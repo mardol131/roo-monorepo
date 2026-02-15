@@ -1,0 +1,64 @@
+{
+  "$schema": "https://turborepo.com/schema.json",
+  "tasks": {
+    "build": {
+      "dependsOn": ["^build"],
+      "outputs": [".next/**", "!.next/cache/**"],
+      "env": [
+        "DATABASE_URL",
+
+        "PAYLOAD_SECRET",
+
+        "CMS_API_KEY",
+
+        "NEXT_PUBLIC_WEBSITE_URL",
+        "WEBSITE_URL",
+
+        "SMSMANAGER_API_KEY",
+        "SMSMANAGER_API_URL",
+
+        "NEXT_PUBLIC_PAYMENT_LINK",
+        "NEXT_PUBLIC_SUB_ACCOUNT_LINK",
+        "NEXT_PUBLIC_CMS_URL",
+        "CMS_URL",
+
+        "GENERAL_API_KEY",
+
+        "EMAIL_API_URL",
+        "SMTP2GO_API_KEY",
+
+        "EMAIL_NOTIFICATIONS",
+        "EMAIL_INFO",
+
+        "ECOMAIL_API_KEY",
+
+        "BREVO_API_KEY",
+        "BREVO_API_URL",
+
+        "STRIPE_KEY",
+        "STRIPE_WEBHOOK_SECRET",
+        "STRIPE_GIFT_COUPON_ID",
+
+        "CRON_MONTHLY_NOTIFICATION_QUEUE",
+        "CRON_ALERT_NOTIFICATIONS_QUEUE",
+        "CRON_SUBSCRIPTION_ACTIVATED_QUEUE",
+        "CRON_ADD_MARKETING_CONTACT_QUEUE",
+        "CRON_SEND_EMAIL_QUEUE",
+        "CRON_SEND_SMS_QUEUE",
+
+        "NEXT_PUBLIC_IS_TEST_ENV",
+
+        "NEXT_PUBLIC_VAPID_KEY",
+        "VAPID_PRIVATE_KEY",
+        "VAPID_SUBJECT"
+      ]
+    },
+    "check-types": {
+      "dependsOn": ["^check-types"]
+    },
+    "dev": {
+      "persistent": true,
+      "cache": false
+    }
+  }
+}
