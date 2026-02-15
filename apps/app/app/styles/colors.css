@@ -1,0 +1,10 @@
+@theme {
+  --color-primary: var(--color-rose-500);
+  --color-onPrimary: var(--color-white);
+
+  --color-secondary: var(--color-zinc-900);
+  --color-onSecondary: var(--color-white);
+
+  --color-textDark: var(--color-zinc-900);
+  --color-textLight: var(--color-zinc-200);
+}

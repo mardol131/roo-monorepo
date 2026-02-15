@@ -15,6 +15,14 @@ const nextConfig: NextConfig = {
     remotePatterns: [{ protocol: "https", hostname: "**" }],
   },
   /* config options here */
+  rewrites: async () => {
+    return [
+      {
+        source: "/",
+        destination: "/homepage",
+      },
+    ];
+  },
 };
 
 export default nextConfig;

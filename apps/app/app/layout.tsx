@@ -1,5 +1,7 @@
 import { Metadata } from "next";
 import { ReactNode } from "react";
+import "./styles/global.css";
+import Header from "./components/layout/header/header";
 
 export const metadata: Metadata = {};
 
@@ -13,8 +15,9 @@ export default function RootLayout({
       <head>
         <link rel="manifest" href="/manifest.json" />
       </head>
-      <body className={` text-primary`}>
-        <div>Hello there</div>
+      <body className={`text-textDark`}>
+        <Header />
+        <div className="pt-30">{children}</div>
       </body>
     </html>
   );
