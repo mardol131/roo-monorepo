@@ -2,6 +2,7 @@ import { Metadata } from "next";
 import { ReactNode } from "react";
 import "./styles/global.css";
 import Header from "./components/layout/header/header";
+import Footer from "./components/layout/footer";
 
 export const metadata: Metadata = {};
 
@@ -18,6 +19,7 @@ export default function RootLayout({
       <body className={`text-textDark`}>
         <Header />
         <div className="pt-30">{children}</div>
+        <Footer />
       </body>
     </html>
   );

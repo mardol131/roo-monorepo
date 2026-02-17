@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Menu, X } from "lucide-react";
 import logo from "@/public/logo.png";
+import Text from "../../ui/atoms/text";
 
 type HeaderProps = {};
 
@@ -27,7 +28,7 @@ export default function Header({}: HeaderProps) {
   const closeMobileMenu = () => setIsMobileMenuOpen(false);
 
   return (
-    <header className="fixed left-0 top-0 z-50 w-full flex justify-center items-center border-b border-zinc-100/80 bg-white shadow-sm">
+    <header className="fixed left-0 top-0 z-50 w-full flex justify-center items-center border-b border-zinc-100/80 bg-white/90 backdrop-blur-md shadow-sm">
       <div className=" flex max-w-content w-full items-center justify-between py-4">
         {/* Logo a menu */}
         <div className="flex items-center gap-8">
@@ -42,7 +43,7 @@ export default function Header({}: HeaderProps) {
                 href={item.href}
                 className="hover:text-zinc-900 transition-colors"
               >
-                {item.label}
+                <Text variant="body3">{item.label}</Text>
               </Link>
             ))}
           </nav>
@@ -54,14 +55,16 @@ export default function Header({}: HeaderProps) {
             href="/demo"
             className="text-sm font-medium text-rose-500 hover:text-rose-600 transition-colors"
           >
-            Přidej svojí službu
+            <Text variant="body3" color="primary">
+              Staňte se dodavatelem
+            </Text>
           </Link>
           <button
             type="button"
             onClick={toggleMobileMenu}
             aria-label="Toggle menu"
             aria-expanded={isMobileMenuOpen}
-            className="flex h-10 w-10 items-center bg-zinc-100 justify-center rounded-full border border-zinc-200 text-zinc-900 transition-colors hover:bg-zinc-50"
+            className="flex h-10 w-10 items-center bg-zinc-100 justify-center rounded-full cursor-pointer border-zinc-200 text-zinc-900 transition-colors hover:bg-primary/10"
           >
             {isMobileMenuOpen ? (
               <X className="h-5 w-5" />
