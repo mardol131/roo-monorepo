@@ -1,5 +1,9 @@
+import * as lucideIcons from "lucide-react";
+
 type ButtonVersion = "primary" | "secondary" | "plain" | "outlined" | "link";
 type ButtonSize = "2xl" | "xl" | "lg" | "md" | "sm";
+
+type LucideIcons = keyof typeof lucideIcons;
 
 interface ButtonProps {
   version?: ButtonVersion;
@@ -8,6 +12,8 @@ interface ButtonProps {
   onClick?: () => void;
   link?: string;
   className?: string;
+  iconLeft?: LucideIcons;
+  iconRight?: LucideIcons;
 }
 
 const getVersionClass = (version: ButtonVersion): string => {
@@ -33,6 +39,17 @@ const getSizeClass = (size: ButtonSize): string => {
   return sizeClasses[size];
 };
 
+const getIconSize = (size: ButtonSize): string => {
+  const iconSizes: Record<ButtonSize, string> = {
+    "2xl": "w-8 h-8",
+    xl: "w-6 h-6",
+    lg: "w-5 h-5",
+    md: "w-4 h-4",
+    sm: "w-3.5 h-3.5",
+  };
+  return iconSizes[size];
+};
+
 export default function Button({
   version = "primary",
   text,
@@ -40,25 +57,47 @@ export default function Button({
   onClick,
   link,
   className,
+  iconLeft,
+  iconRight,
 }: ButtonProps) {
   const baseClasses =
-    "inline-flex items-center rounded-full justify-center font-medium rounded transition-all ease-in-out hover:scale-105";
+    "inline-flex items-center rounded-full justify-center font-medium rounded transition-all ease-in-out hover:scale-105 gap-2";
   const versionClass = getVersionClass(version);
   const sizeClass = getSizeClass(size);
+  const iconSize = getIconSize(size);
   const buttonClass =
     `${baseClasses} ${versionClass} ${version !== "link" ? sizeClass : ""} ${className || ""}`.trim();
+
+  const LeftIcon = iconLeft
+    ? (lucideIcons[
+        iconLeft as keyof typeof lucideIcons
+      ] as React.ComponentType<{ className?: string }>)
+    : null;
+  const RightIcon = iconRight
+    ? (lucideIcons[
+        iconRight as keyof typeof lucideIcons
+      ] as React.ComponentType<{ className?: string }>)
+    : null;
+
+  const buttonContent = (
+    <>
+      {LeftIcon && <LeftIcon className={iconSize} />}
+      {text}
+      {RightIcon && <RightIcon className={iconSize} />}
+    </>
+  );
 
   if (link) {
     return (
       <a href={link} className={buttonClass}>
-        {text}
+        {buttonContent}
       </a>
     );
   }
 
   return (
     <button className={buttonClass} onClick={onClick} type="button">
-      {text}
+      {buttonContent}
     </button>
   );
 }

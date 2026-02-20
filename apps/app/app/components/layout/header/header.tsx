@@ -28,8 +28,8 @@ export default function Header({}: HeaderProps) {
   const closeMobileMenu = () => setIsMobileMenuOpen(false);
 
   return (
-    <header className="fixed left-0 top-0 z-50 w-full flex justify-center items-center border-b border-zinc-100/80 bg-white/90 backdrop-blur-md shadow-sm">
-      <div className=" flex max-w-content w-full items-center justify-between py-4">
+    <header className="fixed left-0 top-0 z-50 w-full flex justify-center items-center border-b border-zinc-100/80 bg-linear-0 to-white/90 from-zinc-100/90 backdrop-blur-md shadow-sm">
+      <div className=" flex max-w-content w-full items-center justify-between py-6">
         {/* Logo a menu */}
         <div className="flex items-center gap-8">
           <Link href="/" className="flex items-center gap-3">
@@ -81,7 +81,7 @@ export default function Header({}: HeaderProps) {
           isMobileMenuOpen ? "max-h-96 border-t border-zinc-100" : "max-h-0"
         } overflow-hidden bg-white transition-[max-height] duration-300 ease-out`}
       >
-        <nav className="flex flex-col gap-4 px-6 py-4 text-sm font-medium text-zinc-800">
+        <nav className="flex flex-col gap-4 text-sm font-medium text-zinc-800">
           {navigationItems.map((item) => (
             <Link
               key={item.href}

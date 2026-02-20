@@ -21,6 +21,14 @@ const nextConfig: NextConfig = {
         source: "/",
         destination: "/homepage",
       },
+      {
+        source: "/katalog",
+        destination: "/catalog",
+      },
+      {
+        source: "/inzerat/:id",
+        destination: "/listing/:id",
+      },
     ];
   },
 };

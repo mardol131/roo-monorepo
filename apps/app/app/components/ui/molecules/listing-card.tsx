@@ -23,13 +23,17 @@ export default function ListingCard({
 }: Props) {
   const [isLiked, setIsLiked] = useState(liked);
 
-  const clickOnLikedHandler = useCallback(() => {
-    setIsLiked((prev) => !prev);
-  }, [isLiked]);
+  const clickOnLikedHandler = useCallback(
+    (e: React.MouseEvent<SVGAElement | SVGElement, MouseEvent>) => {
+      e.stopPropagation();
+      setIsLiked((prev) => !prev);
+    },
+    [isLiked],
+  );
 
   return (
     <div className="group rounded-xl transition ease-in-out">
-      <div className="relative w-60 rounded-xl aspect-square bg-zinc-100 overflow-hidden">
+      <div className="relative min-w-60 w-full rounded-xl aspect-square bg-zinc-100 overflow-hidden">
         <Image
           src={imageUrl}
           alt={imageAlt || title}
@@ -37,19 +41,11 @@ export default function ListingCard({
           width={1000}
           height={1000}
         />
-        {isLiked ? (
-          <FaHeart
-            onClick={clickOnLikedHandler}
-            size={24}
-            className="absolute top-3 right-3 text-primary"
-          />
-        ) : (
-          <Heart
-            onClick={clickOnLikedHandler}
-            size={24}
-            className="absolute top-3 right-3 text-white"
-          />
-        )}
+        <FaHeart
+          onClick={clickOnLikedHandler}
+          size={24}
+          className={`absolute top-3 right-3 text-primary cursor-pointer ${isLiked ? "text-rose-500" : "text-secondary/80"} transition-colors duration-200 hover:text-rose-500`}
+        />
       </div>
       <div className="flex items-center justify-between mt-2">
         <div className="p-3 flex flex-col gap-1">

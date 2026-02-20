@@ -35,7 +35,7 @@ export default function Banner({
               {title}
             </Text>
             <Text
-              variant="body1"
+              variant="subheading0"
               className="text-zinc-600 text-base sm:text-lg"
             >
               {text}
