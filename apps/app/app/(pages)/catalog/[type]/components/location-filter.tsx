@@ -68,12 +68,6 @@ export default function LocationFilter({
 
   return (
     <div className="flex flex-col gap-2">
-      <div className="flex items-center gap-2 text-sm font-medium text-zinc-900">
-        <MapPin className="w-4 h-4 text-rose-500" />
-        <Text variant="label1" color="dark">
-          Kde se akce koná
-        </Text>
-      </div>
       <div className="relative" ref={ref}>
         <button
           onClick={() => {

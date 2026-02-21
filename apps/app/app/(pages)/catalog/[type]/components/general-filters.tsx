@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import LocationFilter from "./location-filter";
 import DateFilter from "./date-filter";
 import GuestsFilter from "./guests-filter";
+import { Calendar, MapPin, Users } from "lucide-react";
+import Text from "@/app/components/ui/atoms/text";
 
 interface GuestsFilterState {
   adults: number;
@@ -53,13 +55,45 @@ export default function GeneralFilters({
   };
 
   return (
-    <div className="grid grid-cols-3 gap-4 w-full border rounded-xl p-5 border-zinc-200 shadow-lg">
-      <LocationFilter
-        value={filters.location}
-        onChange={handleLocationChange}
-      />
-      <DateFilter value={filters.date} onChange={handleDateChange} />
-      <GuestsFilter value={filters.guests} onChange={handleGuestsChange} />
+    <div className="grid grid-cols-3 gap-4 w-full">
+      <div className="w-full">
+        <div className="flex flex-col gap-5">
+          <FilterLabel icon={MapPin} text="Kde se akce koná" />
+          <LocationFilter
+            value={filters.location}
+            onChange={handleLocationChange}
+          />
+        </div>
+      </div>
+      <div className="w-full">
+        <div className="flex flex-col gap-5">
+          <FilterLabel icon={Calendar} text="Kdy se akce koná" />
+          <DateFilter value={filters.date} onChange={handleDateChange} />
+        </div>
+      </div>
+      <div className="w-full">
+        <div className="flex flex-col gap-5">
+          <FilterLabel icon={Users} text="Počet hostů" />
+          <GuestsFilter value={filters.guests} onChange={handleGuestsChange} />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function FilterLabel({
+  icon: Icon,
+  text,
+}: {
+  icon: React.ElementType;
+  text: string;
+}) {
+  return (
+    <div className="flex items-center gap-4">
+      <Icon className="w-10 h-10 text-rose-500" />
+      <Text variant="heading4" color="dark">
+        {text}
+      </Text>
     </div>
   );
 }

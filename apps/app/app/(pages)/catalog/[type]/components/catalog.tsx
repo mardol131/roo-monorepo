@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useCallback } from "react";
 import CatalogFilters from "./catalog-filters";
 import Button from "@/app/components/ui/atoms/button";
 import ListingCard from "@/app/components/ui/molecules/listing-card";
@@ -65,6 +65,11 @@ const mockListings = [
 
 export default function Catalog({}: Props) {
   const router = useRouter();
+  const [mapView, setMapView] = React.useState(false);
+
+  const switchMapViewHandler = useCallback(() => {
+    setMapView(!mapView);
+  }, [mapView]);
 
   return (
     <div className="flex flex-col gap-10 items-center justify-center w-full px-6">
@@ -72,9 +77,14 @@ export default function Catalog({}: Props) {
         <CatalogTypeSelection />
         <GeneralFilters />
       </div>
-      <div className="flex w-full max-w-content items-start gap-6">
-        <div className="w-70 shrink-0 pb-40 relative">
-          <CatalogFilters />
+      <div className={`flex items-start w-full max-w-content  gap-6`}>
+        <div
+          className={`${mapView ? "w-[50%]" : "w-80"} shrink-0 pb-40 relative transition-all ease-in-out`}
+        >
+          <CatalogFilters
+            switchMapViewHandler={switchMapViewHandler}
+            mapViewIsActive={mapView}
+          />
         </div>
         <div className="w-full grid grid-cols-[repeat(auto-fill,minmax(230px,1fr))] content-start gap-5">
           {mockListings.map((listing) => (
