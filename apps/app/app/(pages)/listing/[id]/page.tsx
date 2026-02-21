@@ -1,15 +1,3 @@
-import Text from "@/app/components/ui/atoms/text";
-import Image from "next/image";
-import React from "react";
-import HeroImageSection from "./components/hero-image-section";
-import Button from "@/app/components/ui/atoms/button";
-import { FaQuestion, FaStar } from "react-icons/fa";
-import OrderBox from "./components/order-box";
-import DescriptionSection from "./components/description-section";
-import ItemsSection, { Item } from "./components/items-section";
-import BusinessProfile from "./components/business-profile";
-import ReviewsSection, { Review } from "./components/reviews-section";
-import FAQSection, { FAQ } from "./components/faq-section";
 import {
   AlertCircle,
   Briefcase,
@@ -20,6 +8,16 @@ import {
   Wifi,
   Wind,
 } from "lucide-react";
+import BusinessProfile from "./components/business-profile";
+import DescriptionSection from "./components/description-section";
+import FAQSection, { FAQ } from "./components/faq-section";
+import HeroImageSection from "./components/hero-image-section";
+import ItemsSection, { Item } from "./components/items-section";
+import { Offer } from "./components/offer-item";
+import OffersSection from "./components/offers-section";
+import OrderBox from "./components/order-box";
+import OrderModal from "./components/order-modal/order-modal";
+import ReviewsSection, { Review } from "./components/reviews-section";
 import SectionWrapper from "./components/section-wrapper";
 
 type Props = {};
@@ -150,15 +148,119 @@ const faqs: FAQ[] = [
   },
 ];
 
+export const offers: Offer[] = [
+  {
+    id: "1",
+    title: "Pronájem Mlýnice",
+    description:
+      "Pronajímáme si exkluzivně celý areál Mlýna Davídkova, skvostně situovaný v srdci přírody nedaleko Prahy.",
+    price: 45000,
+    duration: "za den",
+    images: [
+      "https://images.unsplash.com/photo-1519671482749-fd09be7ccebf?w=800&h=600&fit=crop",
+      "https://images.unsplash.com/photo-1543269865-cbdf26cecbb2?w=800&h=600&fit=crop",
+      "https://images.unsplash.com/photo-1552321554-5fefe8c9ef14?w=800&h=600&fit=crop",
+    ],
+    includes: [
+      "Pronájem místnosti s balkonem 20 m²",
+      "Pronájem hlavní místnosti 32 m² s přístupem do zahrady",
+      "Personál v areálu",
+      "Parkování zdarma",
+    ],
+    excludes: [
+      "Stravování (mimo 0,5 m)",
+      "Lístkování není součástí",
+      "Vlastní alkohol není povolen",
+    ],
+    idealFor: [
+      "Branda",
+      "Narozeniny",
+      "Firemní akce",
+      "Svatba",
+      "Teambulding",
+      "Petr",
+      "svetr",
+    ],
+    availableDate: "10.9.2025",
+  },
+  {
+    id: "2",
+    title: "Pronájem prostor - Mini balíček",
+    description:
+      "Menší prostor ideální pro intimate akce a soukromé setkání s přáteli a rodinou.",
+    price: 15000,
+    duration: "za den",
+    images: [
+      "https://images.unsplash.com/photo-1559056199-641a0ac8b3f4?w=800&h=600&fit=crop",
+      "https://images.unsplash.com/photo-1527576539890-dfa540c45b6d?w=800&h=600&fit=crop",
+      "https://images.unsplash.com/photo-1519671482749-fd09be7ccebf?w=800&h=600&fit=crop",
+    ],
+    includes: [
+      "Prostory pro až 30 osob",
+      "Základní vybavení - stoly, židle",
+      "Přístup k sociálním zařízením",
+      "WiFi",
+    ],
+    excludes: [
+      "Katering není zahrnut",
+      "Pronájem techniky na vrub",
+      "Ubytování není zahrnuto",
+    ],
+    idealFor: ["Narozeniny", "Oslava", "Schůzka"],
+    availableDate: "15.9.2025",
+  },
+  {
+    id: "3",
+    title: "Pronájem prostor - Premium balíček",
+    description:
+      "Kompletní pronájem s technickým vybavením a možností catering v našem vlastním bistru.",
+    price: 35000,
+    duration: "za den",
+    images: [
+      "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=800&h=600&fit=crop",
+      "https://images.unsplash.com/photo-1511632765486-a01980e01a18?w=800&h=600&fit=crop",
+      "https://images.unsplash.com/photo-1478655096635-cccbcbcbccc?w=800&h=600&fit=crop",
+    ],
+    includes: [
+      "Všechny prostory v objektu",
+      "Projektor a zvukový systém",
+      "Příprava prostorů",
+      "Konzultace s event managerem",
+      "Možnost catering",
+    ],
+    excludes: ["Ubytování mimo areál", "Vlastní dekorace nejsou povoleny"],
+    idealFor: ["Korporátní akce", "Konference", "Školení", "Firemní akce"],
+    availableDate: "22.9.2025",
+  },
+];
+
 export default function page({}: Props) {
   return (
     <div className="flex justify-center w-full px-6">
-      <div className="w-full flex flex-col max-w-listing-page min-h-screen">
+      <div className="w-full flex flex-col max-w-listing-page pb-20">
         <HeroImageSection />
         <div className="grid grid-cols-[1fr_400px] gap-6 mt-10">
           <div className="min-h-screen flex flex-col w-full gap-15">
             <SectionWrapper>
               <DescriptionSection />
+            </SectionWrapper>
+            <SectionWrapper>
+              <ItemsSection
+                title="Co toto ubytování nabízí"
+                items={amenities}
+                displayCount={6}
+                buttonText={`Ukázat všech ${amenities.length} položek vybavení`}
+                columns={2}
+              />
+            </SectionWrapper>
+            <SectionWrapper>
+              <ItemsSection
+                title="Co toto ubytování nabízí"
+                items={amenities}
+                displayCount={6}
+                buttonText={`Ukázat všech ${amenities.length} položek vybavení`}
+                columns={2}
+              />
             </SectionWrapper>
             <SectionWrapper>
               <ItemsSection
@@ -182,13 +284,16 @@ export default function page({}: Props) {
             <SectionWrapper>
               <FAQSection faqs={faqs} />
             </SectionWrapper>
-            <SectionWrapper>Zde bude sekce variant</SectionWrapper>
           </div>
           <div>
-            <OrderBox />
+            <OrderBox offers={offers} />
           </div>
         </div>
+        <div className="mt-10">
+          <OffersSection offers={offers} />
+        </div>
       </div>
+      <OrderModal />
     </div>
   );
 }

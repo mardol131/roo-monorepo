@@ -1,11 +1,18 @@
+"use client";
+
 import Button from "@/app/components/ui/atoms/button";
 import Text from "@/app/components/ui/atoms/text";
 import React from "react";
 import { FaStar } from "react-icons/fa";
+import { Offer } from "./offer-item";
+import { useOrderStore } from "@/app/store/order-store";
 
-type Props = {};
+type Props = {
+  offers: Offer[];
+};
 
-export default function OrderBox({}: Props) {
+export default function OrderBox({ offers }: Props) {
+  const orderStore = useOrderStore();
   return (
     <div className="shadow-lg rounded-lg p-6 sticky top-30">
       <Text variant="body1" className="mb-4">
@@ -49,6 +56,7 @@ export default function OrderBox({}: Props) {
         Bezplatné zrušení do 10.12.2024
       </Text>
       <Button
+        onClick={() => orderStore.openOrderModal()}
         size="lg"
         text="Odeslat poptávku"
         version="primary"

@@ -35,7 +35,7 @@ export default function FilterSection({
         {title}
       </Text>
 
-      <div className="flex flex-col gap-2">
+      <div className="grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-2">
         {options.map((option) => (
           <Checkbox
             key={option.id}

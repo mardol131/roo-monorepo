@@ -23,6 +23,22 @@ const MONTHS = [
   "Prosinec",
 ];
 
+const formatTimeInput = (value: string): string => {
+  // Remove all non-digit characters
+  const digits = value.replace(/\D/g, "");
+
+  // Limit to 4 digits (HHMM)
+  if (digits.length === 0) return "";
+  if (digits.length <= 2) return digits;
+  if (digits.length === 3) return `${digits.slice(0, 2)}:${digits[2]}`;
+  return `${digits.slice(0, 2)}:${digits.slice(2, 4)}`;
+};
+
+const isValidTime = (value: string): boolean => {
+  const timeRegex = /^([0-1][0-9]|2[0-3]):[0-5][0-9]$/;
+  return timeRegex.test(value);
+};
+
 export default function DateFilter({ value, onChange }: DateFilterProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [currentMonth, setCurrentMonth] = useState(new Date());
@@ -112,9 +128,9 @@ export default function DateFilter({ value, onChange }: DateFilterProps) {
 
   const displayText =
     startDate && endDate
-      ? `${startDate.toLocaleDateString("cs-CZ")} - ${endDate.toLocaleDateString("cs-CZ")}`
+      ? `${startDate.toLocaleDateString("cs-CZ")} ${startTime} - ${endDate.toLocaleDateString("cs-CZ")} ${endTime}`
       : startDate
-        ? `Od: ${startDate.toLocaleDateString("cs-CZ")}`
+        ? `Od: ${startDate.toLocaleDateString("cs-CZ")} ${startTime}`
         : "Vyberte datum";
 
   const nextMonth = new Date(
@@ -124,12 +140,6 @@ export default function DateFilter({ value, onChange }: DateFilterProps) {
 
   return (
     <div className="flex flex-col gap-2">
-      <label className="flex items-center gap-2 text-sm font-medium text-zinc-900">
-        <Calendar className="w-4 h-4 text-rose-500" />
-        <Text variant="label1" color="dark">
-          Kdy se akce koná
-        </Text>
-      </label>
       <div className="relative" ref={ref}>
         <button
           onClick={() => setIsOpen(!isOpen)}
@@ -145,10 +155,6 @@ export default function DateFilter({ value, onChange }: DateFilterProps) {
               {/* Start month */}
               <div>
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-sm font-medium text-zinc-900">
-                    {MONTHS[currentMonth.getMonth()]}{" "}
-                    {currentMonth.getFullYear()}
-                  </h3>
                   <button
                     onClick={() =>
                       setCurrentMonth(
@@ -162,6 +168,10 @@ export default function DateFilter({ value, onChange }: DateFilterProps) {
                   >
                     <ChevronLeft className="w-4 h-4" />
                   </button>
+                  <h3 className="text-sm font-medium text-zinc-900">
+                    {MONTHS[currentMonth.getMonth()]}{" "}
+                    {currentMonth.getFullYear()}
+                  </h3>
                 </div>
 
                 {/* Days header */}
@@ -263,10 +273,19 @@ export default function DateFilter({ value, onChange }: DateFilterProps) {
                   Začátek
                 </label>
                 <input
-                  type="time"
+                  type="text"
+                  placeholder="09:00"
                   value={startTime}
-                  onChange={(e) => setStartTime(e.target.value)}
-                  className="px-2 py-1.5 border border-zinc-200 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-rose-500"
+                  onChange={(e) => {
+                    const formatted = formatTimeInput(e.target.value);
+                    setStartTime(formatted);
+                  }}
+                  maxLength={5}
+                  className={`px-2 py-1.5 border rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-rose-500 ${
+                    isValidTime(startTime) || startTime === ""
+                      ? "border-zinc-200"
+                      : "border-red-500"
+                  }`}
                 />
               </div>
               <div className="flex flex-col gap-1">
@@ -274,10 +293,19 @@ export default function DateFilter({ value, onChange }: DateFilterProps) {
                   Konec
                 </label>
                 <input
-                  type="time"
+                  type="text"
+                  placeholder="17:00"
                   value={endTime}
-                  onChange={(e) => setEndTime(e.target.value)}
-                  className="px-2 py-1.5 border border-zinc-200 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-rose-500"
+                  onChange={(e) => {
+                    const formatted = formatTimeInput(e.target.value);
+                    setEndTime(formatted);
+                  }}
+                  maxLength={5}
+                  className={`px-2 py-1.5 border rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-rose-500 ${
+                    isValidTime(endTime) || endTime === ""
+                      ? "border-zinc-200"
+                      : "border-red-500"
+                  }`}
                 />
               </div>
             </div>

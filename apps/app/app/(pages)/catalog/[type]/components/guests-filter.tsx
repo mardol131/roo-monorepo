@@ -50,12 +50,6 @@ export default function GuestsFilter({ value, onChange }: GuestsFilterProps) {
 
   return (
     <div className="flex flex-col gap-2">
-      <label className="flex items-center gap-2 text-sm font-medium text-zinc-900">
-        <Users className="w-4 h-4 text-rose-500" />
-        <Text variant="label1" color="dark">
-          Počet hostů
-        </Text>
-      </label>
       <div className="relative" ref={ref}>
         <button
           onClick={() => setIsOpen(!isOpen)}

@@ -42,10 +42,14 @@ const CATEGORIES = [
 
 interface CatalogFiltersProps {
   onFilterChange?: (filters: FilterState) => void;
+  switchMapViewHandler?: () => void;
+  mapViewIsActive?: boolean;
 }
 
 export default function CatalogFilters({
   onFilterChange,
+  switchMapViewHandler,
+  mapViewIsActive,
 }: CatalogFiltersProps) {
   const [filters, setFilters] = useState<FilterState>({
     eventTypes: [],
@@ -78,15 +82,19 @@ export default function CatalogFilters({
   return (
     <div className="relative h-full flex flex-col">
       {/* Mapa */}
-      <div className="mb-6 rounded-xl overflow-hidden bg-gradient-to-br from-zinc-50 to-zinc-100 aspect-square flex items-center justify-center border border-zinc-200 shadow-sm hover:shadow-md transition-shadow">
-        <div className="text-center">
-          <Text variant="heading5" color="secondary" className="mb-2">
-            Mapa
-          </Text>
-          <Text variant="body5" color="secondary">
-            Mockup mapy bude zde
-          </Text>
-        </div>
+      <div
+        onClick={switchMapViewHandler}
+        className={`mb-6 rounded-xl overflow-hidden bg-linear-to-br from-zinc-50 to-zinc-100 ${mapViewIsActive ? "h-80" : "h-40"} transition-all ease-in-out flex items-center justify-center border border-zinc-200 shadow-sm hover:shadow-md`}
+      >
+        {!mapViewIsActive && (
+          <div className="text-center">
+            <Button
+              version="primary"
+              size="sm"
+              text={mapViewIsActive ? "Zobrazit filtry" : "Zobrazit mapu"}
+            />
+          </div>
+        )}
       </div>
 
       {/* Filtry */}
