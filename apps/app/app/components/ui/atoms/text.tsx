@@ -53,9 +53,9 @@ const getVariantStyles = (variant: TextVariant): string => {
     heading5: "text-lg font-bold leading-tight md:text-xl",
 
     // Subheadings
-    subheading0: "text-2xl font-medium leading-relaxed text-zinc-600",
-    subheading1: "text-xl font-medium leading-relaxed text-zinc-600",
-    subheading2: "text-lg font-medium leading-relaxed text-zinc-600",
+    subheading0: "text-2xl font-medium leading-relaxed",
+    subheading1: "text-xl font-medium leading-relaxed",
+    subheading2: "text-lg font-medium leading-relaxed",
 
     // Body text
     body1: "text-2xl leading-relaxed",

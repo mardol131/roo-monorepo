@@ -66,12 +66,11 @@ export default function OrderBox({}: Props) {
             Co to znamená?
           </Text>
         </div>
-        <div className="flex gap-3 absolute right-20">
+        <div className="flex gap-3 absolute right-10">
+          <div className="w-3 h-20 bg-linear-60 from-primary to-yellow-200 rotate-10"></div>
           <div className="w-3 h-20 bg-linear-60 from-primary to-yellow-200 rotate-10"></div>
           <div className="w-3 h-20 bg-linear-60 from-primary to-yellow-200 rotate-10"></div>
         </div>
-
-        <FaStar size={30} className="text-rose-500 mr-4 shrink-0" />
       </div>
     </div>
   );

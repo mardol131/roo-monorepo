@@ -1,6 +1,7 @@
 import React from "react";
-import Text from "../../../components/ui/atoms/text";
+import Text from "../../../../components/ui/atoms/text";
 import Checkbox from "./checkbox";
+import Button from "@/app/components/ui/atoms/button";
 
 interface FilterOption {
   id: string;
@@ -33,7 +34,8 @@ export default function FilterSection({
       <Text variant="label1" className="mb-3 block text-zinc-900 font-semibold">
         {title}
       </Text>
-      <div className="grid grid-cols-2 gap-2">
+
+      <div className="flex flex-col gap-2">
         {options.map((option) => (
           <Checkbox
             key={option.id}

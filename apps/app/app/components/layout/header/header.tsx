@@ -28,8 +28,8 @@ export default function Header({}: HeaderProps) {
   const closeMobileMenu = () => setIsMobileMenuOpen(false);
 
   return (
-    <header className="fixed left-0 top-0 z-50 w-full flex justify-center items-center border-b border-zinc-100/80 bg-linear-0 to-white/90 from-zinc-100/90 backdrop-blur-md shadow-sm">
-      <div className=" flex max-w-content w-full items-center justify-between py-6">
+    <header className="fixed left-0 top-0 z-50 w-full flex justify-center items-center border-b border-zinc-100/80 bg-linear-0 px-10 to-white/90 from-zinc-100/90 backdrop-blur-md shadow-sm">
+      <div className=" flex max-w-content w-full items-center justify-between py-4">
         {/* Logo a menu */}
         <div className="flex items-center gap-8">
           <Link href="/" className="flex items-center gap-3">
@@ -43,7 +43,7 @@ export default function Header({}: HeaderProps) {
                 href={item.href}
                 className="hover:text-zinc-900 transition-colors"
               >
-                <Text variant="body3">{item.label}</Text>
+                <Text variant="body5">{item.label}</Text>
               </Link>
             ))}
           </nav>
@@ -55,7 +55,7 @@ export default function Header({}: HeaderProps) {
             href="/demo"
             className="text-sm font-medium text-rose-500 hover:text-rose-600 transition-colors"
           >
-            <Text variant="body3" color="primary">
+            <Text variant="body5" color="primary" className="font-semibold">
               Staňte se dodavatelem
             </Text>
           </Link>

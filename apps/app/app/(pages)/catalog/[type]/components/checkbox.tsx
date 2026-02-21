@@ -1,5 +1,5 @@
 import React from "react";
-import Text from "../../../components/ui/atoms/text";
+import Text from "../../../../components/ui/atoms/text";
 import { MdCheckBox, MdCheckBoxOutlineBlank } from "react-icons/md";
 
 interface CheckboxProps {
@@ -20,7 +20,7 @@ export default function Checkbox({
   value,
 }: CheckboxProps) {
   return (
-    <label className="flex items-center gap-3 w-full p-2.5 rounded-md hover:bg-white transition-all duration-200 cursor-pointer">
+    <label className="flex items-center gap-3 w-full rounded-md hover:bg-white transition-all duration-200 cursor-pointer">
       <input
         id={id}
         type="checkbox"

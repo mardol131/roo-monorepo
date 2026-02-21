@@ -4,6 +4,11 @@ import React from "react";
 import CatalogFilters from "./catalog-filters";
 import Button from "@/app/components/ui/atoms/button";
 import ListingCard from "@/app/components/ui/molecules/listing-card";
+import Image from "next/image";
+import Text from "@/app/components/ui/atoms/text";
+import { useRouter } from "next/dist/client/components/navigation";
+import CatalogTypeSelection from "./catalog-type-selection";
+import GeneralFilters from "./general-filters";
 
 type Props = {};
 
@@ -59,10 +64,16 @@ const mockListings = [
 ];
 
 export default function Catalog({}: Props) {
+  const router = useRouter();
+
   return (
-    <div className="flex justify-center w-full px-6">
+    <div className="flex flex-col gap-10 items-center justify-center w-full px-6">
+      <div className="max-w-content w-full flex flex-col gap-10">
+        <CatalogTypeSelection />
+        <GeneralFilters />
+      </div>
       <div className="flex w-full max-w-content items-start gap-6">
-        <div className="w-100 shrink-0 pb-40 relative">
+        <div className="w-70 shrink-0 pb-40 relative">
           <CatalogFilters />
         </div>
         <div className="w-full grid grid-cols-[repeat(auto-fill,minmax(230px,1fr))] content-start gap-5">

@@ -1,6 +1,12 @@
 import * as lucideIcons from "lucide-react";
 
-type ButtonVersion = "primary" | "secondary" | "plain" | "outlined" | "link";
+type ButtonVersion =
+  | "primary"
+  | "secondary"
+  | "plain"
+  | "outlined"
+  | "link"
+  | "white";
 type ButtonSize = "2xl" | "xl" | "lg" | "md" | "sm";
 
 type LucideIcons = keyof typeof lucideIcons;
@@ -14,16 +20,21 @@ interface ButtonProps {
   className?: string;
   iconLeft?: LucideIcons;
   iconRight?: LucideIcons;
+  disabled?: boolean;
 }
 
-const getVersionClass = (version: ButtonVersion): string => {
+const getVersionClass = (
+  version: ButtonVersion,
+  disabled?: boolean,
+): string => {
   const versionClasses: Record<ButtonVersion, string> = {
     primary: "bg-rose-500 text-white shadow hover:shadow-md",
     secondary: "bg-zinc-900 text-white shadow hover:shadow-md",
-    plain: "bg-transparent text-zinc-900 hover:bg-black/5",
+    plain: "bg-transparent text-zinc-900",
     outlined:
       "bg-transparent text-zinc-900 border border-zinc-900 hover:bg-black/5",
     link: "bg-transparent text-rose-500 underline hover:opacity-80 active:opacity-60 transition-opacity p-0",
+    white: "bg-white text-dark shadow hover:shadow-md",
   };
   return versionClasses[version];
 };
@@ -59,9 +70,9 @@ export default function Button({
   className,
   iconLeft,
   iconRight,
+  disabled,
 }: ButtonProps) {
-  const baseClasses =
-    "inline-flex items-center rounded-full justify-center font-medium rounded transition-all ease-in-out hover:scale-105 gap-2";
+  const baseClasses = `cursor-pointer inline-flex items-center rounded-full justify-center font-medium rounded transition-all ease-in-out  ${disabled ? "" : "hover:scale-105"} gap-2`;
   const versionClass = getVersionClass(version);
   const sizeClass = getSizeClass(size);
   const iconSize = getIconSize(size);

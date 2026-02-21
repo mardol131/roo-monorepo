@@ -1,6 +1,5 @@
 import LandingSectionWrapper from "@/app/components/ui/sections/landing-section-wrapper";
 import HeroSection from "./components/hero-section";
-import Catalog from "./components/catalog";
 import Image from "next/image";
 import Text from "@/app/components/ui/atoms/text";
 import ListingTypeBanner from "./components/listing-type-banner";

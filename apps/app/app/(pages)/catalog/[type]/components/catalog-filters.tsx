@@ -2,14 +2,17 @@
 
 import React, { useState } from "react";
 import { Sliders } from "lucide-react";
-import Text from "../../../components/ui/atoms/text";
+import Text from "../../../../components/ui/atoms/text";
 import FilterSection from "./filter-section";
+import PriceFilter from "./price-filter";
 import Button from "@/app/components/ui/atoms/button";
 
 interface FilterState {
   eventTypes: string[];
   locations: string[];
   categories: string[];
+  minPrice?: number;
+  maxPrice?: number;
 }
 
 const EVENT_TYPES = [
@@ -48,13 +51,21 @@ export default function CatalogFilters({
     eventTypes: [],
     locations: [],
     categories: [],
+    minPrice: 0,
+    maxPrice: 100000,
   });
 
   const handleFilterChange = (
     filterKey: keyof FilterState,
-    selectedIds: string[],
+    selectedIds: string[] | number,
   ) => {
     const updatedFilters = { ...filters, [filterKey]: selectedIds };
+    setFilters(updatedFilters);
+    onFilterChange?.(updatedFilters);
+  };
+
+  const handlePriceChange = (min: number, max: number) => {
+    const updatedFilters = { ...filters, minPrice: min, maxPrice: max };
     setFilters(updatedFilters);
     onFilterChange?.(updatedFilters);
   };
@@ -85,14 +96,26 @@ export default function CatalogFilters({
           <Text variant="heading5" className="text-zinc-900">
             Filtry
           </Text>
+
           {activeFiltersCount > 0 && (
             <span className="ml-auto inline-flex items-center justify-center h-6 w-6 rounded-full bg-rose-500 text-white text-xs font-semibold">
               {activeFiltersCount}
             </span>
           )}
         </div>
+        <Button
+          text="Všechny filtry"
+          version="outlined"
+          size="sm"
+          className="w-full mb-5"
+        />
 
         <div className="space-y-5">
+          <PriceFilter
+            minPrice={filters.minPrice}
+            maxPrice={filters.maxPrice}
+            onPriceChange={handlePriceChange}
+          />
           <FilterSection
             title="Typ akce"
             options={EVENT_TYPES}
@@ -116,7 +139,12 @@ export default function CatalogFilters({
         </div>
       </div>
       <div className="w-full sticky bottom-10 px-5 mt-4">
-        <Button text="Vyhledat" size="xl" className="shadow-lg w-full" />
+        <Button
+          text="Vyhledat"
+          size="md"
+          className="shadow-lg w-full"
+          iconRight="Search"
+        />
       </div>
     </div>
   );

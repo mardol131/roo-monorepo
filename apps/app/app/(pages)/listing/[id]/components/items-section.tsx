@@ -1,6 +1,8 @@
+"use client";
+
 import Text from "@/app/components/ui/atoms/text";
 import Button from "@/app/components/ui/atoms/button";
-import React from "react";
+import React, { useState } from "react";
 
 export interface Item {
   id: string;
@@ -23,7 +25,8 @@ export default function ItemsSection({
   buttonText,
   columns = 2,
 }: ItemsSectionProps) {
-  const displayedItems = items.slice(0, displayCount);
+  const [showAll, setShowAll] = useState(false);
+  const displayedItems = showAll ? items : items.slice(0, displayCount);
   const colsClass = {
     1: "grid-cols-1",
     2: "grid-cols-2",
@@ -40,7 +43,7 @@ export default function ItemsSection({
       <div className={`grid ${colsClass} gap-6`}>
         {displayedItems.map((item) => (
           <div key={item.id} className="flex items-center gap-3">
-            <div className="flex-shrink-0 text-zinc-700 mt-1">{item.icon}</div>
+            <div className="flex-shrink-0 text-primary mt-1">{item.icon}</div>
             <Text variant="label1" color="dark">
               {item.label}
             </Text>
@@ -51,9 +54,14 @@ export default function ItemsSection({
       {displayCount < items.length && (
         <div>
           <Button
-            text={buttonText || `Ukázat všech ${items.length} položek`}
+            text={
+              showAll
+                ? "Skrýt položky"
+                : buttonText || `Ukázat všech ${items.length} položek`
+            }
             version="primary"
-            iconRight="ChevronDown"
+            iconRight={showAll ? "ChevronUp" : "ChevronDown"}
+            onClick={() => setShowAll(!showAll)}
           />
         </div>
       )}

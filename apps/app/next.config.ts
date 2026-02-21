@@ -22,6 +22,10 @@ const nextConfig: NextConfig = {
         destination: "/homepage",
       },
       {
+        source: "/katalog/:type",
+        destination: "/catalog/:type",
+      },
+      {
         source: "/katalog",
         destination: "/catalog",
       },
