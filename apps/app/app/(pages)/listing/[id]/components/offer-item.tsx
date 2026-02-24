@@ -7,6 +7,7 @@ import { Calendar, Check, X, ChevronLeft, ChevronRight } from "lucide-react";
 import Image from "next/image";
 import { FaCircleCheck, FaCircleXmark } from "react-icons/fa6";
 import { useOrderStore } from "@/app/store/order-store";
+import { OfferIncludesExcludes } from "./offer-includes-excludes";
 
 export interface Offer {
   id: string;
@@ -23,9 +24,15 @@ export interface Offer {
 
 interface OfferItemProps {
   offer: Offer;
+  onOrderButtonClick: () => void;
+  orderButtonText: string;
 }
 
-export default function OfferItem({ offer }: OfferItemProps) {
+export default function OfferItem({
+  offer,
+  onOrderButtonClick,
+  orderButtonText,
+}: OfferItemProps) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const { openOrderModal } = useOrderStore();
 
@@ -90,9 +97,12 @@ export default function OfferItem({ offer }: OfferItemProps) {
               <Text variant="label1" color="dark" className="font-medium">
                 Ideální pro
               </Text>
-              <div className="grid grid-cols-[repeat(auto-fill,minmax(100px,1fr))] gap-2">
+              <div className="grid grid-cols-[repeat(auto-fill,minmax(70px,1fr))] gap-2">
                 {offer.idealFor.map((category, i) => (
-                  <div key={i} className="flex flex-col items-center gap-1">
+                  <div
+                    key={i}
+                    className="flex flex-col items-center gap-1 text-center"
+                  >
                     <div className="flex items-center justify-center w-12 h-12 rounded-full bg-zinc-100 hover:bg-zinc-200 transition-colors"></div>
                     <Text variant="label4" color="secondary">
                       {category}
@@ -138,9 +148,9 @@ export default function OfferItem({ offer }: OfferItemProps) {
             {/* Price and Button */}
           </div>
           <div>
-            <div className="border-t border-zinc-100 pt-4 flex items-end justify-between gap-4">
+            <div className="border border-zinc-300 rounded-2xl p-4 flex items-center justify-between gap-4">
               <div className="flex flex-col gap-0.5">
-                <Text variant="heading5" color="primary">
+                <Text variant="heading4" color="primary">
                   {offer.price.toLocaleString("cs-CZ")} Kč
                 </Text>
                 <Text variant="label2" color="secondary">
@@ -148,46 +158,13 @@ export default function OfferItem({ offer }: OfferItemProps) {
                 </Text>
               </div>
               <Button
-                text="Objednat"
+                text={orderButtonText}
                 version="primary"
-                onClick={() => openOrderModal(offer.id, 2)}
+                onClick={onOrderButtonClick}
               />
             </div>
           </div>
         </div>
-      </div>
-    </div>
-  );
-}
-
-function OfferIncludesExcludes({
-  title,
-  items,
-  icon,
-  colorClass,
-}: {
-  title: string;
-  items: string[];
-  icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
-  colorClass: string;
-}) {
-  const IconComponent = icon;
-  return (
-    <div className="flex flex-col gap-6 border border-zinc-300 rounded-3xl p-6">
-      <Text variant="heading5" color="dark" className="font-semibold">
-        {title}
-      </Text>
-      <div className="flex flex-col gap-5">
-        {items.map((item, idx) => (
-          <div key={idx} className="flex items-start gap-2">
-            <IconComponent
-              className={`w-4 h-4 ${colorClass} flex-shrink-0 mt-0.5`}
-            />
-            <Text variant="label1" color="dark" className="leading-tight">
-              {item}
-            </Text>
-          </div>
-        ))}
       </div>
     </div>
   );

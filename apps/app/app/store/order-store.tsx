@@ -3,15 +3,37 @@ import { create } from "zustand";
 import { Offer } from "../(pages)/listing/[id]/components/offer-item";
 import { offers } from "../(pages)/listing/[id]/page";
 
+type EventVariant = "new-event" | "existing-event" | null;
+
+type EventData = {
+  eventId?: string;
+  name?: string;
+  date?: {
+    start: Date;
+    end: Date;
+  };
+  location?: string;
+  peopleCount?: {
+    adult: number;
+    child: number;
+    ztp: number;
+    pets: boolean;
+  };
+};
+
 interface OrderStore {
   isOrderModalOpen: boolean;
   currentOfferIndex: number;
   currentImageIndex: number;
   currentStep: number;
   offers: Offer[];
+  eventVariant: EventVariant;
+  eventData: EventData;
   setCurrentOfferIndex: (index: number) => void;
   setCurrentImageIndex: (index: number) => void;
   setCurrentStep: (step: number) => void;
+  setEventVariant: (variant: EventVariant) => void;
+  setEventData: (eventData: EventData) => void;
   goToPreviousOffer: () => void;
   goToNextOffer: () => void;
   goToPreviousImage: () => void;
@@ -21,6 +43,7 @@ interface OrderStore {
   openOrderModal: (offerId?: string, step?: number) => void;
   closeOrderModal: () => void;
   resetIndices: () => void;
+  clearEventData: () => void;
 }
 
 export const useOrderStore = create<OrderStore>((set, get) => {
@@ -30,10 +53,15 @@ export const useOrderStore = create<OrderStore>((set, get) => {
     currentImageIndex: 0,
     currentStep: 1,
     offers: offers,
+    eventData: {},
+    eventVariant: null,
+    clearEventData: () => set({ eventData: {} }),
     setCurrentOfferIndex: (index: number) =>
       set({ currentOfferIndex: index, currentImageIndex: 0 }),
     setCurrentImageIndex: (index: number) => set({ currentImageIndex: index }),
     setCurrentStep: (step: number) => set({ currentStep: step }),
+    setEventData: (eventData: EventData) => set({ eventData }),
+    setEventVariant: (variant: EventVariant) => set({ eventVariant: variant }),
     goToPreviousOffer: () => {
       const state = get();
       const newIndex =

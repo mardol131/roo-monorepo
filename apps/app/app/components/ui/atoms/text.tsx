@@ -67,7 +67,7 @@ const getVariantStyles = (variant: TextVariant): string => {
     // Labels
     label1: "text-sm font-medium",
     label2: "text-xs font-medium",
-    label3: "text-xs font-semibold uppercase tracking-wider",
+    label3: "text-xs font-medium",
     label4: "text-xs font-normal",
   };
   return variantClasses[variant];

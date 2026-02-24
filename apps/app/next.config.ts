@@ -33,6 +33,10 @@ const nextConfig: NextConfig = {
         source: "/inzerat/:id",
         destination: "/listing/:id",
       },
+      {
+        source: "/inzerat/:id/poptavka",
+        destination: "/listing/:id/booking",
+      },
     ];
   },
 };

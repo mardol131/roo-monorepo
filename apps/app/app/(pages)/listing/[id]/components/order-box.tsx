@@ -2,51 +2,21 @@
 
 import Button from "@/app/components/ui/atoms/button";
 import Text from "@/app/components/ui/atoms/text";
-import React from "react";
-import { FaStar } from "react-icons/fa";
-import { Offer } from "./offer-item";
 import { useOrderStore } from "@/app/store/order-store";
+import { useParams, useRouter } from "next/navigation";
 
-type Props = {
-  offers: Offer[];
-};
+export default function OrderBox() {
+  const { id } = useParams();
 
-export default function OrderBox({ offers }: Props) {
-  const orderStore = useOrderStore();
+  const router = useRouter();
+  const { setCurrentStep } = useOrderStore();
+
+  const handleOrderClick = () => {
+    setCurrentStep(1);
+    router.push(`/inzerat/${id}/poptavka`);
+  };
   return (
     <div className="shadow-lg rounded-lg p-6 sticky top-30">
-      <Text variant="body1" className="mb-4">
-        Od <span className="font-bold">500 Kč</span> za akci
-      </Text>
-      <div className="border-2 rounded-xl border-zinc-100 min-h-30 grid grid-cols-2">
-        <div className="col-span-2 border-zinc-100">
-          <Text
-            variant="label4"
-            color="secondary"
-            className="p-2 font-semibold"
-          >
-            Počet hostů
-          </Text>
-        </div>
-        <div className="col-span-2 border-t-2 border-zinc-100">
-          <Text
-            variant="label4"
-            color="secondary"
-            className="p-2 font-semibold"
-          >
-            Kde
-          </Text>
-        </div>
-        <div className="col-span-2 border-t-2 border-zinc-100">
-          <Text
-            variant="label4"
-            color="secondary"
-            className="p-2 font-semibold"
-          >
-            Datum akce
-          </Text>
-        </div>
-      </div>
       <Text
         variant="label4"
         as="p"
@@ -56,9 +26,9 @@ export default function OrderBox({ offers }: Props) {
         Bezplatné zrušení do 10.12.2024
       </Text>
       <Button
-        onClick={() => orderStore.openOrderModal()}
+        onClick={handleOrderClick}
         size="lg"
-        text="Odeslat poptávku"
+        text="Vyplnit poptávku"
         version="primary"
         className="w-full mt-4"
       />

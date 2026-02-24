@@ -16,7 +16,6 @@ import ItemsSection, { Item } from "./components/items-section";
 import { Offer } from "./components/offer-item";
 import OffersSection from "./components/offers-section";
 import OrderBox from "./components/order-box";
-import OrderModal from "./components/order-modal/order-modal";
 import ReviewsSection, { Review } from "./components/reviews-section";
 import SectionWrapper from "./components/section-wrapper";
 
@@ -286,14 +285,13 @@ export default function page({}: Props) {
             </SectionWrapper>
           </div>
           <div>
-            <OrderBox offers={offers} />
+            <OrderBox />
           </div>
         </div>
         <div className="mt-10">
           <OffersSection offers={offers} />
         </div>
       </div>
-      <OrderModal />
     </div>
   );
 }
