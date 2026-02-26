@@ -3,8 +3,11 @@ import { Calendar, ChevronLeft, ChevronRight } from "lucide-react";
 import Text from "@/app/components/ui/atoms/text";
 
 interface DateFilterProps {
-  value: string;
+  value?: string;
   onChange: (value: string) => void;
+  fullWidth?: boolean;
+  startDateInput?: React.InputHTMLAttributes<HTMLInputElement>;
+  endDateInput?: React.InputHTMLAttributes<HTMLInputElement>;
 }
 
 const DAYS_OF_WEEK = ["Po", "Út", "St", "Čt", "Pá", "So", "Ne"];
@@ -39,7 +42,13 @@ const isValidTime = (value: string): boolean => {
   return timeRegex.test(value);
 };
 
-export default function DateFilter({ value, onChange }: DateFilterProps) {
+export default function DateFilter({
+  value,
+  onChange,
+  fullWidth,
+  startDateInput,
+  endDateInput,
+}: DateFilterProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [startDate, setStartDate] = useState<Date | null>(null);
@@ -47,6 +56,23 @@ export default function DateFilter({ value, onChange }: DateFilterProps) {
   const [startTime, setStartTime] = useState("09:00");
   const [endTime, setEndTime] = useState("17:00");
   const ref = useRef<HTMLDivElement>(null);
+
+  // Format datetime strings for hidden inputs
+  const getDateTimeString = (date: Date | null, time: string): string => {
+    if (!date) return "";
+    const [hours, minutes] = time.split(":").map(Number);
+    const dateTime = new Date(
+      date.getFullYear(),
+      date.getMonth(),
+      date.getDate(),
+      hours,
+      minutes,
+    );
+    return dateTime.toISOString();
+  };
+
+  const startDateTimeString = getDateTimeString(startDate, startTime);
+  const endDateTimeString = getDateTimeString(endDate, endTime);
 
   // Handle click outside
   useEffect(() => {
@@ -142,6 +168,7 @@ export default function DateFilter({ value, onChange }: DateFilterProps) {
     <div className="flex flex-col gap-2">
       <div className="relative" ref={ref}>
         <button
+          type="button"
           onClick={() => setIsOpen(!isOpen)}
           className="w-full px-3 py-2.5 border border-zinc-200 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-rose-500 bg-white text-left flex items-center justify-between"
         >
@@ -156,6 +183,7 @@ export default function DateFilter({ value, onChange }: DateFilterProps) {
               <div>
                 <div className="flex items-center justify-between mb-4">
                   <button
+                    type="button"
                     onClick={() =>
                       setCurrentMonth(
                         new Date(
@@ -192,6 +220,7 @@ export default function DateFilter({ value, onChange }: DateFilterProps) {
                     <div key={index} className="w-8 h-8">
                       {date ? (
                         <button
+                          type="button"
                           onClick={() => handleDateClick(date)}
                           className={`w-full h-full rounded text-xs font-medium transition-colors ${
                             isDateSelected(date)
@@ -216,6 +245,7 @@ export default function DateFilter({ value, onChange }: DateFilterProps) {
                     {MONTHS[nextMonth.getMonth()]} {nextMonth.getFullYear()}
                   </h3>
                   <button
+                    type="button"
                     onClick={() =>
                       setCurrentMonth(
                         new Date(
@@ -248,6 +278,7 @@ export default function DateFilter({ value, onChange }: DateFilterProps) {
                     <div key={index} className="w-8 h-8">
                       {date ? (
                         <button
+                          type="button"
                           onClick={() => handleDateClick(date)}
                           className={`w-full h-full rounded text-xs font-medium transition-colors ${
                             isDateSelected(date)
@@ -312,6 +343,10 @@ export default function DateFilter({ value, onChange }: DateFilterProps) {
           </div>
         )}
       </div>
+
+      {/* Hidden inputs for form integration */}
+      <input type="hidden" value={startDateTimeString} {...startDateInput} />
+      <input type="hidden" value={endDateTimeString} {...endDateInput} />
     </div>
   );
 }

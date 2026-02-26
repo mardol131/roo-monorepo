@@ -17,7 +17,10 @@
   "scripts": {
     "backend:build": "turbo run build --filter backend",
     "backend:start": "cd backend && pnpm run start",
-    "edev": "cd email-builder && pnpm run start"
+    "edev": "cd email-builder && pnpm run start",
+    "build:types": "turbo run build --filter @roo/types",
+    "build:email-builder": "turbo run build --filter @roo/email-builder",
+    "build:functions": "turbo run build --filter @roo/functions"
   },
   "pnpm": {
     "packageExtensions": {

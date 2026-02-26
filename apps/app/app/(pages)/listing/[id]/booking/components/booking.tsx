@@ -7,7 +7,7 @@ import OrderStepCreateInquiry from "./order-steps/order-step-create-inquiry";
 import OrderStepReviewVariant from "./order-steps/order-step-review-variant";
 import OrderStepSelectEvent from "./order-steps/order-step-select-event";
 import OrderStepSelectVariant from "./order-steps/order-step-select-variant";
-import OrderStepSidebar from "./order-steps/order-step-sidebar";
+import OrderStepSidebar from "./order-step-sidebar";
 
 type Props = {};
 
@@ -99,7 +99,7 @@ export default function Booking({}: Props) {
           </div>
 
           {/* Right Content */}
-          <div className="flex-1 overflow-y-auto">
+          <div className="">
             <div className="flex items-center justify-between mb-4">
               <div className="pb-4 border-b border-zinc-200">
                 <Text variant="heading5" color="dark" className="font-bold">

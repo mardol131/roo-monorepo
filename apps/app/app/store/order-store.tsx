@@ -12,7 +12,10 @@ type EventData = {
     start: Date;
     end: Date;
   };
-  location?: string;
+  location?: {
+    id: string;
+    name: string;
+  };
   peopleCount?: {
     adult: number;
     child: number;

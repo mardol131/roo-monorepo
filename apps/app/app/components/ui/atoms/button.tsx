@@ -21,6 +21,7 @@ interface ButtonProps {
   iconLeft?: LucideIcons;
   iconRight?: LucideIcons;
   disabled?: boolean;
+  htmlType?: HTMLButtonElement["type"];
 }
 
 const getVersionClass = (
@@ -71,6 +72,7 @@ export default function Button({
   iconLeft,
   iconRight,
   disabled,
+  htmlType = "button",
 }: ButtonProps) {
   const baseClasses = `cursor-pointer inline-flex items-center rounded-full justify-center font-medium rounded transition-all ease-in-out  ${disabled ? "" : "hover:scale-105"} gap-2`;
   const versionClass = getVersionClass(version);
@@ -107,7 +109,12 @@ export default function Button({
   }
 
   return (
-    <button className={buttonClass} onClick={onClick} type="button">
+    <button
+      className={buttonClass}
+      onClick={onClick}
+      type={htmlType}
+      disabled={disabled}
+    >
       {buttonContent}
     </button>
   );

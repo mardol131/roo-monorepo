@@ -54,34 +54,32 @@ export default function OrderStepSidebar({}: OrderStepSidebarProps) {
           const IconComponent = step.icon;
 
           return (
-            <>
-              <div key={step.id} className="flex gap-4 items-center">
-                <div
-                  className={`flex items-center justify-center w-10 h-10 rounded-full border-2 transition-colors ${
-                    isCompleted
-                      ? "bg-primary border-primary text-white"
-                      : isActive
-                        ? "bg-white border-primary text-primary"
-                        : "bg-white border-zinc-300 text-zinc-400"
-                  }`}
-                >
-                  {isCompleted ? (
-                    <Check className="w-5 h-5" />
-                  ) : (
-                    <IconComponent className="w-5 h-5" />
-                  )}
-                </div>
-                <div className="flex flex-col gap-1">
-                  <Text
-                    variant="label1"
-                    color={isActive || isCompleted ? "dark" : "secondary"}
-                    className={`font-medium ${isActive ? "font-semibold" : ""}`}
-                  >
-                    {step.title}
-                  </Text>
-                </div>
+            <div key={step.id} className="flex gap-4 items-center">
+              <div
+                className={`flex items-center justify-center w-10 h-10 rounded-full border-2 transition-colors ${
+                  isCompleted
+                    ? "bg-primary border-primary text-white"
+                    : isActive
+                      ? "bg-white border-primary text-primary"
+                      : "bg-white border-zinc-300 text-zinc-400"
+                }`}
+              >
+                {isCompleted ? (
+                  <Check className="w-5 h-5" />
+                ) : (
+                  <IconComponent className="w-5 h-5" />
+                )}
               </div>
-            </>
+              <div className="flex flex-col gap-1">
+                <Text
+                  variant="label1"
+                  color={isActive || isCompleted ? "dark" : "secondary"}
+                  className={`font-medium ${isActive ? "font-semibold" : ""}`}
+                >
+                  {step.title}
+                </Text>
+              </div>
+            </div>
           );
         })}
       </div>
