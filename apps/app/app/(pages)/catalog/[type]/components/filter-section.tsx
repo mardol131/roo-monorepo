@@ -1,6 +1,6 @@
 import React from "react";
 import Text from "../../../../components/ui/atoms/text";
-import Checkbox from "./checkbox";
+import Checkbox from "../../../../components/ui/atoms/inputs/checkbox";
 import Button from "@/app/components/ui/atoms/button";
 
 interface FilterOption {

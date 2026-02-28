@@ -74,7 +74,7 @@ export default function Button({
   disabled,
   htmlType = "button",
 }: ButtonProps) {
-  const baseClasses = `cursor-pointer inline-flex items-center rounded-full justify-center font-medium rounded transition-all ease-in-out  ${disabled ? "" : "hover:scale-105"} gap-2`;
+  const baseClasses = `${!disabled ? "cursor-pointer" : ""} inline-flex items-center rounded-full justify-center font-medium rounded transition-all ease-in-out  ${disabled ? "opacity-50" : "hover:scale-105"} gap-2`;
   const versionClass = getVersionClass(version);
   const sizeClass = getSizeClass(size);
   const iconSize = getIconSize(size);

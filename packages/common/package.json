@@ -1,5 +1,5 @@
 {
-  "name": "@roo/functions",
+  "name": "@roo/common",
   "version": "1.1.0",
   "private": false,
   "main": "./dist/index.js",

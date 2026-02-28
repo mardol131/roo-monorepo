@@ -10,8 +10,7 @@
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
-    "@roo/functions": "workspace:*",
-    "@roo/types": "workspace:*",
+    "@roo/common": "workspace:*",
     "lucide-react": "^0.563.0",
     "next": "16.1.6",
     "postcss": "^8.5.6",

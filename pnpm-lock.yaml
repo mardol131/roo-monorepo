@@ -47,12 +47,9 @@ importers:
       '@hookform/resolvers':
         specifier: ^5.2.2
         version: 5.2.2(react-hook-form@7.71.2(react@19.2.1))
-      '@roo/functions':
+      '@roo/common':
         specifier: workspace:*
-        version: link:../../packages/functions
-      '@roo/types':
-        specifier: workspace:*
-        version: link:../../packages/types
+        version: link:../../packages/common
       lucide-react:
         specifier: ^0.563.0
         version: 0.563.0(react@19.2.1)
@@ -200,6 +197,22 @@ importers:
         specifier: 3.2.3
         version: 3.2.3(@types/debug@4.1.12)(@types/node@22.19.8)(jiti@2.6.1)(jsdom@26.1.0)(lightningcss@1.30.2)(sass@1.77.4)(tsx@4.20.6)
 
+  packages/common:
+    dependencies:
+      react:
+        specifier: ^19.2.1
+        version: 19.2.1
+      react-dom:
+        specifier: ^19.2.1
+        version: 19.2.1(react@19.2.1)
+    devDependencies:
+      '@types/react':
+        specifier: ^19.0.1
+        version: 19.2.1
+      typescript:
+        specifier: 5.7.3
+        version: 5.7.3
+
   packages/email-builder:
     dependencies:
       '@react-email/components':
@@ -233,38 +246,6 @@ importers:
       '@react-email/preview-server':
         specifier: 5.2.1
         version: 5.2.1(@playwright/test@1.56.1)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(sass@1.77.4)
-
-  packages/functions:
-    dependencies:
-      react:
-        specifier: ^19.2.1
-        version: 19.2.1
-      react-dom:
-        specifier: ^19.2.1
-        version: 19.2.1(react@19.2.1)
-    devDependencies:
-      '@types/react':
-        specifier: ^19.0.1
-        version: 19.2.1
-      typescript:
-        specifier: 5.7.3
-        version: 5.7.3
-
-  packages/types:
-    dependencies:
-      react:
-        specifier: ^19.2.1
-        version: 19.2.1
-      react-dom:
-        specifier: ^19.2.1
-        version: 19.2.1(react@19.2.1)
-    devDependencies:
-      '@types/react':
-        specifier: ^19.0.1
-        version: 19.2.1
-      typescript:
-        specifier: 5.7.3
-        version: 5.7.3
 
 packages:
 

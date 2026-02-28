@@ -4,8 +4,8 @@ import Text from "@/app/components/ui/atoms/text";
 import { useOrderStore } from "@/app/store/order-store";
 import { Check, X } from "lucide-react";
 import Image from "next/image";
-import { OfferIncludesExcludes } from "../../../components/offer-includes-excludes";
-import { Offer } from "../../../components/offer-item";
+import { Offer } from "../../../../components/offer-item";
+import { OfferIncludesExcludes } from "../../../../components/offer-includes-excludes";
 
 type Props = {
   offer: Offer;

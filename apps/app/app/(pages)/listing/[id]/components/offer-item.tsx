@@ -24,17 +24,18 @@ export interface Offer {
 
 interface OfferItemProps {
   offer: Offer;
-  onOrderButtonClick: () => void;
-  orderButtonText: string;
+  variant?: "default" | "review";
+  onOrderButtonClick?: () => void;
+  orderButtonText?: string;
 }
 
 export default function OfferItem({
   offer,
+  variant = "default",
   onOrderButtonClick,
   orderButtonText,
 }: OfferItemProps) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const { openOrderModal } = useOrderStore();
 
   const goToPrevious = () => {
     setCurrentImageIndex(
@@ -157,11 +158,13 @@ export default function OfferItem({
                   {offer.duration}
                 </Text>
               </div>
-              <Button
-                text={orderButtonText}
-                version="primary"
-                onClick={onOrderButtonClick}
-              />
+              {variant === "default" && onOrderButtonClick && orderButtonText && (
+                <Button
+                  text={orderButtonText}
+                  version="primary"
+                  onClick={onOrderButtonClick}
+                />
+              )}
             </div>
           </div>
         </div>
