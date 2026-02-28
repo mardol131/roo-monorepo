@@ -18,7 +18,7 @@ export default function RootLayout({
       </head>
       <body className={`text-textDark`}>
         <Header />
-        <div className="pt-30">{children}</div>
+        <div className="">{children}</div>
         <Footer />
       </body>
     </html>

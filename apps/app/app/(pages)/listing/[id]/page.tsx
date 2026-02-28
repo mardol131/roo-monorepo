@@ -235,7 +235,7 @@ export const offers: Offer[] = [
 
 export default function page({}: Props) {
   return (
-    <div className="flex justify-center w-full px-6">
+    <div className="flex justify-center w-full px-6 py-10">
       <div className="w-full flex flex-col max-w-listing-page pb-20">
         <HeroImageSection />
         <div className="grid grid-cols-[1fr_400px] gap-6 mt-10">

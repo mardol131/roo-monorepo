@@ -1,9 +1,13 @@
+import { Inquiry } from "./inquiry";
+
 export type Guests = {
   adults: number;
   children: number;
   ztp: boolean;
   pets: boolean;
 };
+
+export type EventStatus = "active" | "planned" | "completed";
 
 export type EventData = {
   name: string;
@@ -22,4 +26,6 @@ export type EventData = {
 export type Event = {
   id: string;
   data: EventData;
+  status: EventStatus;
+  inquiries?: Inquiry[];
 };

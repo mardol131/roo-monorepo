@@ -1,5 +1,8 @@
+"use client";
+
 import React from "react";
 import { Facebook, Instagram, Twitter, Linkedin, Mail } from "lucide-react";
+import { usePathname } from "next/navigation";
 
 type Props = {};
 
@@ -43,9 +46,12 @@ export default function Footer({}: Props) {
     { icon: Linkedin, href: "#", label: "LinkedIn" },
   ];
 
+  const pathname = usePathname();
+  const isInUserProfile = pathname.startsWith("/user-profile");
+
   return (
     <footer className="bg-zinc-900 text-white pt-10 pb-6">
-      <div className="max-w-content mx-auto px-4">
+      <div className={`${isInUserProfile ? "" : "max-w-content"} w-full px-4`}>
         {/* Main Footer Content */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
           {/* Brand Section */}

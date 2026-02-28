@@ -8,9 +8,6 @@ type Props = {};
 export default function HeroImageSection({}: Props) {
   return (
     <div>
-      <Text variant="heading3" as="h1" className="mb-5">
-        Tady je název inzerátu
-      </Text>
       <div className="relative grid grid-cols-4 gap-4">
         <Image
           src="https://images.unsplash.com/photo-1506744038136-46273834b3fb"
@@ -54,6 +51,9 @@ export default function HeroImageSection({}: Props) {
           iconRight="Image"
         />
       </div>
+      <Text variant="heading3" as="h1" className="mt-5">
+        Tady je název inzerátu
+      </Text>
     </div>
   );
 }
