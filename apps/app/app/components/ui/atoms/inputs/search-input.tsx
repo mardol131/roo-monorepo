@@ -22,6 +22,7 @@ interface SearchInputProps {
   };
   onSelect?: (option: SearchOption) => void;
   onSearchQueryChange?: (query: string) => void;
+  error?: string;
 }
 
 export default function SearchInput({
@@ -34,6 +35,7 @@ export default function SearchInput({
   value,
   onSelect,
   onSearchQueryChange,
+  error,
 }: SearchInputProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -204,6 +206,11 @@ export default function SearchInput({
           }
         }}
       />
+      {error && (
+        <Text variant="label4" color="secondary" className="text-red-500 mt-1">
+          {error}
+        </Text>
+      )}
     </div>
   );
 }

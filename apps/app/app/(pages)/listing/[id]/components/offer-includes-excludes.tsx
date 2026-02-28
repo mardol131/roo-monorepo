@@ -16,7 +16,7 @@ export function OfferIncludesExcludes({
 }) {
   const IconComponent = icon;
   return (
-    <div className="flex flex-col gap-6 border border-zinc-300 rounded-2xl p-4">
+    <div className="flex flex-col gap-4 border-zinc-300 rounded-2xl">
       <Text variant="label1" color="dark" className="font-semibold">
         {title}
       </Text>

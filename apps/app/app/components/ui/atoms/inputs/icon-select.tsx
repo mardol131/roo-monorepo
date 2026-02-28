@@ -1,13 +1,15 @@
 import { LucideIcon } from "lucide-react";
 import React from "react";
 import * as lucideIcons from "lucide-react";
-import Text from "./text";
+import Text from "./../text";
+import ErrorText from "./error-text";
 
 type Props = {
   iconsOptions: LucideIcons[];
   label: string;
   defaultIcon?: LucideIcons;
   onSelect: (icon: LucideIcons) => void;
+  error?: string;
 };
 
 export type LucideIcons = keyof typeof lucideIcons;
@@ -17,6 +19,7 @@ export default function IconSelect({
   label,
   defaultIcon,
   onSelect,
+  error,
 }: Props) {
   const [selectedIcon, setSelectedIcon] = React.useState<
     LucideIcons | undefined
@@ -63,6 +66,7 @@ export default function IconSelect({
           );
         })}
       </div>
+      {error && <ErrorText error={error} />}
     </div>
   );
 }

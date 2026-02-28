@@ -1,6 +1,7 @@
 import React from "react";
 import Text from "../text";
 import { MdCheckBox, MdCheckBoxOutlineBlank } from "react-icons/md";
+import ErrorText from "./error-text";
 
 interface CheckboxProps {
   checked: boolean;
@@ -9,14 +10,22 @@ interface CheckboxProps {
   id?: string;
   name?: string;
   value?: string;
+  error?: string;
 }
 
-const Checkbox = React.forwardRef<HTMLInputElement, CheckboxProps>(
-  ({ checked, onChange, label, id, name, value }, ref) => {
-    return (
+function Checkbox({
+  checked,
+  onChange,
+  label,
+  id,
+  name,
+  value,
+  error,
+}: CheckboxProps) {
+  return (
+    <div>
       <label className="flex items-center gap-3 w-full rounded-md hover:bg-white transition-all duration-200 cursor-pointer">
         <input
-          ref={ref}
           id={id}
           type="checkbox"
           name={name}
@@ -40,10 +49,9 @@ const Checkbox = React.forwardRef<HTMLInputElement, CheckboxProps>(
           {label}
         </Text>
       </label>
-    );
-  },
-);
-
-Checkbox.displayName = "Checkbox";
+      {error && <ErrorText error={error} />}
+    </div>
+  );
+}
 
 export default Checkbox;

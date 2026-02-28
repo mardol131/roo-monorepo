@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useRef, useState, useEffect } from "react";
-import Text from "./text";
+import Text from "./../text";
 import { ChevronDown } from "lucide-react";
 
 export type SelectOption = {
@@ -13,10 +13,11 @@ type Props = React.InputHTMLAttributes<HTMLSelectElement> & {
   label: string;
   items: SelectOption[];
   placeholder?: string;
+  error?: string;
 };
 
 const SelectInput = React.forwardRef<HTMLSelectElement, Props>(
-  ({ label, items, placeholder, id, value, onChange, ...props }, ref) => {
+  ({ label, items, placeholder, id, value, onChange, error, ...props }, ref) => {
     const [isOpen, setIsOpen] = useState(false);
     const containerRef = useRef<HTMLDivElement>(null);
 
@@ -126,6 +127,11 @@ const SelectInput = React.forwardRef<HTMLSelectElement, Props>(
               </div>
             )}
           </div>
+        )}
+        {error && (
+          <Text variant="label4" color="secondary" className="text-red-500 mt-1">
+            {error}
+          </Text>
         )}
       </div>
     );

@@ -8,12 +8,14 @@ interface GuestsFilterProps {
   value: Guests;
   onChange: (value: Guests) => void;
   label: string;
+  error?: string;
 }
 
 export default function GuestsInput({
   value,
   onChange,
   label,
+  error,
 }: GuestsFilterProps) {
   const [isOpen, setIsOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -65,6 +67,7 @@ export default function GuestsInput({
               </label>
               <div className="flex items-center gap-2">
                 <button
+                  type="button"
                   onClick={() => handleAdultsChange(value.adults - 1)}
                   className="w-8 h-8 flex items-center justify-center border border-zinc-200 rounded-lg hover:bg-zinc-50 transition-colors text-sm"
                 >
@@ -80,6 +83,7 @@ export default function GuestsInput({
                   className="flex-1 px-3 py-2 border border-zinc-200 rounded-lg text-center text-sm focus:outline-none focus:ring-1 focus:ring-rose-500"
                 />
                 <button
+                  type="button"
                   onClick={() => handleAdultsChange(value.adults + 1)}
                   className="w-8 h-8 flex items-center justify-center border border-zinc-200 rounded-lg hover:bg-zinc-50 transition-colors text-sm"
                 >
@@ -95,6 +99,7 @@ export default function GuestsInput({
               </label>
               <div className="flex items-center gap-2">
                 <button
+                  type="button"
                   onClick={() => handleChildrenChange(value.children - 1)}
                   className="w-8 h-8 flex items-center justify-center border border-zinc-200 rounded-lg hover:bg-zinc-50 transition-colors text-sm"
                 >
@@ -110,6 +115,7 @@ export default function GuestsInput({
                   className="flex-1 px-3 py-2 border border-zinc-200 rounded-lg text-center text-sm focus:outline-none focus:ring-1 focus:ring-rose-500"
                 />
                 <button
+                  type="button"
                   onClick={() => handleChildrenChange(value.children + 1)}
                   className="w-8 h-8 flex items-center justify-center border border-zinc-200 rounded-lg hover:bg-zinc-50 transition-colors text-sm"
                 >
@@ -150,6 +156,11 @@ export default function GuestsInput({
           </div>
         )}
       </div>
+      {error && (
+        <Text variant="label4" color="secondary" className="text-red-500 mt-1">
+          {error}
+        </Text>
+      )}
     </div>
   );
 }

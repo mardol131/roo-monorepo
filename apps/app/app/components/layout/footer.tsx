@@ -1,5 +1,4 @@
 import React from "react";
-import Text from "../ui/atoms/text";
 import { Facebook, Instagram, Twitter, Linkedin, Mail } from "lucide-react";
 
 type Props = {};
@@ -45,19 +44,19 @@ export default function Footer({}: Props) {
   ];
 
   return (
-    <footer className="bg-zinc-900 text-white pt-16 pb-8">
+    <footer className="bg-zinc-900 text-white pt-10 pb-6">
       <div className="max-w-content mx-auto px-4">
         {/* Main Footer Content */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 mb-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
           {/* Brand Section */}
-          <div className="lg:col-span-1">
-            <Text variant="heading4" className="text-white mb-4">
+          <div className="lg:col-span-2">
+            <span className="text-sm font-semibold text-white tracking-wide">
               EventHub
-            </Text>
-            <Text variant="body2" className="text-zinc-400 mb-6">
+            </span>
+            <p className="text-xs text-zinc-400 mt-2 mb-4 leading-relaxed">
               Objevujte a sdílejte nejlepší zážitky v Praze.
-            </Text>
-            <div className="flex gap-3">
+            </p>
+            <div className="flex gap-2">
               {socialLinks.map((social) => {
                 const Icon = social.icon;
                 return (
@@ -65,9 +64,9 @@ export default function Footer({}: Props) {
                     key={social.label}
                     href={social.href}
                     aria-label={social.label}
-                    className="p-2 rounded-full bg-zinc-800 hover:bg-rose-500 transition-colors"
+                    className="p-1.5 rounded-lg bg-zinc-800 hover:bg-rose-500 transition-colors"
                   >
-                    <Icon size={18} />
+                    <Icon size={14} />
                   </a>
                 );
               })}
@@ -77,19 +76,17 @@ export default function Footer({}: Props) {
           {/* Links Sections */}
           {footerLinks.map((section) => (
             <div key={section.title}>
-              <Text variant="body1" className="text-white font-semibold mb-4">
+              <p className="text-xs font-semibold text-white mb-3">
                 {section.title}
-              </Text>
-              <ul className="space-y-3">
+              </p>
+              <ul className="space-y-2">
                 {section.links.map((link) => (
                   <li key={link.label}>
                     <a
                       href={link.href}
-                      className="text-zinc-400 hover:text-rose-500 transition-colors"
+                      className="text-xs text-zinc-400 hover:text-rose-400 transition-colors"
                     >
-                      <Text variant="body2" color="onPrimary">
-                        {link.label}
-                      </Text>
+                      {link.label}
                     </a>
                   </li>
                 ))}
@@ -99,51 +96,44 @@ export default function Footer({}: Props) {
         </div>
 
         {/* Newsletter Section */}
-        <div className="border-y border-zinc-800 py-12 mb-12">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
-            <div>
-              <Text variant="heading4" className="text-white mb-2">
+        <div className="border-y border-zinc-800 py-6 mb-6">
+          <div className="flex flex-col md:flex-row md:items-center gap-4">
+            <div className="flex-1">
+              <p className="text-sm font-semibold text-white">
                 Zůstaňte v obraze
-              </Text>
-              <Text variant="body2" className="text-zinc-400">
-                Přihlaste se na náš newsletter a dostávejte novinky o nových
-                akcích.
-              </Text>
+              </p>
+              <p className="text-xs text-zinc-400 mt-0.5">
+                Přihlaste se na newsletter a dostávejte novinky o nových akcích.
+              </p>
             </div>
-            <div className="flex gap-2">
+            <div className="flex gap-2 md:w-72">
               <input
                 type="email"
                 placeholder="Váš email..."
-                className="flex-1 px-4 py-3 rounded-lg bg-zinc-800 text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-rose-500 transition-all"
+                className="flex-1 px-3 py-2 text-xs rounded-lg bg-zinc-800 text-white placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-rose-500 transition-all"
               />
-              <button className="px-6 py-3 bg-rose-500 text-white rounded-lg hover:bg-rose-600 transition-colors font-medium">
-                <Mail size={18} />
+              <button className="px-3 py-2 bg-rose-500 text-white rounded-lg hover:bg-rose-600 transition-colors">
+                <Mail size={14} />
               </button>
             </div>
           </div>
         </div>
 
         {/* Bottom Section */}
-        <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-          <Text variant="body2" className="text-zinc-400">
+        <div className="flex flex-col md:flex-row justify-between items-center gap-3">
+          <p className="text-xs text-zinc-500">
             © {currentYear} EventHub. Všechna práva vyhrazena.
-          </Text>
-          <div className="flex gap-6">
-            <a href="#">
-              <Text variant="body2" color="onPrimary">
-                Soukromí
-              </Text>
-            </a>
-            <a href="#">
-              <Text variant="body2" color="onPrimary">
-                Podmínky služby
-              </Text>
-            </a>
-            <a href="#">
-              <Text variant="body2" color="onPrimary">
-                Cookies
-              </Text>
-            </a>
+          </p>
+          <div className="flex gap-5">
+            {["Soukromí", "Podmínky služby", "Cookies"].map((label) => (
+              <a
+                key={label}
+                href="#"
+                className="text-xs text-zinc-500 hover:text-zinc-300 transition-colors"
+              >
+                {label}
+              </a>
+            ))}
           </div>
         </div>
       </div>

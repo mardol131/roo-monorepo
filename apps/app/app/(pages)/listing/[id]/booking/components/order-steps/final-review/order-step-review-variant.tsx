@@ -20,10 +20,14 @@ import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 
 const schema = yup.object({
-  terms: yup.boolean().required("Souhlas s obchodními podmínkami je povinný"),
+  terms: yup
+    .boolean()
+    .oneOf([true], "Souhlas s obchodními podmínkami je povinný")
+    .required(),
   gdpr: yup
     .boolean()
-    .required("Souhlas se zpracováním osobních údajů je povinný"),
+    .oneOf([true], "Souhlas se zpracováním osobních údajů je povinný")
+    .required(),
 });
 
 type SubmitData = yup.InferType<typeof schema>;
@@ -39,12 +43,24 @@ export default function OrderStepReviewVariant() {
     handleSubmit,
     formState: { errors },
   } = useForm<SubmitData>({
-    defaultValues: { terms: false, gdpr: false },
+    defaultValues: {
+      terms: false,
+      gdpr: false,
+    },
     resolver: yupResolver(schema),
   });
 
   const onSubmit = (data: SubmitData) => {
-    console.log("Form submitted with data:", data);
+    const orderSummary = {
+      event: eventData,
+      offer: offer,
+      legal: {
+        terms: data.terms,
+        gdpr: data.gdpr,
+      },
+    };
+
+    console.log("Order Summary:", orderSummary);
     // Here you would typically send the data to your backend or perform other actions
   };
 
@@ -134,83 +150,54 @@ export default function OrderStepReviewVariant() {
               Souhlas s podmínkami
             </Text>
             <div className="flex flex-col gap-3">
-              <div className="flex flex-col gap-1">
-                <Controller
-                  control={control}
-                  name="terms"
-                  rules={{
-                    required: "Souhlas s obchodními podmínkami je povinný",
-                  }}
-                  render={({ field }) => (
-                    <Checkbox
-                      ref={field.ref}
-                      checked={field.value}
-                      onChange={field.onChange}
-                      label={
-                        <span>
-                          Souhlasím s{" "}
-                          <a
-                            href="/obchodni-podminky"
-                            target="_blank"
-                            className="underline hover:text-zinc-900 transition-colors"
-                          >
-                            obchodními podmínkami
-                          </a>
-                        </span>
-                      }
-                    />
-                  )}
-                />
-                {errors.terms && (
-                  <Text
-                    variant="label4"
-                    color="secondary"
-                    className="text-red-500 ml-8"
-                  >
-                    {errors.terms.message}
-                  </Text>
+              <Controller
+                control={control}
+                name="terms"
+                render={({ field }) => (
+                  <Checkbox
+                    error={errors.terms?.message}
+                    checked={field.value ?? false}
+                    onChange={field.onChange}
+                    label={
+                      <span>
+                        Souhlasím s{" "}
+                        <a
+                          href="/obchodni-podminky"
+                          target="_blank"
+                          className="underline hover:text-zinc-900 transition-colors"
+                        >
+                          obchodními podmínkami
+                        </a>
+                      </span>
+                    }
+                  />
                 )}
-              </div>
+              />
 
-              <div className="flex flex-col gap-1">
-                <Controller
-                  control={control}
-                  name="gdpr"
-                  rules={{
-                    required:
-                      "Souhlas se zpracováním osobních údajů je povinný",
-                  }}
-                  render={({ field }) => (
-                    <Checkbox
-                      ref={field.ref}
-                      checked={field.value}
-                      onChange={field.onChange}
-                      label={
-                        <span>
-                          Souhlasím se{" "}
-                          <a
-                            href="/gdpr"
-                            target="_blank"
-                            className="underline hover:text-zinc-900 transition-colors"
-                          >
-                            zpracováním osobních údajů (GDPR)
-                          </a>{" "}
-                          a jejich sdílením s dodavatelem
-                        </span>
-                      }
-                    />
-                  )}
-                />
-                {errors.gdpr && (
-                  <Text
-                    variant="label4"
-                    color="secondary"
-                    className="text-red-500 ml-8"
-                  >
-                    {errors.gdpr.message}
-                  </Text>
+              <Controller
+                control={control}
+                name="gdpr"
+                render={({ field }) => (
+                  <Checkbox
+                    error={errors.gdpr?.message}
+                    checked={field.value ?? false}
+                    onChange={field.onChange}
+                    label={
+                      <span>
+                        Souhlasím se{" "}
+                        <a
+                          href="/gdpr"
+                          target="_blank"
+                          className="underline hover:text-zinc-900 transition-colors"
+                        >
+                          zpracováním osobních údajů (GDPR)
+                        </a>{" "}
+                        a jejich sdílením s dodavatelem
+                      </span>
+                    }
+                  />
                 )}
-              </div>
+              />
             </div>
           </div>
 

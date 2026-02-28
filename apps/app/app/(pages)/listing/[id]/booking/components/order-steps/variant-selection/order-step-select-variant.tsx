@@ -11,7 +11,7 @@ import OfferCard from "./offer-card";
 import StepHeading from "../step-heading";
 
 export default function OrderStepSelectVariant() {
-  const { currentOfferIndex, offers } = useOrderStore();
+  const { offers } = useOrderStore();
 
   return (
     <div>

@@ -4,6 +4,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { Calendar, ChevronLeft, ChevronRight } from "lucide-react";
 import Text from "@/app/components/ui/atoms/text";
 import { useClickOutside } from "@/app/hooks/use-click-outside";
+import ErrorText from "./error-text";
 
 interface DateTimeInputProps {
   label: string;
@@ -11,6 +12,7 @@ interface DateTimeInputProps {
   onChange?: (value: Date | null) => void;
   min?: Date;
   placeholder?: string;
+  error?: string;
 }
 
 const DAYS_OF_WEEK = ["Po", "Út", "St", "Čt", "Pá", "So", "Ne"];
@@ -50,6 +52,7 @@ export default function DateTimeInput({
   onChange,
   min,
   placeholder = "Vyberte datum a čas",
+  error,
 }: DateTimeInputProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [currentMonth, setCurrentMonth] = useState<Date>(value ?? new Date());
@@ -117,6 +120,22 @@ export default function DateTimeInput({
   const isDateSelected = (date: Date) =>
     selectedDateState?.toDateString() === date.toDateString();
 
+  const isSameDay = (a: Date, b: Date) =>
+    a.getFullYear() === b.getFullYear() &&
+    a.getMonth() === b.getMonth() &&
+    a.getDate() === b.getDate();
+
+  const minTimeString = min
+    ? `${String(min.getHours()).padStart(2, "0")}:${String(min.getMinutes()).padStart(2, "0")}`
+    : null;
+
+  const isTimeBelowMin = (timeStr: string, date: Date | null): boolean => {
+    if (!min || !date || !minTimeString || !isSameDay(date, min)) return false;
+    if (!isValidTime(timeStr)) return false;
+    const [h, m] = timeStr.split(":").map(Number);
+    return h < min.getHours() || (h === min.getHours() && m < min.getMinutes());
+  };
+
   const isDateDisabled = (date: Date) => {
     if (!min) return false;
 
@@ -133,6 +152,26 @@ export default function DateTimeInput({
   const handleDateClick = (date: Date) => {
     if (!isDateDisabled(date)) {
       setSelectedDateState(date);
+      if (
+        min &&
+        isSameDay(date, min) &&
+        isValidTime(time) &&
+        isTimeBelowMin(time, date)
+      ) {
+        setTime(minTimeString!);
+      }
+    }
+  };
+
+  const handleTimeChange = (rawValue: string) => {
+    const formatted = formatTimeInput(rawValue);
+    if (
+      isValidTime(formatted) &&
+      isTimeBelowMin(formatted, selectedDateState)
+    ) {
+      setTime(minTimeString!);
+    } else {
+      setTime(formatted);
     }
   };
 
@@ -232,13 +271,13 @@ export default function DateTimeInput({
                 ))}
               </div>
 
-              <div className="border-t border-zinc-100 pt-4">
+              <div className="border-t flex gap-2 items-center border-zinc-100 pt-4">
                 <label className="text-xs font-medium text-zinc-900">Čas</label>
                 <input
                   type="text"
                   placeholder="09:00"
                   value={time}
-                  onChange={(e) => setTime(formatTimeInput(e.target.value))}
+                  onChange={(e) => handleTimeChange(e.target.value)}
                   maxLength={5}
                   className="px-2 py-1.5 border border-zinc-200 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-rose-500"
                 />
@@ -247,6 +286,7 @@ export default function DateTimeInput({
           </div>
         )}
       </div>
+      {error && <ErrorText error={error} />}
     </div>
   );
 }

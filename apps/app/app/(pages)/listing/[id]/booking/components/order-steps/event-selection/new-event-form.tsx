@@ -34,10 +34,12 @@ const schema = yup.object({
     .date()
     .min(yup.ref("startDate"), "Datum konce musí být po datu začátku")
     .required("Datum konce je povinné"),
-  location: yup.object({
-    id: yup.string().required("ID lokace je povinné"),
-    label: yup.string().required("Název lokace je povinný"),
-  }),
+  location: yup
+    .object({
+      id: yup.string().required("ID lokace je povinné"),
+      label: yup.string().required("Název lokace je povinný"),
+    })
+    .required("Lokalita je povinná"),
   guests: yup
     .object({
       adults: yup.number().min(1).required(),
@@ -45,7 +47,7 @@ const schema = yup.object({
       ztp: yup.boolean().required(),
       pets: yup.boolean().required(),
     })
-    .required(),
+    .required("Počet hostů je povinný"),
 });
 
 type FormInputs = yup.InferType<typeof schema>;
@@ -62,6 +64,7 @@ export default function NewEventForm() {
   } = useForm<FormInputs>({
     resolver: yupResolver(schema),
     defaultValues: {
+      icon: "Calendar",
       guests: { adults: 1, children: 0, ztp: false, pets: false },
     },
   });
@@ -103,32 +106,32 @@ export default function NewEventForm() {
     >
       {/* Section 1 — Základní informace */}
       <FormSection number={1} icon={Smile} title="Základní informace">
-        <div className="flex flex-col gap-1">
-          <Input label="Název události" inputProps={{ ...register("name") }} />
-          {errors.name && <FieldError message={errors.name.message} />}
-        </div>
+        <Input
+          label="Název události"
+          inputProps={{ ...register("name") }}
+          error={errors.name?.message}
+        />
 
-        <div className="flex flex-col gap-1">
-          <Controller
-            name="icon"
-            control={control}
-            render={({ field }) => (
-              <IconSelect
-                label="Ikona události"
-                onSelect={(val) => field.onChange(val)}
-                iconsOptions={[
-                  "Calendar",
-                  "PartyPopper",
-                  "Briefcase",
-                  "Heart",
-                  "GraduationCap",
-                  "Music",
-                ]}
-              />
-            )}
-          />
-          {errors.icon && <FieldError message={errors.icon.message} />}
-        </div>
+        <Controller
+          name="icon"
+          control={control}
+          render={({ field }) => (
+            <IconSelect
+              error={errors.icon?.message}
+              label="Ikona události"
+              defaultIcon="Calendar"
+              onSelect={(val) => field.onChange(val)}
+              iconsOptions={[
+                "Calendar",
+                "PartyPopper",
+                "Briefcase",
+                "Heart",
+                "GraduationCap",
+                "Music",
+              ]}
+            />
+          )}
+        />
       </FormSection>
 
       <Divider />
@@ -136,38 +139,31 @@ export default function NewEventForm() {
       {/* Section 2 — Termín */}
       <FormSection number={2} icon={Calendar} title="Termín konání">
         <div className="grid grid-cols-2 gap-5">
-          <div className="flex flex-col gap-1">
-            <Controller
-              name="startDate"
-              control={control}
-              render={({ field }) => (
-                <DateTimeInput
-                  label="Začátek události"
-                  value={field.value}
-                  onChange={field.onChange}
-                />
-              )}
-            />
-            {errors.startDate && (
-              <FieldError message={errors.startDate.message} />
+          <Controller
+            name="startDate"
+            control={control}
+            render={({ field }) => (
+              <DateTimeInput
+                error={errors.startDate?.message}
+                label="Začátek události"
+                value={field.value}
+                onChange={field.onChange}
+              />
             )}
-          </div>
-
-          <div className="flex flex-col gap-1">
-            <Controller
-              name="endDate"
-              control={control}
-              render={({ field }) => (
-                <DateTimeInput
-                  label="Konec události"
-                  value={field.value}
-                  onChange={field.onChange}
-                  min={startDateValue ? new Date(startDateValue) : undefined}
-                />
-              )}
-            />
-            {errors.endDate && <FieldError message={errors.endDate.message} />}
-          </div>
+          />
+          <Controller
+            name="endDate"
+            control={control}
+            render={({ field }) => (
+              <DateTimeInput
+                label="Konec události"
+                value={field.value}
+                onChange={field.onChange}
+                min={startDateValue ? new Date(startDateValue) : undefined}
+                error={errors.endDate?.message}
+              />
+            )}
+          />
         </div>
       </FormSection>
 
@@ -175,28 +171,25 @@ export default function NewEventForm() {
 
       <FormSection number={3} icon={MapPin} title="Lokalita a počet hostů">
         <div className="grid grid-cols-2 gap-5 w-full">
-          <div className="flex flex-col gap-1">
-            <Controller
-              control={control}
-              name="location"
-              render={({ field }) => (
-                <SearchInput
-                  value={field.value}
-                  label="Město nebo obec"
-                  options={MOCK_LOCATIONS}
-                  onSelect={field.onChange}
-                />
-              )}
-            />
-            {errors.location && (
-              <FieldError message={errors.location.label?.message} />
+          <Controller
+            control={control}
+            name="location"
+            render={({ field }) => (
+              <SearchInput
+                error={errors.location?.message}
+                value={field.value}
+                label="Město nebo obec"
+                options={MOCK_LOCATIONS}
+                onSelect={field.onChange}
+              />
             )}
-          </div>
+          />
           <Controller
             control={control}
             name="guests"
             render={({ field }) => (
               <GuestsInput
+                error={errors.guests?.message}
                 label="Vyberte počet hostů"
                 value={field.value}
                 onChange={field.onChange}
@@ -207,7 +200,7 @@ export default function NewEventForm() {
       </FormSection>
       <div className="p-5 flex justify-end border-t border-zinc-200">
         <Button
-          text="Zkontrolovat a uložit"
+          text="Zkontrolovat a pokračovat"
           htmlType="submit"
           disabled={buttonIsDisabled}
           version="primary"

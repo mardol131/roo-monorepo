@@ -20,9 +20,9 @@ export default function EventSelectionButton({
   return (
     <button
       onClick={onClick}
-      className={`group flex flex-col gap-4 p-5 rounded-2xl border transition-all text-left w-full ${
+      className={`group flex flex-col gap-4 p-5 rounded-2xl border-2 transition-all text-left w-full ${
         isActive
-          ? "border-primary border shadow-sm"
+          ? "border-primary bg-zinc-50 shadow-sm"
           : "border-zinc-200 bg-white hover:border-zinc-300 hover:shadow-md"
       }`}
     >
