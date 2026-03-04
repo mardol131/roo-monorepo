@@ -2,8 +2,8 @@
 
 import React, { useState } from "react";
 import { Search, MapPin, Calendar, Users } from "lucide-react";
-import Button from "../../../components/ui/atoms/button";
-import Text from "../../../components/ui/atoms/text";
+import Button from "../../../../components/ui/atoms/button";
+import Text from "../../../../components/ui/atoms/text";
 
 interface EventFiltersProps {
   onSearch?: (filters: FilterValues) => void;

@@ -2,32 +2,22 @@
 
 import Button from "@/app/components/ui/atoms/button";
 import Text from "@/app/components/ui/atoms/text";
+import { getPathname, Link, usePathname } from "@/app/i18n/navigation";
+import { Routes } from "@/app/i18n/routing";
+import { useLocale } from "next-intl";
 import {
-  LayoutDashboard,
   Calendar,
-  MessageSquare,
   Heart,
-  MessageCircle,
-  CreditCard,
-  Settings,
+  LayoutDashboard,
   LogOut,
-  Plus,
   LucideIcon,
+  MessageCircle,
+  MessageSquare,
+  Settings,
 } from "lucide-react";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { useCallback } from "react";
 
-const NAV_ITEMS: { label: string; href: string; icon: LucideIcon }[] = [
-  { label: "Přehled", href: "/user-profile", icon: LayoutDashboard },
-  { label: "Moje události", href: "/user-profile/my-events", icon: Calendar },
-  { label: "Poptávky", href: "/user-profile/inquiries", icon: MessageSquare },
-  { label: "Zprávy", href: "/user-profile/messages", icon: MessageCircle },
-  { label: "Oblíbené", href: "/user-profile/favorites", icon: Heart },
-];
-
-const BOTTOM_ITEMS: { label: string; href: string; icon: LucideIcon }[] = [
-  { label: "Nastavení", href: "/user-profile/settings", icon: Settings },
-];
+// Filtr: pouze statické cesty bez [param] — dynamické vyžadují { pathname, params } objekt
 
 // Placeholder user — swap for real auth data later
 const USER = {
@@ -37,17 +27,39 @@ const USER = {
 };
 
 export default function Sidebar() {
+  // next-intl usePathname returns localized path: /ucet, /ucet/moje-udalosti, ...
   const pathname = usePathname();
+  const locale = useLocale();
 
-  const isActive = (href: string) =>
-    href === "/user-profile"
-      ? pathname === "/user-profile"
-      : pathname.startsWith(href);
+  const NAV_ITEMS: { label: string; href: Routes; icon: LucideIcon }[] = [
+    { label: "Přehled", href: "/user-profile", icon: LayoutDashboard },
+    { label: "Moje události", href: "/user-profile/my-events", icon: Calendar },
+    { label: "Poptávky", href: "/user-profile/inquiries", icon: MessageSquare },
+    { label: "Zprávy", href: "/user-profile/messages", icon: MessageCircle },
+    { label: "Oblíbené", href: "/user-profile/favorites", icon: Heart },
+  ];
+
+  const BOTTOM_ITEMS: {
+    label: string;
+    href: Routes;
+    icon: LucideIcon;
+  }[] = [
+    { label: "Nastavení", href: "/user-profile/settings", icon: Settings },
+  ];
+
+  const isActive = useCallback(
+    (href: Routes) => {
+      const localized = getPathname({ href, locale });
+      return href === "/user-profile"
+        ? pathname === localized
+        : pathname.startsWith(localized);
+    },
+    [pathname, locale],
+  );
 
   return (
     <aside className="w-64 shrink-0 flex flex-col bg-white border-r border-zinc-200">
       <div className="sticky top-0">
-        {" "}
         {/* User info */}
         <div className="p-5 border-b border-zinc-100">
           <div className="flex items-center gap-3">
@@ -70,15 +82,17 @@ export default function Sidebar() {
             </div>
           </div>
         </div>
+
         {/* New event button */}
         <div className="px-3 pt-4 pb-2">
           <Button
-            link="/new-event"
+            link="/user-profile/new-event"
             text="Nový event"
             className="w-full"
             iconRight="Plus"
           />
         </div>
+
         {/* Main navigation */}
         <nav className="flex-1 px-3 py-2 overflow-y-auto">
           <ul className="flex flex-col gap-0.5">
@@ -104,6 +118,7 @@ export default function Sidebar() {
             })}
           </ul>
         </nav>
+
         {/* Bottom submenu */}
         <div className="px-3 py-3 border-t border-zinc-100">
           <ul className="flex flex-col gap-0.5">

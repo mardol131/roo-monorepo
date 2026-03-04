@@ -7,6 +7,7 @@ import OrderStepSelectEvent from "./order-steps/event-selection/order-step-selec
 import OrderStepReviewVariant from "./order-steps/final-review/order-step-review-variant";
 import OrderStepSelectVariant from "./order-steps/variant-selection/order-step-select-variant";
 import { Event, EventData } from "@roo/common";
+import { MOCK_EVENTS } from "@/app/(pages)/[locale]/user-profile/_mock/mock-data";
 
 type Props = {};
 
@@ -30,7 +31,7 @@ export default function Booking({}: Props) {
               isOrderStepActivated(1) ? "" : "pointer-events-none opacity-30"
             }
           >
-            <OrderStepSelectEvent existingEvents={mockEventsWithIds} />
+            <OrderStepSelectEvent existingEvents={MOCK_EVENTS} />
           </div>
           <div
             className={
@@ -47,28 +48,3 @@ export default function Booking({}: Props) {
     </div>
   );
 }
-
-// Mock data - TODO: Nahradit skutečnými event daty z databáze
-export const mockEventsWithIds: Array<Event> = [
-  {
-    id: "1",
-    data: {
-      name: "Svatba Jana a Petry",
-      icon: "Calendar",
-      date: {
-        start: new Date("2024-09-15"),
-        end: new Date("2024-09-15"),
-      },
-      location: {
-        id: "loc1",
-        name: "Praha",
-      },
-      guests: {
-        adults: 50,
-        children: 10,
-        ztp: false,
-        pets: false,
-      },
-    },
-  },
-];

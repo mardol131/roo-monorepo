@@ -3,6 +3,7 @@ import { ReactNode } from "react";
 import "./styles/global.css";
 import Header from "./components/layout/header/header";
 import Footer from "./components/layout/footer";
+import { NextIntlClientProvider } from "next-intl";
 
 export const metadata: Metadata = {};
 
@@ -17,9 +18,11 @@ export default function RootLayout({
         <link rel="manifest" href="/manifest.json" />
       </head>
       <body className={`text-textDark`}>
-        <Header />
-        <div className="">{children}</div>
-        <Footer />
+        <NextIntlClientProvider>
+          <Header />
+          <div className="">{children}</div>
+          <Footer />
+        </NextIntlClientProvider>{" "}
       </body>
     </html>
   );

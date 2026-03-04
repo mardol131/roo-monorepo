@@ -1,7 +1,7 @@
 import type { NextConfig } from "next";
 import path from "path/win32";
 import dotenv from "dotenv";
-import { rewrites } from "./config/rewrites";
+import createNextIntlPlugin from "next-intl/plugin";
 
 if (process.env.VERCEL !== "1") {
   const rootEnvPath = path.resolve(__dirname, "../.env");
@@ -15,10 +15,9 @@ const nextConfig: NextConfig = {
   images: {
     remotePatterns: [{ protocol: "https", hostname: "**" }],
   },
-  /* config options here */
-  rewrites: async () => {
-    return rewrites;
-  },
+  typedRoutes: false,
 };
 
-export default nextConfig;
+const withNextIntl = createNextIntlPlugin("./app/i18n/request.ts");
+
+export default withNextIntl(nextConfig);

@@ -1,12 +1,13 @@
 import Text from "@/app/components/ui/atoms/text";
-import Link from "next/link";
-import React from "react";
+import { Link } from "@/app/i18n/navigation";
+import { IntlLink } from "@/app/i18n/routing";
+import { ComponentProps } from "react";
 
 type Props = {
   imageUrl: string;
   title: string;
   text: string;
-  link: string;
+  link: IntlLink;
 };
 
 export default function ListingTypeBanner({

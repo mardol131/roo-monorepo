@@ -8,13 +8,13 @@ import { Controller, useForm } from "react-hook-form";
 import Input from "@/app/components/ui/atoms/inputs/input";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
-import SearchInput from "../../../../../../../components/ui/atoms/inputs/search-input";
-import DateTimeInput from "../../../../../../../components/ui/atoms/inputs/date-time-input";
+import SearchInput from "../../../../../../../../components/ui/atoms/inputs/search-input";
+import DateTimeInput from "../../../../../../../../components/ui/atoms/inputs/date-time-input";
 import IconSelect, {
   LucideIcons,
 } from "@/app/components/ui/atoms/inputs/icon-select";
 import { Calendar, MapPin, Smile, Users } from "lucide-react";
-import GuestsFilter from "@/app/(pages)/catalog/[type]/components/guests-filter";
+import GuestsFilter from "@/app/(pages)/[locale]/catalog/[type]/components/guests-filter";
 import GuestsInput from "@/app/components/ui/atoms/inputs/guests-input";
 
 const MOCK_LOCATIONS = [

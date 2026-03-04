@@ -1,5 +1,5 @@
 import Image from "next/image";
-import Button from "../../../components/ui/atoms/button";
+import Button from "../../../../components/ui/atoms/button";
 import Text from "@/app/components/ui/atoms/text";
 import EventFilters from "./event-filters";
 

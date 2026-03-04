@@ -6,11 +6,11 @@ import {
   Plus,
   Search,
 } from "lucide-react";
-import Link from "next/link";
 import { getInquiries, MOCK_EVENTS, STATS } from "./_mock/mock-data";
 import { EventRow } from "./components/event-row";
 import { InquiryRow } from "./components/inquiry-row";
 import { SummaryCard } from "./components/summary-card";
+import { Link } from "@/app/i18n/navigation";
 
 export default function UserProfilePage() {
   const events = MOCK_EVENTS.slice(0, 3);

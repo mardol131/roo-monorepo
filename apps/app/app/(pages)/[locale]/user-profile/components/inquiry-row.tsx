@@ -1,8 +1,8 @@
 import Text from "@/app/components/ui/atoms/text";
-import Link from "next/link";
 import { CheckCircle2, ChevronRight, Clock, XCircle } from "lucide-react";
 import { INQUIRY_STATUS } from "@/app/data/inquiry";
 import { Inquiry } from "@roo/common";
+import { Link } from "@/app/i18n/navigation";
 
 export function InquiryRow({
   inquiry,
@@ -16,7 +16,10 @@ export function InquiryRow({
 
   return (
     <Link
-      href={`/user-profile/my-events/${eventId}/${inquiry.id}`}
+      href={{
+        pathname: "/user-profile/my-events/[id]/[contractorId]",
+        params: { id: eventId, contractorId: inquiry.supplier.id },
+      }}
       className="flex items-center gap-4 px-6 py-4 hover:bg-zinc-50 transition-colors group"
     >
       <StatusIcon className={`w-5 h-5 shrink-0 ${status.iconColor}`} />

@@ -1,5 +1,6 @@
 import Text from "@/app/components/ui/atoms/text";
 import { EVENT_STATUS } from "@/app/data/event";
+import { Link } from "@/app/i18n/navigation";
 import {
   Event,
   formatGuestsString,
@@ -15,7 +16,6 @@ import {
   MessageSquare,
   ChevronRight,
 } from "lucide-react";
-import Link from "next/link";
 
 export function EventCard({ event }: { event: Event }) {
   const Icon =
@@ -25,7 +25,10 @@ export function EventCard({ event }: { event: Event }) {
 
   return (
     <Link
-      href={`/user-profile/my-events/${event.id}`}
+      href={{
+        pathname: "/user-profile/my-events/[id]",
+        params: { id: event.id },
+      }}
       className="group bg-white rounded-2xl border border-zinc-200 hover:border-zinc-300 hover:shadow-sm transition-all px-6 py-5 flex items-center gap-5"
     >
       {/* Icon */}

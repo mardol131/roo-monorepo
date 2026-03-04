@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { Sliders } from "lucide-react";
-import Text from "../../../../components/ui/atoms/text";
+import Text from "../../../../../components/ui/atoms/text";
 import FilterSection from "./filter-section";
 import PriceFilter from "./price-filter";
 import Button from "@/app/components/ui/atoms/button";
