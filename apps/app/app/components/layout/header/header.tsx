@@ -1,33 +1,52 @@
 "use client";
 
 import React, { useState } from "react";
-import Link from "next/link";
 import Image from "next/image";
 import { Menu, X } from "lucide-react";
 import logo from "@/public/logo.png";
-import { usePathname } from "next/navigation";
 import Button from "../../ui/atoms/button";
+import { Link } from "@/app/i18n/navigation";
+import { IntlLink } from "@/app/i18n/routing";
 
-const navigationItems = [
-  { label: "Místa", href: "#mista" },
-  { label: "Gastro", href: "#gastro" },
-  { label: "Zábava", href: "#zabava" },
-  { label: "Plánovač akcí", href: "#planovac" },
+const navigationItems: { label: string; href: IntlLink }[] = [
+  {
+    label: "Místa",
+    href: {
+      pathname: "/catalog/[type]",
+      params: { type: "misto" },
+    },
+  },
+  {
+    label: "Gastro",
+    href: {
+      pathname: "/catalog/[type]",
+      params: { type: "gastro" },
+    },
+  },
+  {
+    label: "Zábava",
+    href: {
+      pathname: "/catalog/[type]",
+      params: { type: "zabava" },
+    },
+  },
+  {
+    label: "Plánovač akcí",
+    href: {
+      pathname: "/user-profile/new-event",
+    },
+  },
 ];
 
 export default function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const pathname = usePathname();
-  const isInUserProfile = pathname.startsWith("/user-profile");
-
-  if (isInUserProfile) return null;
 
   return (
     <header className="sticky top-0 z-50 w-full bg-white/95 backdrop-blur-sm border-b border-zinc-200">
       <div className="max-w-content mx-auto px-8 flex items-center justify-between h-20">
         {/* Logo + nav */}
         <div className="flex items-center gap-10">
-          <Link href="/" className="flex items-center gap-2.5 shrink-0">
+          <Link href="/homepage" className="flex items-center gap-2.5 shrink-0">
             <Image src={logo} alt="Roo" width={34} height={34} priority />
             <span className="text-lg font-bold text-zinc-900 tracking-tight">
               Roo
@@ -37,7 +56,7 @@ export default function Header() {
           <nav className="hidden md:flex items-center gap-0.5">
             {navigationItems.map((item) => (
               <Button
-                key={item.href}
+                key={item.href.toString()}
                 link={item.href}
                 version="plain"
                 text={item.label}
@@ -50,7 +69,7 @@ export default function Header() {
         {/* Right side */}
         <div className="flex items-center gap-3">
           <Button
-            link="/registrations"
+            link="/register"
             version="plain"
             text="Staňte se dodavatelem"
             size="sm"
@@ -64,7 +83,7 @@ export default function Header() {
               size="sm"
             />
             <Button
-              link="/registrations"
+              link="/register"
               version="primary"
               text="Registrovat se"
               size="sm"
@@ -96,7 +115,7 @@ export default function Header() {
         <nav className="flex flex-col px-4 py-3 gap-1">
           {navigationItems.map((item) => (
             <Link
-              key={item.href}
+              key={item.href.toString()}
               href={item.href}
               onClick={() => setIsMobileMenuOpen(false)}
               className="px-3 py-2.5 text-sm font-medium text-zinc-700 hover:bg-zinc-50 rounded-lg transition-colors"

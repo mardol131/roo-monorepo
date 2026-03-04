@@ -12,6 +12,10 @@ export const routing = defineRouting({
     "/catalog/[type]": { cs: "/katalog/[type]" },
     "/listing/[id]": { cs: "/inzerat/[id]" },
     "/listing/[id]/booking": { cs: "/inzerat/[id]/poptavka" },
+
+    "/login": { cs: "/prihlaseni" },
+    "/register": { cs: "/registrace" },
+
     "/user-profile": { cs: "/ucet" },
     "/user-profile/new-event": { cs: "/ucet/nova-udalost" },
     "/user-profile/my-events": { cs: "/ucet/moje-udalosti" },

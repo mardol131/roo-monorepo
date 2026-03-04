@@ -1,3 +1,5 @@
+import { Link } from "@/app/i18n/navigation";
+import { IntlLink } from "@/app/i18n/routing";
 import * as lucideIcons from "lucide-react";
 
 type ButtonVersion =
@@ -16,7 +18,7 @@ interface ButtonProps {
   text: string;
   size?: ButtonSize;
   onClick?: () => void;
-  link?: string;
+  link?: IntlLink;
   className?: string;
   iconLeft?: LucideIcons;
   iconRight?: LucideIcons;
@@ -102,9 +104,9 @@ export default function Button({
 
   if (link) {
     return (
-      <a href={link} className={buttonClass}>
+      <Link href={link} className={buttonClass}>
         {buttonContent}
-      </a>
+      </Link>
     );
   }
 

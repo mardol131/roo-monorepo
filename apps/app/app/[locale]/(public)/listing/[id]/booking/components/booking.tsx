@@ -7,7 +7,7 @@ import OrderStepSelectEvent from "./order-steps/event-selection/order-step-selec
 import OrderStepReviewVariant from "./order-steps/final-review/order-step-review-variant";
 import OrderStepSelectVariant from "./order-steps/variant-selection/order-step-select-variant";
 import { Event, EventData } from "@roo/common";
-import { MOCK_EVENTS } from "@/app/(pages)/[locale]/user-profile/_mock/mock-data";
+import { MOCK_EVENTS } from "@/app/[locale]/(user)/user-profile/_mock/mock-data";
 
 type Props = {};
 
