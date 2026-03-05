@@ -2,7 +2,6 @@
 
 import React, { useState } from "react";
 import Text from "@/app/components/ui/atoms/text";
-import Link from "next/link";
 import {
   CheckCircle2,
   ChevronRight,
@@ -12,6 +11,7 @@ import {
 } from "lucide-react";
 import { formatInquiryCountLabel, Inquiry, InquiryStatus } from "@roo/common";
 import { InquiryRow } from "../../components/inquiry-row";
+import { Link } from "@/app/i18n/navigation";
 
 // ── Config ─────────────────────────────────────────────────────────────────────
 
@@ -122,7 +122,10 @@ function EventGroup({
           </div>
         </div>
         <Link
-          href={`/user-profile/my-events/${event.id}`}
+          href={{
+            pathname: "/user-profile/my-events/[id]",
+            params: { id: event.id },
+          }}
           className="text-xs text-rose-500 hover:text-rose-600 font-medium transition-colors"
         >
           Detail události →

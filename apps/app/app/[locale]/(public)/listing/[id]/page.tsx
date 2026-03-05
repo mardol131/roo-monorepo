@@ -13,11 +13,11 @@ import DescriptionSection from "./components/description-section";
 import FAQSection, { FAQ } from "./components/faq-section";
 import HeroImageSection from "./components/hero-image-section";
 import ItemsSection, { Item } from "./components/items-section";
-import { Offer } from "./components/offer-item";
 import OffersSection from "./components/offers-section";
 import OrderBox from "./components/order-box";
 import ReviewsSection, { Review } from "./components/reviews-section";
 import SectionWrapper from "./components/section-wrapper";
+import { Offer } from "@roo/common";
 
 type Props = {};
 

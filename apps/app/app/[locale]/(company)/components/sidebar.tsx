@@ -96,10 +96,9 @@ export default function Sidebar() {
         <div className="px-3 pt-4 pb-2">
           <Button
             link="/user-profile/new-event"
-            text="Vytvořit událost"
+            text="Nový event"
             className="w-full"
             iconRight="Plus"
-            size="md"
           />
         </div>
 

@@ -1,10 +1,10 @@
 import Text from "@/app/components/ui/atoms/text";
 import { EVENT_STATUS } from "@/app/data/event";
+import { Link } from "@/app/i18n/navigation";
 import { Event } from "@roo/common";
 import * as lucideIcons from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { Calendar, ChevronRight, MapPin, Users } from "lucide-react";
-import Link from "next/link";
 
 export function EventRow({ event }: { event: Event }) {
   const Icon =
@@ -14,7 +14,10 @@ export function EventRow({ event }: { event: Event }) {
 
   return (
     <Link
-      href={`/user-profile/my-events/${event.id}`}
+      href={{
+        pathname: "/user-profile/my-events/[id]",
+        params: { id: event.id },
+      }}
       className="flex items-center gap-4 px-6 py-4 hover:bg-zinc-50 transition-colors group"
     >
       <div className="w-8 h-8 rounded-lg bg-rose-50 flex items-center justify-center shrink-0">

@@ -1,9 +1,7 @@
-import { redirect } from "next/navigation";
-import React from "react";
+import { redirect } from "@/app/i18n/navigation";
+import { getLocale } from "next-intl/server";
 
-type Props = {};
-
-export default function page({}: Props) {
-  redirect("/katalog/gastro");
-  return <div>page</div>;
+export default async function CatalogPage() {
+  const locale = await getLocale();
+  redirect({ href: { pathname: "/catalog/[type]", params: { type: "misto" } }, locale });
 }

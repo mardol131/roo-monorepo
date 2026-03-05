@@ -11,22 +11,19 @@ import { EventRow } from "./components/event-row";
 import { InquiryRow } from "./components/inquiry-row";
 import { SummaryCard } from "./components/summary-card";
 import { Link } from "@/app/i18n/navigation";
+import PageHeading from "./components/page-heading";
 
 export default function UserProfilePage() {
   const events = MOCK_EVENTS.slice(0, 3);
   const inquiries = getInquiries().slice(0, 5);
 
   return (
-    <div>
+    <main className="w-full">
       {/* Header */}
-      <div className="mb-8">
-        <Text variant="heading4" color="dark" className="font-bold">
-          Přehled
-        </Text>
-        <Text variant="label2" color="secondary" className="mt-1">
-          Vítejte zpět! Zde je přehled vaší aktivity.
-        </Text>
-      </div>
+      <PageHeading
+        heading="Přehled"
+        description="Vítejte zpět! Zde je přehled vašich aktivit."
+      />
 
       {/* Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
@@ -99,7 +96,7 @@ export default function UserProfilePage() {
           </div>
         )}
       </div>
-    </div>
+    </main>
   );
 }
 

@@ -1,6 +1,5 @@
 import Text from "@/app/components/ui/atoms/text";
-import { Link } from "@/app/i18n/navigation";
-import { IntlLink } from "@/app/i18n/routing";
+import { IntlLink, Link } from "@/app/i18n/navigation";
 import { ComponentProps } from "react";
 
 type Props = {

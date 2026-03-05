@@ -14,7 +14,6 @@ import IconSelect, {
   LucideIcons,
 } from "@/app/components/ui/atoms/inputs/icon-select";
 import { Calendar, MapPin, Smile, Users } from "lucide-react";
-import GuestsFilter from "@/app/(pages)/[locale]/catalog/[type]/components/guests-filter";
 import GuestsInput from "@/app/components/ui/atoms/inputs/guests-input";
 
 const MOCK_LOCATIONS = [

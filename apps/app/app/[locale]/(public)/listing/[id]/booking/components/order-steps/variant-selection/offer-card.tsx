@@ -5,8 +5,8 @@ import { useOrderStore } from "@/app/store/order-store";
 import { Check, ChevronLeft, ChevronRight, X } from "lucide-react";
 import Image from "next/image";
 import { useState } from "react";
-import { Offer } from "../../../../components/offer-item";
 import { OfferIncludesExcludes } from "../../../../components/offer-includes-excludes";
+import { Offer } from "@roo/common";
 
 type Props = {
   offer: Offer;

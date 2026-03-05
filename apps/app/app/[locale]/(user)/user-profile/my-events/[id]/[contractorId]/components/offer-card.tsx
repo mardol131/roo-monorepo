@@ -1,7 +1,7 @@
 import Text from "@/app/components/ui/atoms/text";
 import { Check, X } from "lucide-react";
-import type { Inquiry } from "../types";
 import SectionHeader from "./section-header";
+import { Inquiry } from "@roo/common";
 
 type Props = {
   offer: Inquiry["offer"];

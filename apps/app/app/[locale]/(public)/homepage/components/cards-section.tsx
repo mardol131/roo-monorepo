@@ -92,7 +92,7 @@ export default function CardsSection({}: Props) {
               Jedinečné akce a zážitky vybrané speciálně pro vás
             </Text>
           </div>
-          <Button link="/" text="Zobrazit" />
+          <Button link="/catalog" text="Zobrazit" />
         </div>
         <div className="flex gap-2">
           <button

@@ -1,37 +1,55 @@
 import React from "react";
 import Text from "@/app/components/ui/atoms/text";
 import Button from "@/app/components/ui/atoms/button";
+import { IntlLink } from "@/app/i18n/navigation";
 
 type Props = {};
 
-const bubbles = [
+const bubbles: {
+  id: number;
+  title: string;
+  backgroundImage: string;
+  link: IntlLink;
+}[] = [
   {
     id: 1,
     title: "Hudební festivaly",
     backgroundImage:
       "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?auto=format&fit=crop&w=600&q=80",
-    link: "/events?category=music",
+    link: {
+      pathname: "/catalog/[type]",
+      params: { type: "zabava" },
+    },
   },
   {
     id: 2,
     title: "Divadelní představení",
     backgroundImage:
       "https://images.unsplash.com/photo-1519125323398-675f0ddb6308?auto=format&fit=crop&w=600&q=80",
-    link: "/events?category=theater",
+    link: {
+      pathname: "/catalog/[type]",
+      params: { type: "zabava" },
+    },
   },
   {
     id: 3,
     title: "Stand-up comedy",
     backgroundImage:
       "https://images.unsplash.com/photo-1470229722913-7f419344ca51?auto=format&fit=crop&w=600&q=80",
-    link: "/events?category=comedy",
+    link: {
+      pathname: "/catalog/[type]",
+      params: { type: "zabava" },
+    },
   },
   {
     id: 4,
     title: "Sportovní akce",
     backgroundImage:
       "https://images.unsplash.com/photo-1461896836934-ffe607ba8211?auto=format&fit=crop&w=600&q=80",
-    link: "/events?category=sports",
+    link: {
+      pathname: "/catalog/[type]",
+      params: { type: "zabava" },
+    },
   },
 ];
 
@@ -94,7 +112,7 @@ export default function BubbleMasonrySection({}: Props) {
   );
 }
 
-function MasonryContent({ title, link }: { title: string; link: string }) {
+function MasonryContent({ title, link }: { title: string; link: IntlLink }) {
   return (
     <>
       <div className="inset-0 bg-black/40 hover:bg-black/20 transition-all ease-in-out flex flex-col items-start justify-end w-full h-full gap-6 p-6">

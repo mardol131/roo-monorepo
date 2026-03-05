@@ -1,5 +1,4 @@
 import Text from "@/app/components/ui/atoms/text";
-import React from "react";
 
 type Props = {
   title: string;

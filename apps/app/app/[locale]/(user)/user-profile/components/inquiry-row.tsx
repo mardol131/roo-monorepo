@@ -1,7 +1,7 @@
 import Text from "@/app/components/ui/atoms/text";
 import { CheckCircle2, ChevronRight, Clock, XCircle } from "lucide-react";
 import { INQUIRY_STATUS } from "@/app/data/inquiry";
-import { Inquiry } from "@roo/common";
+import { hasUnreadMessageForUser, Inquiry } from "@roo/common";
 import { Link } from "@/app/i18n/navigation";
 
 export function InquiryRow({
@@ -14,22 +14,29 @@ export function InquiryRow({
   const status = INQUIRY_STATUS[inquiry.status];
   const StatusIcon = status.icon;
 
+  const unread = hasUnreadMessageForUser(inquiry);
+
   return (
     <Link
       href={{
         pathname: "/user-profile/my-events/[id]/[contractorId]",
-        params: { id: eventId, contractorId: inquiry.supplier.id },
+        params: { id: eventId, contractorId: inquiry.company.id },
       }}
       className="flex items-center gap-4 px-6 py-4 hover:bg-zinc-50 transition-colors group"
     >
-      <StatusIcon className={`w-5 h-5 shrink-0 ${status.iconColor}`} />
+      <div className="relative shrink-0">
+        <StatusIcon className={`w-5 h-5 ${status.iconColor}`} />
+        {unread && (
+          <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-rose-500 rounded-full border-2 border-white" />
+        )}
+      </div>
 
       <div className="flex-1 flex flex-col min-w-0">
         <Text variant="label1" color="dark" className="font-medium truncate">
-          {inquiry.supplier.name}
+          {inquiry.company.name}
         </Text>
         <Text variant="label4" color="secondary">
-          {inquiry.supplier.category} · odesláno {inquiry.sentAt}
+          {inquiry.company.category} · odesláno {inquiry.sentAt}
         </Text>
       </div>
 

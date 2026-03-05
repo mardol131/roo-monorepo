@@ -11,7 +11,7 @@ export default function layout({ children }: Props) {
       <div className="flex min-h-screen bg-zinc-50">
         <Sidebar />
         <div className="flex-1 flex justify-center">
-          <div className="max-w-user-profile-content w-full flex flex-col px-8 py-20">
+          <div className="max-w-4xl w-full flex flex-col px-8 py-10">
             {children}
           </div>
         </div>

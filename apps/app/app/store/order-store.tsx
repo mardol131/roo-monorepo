@@ -1,8 +1,7 @@
 import { off } from "process";
 import { create } from "zustand";
-import { Offer } from "../[locale]/listing/[id]/components/offer-item";
-import { offers } from "../[locale]/listing/[id]/page";
-import { EventData } from "@roo/common";
+import { EventData, Offer } from "@roo/common";
+import { offers } from "../[locale]/(public)/listing/[id]/page";
 
 type EventVariant = "new-event" | "existing-event" | null;
 

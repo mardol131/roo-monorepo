@@ -3,7 +3,7 @@
 import React from "react";
 import Text from "@/app/components/ui/atoms/text";
 import { Check, CheckCircle2, Clock, Send, XCircle } from "lucide-react";
-import type { InquiryStatus } from "../types";
+import { InquiryStatus } from "@roo/common";
 
 const STATUS_STEPS: {
   label: string;
@@ -20,11 +20,7 @@ function getActiveStep(status: InquiryStatus): number {
   return 0;
 }
 
-export default function InquiryTimeline({
-  status,
-}: {
-  status: InquiryStatus;
-}) {
+export default function InquiryTimeline({ status }: { status: InquiryStatus }) {
   const activeStep = getActiveStep(status);
 
   if (status === "declined") {

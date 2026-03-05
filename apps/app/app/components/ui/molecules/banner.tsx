@@ -2,13 +2,14 @@ import React from "react";
 import Image from "next/image";
 import Text from "../atoms/text";
 import Button from "../atoms/button";
+import { IntlLink } from "@/app/i18n/navigation";
 
 type Props = {
   image: string;
   title: string;
   text: string;
   buttonText: string;
-  link: string;
+  link: IntlLink;
   imageAlt?: string;
   rotate?: boolean;
 };

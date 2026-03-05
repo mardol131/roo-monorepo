@@ -8,19 +8,7 @@ import Image from "next/image";
 import { FaCircleCheck, FaCircleXmark } from "react-icons/fa6";
 import { useOrderStore } from "@/app/store/order-store";
 import { OfferIncludesExcludes } from "./offer-includes-excludes";
-
-export interface Offer {
-  id: string;
-  title: string;
-  description: string;
-  price: number;
-  duration: string;
-  includes: string[];
-  excludes: string[];
-  idealFor: string[];
-  images: string[];
-  availableDate?: string;
-}
+import { Offer } from "@roo/common";
 
 interface OfferItemProps {
   offer: Offer;
@@ -158,13 +146,15 @@ export default function OfferItem({
                   {offer.duration}
                 </Text>
               </div>
-              {variant === "default" && onOrderButtonClick && orderButtonText && (
-                <Button
-                  text={orderButtonText}
-                  version="primary"
-                  onClick={onOrderButtonClick}
-                />
-              )}
+              {variant === "default" &&
+                onOrderButtonClick &&
+                orderButtonText && (
+                  <Button
+                    text={orderButtonText}
+                    version="primary"
+                    onClick={onOrderButtonClick}
+                  />
+                )}
             </div>
           </div>
         </div>

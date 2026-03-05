@@ -4,7 +4,11 @@ export type Inquiry = {
   id: string;
   status: InquiryStatus;
   sentAt: string;
-  supplier: {
+  lastCompanyMessageSentAt?: Date;
+  lastUserMessageSentAt?: Date;
+  lastUserSeenAt?: Date;
+  lastCompanySeenAt?: Date;
+  company: {
     id: string;
     name: string;
     category: string;
@@ -30,7 +34,7 @@ export type Inquiry = {
 
 export type InquiryChatMessage = {
   id: string;
-  sender: "user" | "supplier";
+  sender: "user" | "company";
   content: string;
   timestamp: Date;
 };

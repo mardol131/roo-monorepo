@@ -9,7 +9,7 @@ export function getInquiries(): Inquiry[] {
       id: "inq-1",
       status: "pending",
       sentAt: "10. 2. 2025",
-      supplier: {
+      company: {
         id: "sup-1",
         name: "DJ Services Praha",
         category: "Hudba & zábava",
@@ -18,6 +18,8 @@ export function getInquiries(): Inquiry[] {
         location: "Praha",
         slug: "dj-services-praha",
       },
+      lastCompanyMessageSentAt: new Date("2025-02-12T10:30:00"),
+      lastUserSeenAt: new Date("2025-02-11T15:00:00"),
       event: { id: "1", name: "Firemní večírek 2025", date: "15. 3. 2025" },
       offer: {
         title: "DJ Premium Balíček",
@@ -38,7 +40,7 @@ export function getInquiries(): Inquiry[] {
       id: "inq-2",
       status: "confirmed",
       sentAt: "8. 2. 2025",
-      supplier: {
+      company: {
         id: "sup-2",
         name: "Catering Premium",
         category: "Catering",
@@ -61,7 +63,7 @@ export function getInquiries(): Inquiry[] {
       id: "inq-3",
       status: "pending",
       sentAt: "12. 2. 2025",
-      supplier: {
+      company: {
         id: "sup-3",
         name: "Foto & Video Studio",
         category: "Fotografie & video",
@@ -84,7 +86,9 @@ export function getInquiries(): Inquiry[] {
       id: "inq-4",
       status: "declined",
       sentAt: "5. 2. 2025",
-      supplier: {
+      lastCompanyMessageSentAt: new Date("2025-02-12T10:30:00"),
+      lastUserSeenAt: new Date("2025-02-11T15:00:00"),
+      company: {
         id: "sup-4",
         name: "Květinová výzdoba Novák",
         category: "Dekorace",
@@ -107,7 +111,7 @@ export function getInquiries(): Inquiry[] {
       id: "inq-5",
       status: "pending",
       sentAt: "18. 3. 2025",
-      supplier: {
+      company: {
         id: "sup-5",
         name: "Magic Show & Entertainment",
         category: "Zábava",
@@ -130,7 +134,7 @@ export function getInquiries(): Inquiry[] {
       id: "inq-6",
       status: "confirmed",
       sentAt: "15. 3. 2025",
-      supplier: {
+      company: {
         id: "sup-6",
         name: "Sound & Light Pro",
         category: "Technika",
@@ -157,7 +161,7 @@ export function getInquiry(_eventId: string, _contractorId: string): Inquiry {
     id: "inq-1",
     status: "pending",
     sentAt: "10. 2. 2025",
-    supplier: {
+    company: {
       id: "sup-1",
       name: "DJ Services Praha",
       category: "Hudba & zábava",
@@ -199,7 +203,7 @@ export function getMessages(_inquiryId: string): InquiryChatMessage[] {
     },
     {
       id: "m2",
-      sender: "supplier",
+      sender: "company",
       content:
         "Dobrý den, děkuji za zájem! Termín 15. 3. mám zatím volný. Mohu se zeptat, od kolika hodin by akce probíhala a jaký žánr hudby preferujete?",
       timestamp: new Date(),

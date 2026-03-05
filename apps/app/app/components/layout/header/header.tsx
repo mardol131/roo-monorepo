@@ -5,8 +5,7 @@ import Image from "next/image";
 import { Menu, X } from "lucide-react";
 import logo from "@/public/logo.png";
 import Button from "../../ui/atoms/button";
-import { Link } from "@/app/i18n/navigation";
-import { IntlLink } from "@/app/i18n/routing";
+import { IntlLink, Link } from "@/app/i18n/navigation";
 
 const navigationItems: { label: string; href: IntlLink }[] = [
   {

@@ -72,7 +72,7 @@ export default function Catalog({}: Props) {
   }, [mapView]);
 
   return (
-    <div className="flex flex-col gap-10 items-center justify-center w-full px-6">
+    <div className="flex flex-col gap-10 items-center justify-center w-full px-6 py-10">
       <div className="max-w-content w-full flex flex-col gap-10">
         <CatalogTypeSelection />
         <GeneralFilters />

@@ -1,5 +1,4 @@
-import { Link } from "@/app/i18n/navigation";
-import { IntlLink } from "@/app/i18n/routing";
+import { IntlLink, Link } from "@/app/i18n/navigation";
 import * as lucideIcons from "lucide-react";
 
 type ButtonVersion =
@@ -13,7 +12,7 @@ type ButtonSize = "2xl" | "xl" | "lg" | "md" | "sm";
 
 type LucideIcons = keyof typeof lucideIcons;
 
-interface ButtonProps {
+export interface ButtonProps {
   version?: ButtonVersion;
   text: string;
   size?: ButtonSize;

@@ -1,5 +1,4 @@
 import Button from "@/app/components/ui/atoms/button";
-import React from "react";
 
 type Props = {
   showBackButton?: boolean;

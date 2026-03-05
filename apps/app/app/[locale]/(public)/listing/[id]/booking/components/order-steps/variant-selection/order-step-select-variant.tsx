@@ -1,14 +1,8 @@
 "use client";
 
-import React from "react";
-import { Check, X, ChevronLeft, ChevronRight } from "lucide-react";
-import Image from "next/image";
-import Text from "@/app/components/ui/atoms/text";
-import Button from "@/app/components/ui/atoms/button";
 import { useOrderStore } from "@/app/store/order-store";
-import ButtonSection from "../../button-section";
-import OfferCard from "./offer-card";
 import StepHeading from "../step-heading";
+import OfferCard from "./offer-card";
 
 export default function OrderStepSelectVariant() {
   const { offers } = useOrderStore();

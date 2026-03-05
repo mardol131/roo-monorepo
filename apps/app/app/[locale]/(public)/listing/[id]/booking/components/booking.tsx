@@ -1,13 +1,12 @@
 "use client";
 
+import { MOCK_EVENTS } from "@/app/[locale]/(user)/user-profile/_mock/mock-data";
 import Text from "@/app/components/ui/atoms/text";
 import { useOrderStore } from "@/app/store/order-store";
 import { useParams } from "next/navigation";
 import OrderStepSelectEvent from "./order-steps/event-selection/order-step-select-event";
 import OrderStepReviewVariant from "./order-steps/final-review/order-step-review-variant";
 import OrderStepSelectVariant from "./order-steps/variant-selection/order-step-select-variant";
-import { Event, EventData } from "@roo/common";
-import { MOCK_EVENTS } from "@/app/[locale]/(user)/user-profile/_mock/mock-data";
 
 type Props = {};
 

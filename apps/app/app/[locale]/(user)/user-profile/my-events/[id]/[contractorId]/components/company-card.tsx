@@ -1,13 +1,13 @@
 import Text from "@/app/components/ui/atoms/text";
 import { MapPin, Star } from "lucide-react";
-import type { Inquiry } from "../types";
 import SectionHeader from "./section-header";
+import { Inquiry } from "@roo/common";
 
 type Props = {
-  supplier: Inquiry["supplier"];
+  supplier: Inquiry["company"];
 };
 
-export default function SupplierCard({ supplier }: Props) {
+export default function CompanyCard({ supplier }: Props) {
   return (
     <div className="bg-white rounded-2xl border border-zinc-200 flex flex-col gap-3">
       <SectionHeader icon={Star} title="Informace o dodavateli" />

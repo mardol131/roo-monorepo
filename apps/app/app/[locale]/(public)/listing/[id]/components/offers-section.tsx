@@ -3,7 +3,8 @@
 import Text from "@/app/components/ui/atoms/text";
 import { useOrderStore } from "@/app/store/order-store";
 import { useRouter } from "next/navigation";
-import OfferItem, { Offer } from "./offer-item";
+import OfferItem from "./offer-item";
+import { Offer } from "@roo/common";
 
 interface OffersSectionProps {
   offers: Offer[];

@@ -29,19 +29,19 @@ export default function page({}: Props) {
             imageUrl="https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f"
             title="Místa"
             text="Objevuj zajímavá místa a lokace pro své zážitky"
-            link="/mista"
+            link={{ pathname: "/catalog/[type]", params: { type: "mista" } }}
           />
           <ListingTypeBanner
             imageUrl="https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f"
             title="Gastro"
             text="Objevuj nejlepší gastronomické zážitky ve tvém okolí"
-            link="/gastro"
+            link={{ pathname: "/catalog/[type]", params: { type: "gastro" } }}
           />
           <ListingTypeBanner
             imageUrl="https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f"
             title="Zábava"
             text="Najdi zábavné aktivity a události pro volný čas"
-            link="/zabava"
+            link={{ pathname: "/catalog/[type]", params: { type: "zabava" } }}
           />
         </div>
       </LandingSectionWrapper>
@@ -62,7 +62,7 @@ export default function page({}: Props) {
           title="Speciální nabídka"
           text="Lorem ipsum dolor, sit amet consectetur adipisicing elit. Dolor dolorum sapiente natus voluptatibus sed temporibus soluta consequuntur quibusdam ex aut officia, accusamus reiciendis doloremque quae autem nam impedit excepturi possimus."
           buttonText="Zjistit více"
-          link="/special-offers"
+          link="/catalog"
         />
       </LandingSectionWrapper>
     </div>
