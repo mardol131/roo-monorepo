@@ -32,57 +32,68 @@ export const routing = defineRouting({
     "/user-profile/profile-settings": { cs: "/ucet/nastaveni" },
 
     // company profile
-    "/company-profile": { cs: "/dodavatel" },
-    "/company-profile/companies": { cs: "/dodavatel/spolecnosti" },
-    "/company-profile/companies/new-company": {
-      cs: "/dodavatel/spolecnosti/nova-spolecnost",
+    "/company-profile": { cs: "/firemni-ucet" },
+    "/company-profile/companies": { cs: "/firemni-ucet/firmy" },
+    "/company-profile/new-company": {
+      cs: "/firemni-ucet/firmy/nova-firma",
     },
 
     // company detail
-    "/company-profile/companies/[id]": { cs: "/dodavatel/spolecnosti/[id]" },
-    "/company-profile/companies/[id]/edit": {
-      cs: "/dodavatel/spolecnosti/[id]/upravit",
+    //// legal, company data
+    "/company-profile/companies/[companyId]": {
+      cs: "/firemni-ucet/firmy/[companyId]",
+    },
+    "/company-profile/companies/[companyId]/edit": {
+      cs: "/firemni-ucet/firmy/[companyId]/upravit",
     },
 
-    // company services profile
-    "/company-profile/companies/[id]/services": {
-      cs: "/dodavatel/spolecnosti/[id]/sluzby",
+    // company listing profile
+    //// service that company offer - gastro|place|entertainment
+    //// can be more than one
+    "/company-profile/companies/[companyId]/listings": {
+      cs: "/firemni-ucet/firmy/[companyId]/nabidky",
     },
-    "/company-profile/companies/[id]/services/new-service": {
-      cs: "/dodavatel/spolecnosti/[id]/sluzby/nova-sluzba",
+    "/company-profile/companies/[companyId]/listings/new-listing": {
+      cs: "/firemni-ucet/firmy/[companyId]/nabidky/nova-nabidka",
     },
 
-    // company service detail
-    "/company-profile/companies/[id]/services/[serviceId]": {
-      cs: "/dodavatel/spolecnosti/[id]/sluzby/[serviceId]",
+    // company listing detail
+    //// listings are shown in catalog as separate cards
+    //// each listing has its own page
+    "/company-profile/companies/[companyId]/listings/[listingsId]": {
+      cs: "/firemni-ucet/firmy/[companyId]/nabidky/[listingsId]",
     },
-    "/company-profile/companies/[id]/services/[serviceId]/edit": {
-      cs: "/dodavatel/spolecnosti/[id]/sluzby/[serviceId]/upravit",
+    "/company-profile/companies/[companyId]/listings/[listingsId]/edit": {
+      cs: "/firemni-ucet/firmy/[companyId]/nabidky/[listingsId]/upravit",
     },
-    "/company-profile/companies/[id]/services/[serviceId]/calendar": {
-      cs: "/dodavatel/spolecnosti/[id]/sluzby/[serviceId]/kalendar",
+    "/company-profile/companies/[companyId]/listings/[listingsId]/calendar": {
+      cs: "/firemni-ucet/firmy/[companyId]/nabidky/[listingsId]/kalendar",
     },
-    "/company-profile/companies/[id]/services/[serviceId]/inquiries": {
-      cs: "/dodavatel/spolecnosti/[id]/sluzby/[serviceId]/poptavky",
+    "/company-profile/companies/[companyId]/listings/[listingsId]/inquiries": {
+      cs: "/firemni-ucet/firmy/[companyId]/nabidky/[listingsId]/poptavky",
     },
-    "/company-profile/companies/[id]/services/[serviceId]/inquiries/[inquiryId]":
+    "/company-profile/companies/[companyId]/listings/[listingsId]/inquiries/[inquiryId]":
       {
-        cs: "/dodavatel/spolecnosti/[id]/sluzby/[serviceId]/poptavky/[inquiryId]",
+        cs: "/firemni-ucet/firmy/[companyId]/nabidky/[listingsId]/poptavky/[inquiryId]",
       },
 
-    // company service offers
-    "/company-profile/companies/[id]/services/[serviceId]/offers": {
-      cs: "/dodavatel/spolecnosti/[id]/sluzby/[serviceId]/nabidky",
+    // company listings variant
+    //// variant are premade versions of listings
+    //// all are shown under listing page
+    "/company-profile/companies/[companyId]/listings/[listingsId]/variants": {
+      cs: "/firemni-ucet/firmy/[companyId]/nabidky/[listingsId]/nabidky",
     },
-    "/company-profile/companies/[id]/services/[serviceId]/offers/new-offer": {
-      cs: "/dodavatel/spolecnosti/[id]/sluzby/[serviceId]/nabidky/nova-nabidka",
-    },
-    "/company-profile/companies/[id]/services/[serviceId]/offers/[offerId]": {
-      cs: "/dodavatel/spolecnosti/[id]/sluzby/[serviceId]/nabidky/[offerId]",
-    },
-    "/company-profile/companies/[id]/services/[serviceId]/offers/[offerId]/edit":
+    "/company-profile/companies/[companyId]/listings/[listingsId]/variants/new-variant":
       {
-        cs: "/dodavatel/spolecnosti/[id]/sluzby/[serviceId]/nabidky/[offerId]/upravit",
+        cs: "/firemni-ucet/firmy/[companyId]/nabidky/[listingsId]/nabidky/nova-nabidka",
+      },
+    "/company-profile/companies/[companyId]/listings/[listingsId]/variants/[variantId]":
+      {
+        cs: "/firemni-ucet/firmy/[companyId]/nabidky/[listingsId]/nabidky/[variantId]",
+      },
+    "/company-profile/companies/[companyId]/listings/[listingsId]/variants/[variantId]/edit":
+      {
+        cs: "/firemni-ucet/firmy/[companyId]/nabidky/[listingsId]/nabidky/[variantId]/upravit",
       },
   },
 });
