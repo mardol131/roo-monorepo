@@ -2,7 +2,7 @@ import Text from "@/app/components/ui/atoms/text";
 import InquirySummary from "./components/inquiry-summary";
 import InquiryList from "./components/inquiry-list";
 import { getInquiries } from "../_mock/mock-data";
-import PageHeading from "../components/page-heading";
+import PageHeading from "../../components/page-heading";
 
 export default async function InquiriesPage() {
   const inquiries = await getInquiries();

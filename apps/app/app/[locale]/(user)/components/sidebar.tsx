@@ -1,27 +1,14 @@
 "use client";
 
-import Button from "@/app/components/ui/atoms/button";
+import Button, { ButtonProps } from "@/app/components/ui/atoms/button";
 import Text from "@/app/components/ui/atoms/text";
-import {
-  getPathname,
-  IntlPathname,
-  Link,
-  usePathname,
-} from "@/app/i18n/navigation";
+import { IntlPathname, Link, usePathname } from "@/app/i18n/navigation";
 import { useLocale } from "next-intl";
-import {
-  Calendar,
-  Heart,
-  LayoutDashboard,
-  LogOut,
-  LucideIcon,
-  MessageCircle,
-  MessageSquare,
-  Settings,
-} from "lucide-react";
 import { useCallback } from "react";
-
-// Filtr: pouze statické cesty bez [param] — dynamické vyžadují { pathname, params } objekt
+import { Building2, LucideIcon, User } from "lucide-react";
+import ProfileSwitchButton from "./profile-switch-button";
+import Image from "next/image";
+import logo from "../../../../public/logo.png";
 
 // Placeholder user — swap for real auth data later
 const USER = {
@@ -30,99 +17,68 @@ const USER = {
   initials: "JN",
 };
 
-export default function Sidebar() {
+export type SidebarItem = {
+  label: string;
+  href: IntlPathname;
+  icon: LucideIcon;
+  onClick?: () => void;
+};
+
+export type SidebarProps = {
+  button?: ButtonProps;
+  mainMenuItems: SidebarItem[];
+  subMenuItems?: SidebarItem[];
+  headerComponent?: React.ReactNode;
+  isActiveFunction: (href: IntlPathname) => boolean;
+};
+
+export default function Sidebar({
+  button,
+  mainMenuItems,
+  subMenuItems,
+  headerComponent,
+  isActiveFunction,
+}: SidebarProps) {
   // next-intl usePathname returns localized path: /ucet, /ucet/moje-udalosti, ...
   const pathname = usePathname();
   const locale = useLocale();
 
-  const NAV_ITEMS: { label: string; href: IntlPathname; icon: LucideIcon }[] = [
-    { label: "Přehled", href: "/user-profile", icon: LayoutDashboard },
-    { label: "Moje události", href: "/user-profile/my-events", icon: Calendar },
-    { label: "Poptávky", href: "/user-profile/inquiries", icon: MessageSquare },
-    { label: "Zprávy", href: "/user-profile/messages", icon: MessageCircle },
-    { label: "Oblíbené", href: "/user-profile/favorites", icon: Heart },
-  ];
-
-  const BOTTOM_ITEMS: {
-    label: string;
-    href: IntlPathname;
-    icon: LucideIcon;
-  }[] = [
-    {
-      label: "Nastavení",
-      href: "/user-profile/profile-settings",
-      icon: Settings,
-    },
-  ];
-
-  const isActive = useCallback(
-    (href: IntlPathname) => {
-      if (typeof href === "string") {
-        return href === pathname;
-      } else {
-        return href.pathname === pathname;
-      }
-    },
-    [pathname, locale],
-  );
-
   return (
-    <aside className="w-64 shrink-0 flex flex-col bg-white border-r border-zinc-200">
-      <div className="sticky top-0">
-        {/* User info */}
-        <div className="p-5 border-b border-zinc-100">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center shrink-0">
-              <Text variant="label1" color="white" className="font-semibold">
-                {USER.initials}
-              </Text>
-            </div>
-            <div className="min-w-0 flex flex-col">
-              <Text
-                variant="label1"
-                color="dark"
-                className="font-semibold truncate"
-              >
-                {USER.name}
-              </Text>
-              <Text variant="label4" color="secondary" className="truncate">
-                {USER.email}
-              </Text>
-            </div>
-          </div>
-        </div>
+    <aside className="w-18 shrink-0 flex flex-col bg-white border-r border-zinc-200">
+      <div className="sticky top-0 flex flex-col h-screen">
+        <Image src={logo} alt="Logo" className="p-3" />
+        {headerComponent}
 
-        {/* New event button */}
-        <div className="px-3 pt-4 pb-2">
-          <Button
-            link="/user-profile/new-event"
-            text="Vytvořit událost"
-            className="w-full"
-            iconRight="Plus"
-            size="md"
-          />
-        </div>
+        {button && (
+          <div className="flex justify-center py-3 border-b border-zinc-100">
+            <Button {...button} />
+          </div>
+        )}
 
         {/* Main navigation */}
-        <nav className="flex-1 px-3 py-2 overflow-y-auto">
-          <ul className="flex flex-col gap-0.5">
-            {NAV_ITEMS.map(({ label, href, icon: Icon }) => {
-              const active = isActive(href);
+        <nav className="flex-1 px-2 py-3 overflow-y-auto">
+          <ul className="flex flex-col gap-1">
+            {mainMenuItems.map(({ label, href, icon, onClick }) => {
+              const active = isActiveFunction(href);
+              const Icon = icon;
 
               return (
                 <li key={href.toString()}>
                   <Link
+                    onClick={onClick}
                     href={href}
-                    className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${
+                    className={`flex flex-col items-center gap-1 px-1 py-2.5 rounded-xl transition-all ${
                       active
-                        ? "bg-rose-50 text-rose-600"
-                        : "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900"
+                        ? "bg-rose-50 text-primary"
+                        : "text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900"
                     }`}
                   >
                     <Icon
-                      className={`w-4 h-4 shrink-0 ${active ? "text-rose-500" : "text-zinc-400"}`}
+                      className={`w-5 h-5 shrink-0 ${active ? "text-primary" : "text-zinc-400"}`}
                     />
-                    {label}
+                    <span className="text-[10px] font-medium leading-tight text-center">
+                      {label}
+                    </span>
                   </Link>
                 </li>
               );
@@ -131,41 +87,39 @@ export default function Sidebar() {
         </nav>
 
         {/* Bottom submenu */}
-        <div className="px-3 py-3 border-t border-zinc-100">
-          <ul className="flex flex-col gap-0.5">
-            {BOTTOM_ITEMS.map(({ label, href, icon: Icon }) => {
-              const active = isActive(href);
-              return (
-                <li key={href.toString()}>
-                  <Link
-                    href={href}
-                    className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${
-                      active
-                        ? "bg-rose-50 text-rose-600"
-                        : "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900"
-                    }`}
-                  >
-                    <Icon
-                      className={`w-4 h-4 shrink-0 ${active ? "text-rose-500" : "text-zinc-400"}`}
-                    />
-                    {label}
-                  </Link>
-                </li>
-              );
-            })}
-            <li>
-              <button
-                className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-zinc-600 hover:bg-red-50 hover:text-red-600 transition-all"
-                onClick={() => {
-                  /* handle logout */
-                }}
-              >
-                <LogOut className="w-4 h-4 shrink-0 text-zinc-400" />
-                Odhlásit se
-              </button>
-            </li>
-          </ul>
-        </div>
+        {subMenuItems && subMenuItems.length > 0 && (
+          <div className="px-2 pb-3 border-t border-zinc-100">
+            <ul className="flex flex-col gap-1">
+              {<ProfileSwitchButton />}
+
+              {subMenuItems.map(({ label, href, icon, onClick }) => {
+                const active = isActiveFunction(href);
+                const Icon = icon;
+
+                return (
+                  <li key={href.toString()}>
+                    <Link
+                      onClick={onClick}
+                      href={href}
+                      className={`flex flex-col items-center gap-1 px-1 py-2.5 rounded-xl transition-all ${
+                        active
+                          ? "bg-rose-50 text-rose-600"
+                          : "text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900"
+                      }`}
+                    >
+                      <Icon
+                        className={`w-5 h-5 shrink-0 ${active ? "text-rose-500" : "text-zinc-400"}`}
+                      />
+                      <span className="text-[10px] font-medium leading-tight text-center">
+                        {label}
+                      </span>
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        )}
       </div>
     </aside>
   );

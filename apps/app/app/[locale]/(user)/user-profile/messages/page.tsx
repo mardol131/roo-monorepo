@@ -2,7 +2,7 @@ import Text from "@/app/components/ui/atoms/text";
 import { getInquiries } from "../_mock/mock-data";
 import { InquiryCard } from "../components/inquiry-card";
 import { MessageCircle } from "lucide-react";
-import PageHeading from "../components/page-heading";
+import PageHeading from "../../components/page-heading";
 
 export default function MessagesPage() {
   const inquiries = getInquiries();

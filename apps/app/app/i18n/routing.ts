@@ -33,10 +33,11 @@ export const routing = defineRouting({
 
     // company profile
     "/company-profile": { cs: "/firemni-ucet" },
-    "/company-profile/companies": { cs: "/firemni-ucet/firmy" },
+    // "/company-profile/companies": { cs: "/firemni-ucet/firmy" },
     "/company-profile/new-company": {
       cs: "/firemni-ucet/firmy/nova-firma",
     },
+    "/company-profile/settings": { cs: "/firemni-ucet/nastaveni" },
 
     // company detail
     //// legal, company data
@@ -51,49 +52,49 @@ export const routing = defineRouting({
     //// service that company offer - gastro|place|entertainment
     //// can be more than one
     "/company-profile/companies/[companyId]/listings": {
-      cs: "/firemni-ucet/firmy/[companyId]/nabidky",
+      cs: "/firemni-ucet/firmy/[companyId]/inzeraty",
     },
     "/company-profile/companies/[companyId]/listings/new-listing": {
-      cs: "/firemni-ucet/firmy/[companyId]/nabidky/nova-nabidka",
+      cs: "/firemni-ucet/firmy/[companyId]/inzeraty/nova-nabidka",
     },
 
     // company listing detail
     //// listings are shown in catalog as separate cards
     //// each listing has its own page
     "/company-profile/companies/[companyId]/listings/[listingsId]": {
-      cs: "/firemni-ucet/firmy/[companyId]/nabidky/[listingsId]",
+      cs: "/firemni-ucet/firmy/[companyId]/inzeraty/[listingsId]",
     },
     "/company-profile/companies/[companyId]/listings/[listingsId]/edit": {
-      cs: "/firemni-ucet/firmy/[companyId]/nabidky/[listingsId]/upravit",
+      cs: "/firemni-ucet/firmy/[companyId]/inzeraty/[listingsId]/upravit",
     },
     "/company-profile/companies/[companyId]/listings/[listingsId]/calendar": {
-      cs: "/firemni-ucet/firmy/[companyId]/nabidky/[listingsId]/kalendar",
+      cs: "/firemni-ucet/firmy/[companyId]/inzeraty/[listingsId]/kalendar",
     },
     "/company-profile/companies/[companyId]/listings/[listingsId]/inquiries": {
-      cs: "/firemni-ucet/firmy/[companyId]/nabidky/[listingsId]/poptavky",
+      cs: "/firemni-ucet/firmy/[companyId]/inzeraty/[listingsId]/poptavky",
     },
     "/company-profile/companies/[companyId]/listings/[listingsId]/inquiries/[inquiryId]":
       {
-        cs: "/firemni-ucet/firmy/[companyId]/nabidky/[listingsId]/poptavky/[inquiryId]",
+        cs: "/firemni-ucet/firmy/[companyId]/inzeraty/[listingsId]/poptavky/[inquiryId]",
       },
 
     // company listings variant
     //// variant are premade versions of listings
     //// all are shown under listing page
     "/company-profile/companies/[companyId]/listings/[listingsId]/variants": {
-      cs: "/firemni-ucet/firmy/[companyId]/nabidky/[listingsId]/nabidky",
+      cs: "/firemni-ucet/firmy/[companyId]/inzeraty/[listingsId]/nabidky",
     },
     "/company-profile/companies/[companyId]/listings/[listingsId]/variants/new-variant":
       {
-        cs: "/firemni-ucet/firmy/[companyId]/nabidky/[listingsId]/nabidky/nova-nabidka",
+        cs: "/firemni-ucet/firmy/[companyId]/inzeraty/[listingsId]/nabidky/nova-varianta",
       },
     "/company-profile/companies/[companyId]/listings/[listingsId]/variants/[variantId]":
       {
-        cs: "/firemni-ucet/firmy/[companyId]/nabidky/[listingsId]/nabidky/[variantId]",
+        cs: "/firemni-ucet/firmy/[companyId]/inzeraty/[listingsId]/nabidky/[variantId]",
       },
     "/company-profile/companies/[companyId]/listings/[listingsId]/variants/[variantId]/edit":
       {
-        cs: "/firemni-ucet/firmy/[companyId]/nabidky/[listingsId]/nabidky/[variantId]/upravit",
+        cs: "/firemni-ucet/firmy/[companyId]/inzeraty/[listingsId]/nabidky/[variantId]/upravit",
       },
   },
 });

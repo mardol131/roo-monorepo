@@ -15,7 +15,7 @@ import Link from "next/link";
 import React, { useState } from "react";
 import { MOCK_EVENTS } from "../_mock/mock-data";
 import { EventCard } from "../components/event-card";
-import PageHeading from "../components/page-heading";
+import PageHeading from "../../components/page-heading";
 
 const TABS: { label: string; value: EventStatus | "all" }[] = [
   { label: "Všechny", value: "all" },
