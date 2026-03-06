@@ -9,13 +9,28 @@ type ButtonVersion =
   | "link"
   | "white";
 type ButtonSize = "2xl" | "xl" | "lg" | "md" | "sm";
+type ButtonRounding = "none" | "sm" | "md" | "lg" | "xl" | "2xl" | "full";
 
 type LucideIcons = keyof typeof lucideIcons;
+
+const getRoundingClass = (rounding: ButtonRounding): string => {
+  const roundingClasses: Record<ButtonRounding, string> = {
+    none: "rounded-none",
+    sm: "rounded-sm",
+    md: "rounded-md",
+    lg: "rounded-lg",
+    xl: "rounded-xl",
+    "2xl": "rounded-2xl",
+    full: "rounded-full",
+  };
+  return roundingClasses[rounding];
+};
 
 export interface ButtonProps {
   version?: ButtonVersion;
   text: string;
   size?: ButtonSize;
+  rounding?: ButtonRounding;
   onClick?: () => void;
   link?: IntlLink;
   className?: string;
@@ -67,6 +82,7 @@ export default function Button({
   version = "primary",
   text,
   size = "md",
+  rounding = "full",
   onClick,
   link,
   className,
@@ -75,7 +91,7 @@ export default function Button({
   disabled,
   htmlType = "button",
 }: ButtonProps) {
-  const baseClasses = `${!disabled ? "cursor-pointer" : ""} inline-flex items-center rounded-full justify-center font-medium rounded transition-all ease-in-out  ${disabled ? "opacity-50" : "hover:scale-105"} gap-2`;
+  const baseClasses = `${!disabled ? "cursor-pointer" : ""} inline-flex items-center ${getRoundingClass(rounding)} justify-center font-medium transition-all ease-in-out ${disabled ? "opacity-50" : "hover:scale-105"} gap-2`;
   const versionClass = getVersionClass(version);
   const sizeClass = getSizeClass(size);
   const iconSize = getIconSize(size);
