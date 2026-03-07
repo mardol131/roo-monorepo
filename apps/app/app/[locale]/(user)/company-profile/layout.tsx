@@ -1,22 +1,9 @@
 "use client";
 
-import React, { useCallback } from "react";
-import {
-  Building2,
-  Calendar,
-  Heart,
-  LayoutDashboard,
-  LogOut,
-  MessageCircle,
-  MessageSquare,
-  Plus,
-  Settings,
-} from "lucide-react";
-import Sidebar, { SidebarProps } from "../components/sidebar";
-import Text from "@/app/components/ui/atoms/text";
-import { USER } from "./_mock/mock";
-import CompanySidebar from "../components/company-sidebar";
 import { IntlPathname, usePathname } from "@/app/i18n/navigation";
+import { Building2, LogOut, Plus, Settings } from "lucide-react";
+import React, { useCallback } from "react";
+import Sidebar, { SidebarProps } from "../components/sidebar";
 
 type Props = {
   children: React.ReactNode;
