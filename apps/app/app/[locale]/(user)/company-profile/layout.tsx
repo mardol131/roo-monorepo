@@ -1,7 +1,13 @@
 "use client";
 
 import { IntlPathname, usePathname } from "@/app/i18n/navigation";
-import { Building2, LogOut, Plus, Settings } from "lucide-react";
+import {
+  Building2,
+  LayoutDashboard,
+  LogOut,
+  Plus,
+  Settings,
+} from "lucide-react";
 import React, { useCallback } from "react";
 import Sidebar, { SidebarProps } from "../components/sidebar";
 
@@ -24,7 +30,8 @@ export default function layout({ children }: Props) {
   );
   const sidebarProps: SidebarProps = {
     mainMenuItems: [
-      { label: "Firmy", href: "/company-profile", icon: Building2 },
+      { label: "Přehled", href: "/company-profile", icon: LayoutDashboard },
+      { label: "Firmy", href: "/company-profile/companies", icon: Building2 },
       {
         label: "Přidat firmu",
         href: "/company-profile/new-company",
@@ -32,7 +39,11 @@ export default function layout({ children }: Props) {
       },
     ],
     subMenuItems: [
-      { label: "Nastavení", href: "/company-profile/settings", icon: Settings },
+      {
+        label: "Nastavení",
+        href: "/company-profile/profile-settings",
+        icon: Settings,
+      },
       { label: "Odhlásit se", href: "/homepage", icon: LogOut },
     ],
     isActiveFunction: isActive,

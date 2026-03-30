@@ -1,17 +1,10 @@
-import Text from "@/app/components/ui/atoms/text";
-import {
-  ArrowRight,
-  Calendar,
-  MessageSquare,
-  Plus,
-  Search,
-} from "lucide-react";
-import { getInquiries, MOCK_EVENTS, STATS } from "./_mock/mock-data";
-import { EventRow } from "./components/event-row";
-import { InquiryRow } from "./components/inquiry-row";
-import { SummaryCard } from "./components/summary-card";
-import { Link } from "@/app/i18n/navigation";
+import { Calendar, MessageSquare } from "lucide-react";
 import PageHeading from "../components/page-heading";
+import RowContainer from "../components/row-container";
+import { getInquiries, MOCK_EVENTS, STATS } from "./_mock/mock-data";
+import { EventRow } from "../components/collection-components/event-row";
+import { InquiryRow } from "../components/collection-components/inquiry-row";
+import { SummaryCard } from "./components/summary-card";
 
 export default function UserProfilePage() {
   const events = MOCK_EVENTS.slice(0, 3);
@@ -40,110 +33,32 @@ export default function UserProfilePage() {
       </div>
 
       {/* Recent events */}
-      <div className="bg-white rounded-2xl border border-zinc-200 overflow-hidden mb-6">
-        <div className="px-6 py-4 border-b border-zinc-100 flex items-center justify-between">
-          <Text variant="label1" color="dark" className="font-semibold">
-            Nedávné události
-          </Text>
-          {events.length > 0 && (
-            <Link
-              href="/user-profile/my-events"
-              className="flex items-center gap-1 text-xs text-rose-500 hover:text-rose-600 font-medium transition-colors"
-            >
-              Zobrazit vše
-              <ArrowRight className="w-3 h-3" />
-            </Link>
-          )}
-        </div>
-        {events.length === 0 ? (
-          <EmptyEvents />
-        ) : (
-          <div className="divide-y divide-zinc-50">
-            {events.map((event) => (
-              <EventRow key={event.id} event={event} />
-            ))}
-          </div>
-        )}
-      </div>
+      <RowContainer
+        icon={<Calendar className="w-4 h-4 text-rose-500" />}
+        label="Nedávné události"
+        rowComponents={events.map((event) => (
+          <EventRow key={event.id} event={event} />
+        ))}
+        emptyHeading="Zatím žádné události"
+        emptyText="Vytvořte první událost a začněte plánovat svou akci."
+        className="mb-10"
+      />
 
       {/* Recent inquiries */}
-      <div className="bg-white rounded-2xl border border-zinc-200 overflow-hidden">
-        <div className="px-6 py-4 border-b border-zinc-100 flex items-center justify-between">
-          <Text variant="label1" color="dark" className="font-semibold">
-            Nedávné poptávky
-          </Text>
-          {inquiries.length > 0 && (
-            <Link
-              href="/user-profile/inquiries"
-              className="flex items-center gap-1 text-xs text-rose-500 hover:text-rose-600 font-medium transition-colors"
-            >
-              Zobrazit vše
-              <ArrowRight className="w-3 h-3" />
-            </Link>
-          )}
-        </div>
-        {inquiries.length === 0 ? (
-          <EmptyInquiries />
-        ) : (
-          <div className="divide-y divide-zinc-50">
-            {inquiries.map((inquiry) => (
-              <InquiryRow
-                key={inquiry.id}
-                inquiry={inquiry}
-                eventId={inquiry.event.id}
-              />
-            ))}
-          </div>
-        )}
-      </div>
+
+      <RowContainer
+        icon={<MessageSquare className="w-4 h-4 text-rose-500" />}
+        label="Nedávné poptávky"
+        rowComponents={inquiries.map((inquiry) => (
+          <InquiryRow
+            key={inquiry.id}
+            inquiry={inquiry}
+            eventId={inquiry.event.id}
+          />
+        ))}
+        emptyHeading="Zatím žádné poptávky"
+        emptyText="Přejděte do katalogu a oslovte dodavatele pro svou akci."
+      />
     </main>
-  );
-}
-
-// ── Empty states ────────────────────────────────────────────────────────────────
-
-function EmptyEvents() {
-  return (
-    <div className="flex flex-col items-center justify-center py-10 px-8 text-center">
-      <div className="w-10 h-10 rounded-xl bg-rose-50 flex items-center justify-center mb-3">
-        <Calendar className="w-5 h-5 text-rose-400" />
-      </div>
-      <Text variant="label1" color="dark" className="font-semibold mb-1">
-        Zatím žádné události
-      </Text>
-      <Text variant="label4" color="secondary" className="mb-5 max-w-xs">
-        Vytvořte první událost a začněte plánovat svou akci.
-      </Text>
-      <Link
-        href="/user-profile/new-event"
-        className="flex items-center gap-1.5 px-4 py-2 bg-rose-500 hover:bg-rose-600 text-white rounded-xl transition-colors text-sm font-medium"
-      >
-        <Plus className="w-4 h-4" />
-        Vytvořit událost
-      </Link>
-    </div>
-  );
-}
-
-function EmptyInquiries() {
-  return (
-    <div className="flex flex-col items-center justify-center py-10 px-8 text-center">
-      <div className="w-10 h-10 rounded-xl bg-rose-50 flex items-center justify-center mb-3">
-        <MessageSquare className="w-5 h-5 text-rose-400" />
-      </div>
-      <Text variant="label1" color="dark" className="font-semibold mb-1">
-        Zatím žádné poptávky
-      </Text>
-      <Text variant="label4" color="secondary" className="mb-5 max-w-xs">
-        Přejděte do katalogu a oslovte dodavatele pro svou akci.
-      </Text>
-      <Link
-        href="/catalog"
-        className="flex items-center gap-1.5 px-4 py-2 bg-rose-500 hover:bg-rose-600 text-white rounded-xl transition-colors text-sm font-medium"
-      >
-        <Search className="w-4 h-4" />
-        Procházet katalog
-      </Link>
-    </div>
   );
 }

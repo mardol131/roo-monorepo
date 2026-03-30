@@ -1,6 +1,6 @@
 import Text from "@/app/components/ui/atoms/text";
 import { getInquiries } from "../_mock/mock-data";
-import { InquiryCard } from "../components/inquiry-card";
+import { InquiryCard } from "../../components/collection-components/inquiry-card";
 import { MessageCircle } from "lucide-react";
 import PageHeading from "../../components/page-heading";
 
@@ -19,7 +19,17 @@ export default function MessagesPage() {
       ) : (
         <div className="flex flex-col gap-3">
           {inquiries.map((inquiry) => (
-            <InquiryCard key={inquiry.id} inquiry={inquiry} />
+            <InquiryCard
+              key={inquiry.id}
+              inquiry={inquiry}
+              link={{
+                pathname: "/user-profile/my-events/[id]/[contractorId]",
+                params: {
+                  id: inquiry.event.id,
+                  contractorId: inquiry.company.id,
+                },
+              }}
+            />
           ))}
         </div>
       )}

@@ -1,29 +1,27 @@
 "use client";
 
-import React from "react";
 import Text from "@/app/components/ui/atoms/text";
-import Link from "next/link";
+import { EVENT_STATUS } from "@/app/data/event";
+import { formatGuestsString, Inquiry } from "@roo/common";
+import type { LucideIcon } from "lucide-react";
+import * as lucideIcons from "lucide-react";
 import {
   ArrowLeft,
   Calendar,
-  MapPin,
-  Users,
-  PartyPopper,
-  MessageSquare,
-  Clock,
   CheckCircle2,
-  XCircle,
   HelpCircle,
-  ChevronRight,
+  MapPin,
+  MessageSquare,
+  Users,
 } from "lucide-react";
-import { formatGuestsString, Inquiry } from "@roo/common";
-import type { LucideIcon } from "lucide-react";
-import { SummaryCard } from "../../components/summary-card";
-import { InquiryRow } from "../../components/inquiry-row";
+import Link from "next/link";
+import RowContainer from "../../../components/row-container";
 import { getInquiries, MOCK_EVENT } from "../../_mock/mock-data";
-import { INQUIRY_STATUS } from "@/app/data/inquiry";
-import { EVENT_STATUS } from "@/app/data/event";
-import * as lucideIcons from "lucide-react";
+import { InquiryRow } from "../../../components/collection-components/inquiry-row";
+import { SummaryCard } from "../../components/summary-card";
+import { format } from "date-fns";
+import { cs } from "date-fns/locale";
+import DashboardHeader from "../../../company-profile/components/dashboard-header";
 
 // ── Page ───────────────────────────────────────────────────────────────────────
 
@@ -52,49 +50,32 @@ export default function EventDetailPage() {
         <ArrowLeft className="w-4 h-4" />
         Zpět na události
       </Link>
-
-      <div className="flex items-start justify-between mb-8">
-        <div className="flex items-center gap-4">
-          <div className="w-12 h-12 rounded-2xl bg-rose-50 flex items-center justify-center shrink-0">
-            <Icon className="w-6 h-6 text-rose-500" />
-          </div>
-          <div>
-            <div className="flex items-center gap-3">
-              <Text variant="heading4" color="dark" className="font-bold">
-                {event.data.name}
-              </Text>
-              <span
-                className={`text-xs font-medium px-2.5 py-1 rounded-full ${eventStatus.className}`}
-              >
-                {eventStatus.label}
-              </span>
-            </div>
-            <div className="flex items-center gap-4 mt-1 flex-wrap">
-              <span className="flex items-center gap-1.5 text-xs text-zinc-500">
-                <Calendar className="w-3.5 h-3.5" />
-                {event.data.date.start.toLocaleDateString("cs-CZ")}{" "}
-                {event.data.date.start.toLocaleTimeString("cs-CZ", {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                })}{" "}
-                –{" "}
-                {event.data.date.end.toLocaleTimeString("cs-CZ", {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                })}
-              </span>
-              <span className="flex items-center gap-1.5 text-xs text-zinc-500">
-                <MapPin className="w-3.5 h-3.5" />
-                {event.data.location.name}
-              </span>
-              <span className="flex items-center gap-1.5 text-xs text-zinc-500">
-                <Users className="w-3.5 h-3.5" />
-                {formatGuestsString({ ...event.data.guests })}
-              </span>
-            </div>
-          </div>
-        </div>
-      </div>
+      <DashboardHeader
+        icon={Icon}
+        name={event.data.name}
+        nameSideComponent={
+          <span
+            className={`text-xs font-medium px-2.5 py-1 rounded-full ${eventStatus.className}`}
+          >
+            {eventStatus.label}
+          </span>
+        }
+        infoItems={[
+          { icon: "MapPin", text: event.data.location.name },
+          {
+            icon: "Calendar",
+            text: `${format(event.data.date.start, "d. M. yyyy", {
+              locale: cs,
+            })} ${format(event.data.date.start, "HH:mm", {
+              locale: cs,
+            })} – ${format(event.data.date.end, "HH:mm", { locale: cs })}`,
+          },
+          {
+            icon: "Users",
+            text: formatGuestsString({ ...event.data.guests }),
+          },
+        ]}
+      />
 
       {/* Summary cards */}
       <div className="grid grid-cols-3 gap-4 mb-6">
@@ -123,46 +104,21 @@ export default function EventDetailPage() {
       </div>
 
       {/* Inquiries */}
-      <div className="bg-white rounded-2xl border border-zinc-200 overflow-hidden">
-        <div className="px-6 py-4 border-b border-zinc-100 flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl bg-rose-50 flex items-center justify-center shrink-0">
-              <MessageSquare className="w-4 h-4 text-rose-500" />
-            </div>
-            <Text variant="label1" color="dark" className="font-semibold">
-              Poptávky dodavatelů
-            </Text>
-          </div>
-          {pending.length > 0 && (
-            <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-amber-100 text-amber-700">
-              {pending.length} čekají na odpověď
-            </span>
-          )}
-        </div>
-
-        {MOCK_INQUIRIES.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-12 px-8 text-center">
-            <Text variant="label1" color="secondary" className="mb-1">
-              Zatím žádné poptávky
-            </Text>
-            <Text variant="label4" color="secondary">
-              Přejděte do katalogu a oslovte dodavatele.
-            </Text>
-          </div>
-        ) : (
-          <div className="divide-y divide-zinc-50">
-            {MOCK_INQUIRIES.map((inquiry) => {
-              return (
-                <InquiryRow
-                  key={inquiry.id}
-                  inquiry={inquiry}
-                  eventId={event.id}
-                />
-              );
-            })}
-          </div>
-        )}
-      </div>
+      <RowContainer
+        icon={<MessageSquare className="w-4 h-4 text-rose-500" />}
+        label="Poptávky dodavatelů"
+        subLabel={`${MOCK_INQUIRIES.length} celkem, ${pending.length} čekají na odpověď`}
+        headerRightComponent={
+          <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-amber-100 text-amber-700">
+            {pending.length} čekají na odpověď
+          </span>
+        }
+        rowComponents={MOCK_INQUIRIES.map((inquiry) => (
+          <InquiryRow key={inquiry.id} inquiry={inquiry} eventId={event.id} />
+        ))}
+        emptyHeading="Zatím žádné poptávky"
+        emptyText="Přejděte do katalogu a oslovte dodavatele pro svou akci."
+      />
     </main>
   );
 }

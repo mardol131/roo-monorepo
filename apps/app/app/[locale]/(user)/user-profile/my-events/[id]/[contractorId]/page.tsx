@@ -1,14 +1,14 @@
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Package } from "lucide-react";
+
 import Link from "next/link";
 import { getInquiry, getMessages } from "../../../_mock/mock-data";
+import { INQUIRY_STATUS } from "@/app/data/inquiry";
 import ChatWindow from "./components/chat-window";
 import CompanyCard from "./components/company-card";
-import InquiryHeader from "./components/inquiry-header";
 import InquirySettings from "./components/inquiry-settings";
 import InquiryTimeline from "./components/inquiry-timeline";
 import OfferCard from "./components/offer-card";
-
-// ── Page ───────────────────────────────────────────────────────────────────────
+import DashboardHeader from "@/app/[locale]/(user)/company-profile/components/dashboard-header";
 
 export default async function InquiryDetailPage({
   params,
@@ -21,6 +21,8 @@ export default async function InquiryDetailPage({
     getMessages(contractorId),
   ];
 
+  const status = INQUIRY_STATUS[inquiry.status];
+
   return (
     <main className="w-full">
       <Link
@@ -32,7 +34,33 @@ export default async function InquiryDetailPage({
       </Link>
 
       <div className="flex flex-col gap-5">
-        <InquiryHeader eventId={id} inquiry={inquiry} />
+        <DashboardHeader
+          icon={Package}
+          name={inquiry.company.name}
+          nameSideComponent={
+            <span
+              className={`text-xs font-medium px-2.5 py-1 rounded-full ${status.className}`}
+            >
+              {status.label}
+            </span>
+          }
+          infoItems={[
+            { icon: "Tag", text: inquiry.company.category },
+            { icon: "Clock", text: `Odesláno ${inquiry.sentAt}` },
+            { icon: "PartyPopper", text: inquiry.event.name },
+          ]}
+          button={{
+            version: "outlined",
+            text: "Profil dodavatele",
+            iconLeft: "ExternalLink",
+            size: "sm",
+            link: {
+              pathname: "/listing/[id]",
+              params: { id: inquiry.company.slug },
+            },
+          }}
+        />
+
         <div className="bg-white rounded-2xl border border-zinc-200 px-8 py-5">
           <InquiryTimeline status={inquiry.status} />
         </div>
@@ -41,7 +69,7 @@ export default async function InquiryDetailPage({
         <ChatWindow
           supplierName={inquiry.company.name}
           initialMessages={messages}
-        />{" "}
+        />
         {inquiry.status === "pending" && <InquirySettings />}
       </div>
     </main>

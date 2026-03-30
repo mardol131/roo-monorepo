@@ -10,8 +10,9 @@ import {
   XCircle,
 } from "lucide-react";
 import { formatInquiryCountLabel, Inquiry, InquiryStatus } from "@roo/common";
-import { InquiryRow } from "../../components/inquiry-row";
+import { InquiryRow } from "../../../components/collection-components/inquiry-row";
 import { Link } from "@/app/i18n/navigation";
+import RowContainer from "../../../components/row-container";
 
 // ── Config ─────────────────────────────────────────────────────────────────────
 
@@ -87,57 +88,37 @@ export default function InquiryList({ inquiries }: { inquiries: Inquiry[] }) {
       ) : (
         <div className="flex flex-col gap-4">
           {grouped.map(({ event, inquiries: group }) => (
-            <EventGroup key={event.id} event={event} inquiries={group} />
+            <RowContainer
+              key={event.id}
+              icon={
+                <div className="w-8 h-8 rounded-xl bg-rose-50 flex items-center justify-center shrink-0">
+                  <MessageSquare className="w-4 h-4 text-rose-500" />
+                </div>
+              }
+              label={event.name}
+              subLabel={formatInquiryCountLabel(group.length)}
+              rowComponents={group.map((inquiry) => (
+                <InquiryRow
+                  key={inquiry.id}
+                  inquiry={inquiry}
+                  eventId={event.id}
+                />
+              ))}
+              headerRightComponent={
+                <Link
+                  href={{
+                    pathname: "/user-profile/my-events/[id]",
+                    params: { id: event.id },
+                  }}
+                  className="text-xs text-rose-500 hover:text-rose-600 font-medium transition-colors"
+                >
+                  Detail události →
+                </Link>
+              }
+            />
           ))}
         </div>
       )}
-    </div>
-  );
-}
-
-// ── Sub-components ─────────────────────────────────────────────────────────────
-
-function EventGroup({
-  event,
-  inquiries,
-}: {
-  event: Inquiry["event"];
-  inquiries: Inquiry[];
-}) {
-  return (
-    <div className="bg-white rounded-2xl border border-zinc-200 overflow-hidden">
-      {/* Event header */}
-      <div className="px-6 py-4 border-b border-zinc-100 flex items-center justify-between">
-        <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-xl bg-rose-50 flex items-center justify-center shrink-0">
-            <MessageSquare className="w-4 h-4 text-rose-500" />
-          </div>
-          <div className="flex flex-col">
-            <Text variant="label1" color="dark" className="font-semibold">
-              {event.name}
-            </Text>
-            <Text variant="label4" color="secondary">
-              {formatInquiryCountLabel(inquiries.length)}
-            </Text>
-          </div>
-        </div>
-        <Link
-          href={{
-            pathname: "/user-profile/my-events/[id]",
-            params: { id: event.id },
-          }}
-          className="text-xs text-rose-500 hover:text-rose-600 font-medium transition-colors"
-        >
-          Detail události →
-        </Link>
-      </div>
-
-      {/* Inquiry rows */}
-      <div className="divide-y divide-zinc-50">
-        {inquiries.map((inquiry) => (
-          <InquiryRow key={inquiry.id} inquiry={inquiry} eventId={event.id} />
-        ))}
-      </div>
     </div>
   );
 }

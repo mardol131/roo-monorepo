@@ -8,7 +8,7 @@ import SearchInput from "@/app/components/ui/atoms/inputs/search-input";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { Building2, MapPin, Phone } from "lucide-react";
-import { useRouter } from "next/navigation";
+import Button from "@/app/components/ui/atoms/button";
 
 const MOCK_CITIES = [
   { id: "loc-1", label: "Praha" },
@@ -47,9 +47,21 @@ type FormInputs = {
   city: { id: string; label: string };
 };
 
-export default function NewCompanyForm() {
-  const router = useRouter();
+type Props = {
+  defaultValues?: Partial<FormInputs>;
+  onSubmit: (data: FormInputs) => void;
+  onBackClick: () => void;
+  submitLabel: string;
+  cancelLabel: string;
+};
 
+export default function CompanyForm({
+  defaultValues,
+  onSubmit,
+  onBackClick,
+  submitLabel,
+  cancelLabel,
+}: Props) {
   const {
     control,
     register,
@@ -58,6 +70,7 @@ export default function NewCompanyForm() {
     watch,
   } = useForm<FormInputs>({
     resolver: yupResolver(schema) as unknown as Resolver<FormInputs>,
+    defaultValues,
   });
 
   const nameValue = watch("name");
@@ -66,12 +79,6 @@ export default function NewCompanyForm() {
   const cityValue = watch("city");
 
   const buttonIsDisabled = !nameValue || !icoValue || !emailValue || !cityValue;
-
-  const onSubmit = (data: FormInputs) => {
-    // TODO: persist company data
-    console.log("New company:", data);
-    router.push("/company-profile/companies");
-  };
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
@@ -143,20 +150,18 @@ export default function NewCompanyForm() {
 
       {/* Submit */}
       <div className="flex justify-end gap-3 pt-2">
-        <button
-          type="button"
-          onClick={() => router.back()}
-          className="px-5 py-2.5 text-sm font-semibold text-zinc-600 hover:bg-zinc-100 rounded-xl transition-colors"
-        >
-          Zrušit
-        </button>
-        <button
-          type="submit"
+        <Button
+          htmlType="button"
+          text={cancelLabel}
+          onClick={onBackClick}
+          version="plain"
+        />
+        <Button
+          text={submitLabel}
+          version="primary"
           disabled={buttonIsDisabled}
-          className="px-6 py-2.5 text-sm font-semibold bg-rose-500 text-white hover:bg-rose-600 disabled:opacity-40 disabled:cursor-not-allowed rounded-xl transition-colors"
-        >
-          Vytvořit firmu
-        </button>
+          htmlType="submit"
+        />
       </div>
     </form>
   );
