@@ -75,7 +75,6 @@ export default function InquiryList({ inquiries }: { inquiries: Inquiry[] }) {
         ))}
       </div>
 
-      {/* Grouped list */}
       {filtered.length === 0 ? (
         <div className="bg-white rounded-2xl border border-zinc-200 flex flex-col items-center justify-center py-12 px-8 text-center">
           <Text variant="label1" color="secondary" className="mb-1">
@@ -107,8 +106,8 @@ export default function InquiryList({ inquiries }: { inquiries: Inquiry[] }) {
               headerRightComponent={
                 <Link
                   href={{
-                    pathname: "/user-profile/my-events/[id]",
-                    params: { id: event.id },
+                    pathname: "/user-profile/my-events/[eventId]",
+                    params: { eventId: event.id },
                   }}
                   className="text-xs text-rose-500 hover:text-rose-600 font-medium transition-colors"
                 >

@@ -4,38 +4,38 @@ import SectionHeader from "./section-header";
 import { Inquiry } from "@roo/common";
 
 type Props = {
-  offer: Inquiry["offer"];
+  variant: Inquiry["variant"];
 };
 
-export default function OfferCard({ offer }: Props) {
+export default function EventDashboardVariantSection({ variant }: Props) {
   return (
     <div className="bg-white rounded-2xl border border-zinc-200 overflow-hidden">
       <SectionHeader icon={Check} title="Nabídka dodavatele" />
       <div className="p-5 flex flex-col gap-4">
         <div>
           <Text variant="label1" color="dark" className="font-semibold">
-            {offer.title}
+            {variant.title}
           </Text>
           <Text
             variant="label4"
             color="secondary"
             className="mt-1 leading-relaxed"
           >
-            {offer.description}
+            {variant.description}
           </Text>
         </div>
 
         <div className="flex items-baseline gap-1.5">
           <Text variant="heading5" color="dark" className="font-bold">
-            {offer.price.toLocaleString("cs-CZ")} Kč
+            {variant.price.toLocaleString("cs-CZ")} Kč
           </Text>
           <Text variant="label4" color="secondary">
-            {offer.duration}
+            {variant.duration}
           </Text>
         </div>
 
         <div className="flex flex-col gap-3 pt-3 border-t border-zinc-100">
-          {offer.includes.length > 0 && (
+          {variant.includes.length > 0 && (
             <div className="flex flex-col gap-1.5">
               <Text
                 variant="label4"
@@ -44,7 +44,7 @@ export default function OfferCard({ offer }: Props) {
               >
                 Součástí
               </Text>
-              {offer.includes.map((item) => (
+              {variant.includes.map((item) => (
                 <span
                   key={item}
                   className="flex items-center gap-2 text-xs text-zinc-700"
@@ -58,7 +58,7 @@ export default function OfferCard({ offer }: Props) {
               ))}
             </div>
           )}
-          {offer.excludes.length > 0 && (
+          {variant.excludes.length > 0 && (
             <div className="flex flex-col gap-1.5">
               <Text
                 variant="label4"
@@ -67,7 +67,7 @@ export default function OfferCard({ offer }: Props) {
               >
                 Není součástí
               </Text>
-              {offer.excludes.map((item) => (
+              {variant.excludes.map((item) => (
                 <span
                   key={item}
                   className="flex items-center gap-2 text-xs text-zinc-500"

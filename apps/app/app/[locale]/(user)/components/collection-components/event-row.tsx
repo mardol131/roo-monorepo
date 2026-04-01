@@ -17,8 +17,8 @@ export function EventRow({ event }: { event: Event }) {
   return (
     <Link
       href={{
-        pathname: "/user-profile/my-events/[id]",
-        params: { id: event.id },
+        pathname: "/user-profile/my-events/[eventId]",
+        params: { eventId: event.id },
       }}
       className="flex items-center gap-4 px-6 py-4 hover:bg-zinc-50 transition-colors group"
     >

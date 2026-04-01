@@ -22,7 +22,7 @@ export type Inquiry = {
     name: string;
     date: string;
   };
-  offer: {
+  variant: {
     title: string;
     description: string;
     price: number;

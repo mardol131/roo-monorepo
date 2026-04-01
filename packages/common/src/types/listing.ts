@@ -10,7 +10,7 @@ export type Listing = {
   reviewsCount?: number;
 };
 
-export interface Offer {
+export interface Variant {
   id: string;
   title: string;
   description: string;

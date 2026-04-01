@@ -22,9 +22,11 @@ export const routing = defineRouting({
     "/user-profile": { cs: "/ucet" },
     "/user-profile/new-event": { cs: "/ucet/nova-udalost" },
     "/user-profile/my-events": { cs: "/ucet/moje-udalosti" },
-    "/user-profile/my-events/[id]": { cs: "/ucet/moje-udalosti/[id]" },
-    "/user-profile/my-events/[id]/[contractorId]": {
-      cs: "/ucet/moje-udalosti/[id]/[contractorId]",
+    "/user-profile/my-events/[eventId]": {
+      cs: "/ucet/moje-udalosti/[eventId]",
+    },
+    "/user-profile/my-events/[eventId]/[inquiryId]": {
+      cs: "/ucet/moje-udalosti/[eventId]/[inquiryId]",
     },
     "/user-profile/inquiries": { cs: "/ucet/poptavky" },
     "/user-profile/messages": { cs: "/ucet/zpravy" },
@@ -49,7 +51,7 @@ export const routing = defineRouting({
     },
 
     // company listing profile
-    //// service that company offer - gastro|place|entertainment
+    //// service that company offers - gastro|place|entertainment
     //// can be more than one
     "/company-profile/companies/[companyId]/listings": {
       cs: "/firemni-ucet/firmy/[companyId]/sluzby",

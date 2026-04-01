@@ -5,13 +5,26 @@ import { buildConfig } from 'payload'
 import sharp from 'sharp'
 import { fileURLToPath } from 'url'
 
-import { Media } from './collections/Media'
-
-import { Users } from './collections/Users'
-
 import { sendEmailTask } from './jobs/tasks/sendEmailTask'
 
 import { sendPushNotificationTask } from './jobs/tasks/sendPushNotification'
+import { VenueVariants } from './collections/venue-variants'
+import { Activities } from './collections/filters/activities'
+import { Services } from './collections/filters/services'
+import { EventTypes } from './collections/filters/event-types'
+import { VenueListings } from './collections/venue-listings'
+import { Spaces } from './collections/spaces'
+import { Personnel } from './collections/filters/personnel'
+import { Vendors } from './collections/vendors'
+import { Cities } from './collections/locality/cities'
+import { Users } from './collections/users'
+import { Media } from './collections/media'
+import { PlaceTypes } from './collections/filters/place-types'
+import { Rules } from './collections/specific/rules'
+import { Technologies } from './collections/filters/technologies'
+import { Amenities } from './collections/filters/amenities'
+import { RoomAmenities } from './collections/specific/room-amenities'
+import { FoodTypes } from './collections/filters/food-types'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -38,7 +51,25 @@ export default buildConfig({
       baseDir: path.resolve(dirname),
     },
   },
-  collections: [Users, Media],
+  collections: [
+    Users,
+    Media,
+    VenueVariants,
+    Activities,
+    Services,
+    EventTypes,
+    VenueListings,
+    Spaces,
+    Personnel,
+    Vendors,
+    Cities,
+    PlaceTypes,
+    Rules,
+    Technologies,
+    Amenities,
+    RoomAmenities,
+    FoodTypes,
+  ],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || '',
   typescript: {

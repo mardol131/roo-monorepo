@@ -3,7 +3,7 @@ import React from "react";
 
 type Props = {};
 
-export function OfferIncludesExcludes({
+export function VariantIncludesExcludes({
   title,
   items,
   icon,

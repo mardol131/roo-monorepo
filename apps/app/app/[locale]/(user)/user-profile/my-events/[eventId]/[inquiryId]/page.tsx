@@ -7,8 +7,8 @@ import ChatWindow from "./components/chat-window";
 import CompanyCard from "./components/company-card";
 import InquirySettings from "./components/inquiry-settings";
 import InquiryTimeline from "./components/inquiry-timeline";
-import OfferCard from "./components/offer-card";
 import DashboardHeader from "@/app/[locale]/(user)/company-profile/components/dashboard-header";
+import EventDashboardVariantSection from "./components/event-dashboard-variant-section";
 
 export default async function InquiryDetailPage({
   params,
@@ -65,7 +65,7 @@ export default async function InquiryDetailPage({
           <InquiryTimeline status={inquiry.status} />
         </div>
         <CompanyCard supplier={inquiry.company} />
-        <OfferCard offer={inquiry.offer} />
+        <EventDashboardVariantSection variant={inquiry.variant} />
         <ChatWindow
           supplierName={inquiry.company.name}
           initialMessages={messages}

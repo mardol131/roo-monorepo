@@ -1,39 +1,42 @@
 "use client";
 
-import Text from "@/app/components/ui/atoms/text";
 import Button from "@/app/components/ui/atoms/button";
-import React, { useState } from "react";
-import { Calendar, Check, X, ChevronLeft, ChevronRight } from "lucide-react";
+import Text from "@/app/components/ui/atoms/text";
+import { Variant } from "@roo/common";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import Image from "next/image";
+import { useState } from "react";
 import { FaCircleCheck, FaCircleXmark } from "react-icons/fa6";
-import { useOrderStore } from "@/app/store/order-store";
-import { OfferIncludesExcludes } from "./offer-includes-excludes";
-import { Offer } from "@roo/common";
+import { VariantIncludesExcludes } from "./variant-includes-excludes";
 
-interface OfferItemProps {
-  offer: Offer;
-  variant?: "default" | "review";
+interface VariantItemProps {
+  variant: Variant;
+  type?: "default" | "review";
   onOrderButtonClick?: () => void;
   orderButtonText?: string;
 }
 
-export default function OfferItem({
-  offer,
-  variant = "default",
+export default function VariantItem({
+  variant,
+  type = "default",
   onOrderButtonClick,
   orderButtonText,
-}: OfferItemProps) {
+}: VariantItemProps) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   const goToPrevious = () => {
     setCurrentImageIndex(
-      currentImageIndex === 0 ? offer.images.length - 1 : currentImageIndex - 1,
+      currentImageIndex === 0
+        ? variant.images.length - 1
+        : currentImageIndex - 1,
     );
   };
 
   const goToNext = () => {
     setCurrentImageIndex(
-      currentImageIndex === offer.images.length - 1 ? 0 : currentImageIndex + 1,
+      currentImageIndex === variant.images.length - 1
+        ? 0
+        : currentImageIndex + 1,
     );
   };
 
@@ -44,13 +47,13 @@ export default function OfferItem({
           {/* Carousel */}
           <div className="relative w-full aspect-square rounded-3xl overflow-hidden bg-zinc-100 mb-6">
             <Image
-              src={offer.images[currentImageIndex]}
-              alt={`${offer.title} - ${currentImageIndex + 1}`}
+              src={variant.images[currentImageIndex]}
+              alt={`${variant.title} - ${currentImageIndex + 1}`}
               className="object-cover aspect-square"
               width={1000}
               height={1000}
             />
-            {offer.images.length > 1 && (
+            {variant.images.length > 1 && (
               <>
                 <button
                   onClick={goToPrevious}
@@ -65,7 +68,7 @@ export default function OfferItem({
                   <ChevronRight className="w-5 h-5" />
                 </button>
                 <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
-                  {offer.images.map((_, index) => (
+                  {variant.images.map((_, index) => (
                     <button
                       key={index}
                       onClick={() => setCurrentImageIndex(index)}
@@ -81,13 +84,13 @@ export default function OfferItem({
             )}
           </div>
           {/* Ideal for */}
-          {offer.idealFor.length > 0 && (
+          {variant.idealFor.length > 0 && (
             <div className="flex flex-col gap-3">
               <Text variant="label1" color="dark" className="font-medium">
                 Ideální pro
               </Text>
               <div className="grid grid-cols-[repeat(auto-fill,minmax(70px,1fr))] gap-2">
-                {offer.idealFor.map((category, i) => (
+                {variant.idealFor.map((category, i) => (
                   <div
                     key={i}
                     className="flex flex-col items-center gap-1 text-center"
@@ -107,27 +110,27 @@ export default function OfferItem({
             {/* Header */}
             <div>
               <Text variant="heading5" color="dark" className="mb-2">
-                {offer.title}
+                {variant.title}
               </Text>
               <Text variant="body4" color="secondary">
-                {offer.description}
+                {variant.description}
               </Text>
             </div>
 
             {/* Includes and Excludes */}
             <div className="grid grid-cols-2 gap-6">
               {/* Includes */}
-              <OfferIncludesExcludes
+              <VariantIncludesExcludes
                 icon={FaCircleCheck}
-                title="Nabídka obsahuje"
-                items={offer.includes}
+                title="Varianta obsahuje"
+                items={variant.includes}
                 colorClass="text-emerald-500"
               />
               {/* Excludes */}
-              <OfferIncludesExcludes
+              <VariantIncludesExcludes
                 icon={FaCircleXmark}
-                title="Nabídka neobsahuje"
-                items={offer.excludes}
+                title="Varianta neobsahuje"
+                items={variant.excludes}
                 colorClass="text-red-500"
               />
             </div>
@@ -140,21 +143,19 @@ export default function OfferItem({
             <div className="border border-zinc-300 rounded-2xl p-4 flex items-center justify-between gap-4">
               <div className="flex flex-col gap-0.5">
                 <Text variant="heading4" color="primary">
-                  {offer.price.toLocaleString("cs-CZ")} Kč
+                  {variant.price.toLocaleString("cs-CZ")} Kč
                 </Text>
                 <Text variant="label2" color="secondary">
-                  {offer.duration}
+                  {variant.duration}
                 </Text>
               </div>
-              {variant === "default" &&
-                onOrderButtonClick &&
-                orderButtonText && (
-                  <Button
-                    text={orderButtonText}
-                    version="primary"
-                    onClick={onOrderButtonClick}
-                  />
-                )}
+              {type === "default" && onOrderButtonClick && orderButtonText && (
+                <Button
+                  text={orderButtonText}
+                  version="primary"
+                  onClick={onOrderButtonClick}
+                />
+              )}
             </div>
           </div>
         </div>

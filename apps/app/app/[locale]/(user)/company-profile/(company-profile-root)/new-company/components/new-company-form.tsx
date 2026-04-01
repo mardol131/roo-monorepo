@@ -1,23 +1,13 @@
 "use client";
 
-import React from "react";
-import Text from "@/app/components/ui/atoms/text";
-import { Controller, Resolver, useForm } from "react-hook-form";
-import Input from "@/app/components/ui/atoms/inputs/input";
-import SearchInput from "@/app/components/ui/atoms/inputs/search-input";
-import * as yup from "yup";
-import { yupResolver } from "@hookform/resolvers/yup";
-import { Building2, MapPin, Phone } from "lucide-react";
 import Button from "@/app/components/ui/atoms/button";
-
-const MOCK_CITIES = [
-  { id: "loc-1", label: "Praha" },
-  { id: "loc-2", label: "Brno" },
-  { id: "loc-3", label: "Ostrava" },
-  { id: "loc-4", label: "Plzeň" },
-  { id: "loc-5", label: "Liberec" },
-  { id: "loc-6", label: "Pardubice" },
-];
+import Input from "@/app/components/ui/atoms/inputs/input";
+import Text from "@/app/components/ui/atoms/text";
+import { yupResolver } from "@hookform/resolvers/yup";
+import { Building2, Phone } from "lucide-react";
+import React from "react";
+import { Resolver, useForm } from "react-hook-form";
+import * as yup from "yup";
 
 const schema = yup.object({
   name: yup.string().required("Název firmy je povinný"),
@@ -32,9 +22,6 @@ const schema = yup.object({
     .required("E-mail je povinný"),
   phone: yup.string(),
   website: yup.string(),
-  city: yup
-    .object({ id: yup.string().required(), label: yup.string().required() })
-    .required("Město je povinné"),
 });
 
 type FormInputs = {
@@ -44,7 +31,6 @@ type FormInputs = {
   email: string;
   phone?: string;
   website?: string;
-  city: { id: string; label: string };
 };
 
 type Props = {
@@ -76,9 +62,8 @@ export default function CompanyForm({
   const nameValue = watch("name");
   const icoValue = watch("ico");
   const emailValue = watch("email");
-  const cityValue = watch("city");
 
-  const buttonIsDisabled = !nameValue || !icoValue || !emailValue || !cityValue;
+  const buttonIsDisabled = !nameValue || !icoValue || !emailValue;
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
@@ -132,7 +117,19 @@ export default function CompanyForm({
       </FormSection>
 
       {/* Section 3 — Lokalita */}
-      <FormSection icon={MapPin} title="Lokalita">
+      {/* <FormSection icon={MapPin} title="Lokalita">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <Input
+            label="Ulice"
+            inputProps={{ ...register("street") }}
+            error={errors.street?.message}
+          />
+          <Input
+            label="Číslo popisné"
+            inputProps={{ ...register("streetNumber") }}
+            error={errors.streetNumber?.message}
+          />
+        </div>
         <Controller
           control={control}
           name="city"
@@ -143,10 +140,11 @@ export default function CompanyForm({
               value={field.value}
               onSelect={field.onChange}
               error={errors.city?.message}
+              type="fixed"
             />
           )}
         />
-      </FormSection>
+      </FormSection> */}
 
       {/* Submit */}
       <div className="flex justify-end gap-3 pt-2">

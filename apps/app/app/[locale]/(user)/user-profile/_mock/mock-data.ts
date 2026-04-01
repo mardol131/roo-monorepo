@@ -21,7 +21,7 @@ export function getInquiries(): Inquiry[] {
       lastCompanyMessageSentAt: new Date("2025-02-12T10:30:00"),
       lastUserSeenAt: new Date("2025-02-11T15:00:00"),
       event: { id: "1", name: "Firemní večírek 2025", date: "15. 3. 2025" },
-      offer: {
+      variant: {
         title: "DJ Premium Balíček",
         description:
           "Profesionální DJ s vlastní ozvučovací technikou, světelnou show a moderováním.",
@@ -50,7 +50,7 @@ export function getInquiries(): Inquiry[] {
         slug: "catering-premium",
       },
       event: { id: "1", name: "Firemní večírek 2025", date: "15. 3. 2025" },
-      offer: {
+      variant: {
         title: "Firemní catering",
         description: "Kompletní catering pro firemní akce včetně obsluhy.",
         price: 42000,
@@ -73,7 +73,7 @@ export function getInquiries(): Inquiry[] {
         slug: "foto-video-studio",
       },
       event: { id: "1", name: "Firemní večírek 2025", date: "15. 3. 2025" },
-      offer: {
+      variant: {
         title: "Foto + video balíček",
         description: "Profesionální fotograf a kameraman po celou dobu akce.",
         price: 12000,
@@ -98,7 +98,7 @@ export function getInquiries(): Inquiry[] {
         slug: "kvetinova-vyzdoba-novak",
       },
       event: { id: "1", name: "Firemní večírek 2025", date: "15. 3. 2025" },
-      offer: {
+      variant: {
         title: "Firemní dekorace",
         description: "Kompletní květinová výzdoba prostoru.",
         price: 6200,
@@ -121,7 +121,7 @@ export function getInquiries(): Inquiry[] {
         slug: "magic-show-entertainment",
       },
       event: { id: "2", name: "Narozeninová oslava", date: "2. 5. 2025" },
-      offer: {
+      variant: {
         title: "Magic show 60 min",
         description: "Interaktivní kouzelnická show pro hosty všech věků.",
         price: 15000,
@@ -144,7 +144,7 @@ export function getInquiries(): Inquiry[] {
         slug: "sound-light-pro",
       },
       event: { id: "2", name: "Narozeninová oslava", date: "2. 5. 2025" },
-      offer: {
+      variant: {
         title: "Ozvučení + světla",
         description: "Profesionální ozvučovací a světelná technika.",
         price: 9800,
@@ -175,7 +175,7 @@ export function getInquiry(_eventId: string, _contractorId: string): Inquiry {
       name: "Firemní večírek 2025",
       date: "15. 3. 2025",
     },
-    offer: {
+    variant: {
       title: "DJ Premium Balíček",
       description:
         "Profesionální DJ s vlastní ozvučovací technikou, světelnou show a moderováním. Vhodné pro firemní akce a večírky.",

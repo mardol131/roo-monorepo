@@ -62,7 +62,7 @@ export function InquiryCard({
         color="dark"
         className="font-semibold shrink-0 hidden sm:block"
       >
-        {inquiry.offer.price.toLocaleString("cs-CZ")} Kč
+        {inquiry.variant.price.toLocaleString("cs-CZ")} Kč
       </Text>
 
       {/* Arrow */}

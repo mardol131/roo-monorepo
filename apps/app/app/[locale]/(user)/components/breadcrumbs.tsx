@@ -35,26 +35,23 @@ export default function Breadcrumbs({ items }: Props) {
 
   return (
     <nav aria-label="breadcrumb" className="flex items-center gap-1 mb-6">
-      <IntlLink
-        href="/company-profile"
-        className="flex items-center text-zinc-400 hover:text-zinc-700 transition-colors"
-      >
+      <div className="flex items-center text-zinc-400 transition-colors">
         <Signpost className="w-3.5 h-3.5" />
-      </IntlLink>
+      </div>
 
       {crumbs.map((crumb, index) => {
         const isLast = index === crumbs.length - 1;
         return (
           <span key={crumb.href} className="flex items-center gap-1">
-            <ChevronRight className="w-3.5 h-3.5 text-zinc-300 shrink-0" />
+            <ChevronRight className="w-3.5 h-3.5 text-textLight shrink-0" />
             {isLast ? (
-              <span className="text-xs font-medium text-zinc-900 truncate max-w-45">
+              <span className="text-xs font-medium text-textDark truncate max-w-45">
                 {crumb.label}
               </span>
             ) : (
               <Link
                 href={crumb.href}
-                className="text-xs font-medium text-zinc-400 hover:text-zinc-700 transition-colors truncate max-w-45"
+                className="text-xs font-medium text-textLight hover:text-textDark transition-colors truncate max-w-45"
               >
                 {crumb.label}
               </Link>

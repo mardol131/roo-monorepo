@@ -1,23 +1,23 @@
 "use client";
 
+import Button from "@/app/components/ui/atoms/button";
+import Checkbox from "@/app/components/ui/atoms/inputs/checkbox";
 import Text from "@/app/components/ui/atoms/text";
 import { useOrderStore } from "@/app/store/order-store";
+import { yupResolver } from "@hookform/resolvers/yup";
 import {
   Calendar,
+  Handshake,
   MapPin,
-  Users,
+  MessageCircle,
   PawPrint,
   Send,
-  MessageCircle,
-  Handshake,
+  Users,
 } from "lucide-react";
-import { useForm, Controller } from "react-hook-form";
-import OfferItem from "../../../../components/offer-item";
-import Checkbox from "@/app/components/ui/atoms/inputs/checkbox";
-import StepHeading from "../step-heading";
-import Button from "@/app/components/ui/atoms/button";
+import { Controller, useForm } from "react-hook-form";
 import * as yup from "yup";
-import { yupResolver } from "@hookform/resolvers/yup";
+import VariantItem from "../../../../components/variant-item";
+import StepHeading from "../step-heading";
 
 const schema = yup.object({
   terms: yup
@@ -33,10 +33,12 @@ const schema = yup.object({
 type SubmitData = yup.InferType<typeof schema>;
 
 export default function OrderStepReviewVariant() {
-  const { currentOfferIndex, offers, eventData } = useOrderStore();
+  const { currentVariantIndex, variants, eventData } = useOrderStore();
 
-  const offer =
-    currentOfferIndex !== undefined ? offers[currentOfferIndex] : undefined;
+  const variant =
+    currentVariantIndex !== undefined
+      ? variants[currentVariantIndex]
+      : undefined;
 
   const {
     control,
@@ -53,7 +55,7 @@ export default function OrderStepReviewVariant() {
   const onSubmit = (data: SubmitData) => {
     const orderSummary = {
       event: eventData,
-      offer: offer,
+      variant: variant,
       legal: {
         terms: data.terms,
         gdpr: data.gdpr,
@@ -130,11 +132,11 @@ export default function OrderStepReviewVariant() {
           </div>
         )}
 
-        {/* Selected Offer Card */}
-        {offer && (
-          <OfferItem
-            variant="review"
-            offer={offer}
+        {/* Selected variant Card */}
+        {variant && (
+          <VariantItem
+            type="review"
+            variant={variant}
             onOrderButtonClick={handleSubmit(() => {})}
             orderButtonText="Odeslat poptávku"
           />

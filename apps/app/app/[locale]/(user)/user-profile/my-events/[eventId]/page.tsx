@@ -37,7 +37,7 @@ export default function EventDetailPage() {
   const confirmed = MOCK_INQUIRIES.filter((i) => i.status === "confirmed");
   const pending = MOCK_INQUIRIES.filter((i) => i.status === "pending");
   const totalCost = confirmed
-    .reduce((sum, i) => sum + i.offer.price, 0)
+    .reduce((sum, i) => sum + i.variant.price, 0)
     .toLocaleString("cs-CZ");
 
   return (

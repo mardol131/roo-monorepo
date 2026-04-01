@@ -7,8 +7,8 @@ export default function page({}: Props) {
   return (
     <main className="w-full">
       <PageHeading
-        heading="Přidat variantu"
-        description="Zde můžete přidat novou variantu související s vaší službou."
+        heading="Nová varianta"
+        description="Zde můžete vytvořit novou variantu služby, kterou budete nabízet zákazníkům."
       />
     </main>
   );

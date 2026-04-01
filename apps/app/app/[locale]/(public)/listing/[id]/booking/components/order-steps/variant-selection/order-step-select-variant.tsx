@@ -2,10 +2,10 @@
 
 import { useOrderStore } from "@/app/store/order-store";
 import StepHeading from "../step-heading";
-import OfferCard from "./offer-card";
+import OrderVariantSummaryCard from "./order-variant-summary-card";
 
 export default function OrderStepSelectVariant() {
-  const { offers } = useOrderStore();
+  const { variants } = useOrderStore();
 
   return (
     <div>
@@ -14,12 +14,12 @@ export default function OrderStepSelectVariant() {
         description="Zvolte variantu, kterou chcete objednat"
       />
       <div className="flex flex-col gap-6">
-        {/* Offer Selection */}
-        {offers.length > 1 && (
+        {/* Variant Selection */}
+        {variants.length > 1 && (
           <div className="pb-6 border-zinc-200">
             <div className="grid grid-cols-3 gap-3">
-              {offers.map((o, index) => (
-                <OfferCard key={o.id} offer={o} index={index} />
+              {variants.map((v, index) => (
+                <OrderVariantSummaryCard key={v.id} variant={v} index={index} />
               ))}
             </div>
           </div>

@@ -1,6 +1,6 @@
 import Text from "@/app/components/ui/atoms/text";
 import { EVENT_STATUS } from "@/app/data/event";
-import { Link } from "@/app/i18n/navigation";
+import { IntlLink, Link } from "@/app/i18n/navigation";
 import {
   Event,
   formatGuestsString,
@@ -17,7 +17,7 @@ import {
   ChevronRight,
 } from "lucide-react";
 
-export function EventCard({ event }: { event: Event }) {
+export function EventCard({ event, link }: { event: Event; link: IntlLink }) {
   const Icon =
     (lucideIcons[event.data.icon as keyof typeof lucideIcons] as LucideIcon) ??
     lucideIcons.Calendar;
@@ -25,10 +25,7 @@ export function EventCard({ event }: { event: Event }) {
 
   return (
     <Link
-      href={{
-        pathname: "/user-profile/my-events/[id]",
-        params: { id: event.id },
-      }}
+      href={link}
       className="group bg-white rounded-2xl border border-zinc-200 hover:border-zinc-300 hover:shadow-sm transition-all px-6 py-5 flex items-center gap-5"
     >
       {/* Icon */}

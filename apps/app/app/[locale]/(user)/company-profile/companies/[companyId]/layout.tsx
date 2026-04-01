@@ -102,7 +102,7 @@ export default function layout({ children, params }: Props) {
           icon: Calendar,
         },
         {
-          label: "Varianty",
+          label: "Nabízené varianty",
           href: {
             pathname:
               "/company-profile/companies/[companyId]/listings/[listingId]/variants",

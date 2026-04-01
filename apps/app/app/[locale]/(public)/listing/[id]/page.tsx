@@ -13,11 +13,11 @@ import DescriptionSection from "./components/description-section";
 import FAQSection, { FAQ } from "./components/faq-section";
 import HeroImageSection from "./components/hero-image-section";
 import ItemsSection, { Item } from "./components/items-section";
-import OffersSection from "./components/offers-section";
 import OrderBox from "./components/order-box";
 import ReviewsSection, { Review } from "./components/reviews-section";
 import SectionWrapper from "./components/section-wrapper";
-import { Offer } from "@roo/common";
+import { Variant } from "@roo/common";
+import VariantsSection from "./components/variants-section";
 
 type Props = {};
 
@@ -147,7 +147,7 @@ const faqs: FAQ[] = [
   },
 ];
 
-export const offers: Offer[] = [
+export const variants: Variant[] = [
   {
     id: "1",
     title: "Pronájem Mlýnice",
@@ -289,7 +289,7 @@ export default function page({}: Props) {
           </div>
         </div>
         <div className="mt-10">
-          <OffersSection offers={offers} />
+          <VariantsSection variants={variants} />
         </div>
       </div>
     </div>

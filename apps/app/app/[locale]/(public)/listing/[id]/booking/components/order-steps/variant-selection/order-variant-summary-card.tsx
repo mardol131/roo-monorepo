@@ -5,30 +5,34 @@ import { useOrderStore } from "@/app/store/order-store";
 import { Check, ChevronLeft, ChevronRight, X } from "lucide-react";
 import Image from "next/image";
 import { useState } from "react";
-import { OfferIncludesExcludes } from "../../../../components/offer-includes-excludes";
-import { Offer } from "@roo/common";
+import { VariantIncludesExcludes } from "../../../../components/variant-includes-excludes";
+import { Variant } from "@roo/common";
 
 type Props = {
-  offer: Offer;
+  variant: Variant;
   index: number;
 };
 
-export default function OfferCard({ offer, index }: Props) {
-  const { currentOfferIndex, setCurrentOfferIndex } = useOrderStore();
-  const isSelected = index === currentOfferIndex;
+export default function OrderVariantSummaryCard({ variant, index }: Props) {
+  const { currentVariantIndex, setCurrentVariantIndex } = useOrderStore();
+  const isSelected = index === currentVariantIndex;
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   const goToPrevious = (e: React.MouseEvent) => {
     e.stopPropagation();
     setCurrentImageIndex(
-      currentImageIndex === 0 ? offer.images.length - 1 : currentImageIndex - 1,
+      currentImageIndex === 0
+        ? variant.images.length - 1
+        : currentImageIndex - 1,
     );
   };
 
   const goToNext = (e: React.MouseEvent) => {
     e.stopPropagation();
     setCurrentImageIndex(
-      currentImageIndex === offer.images.length - 1 ? 0 : currentImageIndex + 1,
+      currentImageIndex === variant.images.length - 1
+        ? 0
+        : currentImageIndex + 1,
     );
   };
 
@@ -36,8 +40,8 @@ export default function OfferCard({ offer, index }: Props) {
     <div
       role="button"
       tabIndex={0}
-      onClick={() => setCurrentOfferIndex(index)}
-      onKeyDown={(e) => e.key === "Enter" && setCurrentOfferIndex(index)}
+      onClick={() => setCurrentVariantIndex(index)}
+      onKeyDown={(e) => e.key === "Enter" && setCurrentVariantIndex(index)}
       className={`group relative flex flex-col text-left rounded-2xl border-2 transition-all overflow-hidden cursor-pointer ${
         isSelected
           ? "border-primary bg-zinc-50 shadow-sm"
@@ -47,12 +51,12 @@ export default function OfferCard({ offer, index }: Props) {
       {/* Carousel */}
       <div className="relative w-full aspect-4/3 overflow-hidden bg-zinc-100">
         <Image
-          src={offer.images[currentImageIndex]}
-          alt={`${offer.title} - ${currentImageIndex + 1}`}
+          src={variant.images[currentImageIndex]}
+          alt={`${variant.title} - ${currentImageIndex + 1}`}
           fill
           className="object-cover"
         />
-        {offer.images.length > 1 && (
+        {variant.images.length > 1 && (
           <>
             <button
               type="button"
@@ -69,7 +73,7 @@ export default function OfferCard({ offer, index }: Props) {
               <ChevronRight className="w-4 h-4" />
             </button>
             <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
-              {offer.images.map((_, i) => (
+              {variant.images.map((_, i) => (
                 <button
                   key={i}
                   type="button"
@@ -108,41 +112,41 @@ export default function OfferCard({ offer, index }: Props) {
             color="dark"
             className="font-semibold truncate"
           >
-            {offer.title}
+            {variant.title}
           </Text>
           <Text
             variant="label4"
             color="secondary"
             className="mt-0.5 line-clamp-2"
           >
-            {offer.description}
+            {variant.description}
           </Text>
         </div>
 
         {/* Price */}
         <div className="flex items-baseline gap-1.5">
           <Text variant="heading5" color="primary" className="font-bold">
-            {offer.price.toLocaleString("cs-CZ")} Kč
+            {variant.price.toLocaleString("cs-CZ")} Kč
           </Text>
           <Text variant="label4" color="secondary">
-            {offer.duration}
+            {variant.duration}
           </Text>
         </div>
 
         {/* Includes / Excludes */}
-        {(offer.includes.length > 0 || offer.excludes.length > 0) && (
+        {(variant.includes.length > 0 || variant.excludes.length > 0) && (
           <div className="flex flex-col gap-5 pt-1 border-t border-zinc-100">
-            {offer.includes.length > 0 && (
-              <OfferIncludesExcludes
-                items={offer.includes}
+            {variant.includes.length > 0 && (
+              <VariantIncludesExcludes
+                items={variant.includes}
                 title="Součástí"
                 icon={Check}
                 colorClass="text-emerald-500"
               />
             )}
-            {offer.excludes.length > 0 && (
-              <OfferIncludesExcludes
-                items={offer.excludes}
+            {variant.excludes.length > 0 && (
+              <VariantIncludesExcludes
+                items={variant.excludes}
                 title="Není součástí"
                 icon={X}
                 colorClass="text-red-500"

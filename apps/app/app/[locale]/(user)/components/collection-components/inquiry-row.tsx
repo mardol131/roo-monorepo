@@ -19,8 +19,8 @@ export function InquiryRow({
   return (
     <Link
       href={{
-        pathname: "/user-profile/my-events/[id]/[contractorId]",
-        params: { id: eventId, contractorId: inquiry.company.id },
+        pathname: "/user-profile/my-events/[eventId]/[inquiryId]",
+        params: { eventId: eventId, inquiryId: inquiry.id },
       }}
       className="flex items-center gap-4 px-6 py-4 hover:bg-zinc-50 transition-colors group"
     >
@@ -45,7 +45,7 @@ export function InquiryRow({
         color="dark"
         className="font-semibold shrink-0 hidden sm:block"
       >
-        {inquiry.offer.price.toLocaleString("cs-CZ")} Kč
+        {inquiry.variant.price.toLocaleString("cs-CZ")} Kč
       </Text>
 
       <span

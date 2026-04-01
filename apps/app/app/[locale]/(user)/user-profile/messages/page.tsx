@@ -23,10 +23,10 @@ export default function MessagesPage() {
               key={inquiry.id}
               inquiry={inquiry}
               link={{
-                pathname: "/user-profile/my-events/[id]/[contractorId]",
+                pathname: "/user-profile/my-events/[eventId]/[inquiryId]",
                 params: {
-                  id: inquiry.event.id,
-                  contractorId: inquiry.company.id,
+                  eventId: inquiry.event.id,
+                  inquiryId: inquiry.id,
                 },
               }}
             />

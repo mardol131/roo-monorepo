@@ -1,18 +1,18 @@
 import { off } from "process";
 import { create } from "zustand";
-import { EventData, Offer } from "@roo/common";
-import { offers } from "../[locale]/(public)/listing/[id]/page";
+import { EventData, Variant } from "@roo/common";
+import { variants } from "../[locale]/(public)/listing/[id]/page";
 
 type EventVariant = "new-event" | "existing-event" | null;
 
 interface OrderStore {
   isOrderModalOpen: boolean;
-  currentOfferIndex?: number;
+  currentVariantIndex?: number;
   currentStep: number;
-  offers: Offer[];
+  variants: Variant[];
   eventVariant: EventVariant;
   eventData: (EventData & { id?: string }) | undefined;
-  setCurrentOfferIndex: (index: number) => void;
+  setCurrentVariantIndex: (index: number) => void;
   setCurrentStep: (step: number) => void;
   setEventVariant: (variant: EventVariant) => void;
   setEventData: (eventData: EventData & { id?: string }) => void;
@@ -24,16 +24,17 @@ interface OrderStore {
 export const useOrderStore = create<OrderStore>((set, get) => {
   return {
     isOrderModalOpen: false,
-    currentOfferIndex: undefined,
+    currentVariantIndex: undefined,
     currentStep: 1,
-    offers: offers,
+    variants: variants,
     eventData: undefined,
     eventVariant: null,
     clearEventData: () =>
       set({
         eventData: undefined,
       }),
-    setCurrentOfferIndex: (index: number) => set({ currentOfferIndex: index }),
+    setCurrentVariantIndex: (index: number) =>
+      set({ currentVariantIndex: index }),
     setCurrentStep: (step: number) => set({ currentStep: step }),
     setEventData: (eventData: EventData & { id?: string }) =>
       set({ eventData }),
@@ -50,7 +51,7 @@ export const useOrderStore = create<OrderStore>((set, get) => {
         state.eventData?.date &&
         state.eventData?.location &&
         state.eventData?.guests;
-      const offerVariantSelected = state.currentOfferIndex !== undefined;
+      const variantSelected = state.currentVariantIndex !== undefined;
 
       switch (step) {
         case 1:
@@ -61,7 +62,7 @@ export const useOrderStore = create<OrderStore>((set, get) => {
           }
           return false;
         case 3:
-          if (eventDataExists && offerVariantSelected) {
+          if (eventDataExists && variantSelected) {
             return true;
           }
           return false;
@@ -71,7 +72,7 @@ export const useOrderStore = create<OrderStore>((set, get) => {
 
     resetIndices: () =>
       set({
-        currentOfferIndex: undefined,
+        currentVariantIndex: undefined,
         currentStep: 1,
         isOrderModalOpen: false,
       }),
