@@ -30,9 +30,9 @@ export const Spaces: CollectionConfig = {
       hasMany: false,
     },
     {
-      name: 'vendor',
+      name: 'company',
       type: 'relationship',
-      relationTo: 'vendors',
+      relationTo: 'venue-listings',
       required: true,
     },
     {

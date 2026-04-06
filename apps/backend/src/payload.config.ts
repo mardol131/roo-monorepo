@@ -8,14 +8,14 @@ import { fileURLToPath } from 'url'
 import { sendEmailTask } from './jobs/tasks/sendEmailTask'
 
 import { sendPushNotificationTask } from './jobs/tasks/sendPushNotification'
-import { VenueVariants } from './collections/venue-variants'
+import { VenueVariants } from './collections/variants/venue-variants'
 import { Activities } from './collections/filters/activities'
 import { Services } from './collections/filters/services'
 import { EventTypes } from './collections/filters/event-types'
-import { VenueListings } from './collections/venue-listings'
+import { VenueListings } from './collections/listings/venue-listings'
 import { Spaces } from './collections/spaces'
 import { Personnel } from './collections/filters/personnel'
-import { Vendors } from './collections/vendors'
+import { Companies } from './collections/companies'
 import { Cities } from './collections/locality/cities'
 import { Users } from './collections/users'
 import { Media } from './collections/media'
@@ -25,6 +25,13 @@ import { Technologies } from './collections/filters/technologies'
 import { Amenities } from './collections/filters/amenities'
 import { RoomAmenities } from './collections/specific/room-amenities'
 import { FoodTypes } from './collections/filters/food-types'
+import { Events } from './collections/events'
+import { Inquiries } from './collections/inquiries'
+import { ChatMessages } from './collections/chat-messages'
+import { GastroListings } from './collections/listings/gastro-listings'
+import { EntertainmentListings } from './collections/listings/entertainment-listings'
+import { GastroVariants } from './collections/variants/gastro-variants'
+import { EntertainmentVariants } from './collections/variants/entertainment-variants'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -55,13 +62,17 @@ export default buildConfig({
     Users,
     Media,
     VenueVariants,
+    GastroVariants,
+    EntertainmentVariants,
     Activities,
     Services,
     EventTypes,
     VenueListings,
+    GastroListings,
+    EntertainmentListings,
     Spaces,
     Personnel,
-    Vendors,
+    Companies,
     Cities,
     PlaceTypes,
     Rules,
@@ -69,6 +80,9 @@ export default buildConfig({
     Amenities,
     RoomAmenities,
     FoodTypes,
+    Events,
+    ChatMessages,
+    Inquiries,
   ],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || '',

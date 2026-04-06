@@ -10,6 +10,7 @@
     "devsafe": "rm -rf .next && cross-env NODE_OPTIONS=--no-deprecation next dev",
     "generate:importmap": "cross-env NODE_OPTIONS=--no-deprecation payload generate:importmap",
     "generate:types": "cross-env NODE_OPTIONS=--no-deprecation payload generate:types",
+    "postgenerate:types": "node -e \"const fs = require('fs'); const lines = fs.readFileSync('src/payload-types.ts', 'utf8').split('\\n'); fs.writeFileSync('../../packages/common/src/types/payload-types.ts', lines.slice(0, -3).join('\\n'))\"",
     "lint": "cross-env NODE_OPTIONS=--no-deprecation next lint",
     "payload": "cross-env NODE_OPTIONS=--no-deprecation payload",
     "start": "cross-env NODE_OPTIONS=--no-deprecation next start",

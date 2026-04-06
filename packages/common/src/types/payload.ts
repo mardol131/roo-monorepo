@@ -73,9 +73,17 @@ export interface Config {
     activities: Activity;
     services: Service;
     "event-types": EventType;
-    listings: Listing;
+    "venue-listings": VenueListing;
     spaces: Space;
     personnel: Personnel;
+    companies: Company;
+    cities: City;
+    "place-types": PlaceType;
+    rules: Rule;
+    technologies: Technology;
+    amenities: Amenity;
+    "room-amenities": RoomAmenity;
+    "food-types": FoodType;
     "payload-kv": PayloadKv;
     "payload-jobs": PayloadJob;
     "payload-locked-documents": PayloadLockedDocument;
@@ -90,9 +98,17 @@ export interface Config {
     activities: ActivitiesSelect<false> | ActivitiesSelect<true>;
     services: ServicesSelect<false> | ServicesSelect<true>;
     "event-types": EventTypesSelect<false> | EventTypesSelect<true>;
-    listings: ListingsSelect<false> | ListingsSelect<true>;
+    "venue-listings": VenueListingsSelect<false> | VenueListingsSelect<true>;
     spaces: SpacesSelect<false> | SpacesSelect<true>;
     personnel: PersonnelSelect<false> | PersonnelSelect<true>;
+    companies: CompaniesSelect<false> | CompaniesSelect<true>;
+    cities: CitiesSelect<false> | CitiesSelect<true>;
+    "place-types": PlaceTypesSelect<false> | PlaceTypesSelect<true>;
+    rules: RulesSelect<false> | RulesSelect<true>;
+    technologies: TechnologiesSelect<false> | TechnologiesSelect<true>;
+    amenities: AmenitiesSelect<false> | AmenitiesSelect<true>;
+    "room-amenities": RoomAmenitiesSelect<false> | RoomAmenitiesSelect<true>;
+    "food-types": FoodTypesSelect<false> | FoodTypesSelect<true>;
     "payload-kv": PayloadKvSelect<false> | PayloadKvSelect<true>;
     "payload-jobs": PayloadJobsSelect<false> | PayloadJobsSelect<true>;
     "payload-locked-documents":
@@ -198,6 +214,7 @@ export interface Media {
  */
 export interface VenueVariant {
   id: string;
+  listing?: (string | null) | VenueListing;
   name: string;
   shortDescription?: string | null;
   description?: string | null;
@@ -255,24 +272,115 @@ export interface VenueVariant {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "spaces".
+ * via the `definition` "venue-listings".
  */
-export interface Space {
+export interface VenueListing {
   id: string;
   name: string;
-  type: "venue" | "building" | "room" | "hall" | "outdoor";
+  slug: string;
+  company: string | Company;
   description?: string | null;
-  /**
-   * Maximální kapacita osob
-   */
-  capacity?: number | null;
-  /**
-   * Plocha v m²
-   */
-  area?: number | null;
-  images?:
+  shortDescription?: string | null;
+  locations: {
+    address: string;
+    city: string | City;
+    postalCode?: string | null;
+    latitude?: number | null;
+    longitude?: number | null;
+  };
+  indoor?: boolean | null;
+  outdoor?: boolean | null;
+  eventTypes?: (string | EventType)[] | null;
+  images: {
+    coverImage: string;
+    logo?: string | null;
+    gallery?:
+      | {
+          url?: string | null;
+          id?: string | null;
+        }[]
+      | null;
+  };
+  placeTypes?: (string | PlaceType)[] | null;
+  capacity: number;
+  area: number;
+  canBeBookedAsWhole?: boolean | null;
+  hasAccommodation?: boolean | null;
+  accommodationCapacity?: number | null;
+  venueRules?: (string | Rule)[] | null;
+  foodAndDrinkRules?: (string | Rule)[] | null;
+  personnel?: (string | Personnel)[] | null;
+  amenities?: (string | Amenity)[] | null;
+  technologies?: (string | Technology)[] | null;
+  activities?: (string | Activity)[] | null;
+  access?: {
+    vehicleTypes?: ("car" | "truck" | "van" | "bus")[] | null;
+    helpWithLoadingAndUnloading?: boolean | null;
+    loadingRamp?: boolean | null;
+    loadingElevator?: boolean | null;
+    serviceAccess?: boolean | null;
+    serviceArea?: boolean | null;
+  };
+  storage?:
     | {
-        image: string | Media;
+        name: string;
+        area: number;
+        space?: (string | null) | Space;
+        accessedFrom?: (string | null) | Space;
+        id?: string | null;
+      }[]
+    | null;
+  activityAddons?:
+    | {
+        activity: string | Activity;
+        price: number;
+        space?: (string | null) | Space;
+        type: "indoor" | "outdoor";
+        id?: string | null;
+      }[]
+    | null;
+  breakfast?: {
+    included?: boolean | null;
+    allowAccommodationWithoutBreakfast?: boolean | null;
+    allowMoreBreakfastsThanAccommodation?: boolean | null;
+    breakfastIsIncludedInPrice?: boolean | null;
+    price?: number | null;
+    pricePer?: ("person" | "booking") | null;
+    /**
+     * Čas, od kterého je snídaně k dispozici (např. 07:00)
+     */
+    timeFrom?: string | null;
+    /**
+     * Čas, do kterého je snídaně k dispozici (např. 10:00)
+     */
+    timeTo?: string | null;
+    foodTypes?: (string | FoodType)[] | null;
+  };
+  faq?:
+    | {
+        active?: boolean | null;
+        question: string;
+        answer: string;
+        groupedBy?:
+          | ("general" | "booking" | "cancellation" | "payment" | "other")
+          | null;
+        id?: string | null;
+      }[]
+    | null;
+  references?:
+    | {
+        image?: string | null;
+        eventName?: string | null;
+        clientName?: string | null;
+        eventType?: (string | null) | EventType;
+        id?: string | null;
+      }[]
+    | null;
+  employees?:
+    | {
+        name: string;
+        role: string;
+        description?: string | null;
         id?: string | null;
       }[]
     | null;
@@ -281,31 +389,25 @@ export interface Space {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "activities".
+ * via the `definition` "companies".
  */
-export interface Activity {
+export interface Company {
   id: string;
   name: string;
-  slug: string;
+  ico: string;
+  description?: string | null;
+  email: string;
+  phone?: string | null;
+  website?: string | null;
+  owner: string | User;
   updatedAt: string;
   createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "personnel".
+ * via the `definition` "cities".
  */
-export interface Personnel {
-  id: string;
-  name: string;
-  slug: string;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "services".
- */
-export interface Service {
+export interface City {
   id: string;
   name: string;
   slug: string;
@@ -325,9 +427,142 @@ export interface EventType {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "listings".
+ * via the `definition` "place-types".
  */
-export interface Listing {
+export interface PlaceType {
+  id: string;
+  name: string;
+  slug: string;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "rules".
+ */
+export interface Rule {
+  id: string;
+  name: string;
+  slug: string;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "personnel".
+ */
+export interface Personnel {
+  id: string;
+  name: string;
+  slug: string;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "amenities".
+ */
+export interface Amenity {
+  id: string;
+  name: string;
+  slug: string;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "technologies".
+ */
+export interface Technology {
+  id: string;
+  name: string;
+  slug: string;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "activities".
+ */
+export interface Activity {
+  id: string;
+  name: string;
+  slug: string;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "spaces".
+ */
+export interface Space {
+  id: string;
+  name: string;
+  type: "venue" | "building" | "room" | "hall" | "outdoor";
+  parent?: (string | null) | Space;
+  company: string | Company;
+  description?: string | null;
+  /**
+   * Maximální kapacita osob
+   */
+  capacity?: number | null;
+  /**
+   * Plocha v m²
+   */
+  area?: number | null;
+  images?:
+    | {
+        image: string | Media;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Indikuje, zda prostor nabízí ubytování
+   */
+  hasAccommodation?: boolean | null;
+  /**
+   * Kapacita ubytování (počet lůžek)
+   */
+  accommodationCapacity?: number | null;
+  rooms?:
+    | {
+        name: string;
+        capacity: number;
+        countOfRoomsOfThisType: number;
+        amenities?: (string | RoomAmenity)[] | null;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "room-amenities".
+ */
+export interface RoomAmenity {
+  id: string;
+  name: string;
+  slug: string;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "food-types".
+ */
+export interface FoodType {
+  id: string;
+  name: string;
+  slug: string;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "services".
+ */
+export interface Service {
   id: string;
   name: string;
   slug: string;
@@ -475,8 +710,8 @@ export interface PayloadLockedDocument {
         value: string | EventType;
       } | null)
     | ({
-        relationTo: "listings";
-        value: string | Listing;
+        relationTo: "venue-listings";
+        value: string | VenueListing;
       } | null)
     | ({
         relationTo: "spaces";
@@ -485,6 +720,38 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: "personnel";
         value: string | Personnel;
+      } | null)
+    | ({
+        relationTo: "companies";
+        value: string | Company;
+      } | null)
+    | ({
+        relationTo: "cities";
+        value: string | City;
+      } | null)
+    | ({
+        relationTo: "place-types";
+        value: string | PlaceType;
+      } | null)
+    | ({
+        relationTo: "rules";
+        value: string | Rule;
+      } | null)
+    | ({
+        relationTo: "technologies";
+        value: string | Technology;
+      } | null)
+    | ({
+        relationTo: "amenities";
+        value: string | Amenity;
+      } | null)
+    | ({
+        relationTo: "room-amenities";
+        value: string | RoomAmenity;
+      } | null)
+    | ({
+        relationTo: "food-types";
+        value: string | FoodType;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -577,6 +844,7 @@ export interface MediaSelect<T extends boolean = true> {
  * via the `definition` "venue-variants_select".
  */
 export interface VenueVariantsSelect<T extends boolean = true> {
+  listing?: T;
   name?: T;
   shortDescription?: T;
   description?: T;
@@ -672,11 +940,117 @@ export interface EventTypesSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "listings_select".
+ * via the `definition` "venue-listings_select".
  */
-export interface ListingsSelect<T extends boolean = true> {
+export interface VenueListingsSelect<T extends boolean = true> {
   name?: T;
   slug?: T;
+  company?: T;
+  description?: T;
+  shortDescription?: T;
+  locations?:
+    | T
+    | {
+        address?: T;
+        city?: T;
+        postalCode?: T;
+        latitude?: T;
+        longitude?: T;
+      };
+  indoor?: T;
+  outdoor?: T;
+  eventTypes?: T;
+  images?:
+    | T
+    | {
+        coverImage?: T;
+        logo?: T;
+        gallery?:
+          | T
+          | {
+              url?: T;
+              id?: T;
+            };
+      };
+  placeTypes?: T;
+  capacity?: T;
+  area?: T;
+  canBeBookedAsWhole?: T;
+  hasAccommodation?: T;
+  accommodationCapacity?: T;
+  venueRules?: T;
+  foodAndDrinkRules?: T;
+  personnel?: T;
+  amenities?: T;
+  technologies?: T;
+  activities?: T;
+  access?:
+    | T
+    | {
+        vehicleTypes?: T;
+        helpWithLoadingAndUnloading?: T;
+        loadingRamp?: T;
+        loadingElevator?: T;
+        serviceAccess?: T;
+        serviceArea?: T;
+      };
+  storage?:
+    | T
+    | {
+        name?: T;
+        area?: T;
+        space?: T;
+        accessedFrom?: T;
+        id?: T;
+      };
+  activityAddons?:
+    | T
+    | {
+        activity?: T;
+        price?: T;
+        space?: T;
+        type?: T;
+        id?: T;
+      };
+  breakfast?:
+    | T
+    | {
+        included?: T;
+        allowAccommodationWithoutBreakfast?: T;
+        allowMoreBreakfastsThanAccommodation?: T;
+        breakfastIsIncludedInPrice?: T;
+        price?: T;
+        pricePer?: T;
+        timeFrom?: T;
+        timeTo?: T;
+        foodTypes?: T;
+      };
+  faq?:
+    | T
+    | {
+        active?: T;
+        question?: T;
+        answer?: T;
+        groupedBy?: T;
+        id?: T;
+      };
+  references?:
+    | T
+    | {
+        image?: T;
+        eventName?: T;
+        clientName?: T;
+        eventType?: T;
+        id?: T;
+      };
+  employees?:
+    | T
+    | {
+        name?: T;
+        role?: T;
+        description?: T;
+        id?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
 }
@@ -687,6 +1061,8 @@ export interface ListingsSelect<T extends boolean = true> {
 export interface SpacesSelect<T extends boolean = true> {
   name?: T;
   type?: T;
+  parent?: T;
+  company?: T;
   description?: T;
   capacity?: T;
   area?: T;
@@ -694,6 +1070,17 @@ export interface SpacesSelect<T extends boolean = true> {
     | T
     | {
         image?: T;
+        id?: T;
+      };
+  hasAccommodation?: T;
+  accommodationCapacity?: T;
+  rooms?:
+    | T
+    | {
+        name?: T;
+        capacity?: T;
+        countOfRoomsOfThisType?: T;
+        amenities?: T;
         id?: T;
       };
   updatedAt?: T;
@@ -704,6 +1091,91 @@ export interface SpacesSelect<T extends boolean = true> {
  * via the `definition` "personnel_select".
  */
 export interface PersonnelSelect<T extends boolean = true> {
+  name?: T;
+  slug?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "companies_select".
+ */
+export interface CompaniesSelect<T extends boolean = true> {
+  name?: T;
+  ico?: T;
+  description?: T;
+  email?: T;
+  phone?: T;
+  website?: T;
+  owner?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "cities_select".
+ */
+export interface CitiesSelect<T extends boolean = true> {
+  name?: T;
+  slug?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "place-types_select".
+ */
+export interface PlaceTypesSelect<T extends boolean = true> {
+  name?: T;
+  slug?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "rules_select".
+ */
+export interface RulesSelect<T extends boolean = true> {
+  name?: T;
+  slug?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "technologies_select".
+ */
+export interface TechnologiesSelect<T extends boolean = true> {
+  name?: T;
+  slug?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "amenities_select".
+ */
+export interface AmenitiesSelect<T extends boolean = true> {
+  name?: T;
+  slug?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "room-amenities_select".
+ */
+export interface RoomAmenitiesSelect<T extends boolean = true> {
+  name?: T;
+  slug?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "food-types_select".
+ */
+export interface FoodTypesSelect<T extends boolean = true> {
   name?: T;
   slug?: T;
   updatedAt?: T;

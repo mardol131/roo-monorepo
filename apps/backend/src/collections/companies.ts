@@ -1,7 +1,7 @@
 import type { CollectionConfig } from 'payload'
 
-export const Vendors: CollectionConfig = {
-  slug: 'vendors',
+export const Companies: CollectionConfig = {
+  slug: 'companies',
   admin: {
     useAsTitle: 'name',
   },
@@ -16,10 +16,6 @@ export const Vendors: CollectionConfig = {
       name: 'ico',
       type: 'text',
       required: true,
-      unique: true,
-      minLength: 8,
-      maxLength: 8,
-      admin: { description: 'IČO — 8 číslic' },
     },
     {
       name: 'description',

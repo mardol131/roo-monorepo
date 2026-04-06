@@ -1,7 +1,7 @@
 import type { CollectionConfig } from 'payload'
 
-export const VenueListings: CollectionConfig = {
-  slug: 'venue-listings',
+export const GastroListings: CollectionConfig = {
+  slug: 'gastro-listings',
   admin: {
     useAsTitle: 'name',
   },
@@ -17,9 +17,9 @@ export const VenueListings: CollectionConfig = {
       required: true,
     },
     {
-      name: 'vendor',
+      name: 'company',
       type: 'relationship',
-      relationTo: 'vendors',
+      relationTo: 'companies',
       required: true,
     },
     {
@@ -31,7 +31,7 @@ export const VenueListings: CollectionConfig = {
       type: 'text',
     },
     {
-      name: 'locations',
+      name: 'location',
       type: 'group',
       fields: [
         {

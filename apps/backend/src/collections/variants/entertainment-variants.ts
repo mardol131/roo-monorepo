@@ -1,8 +1,14 @@
 import type { CollectionConfig } from 'payload'
 
-export const VenueVariants: CollectionConfig = {
-  slug: 'venue-variants',
+export const EntertainmentVariants: CollectionConfig = {
+  slug: 'entertainment-variants',
   fields: [
+    {
+      name: 'listing',
+      type: 'relationship',
+      relationTo: 'entertainment-listings',
+      hasMany: false,
+    },
     {
       name: 'name',
       type: 'text',
