@@ -3,7 +3,7 @@
 import React from "react";
 import Text from "@/app/components/ui/atoms/text";
 import { Check, CheckCircle2, Clock, Send, XCircle } from "lucide-react";
-import { InquiryStatus } from "@roo/common";
+import { Inquiry } from "@roo/common";
 
 const STATUS_STEPS: {
   label: string;
@@ -14,16 +14,20 @@ const STATUS_STEPS: {
   { label: "Potvrzeno", icon: CheckCircle2 },
 ];
 
-function getActiveStep(status: InquiryStatus): number {
-  if (status === "confirmed" || status === "declined") return 2;
+function getActiveStep(status: Inquiry["userStatus"]): number {
+  if (status === "confirmed" || status === "cancelled") return 2;
   if (status === "pending") return 1;
   return 0;
 }
 
-export default function InquiryTimeline({ status }: { status: InquiryStatus }) {
+export default function InquiryTimeline({
+  status,
+}: {
+  status: Inquiry["userStatus"];
+}) {
   const activeStep = getActiveStep(status);
 
-  if (status === "declined") {
+  if (status === "cancelled") {
     return (
       <div className="flex items-center w-full">
         {[

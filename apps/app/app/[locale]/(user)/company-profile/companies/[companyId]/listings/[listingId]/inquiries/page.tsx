@@ -9,7 +9,7 @@ export default async function page({
   params: Promise<{ companyId: string; listingId: string }>;
 }) {
   const { companyId, listingId } = await params;
-  const inquiries = getInquiries() as Inquiry[];
+  const inquiries = getInquiries();
 
   return (
     <main className="w-full">

@@ -2,9 +2,8 @@ import { Calendar, MessageSquare } from "lucide-react";
 import PageHeading from "../components/page-heading";
 import RowContainer from "../components/row-container";
 import { getInquiries, MOCK_EVENTS, STATS } from "./_mock/mock-data";
-import { EventRow } from "../components/collection-components/event-row";
-import { InquiryRow } from "../components/collection-components/inquiry-row";
 import { SummaryCard } from "./components/summary-card";
+import EntityRow from "../components/entity-row";
 
 export default function UserProfilePage() {
   const events = MOCK_EVENTS.slice(0, 3);
@@ -37,7 +36,18 @@ export default function UserProfilePage() {
         icon={<Calendar className="w-4 h-4 text-rose-500" />}
         label="Nedávné události"
         rowComponents={events.map((event) => (
-          <EventRow key={event.id} event={event} />
+          <EntityRow
+            icon="Calendar"
+            iconColor="text-rose-500"
+            iconBackgroundColor="bg-rose-50"
+            key={event.id}
+            label={event.name}
+            items={[]}
+            link={{
+              pathname: "/user-profile/my-events/[eventId]",
+              params: { eventId: event.id },
+            }}
+          />
         ))}
         emptyHeading="Zatím žádné události"
         emptyText="Vytvořte první událost a začněte plánovat svou akci."
@@ -49,13 +59,26 @@ export default function UserProfilePage() {
       <RowContainer
         icon={<MessageSquare className="w-4 h-4 text-rose-500" />}
         label="Nedávné poptávky"
-        rowComponents={inquiries.map((inquiry) => (
-          <InquiryRow
-            key={inquiry.id}
-            inquiry={inquiry}
-            eventId={inquiry.event.id}
-          />
-        ))}
+        rowComponents={inquiries.map((inquiry) =>
+          typeof inquiry.event !== "string" ? (
+            <EntityRow
+              key={inquiry.id}
+              icon="MessageSquare"
+              iconColor="text-rose-500"
+              iconBackgroundColor="bg-rose-50"
+              label={
+                typeof inquiry.listing.value === "string"
+                  ? inquiry.listing.value
+                  : "Poptávka"
+              }
+              items={[]}
+              link={{
+                pathname: "/user-profile/my-events/[eventId]/[inquiryId]",
+                params: { eventId: inquiry.event.id, inquiryId: inquiry.id },
+              }}
+            />
+          ) : null,
+        )}
         emptyHeading="Zatím žádné poptávky"
         emptyText="Přejděte do katalogu a oslovte dodavatele pro svou akci."
       />

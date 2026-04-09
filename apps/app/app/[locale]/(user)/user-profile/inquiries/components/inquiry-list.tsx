@@ -1,26 +1,25 @@
 "use client";
 
-import React, { useState } from "react";
 import Text from "@/app/components/ui/atoms/text";
-import {
-  CheckCircle2,
-  ChevronRight,
-  Clock,
-  MessageSquare,
-  XCircle,
-} from "lucide-react";
-import { formatInquiryCountLabel, Inquiry, InquiryStatus } from "@roo/common";
-import { InquiryRow } from "../../../components/collection-components/inquiry-row";
 import { Link } from "@/app/i18n/navigation";
+import {
+  aggregateInquiryStatus,
+  formatInquiryCountLabel,
+  getIdFromRelationshipField,
+  Inquiry,
+} from "@roo/common";
+import { MessageSquare } from "lucide-react";
+import { useState } from "react";
 import RowContainer from "../../../components/row-container";
+import EntityRow from "../../../components/entity-row";
 
 // ── Config ─────────────────────────────────────────────────────────────────────
 
-const TABS: { label: string; value: InquiryStatus | "all" }[] = [
+const TABS: { label: string; value: Inquiry["userStatus"] | "all" }[] = [
   { label: "Všechny", value: "all" },
   { label: "Čekající", value: "pending" },
   { label: "Potvrzené", value: "confirmed" },
-  { label: "Odmítnuté", value: "declined" },
+  { label: "Odmítnuté", value: "cancelled" },
 ];
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
@@ -33,11 +32,14 @@ function groupByEvent(
     { event: Inquiry["event"]; inquiries: Inquiry[] }
   >();
   for (const inquiry of inquiries) {
-    const existing = map.get(inquiry.event.id);
+    const existing = map.get(getIdFromRelationshipField(inquiry.event));
     if (existing) {
       existing.inquiries.push(inquiry);
     } else {
-      map.set(inquiry.event.id, { event: inquiry.event, inquiries: [inquiry] });
+      map.set(getIdFromRelationshipField(inquiry.event), {
+        event: inquiry.event,
+        inquiries: [inquiry],
+      });
     }
   }
   return Array.from(map.values());
@@ -46,12 +48,14 @@ function groupByEvent(
 // ── Component ──────────────────────────────────────────────────────────────────
 
 export default function InquiryList({ inquiries }: { inquiries: Inquiry[] }) {
-  const [activeTab, setActiveTab] = useState<InquiryStatus | "all">("all");
+  const [activeTab, setActiveTab] = useState<Inquiry["userStatus"] | "all">(
+    "all",
+  );
 
   const filtered =
     activeTab === "all"
       ? inquiries
-      : inquiries.filter((i) => i.status === activeTab);
+      : inquiries.filter((i) => aggregateInquiryStatus(i) === activeTab);
 
   const grouped = groupByEvent(filtered);
 
@@ -86,36 +90,61 @@ export default function InquiryList({ inquiries }: { inquiries: Inquiry[] }) {
         </div>
       ) : (
         <div className="flex flex-col gap-4">
-          {grouped.map(({ event, inquiries: group }) => (
-            <RowContainer
-              key={event.id}
-              icon={
-                <div className="w-8 h-8 rounded-xl bg-rose-50 flex items-center justify-center shrink-0">
-                  <MessageSquare className="w-4 h-4 text-rose-500" />
-                </div>
-              }
-              label={event.name}
-              subLabel={formatInquiryCountLabel(group.length)}
-              rowComponents={group.map((inquiry) => (
-                <InquiryRow
-                  key={inquiry.id}
-                  inquiry={inquiry}
-                  eventId={event.id}
-                />
-              ))}
-              headerRightComponent={
-                <Link
-                  href={{
-                    pathname: "/user-profile/my-events/[eventId]",
-                    params: { eventId: event.id },
-                  }}
-                  className="text-xs text-rose-500 hover:text-rose-600 font-medium transition-colors"
-                >
-                  Detail události →
-                </Link>
-              }
-            />
-          ))}
+          {grouped.map(({ event, inquiries: group }) => {
+            if (typeof event === "string") return null; // Shouldn't happen
+
+            return (
+              <RowContainer
+                key={getIdFromRelationshipField(event)}
+                icon={
+                  <div className="w-8 h-8 rounded-xl bg-rose-50 flex items-center justify-center shrink-0">
+                    <MessageSquare className="w-4 h-4 text-rose-500" />
+                  </div>
+                }
+                label={event.name}
+                subLabel={formatInquiryCountLabel(group.length)}
+                rowComponents={group
+                  .filter(
+                    (inquiry) =>
+                      typeof inquiry.listing.value !== "string" &&
+                      inquiry.listing.value,
+                  )
+                  .map((inquiry) => (
+                    <EntityRow
+                      key={inquiry.id}
+                      label={
+                        typeof inquiry.listing.value !== "string"
+                          ? inquiry.listing.value.name
+                          : "Poptávka"
+                      }
+                      icon="MessageSquare"
+                      iconBackgroundColor="bg-rose-50"
+                      iconColor="text-rose-500"
+                      items={[]}
+                      link={{
+                        pathname:
+                          "/user-profile/my-events/[eventId]/[inquiryId]",
+                        params: {
+                          eventId: getIdFromRelationshipField(inquiry.event),
+                          inquiryId: inquiry.id,
+                        },
+                      }}
+                    />
+                  ))}
+                headerRightComponent={
+                  <Link
+                    href={{
+                      pathname: "/user-profile/my-events/[eventId]",
+                      params: { eventId: event.id },
+                    }}
+                    className="text-xs text-rose-500 hover:text-rose-600 font-medium transition-colors"
+                  >
+                    Detail události →
+                  </Link>
+                }
+              />
+            );
+          })}
         </div>
       )}
     </div>

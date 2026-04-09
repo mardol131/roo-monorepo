@@ -1,8 +1,8 @@
-import { InquiryStatus } from "@roo/common";
+import { Inquiry } from "@roo/common";
 import { CheckCircle2, Clock, XCircle } from "lucide-react";
 
 export const INQUIRY_STATUS: Record<
-  InquiryStatus,
+  Inquiry["userStatus"],
   {
     label: string;
     icon: React.ElementType;
@@ -22,7 +22,7 @@ export const INQUIRY_STATUS: Record<
     className: "bg-emerald-100 text-emerald-700",
     iconColor: "text-emerald-500",
   },
-  declined: {
+  cancelled: {
     label: "Odmítnuto",
     icon: XCircle,
     className: "bg-red-100 text-red-600",

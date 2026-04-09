@@ -64,10 +64,12 @@ export type SupportedTimezones =
 export interface Config {
   auth: {
     users: UserAuthOperations;
+    admins: AdminAuthOperations;
   };
   blocks: {};
   collections: {
     users: User;
+    admins: Admin;
     media: Media;
     'venue-variants': VenueVariant;
     'gastro-variants': GastroVariant;
@@ -100,6 +102,7 @@ export interface Config {
   collectionsJoins: {};
   collectionsSelect: {
     users: UsersSelect<false> | UsersSelect<true>;
+    admins: AdminsSelect<false> | AdminsSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     'venue-variants': VenueVariantsSelect<false> | VenueVariantsSelect<true>;
     'gastro-variants': GastroVariantsSelect<false> | GastroVariantsSelect<true>;
@@ -136,9 +139,13 @@ export interface Config {
   globals: {};
   globalsSelect: {};
   locale: null;
-  user: User & {
-    collection: 'users';
-  };
+  user:
+    | (User & {
+        collection: 'users';
+      })
+    | (Admin & {
+        collection: 'admins';
+      });
   jobs: {
     tasks: {
       sendEmail: TaskSendEmail;
@@ -169,11 +176,55 @@ export interface UserAuthOperations {
     password: string;
   };
 }
+export interface AdminAuthOperations {
+  forgotPassword: {
+    email: string;
+    password: string;
+  };
+  login: {
+    email: string;
+    password: string;
+  };
+  registerFirstUser: {
+    email: string;
+    password: string;
+  };
+  unlock: {
+    email: string;
+    password: string;
+  };
+}
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
 export interface User {
+  id: string;
+  firstName: string;
+  lastName: string;
+  updatedAt: string;
+  createdAt: string;
+  email: string;
+  resetPasswordToken?: string | null;
+  resetPasswordExpiration?: string | null;
+  salt?: string | null;
+  hash?: string | null;
+  loginAttempts?: number | null;
+  lockUntil?: string | null;
+  sessions?:
+    | {
+        id: string;
+        createdAt?: string | null;
+        expiresAt: string;
+      }[]
+    | null;
+  password?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "admins".
+ */
+export interface Admin {
   id: string;
   role: ('admin' | 'public-api')[];
   updatedAt: string;
@@ -286,19 +337,13 @@ export interface VenueListing {
   id: string;
   name: string;
   slug: string;
+  status: 'draft' | 'active' | 'archived';
   company: string | Company;
   description?: string | null;
   shortDescription?: string | null;
-  location: {
-    address: string;
-    city: string | City;
-    postalCode?: string | null;
-    latitude?: number | null;
-    longitude?: number | null;
-  };
+  eventTypes?: (string | EventType)[] | null;
   indoor?: boolean | null;
   outdoor?: boolean | null;
-  eventTypes?: (string | EventType)[] | null;
   images: {
     coverImage: string;
     logo?: string | null;
@@ -308,6 +353,25 @@ export interface VenueListing {
           id?: string | null;
         }[]
       | null;
+  };
+  price: {
+    generalPrice: number;
+    seasonalPrices?:
+      | {
+          price: number;
+          description?: string | null;
+          from: string;
+          to: string;
+          id?: string | null;
+        }[]
+      | null;
+  };
+  location: {
+    address: string;
+    city: string | City;
+    postalCode?: string | null;
+    latitude?: number | null;
+    longitude?: number | null;
   };
   placeTypes?: (string | PlaceType)[] | null;
   capacity: number;
@@ -411,9 +475,9 @@ export interface Company {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "cities".
+ * via the `definition` "event-types".
  */
-export interface City {
+export interface EventType {
   id: string;
   name: string;
   slug: string;
@@ -422,9 +486,9 @@ export interface City {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "event-types".
+ * via the `definition` "cities".
  */
-export interface EventType {
+export interface City {
   id: string;
   name: string;
   slug: string;
@@ -581,7 +645,69 @@ export interface Service {
  */
 export interface GastroVariant {
   id: string;
-  listing?: (string | null) | GastroListing;
+  listing?: (string | null) | VenueListing;
+  name: string;
+  shortDescription?: string | null;
+  description?: string | null;
+  type?: ('allYear' | 'seasonal') | null;
+  availability: 'allDay' | 'selectedHours';
+  selectedHours?: {
+    from?: string | null;
+    to?: string | null;
+  };
+  price: {
+    generalPrice: number;
+    seasonalPrices?:
+      | {
+          price: number;
+          description?: string | null;
+          from: string;
+          to: string;
+          id?: string | null;
+        }[]
+      | null;
+  };
+  includes?:
+    | {
+        item?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  excludes?:
+    | {
+        item?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  includedSpaces?: (string | Space)[] | null;
+  activities?: (string | Activity)[] | null;
+  personnel?: (string | Personnel)[] | null;
+  services?: (string | Service)[] | null;
+  breakfast?: {
+    included?: boolean | null;
+    price?: number | null;
+    loweredPrice?: number | null;
+  };
+  eventTypes?: (string | EventType)[] | null;
+  images: {
+    mainImage: string;
+    gallery?:
+      | {
+          image?: string | null;
+          id?: string | null;
+        }[]
+      | null;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "entertainment-variants".
+ */
+export interface EntertainmentVariant {
+  id: string;
+  listing?: (string | null) | VenueListing;
   name: string;
   shortDescription?: string | null;
   description?: string | null;
@@ -645,19 +771,13 @@ export interface GastroListing {
   id: string;
   name: string;
   slug: string;
+  status: 'draft' | 'active' | 'archived';
   company: string | Company;
   description?: string | null;
   shortDescription?: string | null;
-  location: {
-    address: string;
-    city: string | City;
-    postalCode?: string | null;
-    latitude?: number | null;
-    longitude?: number | null;
-  };
+  eventTypes?: (string | EventType)[] | null;
   indoor?: boolean | null;
   outdoor?: boolean | null;
-  eventTypes?: (string | EventType)[] | null;
   images: {
     coverImage: string;
     logo?: string | null;
@@ -667,6 +787,25 @@ export interface GastroListing {
           id?: string | null;
         }[]
       | null;
+  };
+  price: {
+    generalPrice: number;
+    seasonalPrices?:
+      | {
+          price: number;
+          description?: string | null;
+          from: string;
+          to: string;
+          id?: string | null;
+        }[]
+      | null;
+  };
+  location: {
+    address: string;
+    city: string | City;
+    postalCode?: string | null;
+    latitude?: number | null;
+    longitude?: number | null;
   };
   placeTypes?: (string | PlaceType)[] | null;
   capacity: number;
@@ -754,19 +893,28 @@ export interface GastroListing {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "entertainment-variants".
+ * via the `definition` "entertainment-listings".
  */
-export interface EntertainmentVariant {
+export interface EntertainmentListing {
   id: string;
-  listing?: (string | null) | EntertainmentListing;
   name: string;
-  shortDescription?: string | null;
+  slug: string;
+  status: 'draft' | 'active' | 'archived';
+  company: string | Company;
   description?: string | null;
-  type?: ('allYear' | 'seasonal') | null;
-  availability: 'allDay' | 'selectedHours';
-  selectedHours?: {
-    from?: string | null;
-    to?: string | null;
+  shortDescription?: string | null;
+  eventTypes?: (string | EventType)[] | null;
+  indoor?: boolean | null;
+  outdoor?: boolean | null;
+  images: {
+    coverImage: string;
+    logo?: string | null;
+    gallery?:
+      | {
+          url?: string | null;
+          id?: string | null;
+        }[]
+      | null;
   };
   price: {
     generalPrice: number;
@@ -780,70 +928,12 @@ export interface EntertainmentVariant {
         }[]
       | null;
   };
-  includes?:
-    | {
-        item?: string | null;
-        id?: string | null;
-      }[]
-    | null;
-  excludes?:
-    | {
-        item?: string | null;
-        id?: string | null;
-      }[]
-    | null;
-  includedSpaces?: (string | Space)[] | null;
-  activities?: (string | Activity)[] | null;
-  personnel?: (string | Personnel)[] | null;
-  services?: (string | Service)[] | null;
-  breakfast?: {
-    included?: boolean | null;
-    price?: number | null;
-    loweredPrice?: number | null;
-  };
-  eventTypes?: (string | EventType)[] | null;
-  images: {
-    mainImage: string;
-    gallery?:
-      | {
-          image?: string | null;
-          id?: string | null;
-        }[]
-      | null;
-  };
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "entertainment-listings".
- */
-export interface EntertainmentListing {
-  id: string;
-  name: string;
-  slug: string;
-  company: string | Company;
-  description?: string | null;
-  shortDescription?: string | null;
   location: {
     address: string;
     city: string | City;
     postalCode?: string | null;
     latitude?: number | null;
     longitude?: number | null;
-  };
-  indoor?: boolean | null;
-  outdoor?: boolean | null;
-  eventTypes?: (string | EventType)[] | null;
-  images: {
-    coverImage: string;
-    logo?: string | null;
-    gallery?:
-      | {
-          url?: string | null;
-          id?: string | null;
-        }[]
-      | null;
   };
   placeTypes?: (string | PlaceType)[] | null;
   capacity: number;
@@ -960,6 +1050,7 @@ export interface Event {
   location?: {
     city?: (string | null) | City;
     address?: string | null;
+    useVenueAsLocation?: boolean | null;
     venue?: (string | null) | VenueListing;
   };
   guests: {
@@ -993,30 +1084,46 @@ export interface ChatMessage {
  */
 export interface Inquiry {
   id: string;
-  companyStatus: 'pending' | 'confirmed' | 'declined';
+  companyStatus: 'pending' | 'confirmed' | 'cancelled';
   userStatus: 'pending' | 'confirmed' | 'cancelled';
+  pricingMode: 'fixed' | 'open';
+  quotedPrice?: number | null;
+  agreedPrice?: number | null;
+  customRequest?: string | null;
   sentAt: string;
   lastCompanyMessageSentAt?: string | null;
   lastUserMessageSentAt?: string | null;
   lastUserSeenAt?: string | null;
   lastCompanySeenAt?: string | null;
   user: string | User;
-  company: string | Company;
+  listing:
+    | {
+        relationTo: 'venue-listings';
+        value: string | VenueListing;
+      }
+    | {
+        relationTo: 'gastro-listings';
+        value: string | GastroListing;
+      }
+    | {
+        relationTo: 'entertainment-listings';
+        value: string | EntertainmentListing;
+      };
   event: string | Event;
   listingType: 'venue' | 'gastro' | 'entertainment';
-  variant:
-    | {
+  variant?:
+    | ({
         relationTo: 'entertainment-variants';
         value: string | EntertainmentVariant;
-      }
-    | {
+      } | null)
+    | ({
         relationTo: 'gastro-variants';
         value: string | GastroVariant;
-      }
-    | {
+      } | null)
+    | ({
         relationTo: 'venue-variants';
         value: string | VenueVariant;
-      };
+      } | null);
   updatedAt: string;
   createdAt: string;
 }
@@ -1141,6 +1248,10 @@ export interface PayloadLockedDocument {
         value: string | User;
       } | null)
     | ({
+        relationTo: 'admins';
+        value: string | Admin;
+      } | null)
+    | ({
         relationTo: 'media';
         value: string | Media;
       } | null)
@@ -1233,10 +1344,15 @@ export interface PayloadLockedDocument {
         value: string | Inquiry;
       } | null);
   globalSlug?: string | null;
-  user: {
-    relationTo: 'users';
-    value: string | User;
-  };
+  user:
+    | {
+        relationTo: 'users';
+        value: string | User;
+      }
+    | {
+        relationTo: 'admins';
+        value: string | Admin;
+      };
   updatedAt: string;
   createdAt: string;
 }
@@ -1246,10 +1362,15 @@ export interface PayloadLockedDocument {
  */
 export interface PayloadPreference {
   id: string;
-  user: {
-    relationTo: 'users';
-    value: string | User;
-  };
+  user:
+    | {
+        relationTo: 'users';
+        value: string | User;
+      }
+    | {
+        relationTo: 'admins';
+        value: string | Admin;
+      };
   key?: string | null;
   value?:
     | {
@@ -1279,6 +1400,30 @@ export interface PayloadMigration {
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
+  firstName?: T;
+  lastName?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  email?: T;
+  resetPasswordToken?: T;
+  resetPasswordExpiration?: T;
+  salt?: T;
+  hash?: T;
+  loginAttempts?: T;
+  lockUntil?: T;
+  sessions?:
+    | T
+    | {
+        id?: T;
+        createdAt?: T;
+        expiresAt?: T;
+      };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "admins_select".
+ */
+export interface AdminsSelect<T extends boolean = true> {
   role?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -1562,21 +1707,13 @@ export interface EventTypesSelect<T extends boolean = true> {
 export interface VenueListingsSelect<T extends boolean = true> {
   name?: T;
   slug?: T;
+  status?: T;
   company?: T;
   description?: T;
   shortDescription?: T;
-  location?:
-    | T
-    | {
-        address?: T;
-        city?: T;
-        postalCode?: T;
-        latitude?: T;
-        longitude?: T;
-      };
+  eventTypes?: T;
   indoor?: T;
   outdoor?: T;
-  eventTypes?: T;
   images?:
     | T
     | {
@@ -1588,6 +1725,29 @@ export interface VenueListingsSelect<T extends boolean = true> {
               url?: T;
               id?: T;
             };
+      };
+  price?:
+    | T
+    | {
+        generalPrice?: T;
+        seasonalPrices?:
+          | T
+          | {
+              price?: T;
+              description?: T;
+              from?: T;
+              to?: T;
+              id?: T;
+            };
+      };
+  location?:
+    | T
+    | {
+        address?: T;
+        city?: T;
+        postalCode?: T;
+        latitude?: T;
+        longitude?: T;
       };
   placeTypes?: T;
   capacity?: T;
@@ -1678,21 +1838,13 @@ export interface VenueListingsSelect<T extends boolean = true> {
 export interface GastroListingsSelect<T extends boolean = true> {
   name?: T;
   slug?: T;
+  status?: T;
   company?: T;
   description?: T;
   shortDescription?: T;
-  location?:
-    | T
-    | {
-        address?: T;
-        city?: T;
-        postalCode?: T;
-        latitude?: T;
-        longitude?: T;
-      };
+  eventTypes?: T;
   indoor?: T;
   outdoor?: T;
-  eventTypes?: T;
   images?:
     | T
     | {
@@ -1704,6 +1856,29 @@ export interface GastroListingsSelect<T extends boolean = true> {
               url?: T;
               id?: T;
             };
+      };
+  price?:
+    | T
+    | {
+        generalPrice?: T;
+        seasonalPrices?:
+          | T
+          | {
+              price?: T;
+              description?: T;
+              from?: T;
+              to?: T;
+              id?: T;
+            };
+      };
+  location?:
+    | T
+    | {
+        address?: T;
+        city?: T;
+        postalCode?: T;
+        latitude?: T;
+        longitude?: T;
       };
   placeTypes?: T;
   capacity?: T;
@@ -1794,21 +1969,13 @@ export interface GastroListingsSelect<T extends boolean = true> {
 export interface EntertainmentListingsSelect<T extends boolean = true> {
   name?: T;
   slug?: T;
+  status?: T;
   company?: T;
   description?: T;
   shortDescription?: T;
-  location?:
-    | T
-    | {
-        address?: T;
-        city?: T;
-        postalCode?: T;
-        latitude?: T;
-        longitude?: T;
-      };
+  eventTypes?: T;
   indoor?: T;
   outdoor?: T;
-  eventTypes?: T;
   images?:
     | T
     | {
@@ -1820,6 +1987,29 @@ export interface EntertainmentListingsSelect<T extends boolean = true> {
               url?: T;
               id?: T;
             };
+      };
+  price?:
+    | T
+    | {
+        generalPrice?: T;
+        seasonalPrices?:
+          | T
+          | {
+              price?: T;
+              description?: T;
+              from?: T;
+              to?: T;
+              id?: T;
+            };
+      };
+  location?:
+    | T
+    | {
+        address?: T;
+        city?: T;
+        postalCode?: T;
+        latitude?: T;
+        longitude?: T;
       };
   placeTypes?: T;
   capacity?: T;
@@ -2064,6 +2254,7 @@ export interface EventsSelect<T extends boolean = true> {
     | {
         city?: T;
         address?: T;
+        useVenueAsLocation?: T;
         venue?: T;
       };
   guests?:
@@ -2099,13 +2290,17 @@ export interface ChatMessagesSelect<T extends boolean = true> {
 export interface InquiriesSelect<T extends boolean = true> {
   companyStatus?: T;
   userStatus?: T;
+  pricingMode?: T;
+  quotedPrice?: T;
+  agreedPrice?: T;
+  customRequest?: T;
   sentAt?: T;
   lastCompanyMessageSentAt?: T;
   lastUserMessageSentAt?: T;
   lastUserSeenAt?: T;
   lastCompanySeenAt?: T;
   user?: T;
-  company?: T;
+  listing?: T;
   event?: T;
   listingType?: T;
   variant?: T;

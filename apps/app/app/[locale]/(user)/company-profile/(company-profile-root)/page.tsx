@@ -1,26 +1,14 @@
-import PageHeading from "../../components/page-heading";
-import { Building2, Briefcase, Star, Plus } from "lucide-react";
-import { Link } from "@/app/i18n/navigation";
-import { COMPANIES, LISTINGS } from "../_mock/mock";
-import { SummaryCard } from "../../user-profile/components/summary-card";
-import CompanyCard from "../../components/collection-components/company-card";
-import RowContainer from "../../components/row-container";
-import CompanyRow from "../../components/collection-components/company-row";
 import Button from "@/app/components/ui/atoms/button";
+import { Briefcase, Building2 } from "lucide-react";
+import PageHeading from "../../components/page-heading";
+import RowContainer from "../../components/row-container";
+import { SummaryCard } from "../../user-profile/components/summary-card";
+import { COMPANIES, LISTINGS } from "../_mock/mock";
+import EntityRow from "../../components/entity-row";
+import EntityComponentTag from "../../components/entity-component-tag";
 
 export default function CompanyProfileDashboardPage() {
   const totalListings = LISTINGS.length;
-  const totalReviews = LISTINGS.reduce(
-    (sum, l) => sum + (l.reviewsCount ?? 0),
-    0,
-  );
-  const avgRating =
-    LISTINGS.length > 0
-      ? (
-          LISTINGS.reduce((sum, l) => sum + (l.rating ?? 0), 0) /
-          LISTINGS.length
-        ).toFixed(1)
-      : "–";
 
   return (
     <main className="w-full">
@@ -65,7 +53,25 @@ export default function CompanyProfileDashboardPage() {
           </div>
         }
         rowComponents={COMPANIES.map((company) => (
-          <CompanyRow key={company.id} company={company} />
+          <EntityRow
+            key={company.id}
+            icon="Building2"
+            iconColor="text-rose-500"
+            iconBackgroundColor="bg-rose-50"
+            label={company.name}
+            items={[{ icon: "Mail", content: company.email }]}
+            link={{
+              pathname: "/company-profile/companies/[companyId]",
+              params: { companyId: company.id },
+            }}
+            rightComponent={
+              <EntityComponentTag
+                text={`IČO: ${company.ico}`}
+                bgColor="bg-zinc-100"
+                textColor="text-textDark"
+              />
+            }
+          />
         ))}
         headerRightComponent={
           <Button

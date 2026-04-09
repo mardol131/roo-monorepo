@@ -88,6 +88,11 @@ export const Events: CollectionConfig = {
           type: 'text',
         },
         {
+          name: 'useVenueAsLocation',
+          type: 'checkbox',
+          defaultValue: false,
+        },
+        {
           name: 'venue',
           type: 'relationship',
           relationTo: 'venue-listings',

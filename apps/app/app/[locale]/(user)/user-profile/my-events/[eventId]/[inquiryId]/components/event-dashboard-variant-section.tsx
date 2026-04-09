@@ -1,10 +1,10 @@
 import Text from "@/app/components/ui/atoms/text";
+import { EntertainmentVariant, GastroVariant, VenueVariant } from "@roo/common";
 import { Check, X } from "lucide-react";
 import SectionHeader from "./section-header";
-import { Inquiry } from "@roo/common";
 
 type Props = {
-  variant: Inquiry["variant"];
+  variant: VenueVariant | GastroVariant | EntertainmentVariant;
 };
 
 export default function EventDashboardVariantSection({ variant }: Props) {
@@ -14,7 +14,7 @@ export default function EventDashboardVariantSection({ variant }: Props) {
       <div className="p-5 flex flex-col gap-4">
         <div>
           <Text variant="label1" color="dark" className="font-semibold">
-            {variant.title}
+            {variant.name}
           </Text>
           <Text
             variant="label4"
@@ -27,15 +27,12 @@ export default function EventDashboardVariantSection({ variant }: Props) {
 
         <div className="flex items-baseline gap-1.5">
           <Text variant="heading5" color="dark" className="font-bold">
-            {variant.price.toLocaleString("cs-CZ")} Kč
-          </Text>
-          <Text variant="label4" color="secondary">
-            {variant.duration}
+            {variant.price.generalPrice.toLocaleString("cs-CZ")} Kč
           </Text>
         </div>
 
         <div className="flex flex-col gap-3 pt-3 border-t border-zinc-100">
-          {variant.includes.length > 0 && (
+          {variant.includes && variant.includes.length > 0 && (
             <div className="flex flex-col gap-1.5">
               <Text
                 variant="label4"
@@ -46,19 +43,19 @@ export default function EventDashboardVariantSection({ variant }: Props) {
               </Text>
               {variant.includes.map((item) => (
                 <span
-                  key={item}
+                  key={item.id}
                   className="flex items-center gap-2 text-xs text-zinc-700"
                 >
                   <Check
                     className="w-3.5 h-3.5 text-emerald-500 shrink-0"
                     strokeWidth={2.5}
                   />
-                  {item}
+                  {item.item}
                 </span>
               ))}
             </div>
           )}
-          {variant.excludes.length > 0 && (
+          {variant.excludes && variant.excludes.length > 0 && (
             <div className="flex flex-col gap-1.5">
               <Text
                 variant="label4"
@@ -69,14 +66,14 @@ export default function EventDashboardVariantSection({ variant }: Props) {
               </Text>
               {variant.excludes.map((item) => (
                 <span
-                  key={item}
+                  key={item.id}
                   className="flex items-center gap-2 text-xs text-zinc-500"
                 >
                   <X
                     className="w-3.5 h-3.5 text-red-400 shrink-0"
                     strokeWidth={2.5}
                   />
-                  {item}
+                  {item.item}
                 </span>
               ))}
             </div>

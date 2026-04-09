@@ -1,13 +1,14 @@
 import { adminOrApiKeyAuth } from '@/functions/ACL'
 import type { CollectionConfig } from 'payload'
 
-export const Users: CollectionConfig = {
-  slug: 'users',
+export const Admins: CollectionConfig = {
+  slug: 'admins',
   admin: {
     useAsTitle: 'email',
   },
   auth: {
     useSessions: true,
+    useAPIKey: true,
   },
   access: {
     create: async ({ req }) => {
@@ -25,14 +26,11 @@ export const Users: CollectionConfig = {
   },
   fields: [
     {
-      name: 'firstName',
-      type: 'text',
+      name: 'role',
+      type: 'select',
+      options: ['admin', 'public-api'],
       required: true,
-    },
-    {
-      name: 'lastName',
-      type: 'text',
-      required: true,
+      hasMany: true,
     },
   ],
 }

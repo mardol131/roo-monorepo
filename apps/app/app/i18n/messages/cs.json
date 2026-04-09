@@ -2,5 +2,24 @@
   "homepage": {
     "title": "Domů",
     "description": "Roo - Vše pro vaše domácí mazlíčky na jednom místě"
+  },
+  "listings": {
+    "status": {
+      "active": "Aktivní",
+      "draft": "Neaktivní",
+      "archived": "Archivované"
+    }
+  },
+  "inquiries": {
+    "status": {
+      "pending": "Čekající",
+      "confirmed": "Potvrzené",
+      "cancelled": "Odmítnuté"
+    }
+  },
+  "common": {
+    "words": {
+      "all": "Vše"
+    }
   }
 }

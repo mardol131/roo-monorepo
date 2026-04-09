@@ -1,5 +1,6 @@
 @theme {
   --color-primary: var(--color-rose-500);
+  --color-primary-surface: var(--color-rose-50);
   --color-onPrimary: var(--color-zinc-400);
 
   --color-secondary: var(--color-zinc-900);
@@ -7,4 +8,13 @@
 
   --color-textDark: var(--color-zinc-800);
   --color-textLight: var(--color-zinc-400);
+
+  --color-listing-surface: var(--color-violet-50);
+  --color-listing: var(--color-violet-600);
+
+  --color-variant-surface: var(--color-amber-50);
+  --color-variant: var(--color-amber-600);
+
+  --color-inquiry-surface: var(--color-sky-50);
+  --color-inquiry: var(--color-sky-600);
 }

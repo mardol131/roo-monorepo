@@ -2,7 +2,13 @@
 
 import Text from "@/app/components/ui/atoms/text";
 import { EVENT_STATUS } from "@/app/data/event";
-import { formatGuestsString, Inquiry } from "@roo/common";
+import {
+  aggregateInquiryStatus,
+  formatEventAddress,
+  formatGuestsString,
+  getIdFromRelationshipField,
+  Inquiry,
+} from "@roo/common";
 import type { LucideIcon } from "lucide-react";
 import * as lucideIcons from "lucide-react";
 import {
@@ -17,11 +23,11 @@ import {
 import Link from "next/link";
 import RowContainer from "../../../components/row-container";
 import { getInquiries, MOCK_EVENT } from "../../_mock/mock-data";
-import { InquiryRow } from "../../../components/collection-components/inquiry-row";
 import { SummaryCard } from "../../components/summary-card";
 import { format } from "date-fns";
 import { cs } from "date-fns/locale";
 import DashboardHeader from "../../../company-profile/components/dashboard-header";
+import EntityRow from "../../../components/entity-row";
 
 // ── Page ───────────────────────────────────────────────────────────────────────
 
@@ -29,15 +35,19 @@ export default function EventDetailPage() {
   const event = MOCK_EVENT;
   const eventStatus = EVENT_STATUS[event.status];
   const Icon =
-    (lucideIcons[event.data.icon as keyof typeof lucideIcons] as LucideIcon) ??
+    (lucideIcons[event.icon as keyof typeof lucideIcons] as LucideIcon) ??
     Calendar;
 
-  const MOCK_INQUIRIES = getInquiries() as Inquiry[];
+  const MOCK_INQUIRIES = getInquiries();
 
-  const confirmed = MOCK_INQUIRIES.filter((i) => i.status === "confirmed");
-  const pending = MOCK_INQUIRIES.filter((i) => i.status === "pending");
+  const confirmed = MOCK_INQUIRIES.filter(
+    (i) => aggregateInquiryStatus(i) === "confirmed",
+  );
+  const pending = MOCK_INQUIRIES.filter(
+    (i) => aggregateInquiryStatus(i) === "pending",
+  );
   const totalCost = confirmed
-    .reduce((sum, i) => sum + i.variant.price, 0)
+    .reduce((sum, i) => sum + (i.price || 0), 0)
     .toLocaleString("cs-CZ");
 
   return (
@@ -52,7 +62,7 @@ export default function EventDetailPage() {
       </Link>
       <DashboardHeader
         icon={Icon}
-        name={event.data.name}
+        name={event.name}
         nameSideComponent={
           <span
             className={`text-xs font-medium px-2.5 py-1 rounded-full ${eventStatus.className}`}
@@ -61,18 +71,18 @@ export default function EventDetailPage() {
           </span>
         }
         infoItems={[
-          { icon: "MapPin", text: event.data.location.name },
+          { icon: "MapPin", text: formatEventAddress(event) },
           {
             icon: "Calendar",
-            text: `${format(event.data.date.start, "d. M. yyyy", {
+            text: `${format(event.date.start, "d. M. yyyy", {
               locale: cs,
-            })} ${format(event.data.date.start, "HH:mm", {
+            })} ${format(event.date.start, "HH:mm", {
               locale: cs,
-            })} – ${format(event.data.date.end, "HH:mm", { locale: cs })}`,
+            })} – ${format(event.date.end, "HH:mm", { locale: cs })}`,
           },
           {
             icon: "Users",
-            text: formatGuestsString({ ...event.data.guests }),
+            text: formatGuestsString({ ...event.guests }),
           },
         ]}
       />
@@ -114,7 +124,25 @@ export default function EventDetailPage() {
           </span>
         }
         rowComponents={MOCK_INQUIRIES.map((inquiry) => (
-          <InquiryRow key={inquiry.id} inquiry={inquiry} eventId={event.id} />
+          <EntityRow
+            key={inquiry.id}
+            label={
+              typeof inquiry.listing.value !== "string"
+                ? inquiry.listing.value.name
+                : "Poptávka"
+            }
+            icon="MessageSquare"
+            iconBackgroundColor="bg-rose-50"
+            iconColor="text-rose-500"
+            items={[]}
+            link={{
+              pathname: "/user-profile/my-events/[eventId]/[inquiryId]",
+              params: {
+                eventId: getIdFromRelationshipField(inquiry.event),
+                inquiryId: inquiry.id,
+              },
+            }}
+          />
         ))}
         emptyHeading="Zatím žádné poptávky"
         emptyText="Přejděte do katalogu a oslovte dodavatele pro svou akci."

@@ -15,3 +15,7 @@
 html {
   font-family: Montserrat;
 }
+
+.smooth {
+  @apply ease-in-out transition-all;
+}

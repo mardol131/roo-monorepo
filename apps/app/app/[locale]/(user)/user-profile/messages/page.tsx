@@ -1,8 +1,10 @@
 import Text from "@/app/components/ui/atoms/text";
 import { getInquiries } from "../_mock/mock-data";
-import { InquiryCard } from "../../components/collection-components/inquiry-card";
 import { MessageCircle } from "lucide-react";
 import PageHeading from "../../components/page-heading";
+import { getIdFromRelationshipField } from "../../../../../../../packages/common/dist/functions/get-id-from-relationship-field";
+import EntityRow from "../../components/entity-row";
+import EntityCard from "../../components/entity-card";
 
 export default function MessagesPage() {
   const inquiries = getInquiries();
@@ -19,13 +21,21 @@ export default function MessagesPage() {
       ) : (
         <div className="flex flex-col gap-3">
           {inquiries.map((inquiry) => (
-            <InquiryCard
+            <EntityCard
               key={inquiry.id}
-              inquiry={inquiry}
+              label={
+                typeof inquiry.listing.value !== "string"
+                  ? inquiry.listing.value.name
+                  : "Poptávka"
+              }
+              icon="MessageSquare"
+              iconBackgroundColor="bg-rose-50"
+              iconColor="text-rose-500"
+              items={[]}
               link={{
                 pathname: "/user-profile/my-events/[eventId]/[inquiryId]",
                 params: {
-                  eventId: inquiry.event.id,
+                  eventId: getIdFromRelationshipField(inquiry.event),
                   inquiryId: inquiry.id,
                 },
               }}

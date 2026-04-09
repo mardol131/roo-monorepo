@@ -1,9 +1,8 @@
-import Text from "@/app/components/ui/atoms/text";
-import { getInquiries } from "@/app/[locale]/(user)/user-profile/_mock/mock-data";
-import { InquiryCard } from "@/app/[locale]/(user)/components/collection-components/inquiry-card";
-import { MessageCircle } from "lucide-react";
-import PageHeading from "@/app/[locale]/(user)/components/page-heading";
 import { EmptyState } from "@/app/[locale]/(user)/components/empty-state";
+import EntityCard from "@/app/[locale]/(user)/components/entity-card";
+import PageHeading from "@/app/[locale]/(user)/components/page-heading";
+import { getInquiries } from "@/app/[locale]/(user)/user-profile/_mock/mock-data";
+import { getIdFromRelationshipField } from "@roo/common";
 
 export default async function page({
   params,
@@ -28,15 +27,21 @@ export default async function page({
       ) : (
         <div className="flex flex-col gap-3">
           {inquiries.map((inquiry) => (
-            <InquiryCard
+            <EntityCard
               key={inquiry.id}
-              inquiry={inquiry}
+              label={
+                typeof inquiry.listing.value !== "string"
+                  ? inquiry.listing.value.name
+                  : "Poptávka"
+              }
+              icon="MessageSquare"
+              iconBackgroundColor="bg-rose-50"
+              iconColor="text-rose-500"
+              items={[]}
               link={{
-                pathname:
-                  "/company-profile/companies/[companyId]/listings/[listingId]/inquiries/[inquiryId]",
+                pathname: "/user-profile/my-events/[eventId]/[inquiryId]",
                 params: {
-                  companyId,
-                  listingId,
+                  eventId: getIdFromRelationshipField(inquiry.event),
                   inquiryId: inquiry.id,
                 },
               }}

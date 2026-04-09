@@ -6,7 +6,7 @@ type Props = {
   label: string;
   subLabel?: string;
   headerRightComponent?: React.ReactElement;
-  rowComponents: React.ReactElement[];
+  rowComponents: (React.ReactElement | null)[];
   emptyHeading?: string;
   emptyText?: string;
   className?: string;

@@ -4,18 +4,31 @@ import React, { useEffect, useRef, useState } from "react";
 import Text from "@/app/components/ui/atoms/text";
 import { MessageCircle, Send } from "lucide-react";
 import SectionHeader from "./section-header";
-import { InquiryChatMessage } from "@roo/common";
 import { format } from "date-fns";
+import { ChatMessage, getIdFromRelationshipField } from "@roo/common";
+
+type ChatMessageProps = {
+  id: string;
+  senderType: "user" | "supplier";
+  content: string;
+  sentAt: Date;
+};
 
 export default function ChatWindow({
   supplierName,
   initialMessages,
 }: {
   supplierName: string;
-  initialMessages: InquiryChatMessage[];
+  initialMessages: ChatMessage[];
 }) {
-  const [messages, setMessages] =
-    useState<InquiryChatMessage[]>(initialMessages);
+  const [messages, setMessages] = useState<ChatMessageProps[]>(
+    initialMessages.map((m) => ({
+      id: m.id,
+      senderType: m.senderType === "user" ? "user" : "supplier",
+      content: m.content,
+      sentAt: new Date(m.sentAt),
+    })),
+  );
   const [draft, setDraft] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -26,22 +39,13 @@ export default function ChatWindow({
       ...prev,
       {
         id: `m${Date.now()}`,
-        sender: "user",
+        senderType: "user",
         content: trimmed,
-        timestamp: new Date(),
+        sentAt: new Date(),
       },
     ]);
     setDraft("");
   };
-
-  useEffect(() => {
-    if (messagesEndRef.current) {
-      messagesEndRef.current.scrollTo({
-        top: messagesEndRef.current.scrollHeight,
-        behavior: "smooth",
-      });
-    }
-  }, [messages]);
 
   useEffect(() => {
     if (messagesEndRef.current) {
@@ -99,8 +103,8 @@ export default function ChatWindow({
   );
 }
 
-function ChatBubble({ message }: { message: InquiryChatMessage }) {
-  const isUser = message.sender === "user";
+function ChatBubble({ message }: { message: ChatMessageProps }) {
+  const isUser = message.senderType === "user";
   return (
     <div
       className={`flex flex-col gap-1 ${isUser ? "items-end" : "items-start"}`}
@@ -115,7 +119,7 @@ function ChatBubble({ message }: { message: InquiryChatMessage }) {
         {message.content}
       </div>
       <Text variant="label4" color="secondary" className="px-1">
-        {format(message.timestamp, "d. M. yyyy, H:mm")}
+        {format(message.sentAt, "d. M. yyyy, H:mm")}
       </Text>
     </div>
   );

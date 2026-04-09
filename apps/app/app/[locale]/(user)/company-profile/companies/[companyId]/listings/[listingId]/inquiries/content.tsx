@@ -1,16 +1,12 @@
 "use client";
 
-import { InquiryCard } from "@/app/[locale]/(user)/components/collection-components/inquiry-card";
 import CardContainer from "@/app/[locale]/(user)/components/card-container";
-import { getInquiries } from "@/app/[locale]/(user)/user-profile/_mock/mock-data";
-import { Inquiry, InquiryStatus } from "@roo/common";
-
-const TABS: { label: string; value: InquiryStatus | "all" }[] = [
-  { label: "Všechny", value: "all" },
-  { label: "Čekající", value: "pending" },
-  { label: "Potvrzené", value: "confirmed" },
-  { label: "Odmítnuté", value: "declined" },
-];
+import EntityCard from "@/app/[locale]/(user)/components/entity-card";
+import EntityRow from "@/app/[locale]/(user)/components/entity-row";
+import InquiryStatusTag from "@/app/[locale]/(user)/components/inquiry-status-tag";
+import { getIdFromRelationshipField, Inquiry } from "@roo/common";
+import { icons } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 type Props = {
   companyId: string;
@@ -19,21 +15,62 @@ type Props = {
 };
 
 export default function PageContent({ companyId, listingId, items }: Props) {
+  const t = useTranslations();
   return (
     <CardContainer
-      filters={TABS}
+      filters={[
+        { label: t("common.words.all"), value: "all" },
+        { label: t("inquiries.status.pending"), value: "pending" },
+        { label: t("inquiries.status.confirmed"), value: "confirmed" },
+        { label: t("inquiries.status.cancelled"), value: "cancelled" },
+      ]}
       defaultFilter="all"
       items={items ?? []}
-      filterFn={(item, filter) => (item as Inquiry).status === filter}
+      filterFn={(item, filter) => (item as Inquiry).userStatus === filter}
       renderItem={(item) => {
         const inquiry = item as Inquiry;
         return (
-          <InquiryCard
-            inquiry={inquiry}
+          <EntityCard
+            key={inquiry.id}
+            label={
+              typeof inquiry.listing.value !== "string"
+                ? inquiry.listing.value.name
+                : "Poptávka"
+            }
+            rightComponent={
+              <InquiryStatusTag
+                userStatus={inquiry.userStatus}
+                companyStatus={inquiry.companyStatus}
+              />
+            }
+            icon="MessageSquare"
+            iconBackgroundColor="bg-inquiry-surface"
+            iconColor="text-inquiry"
+            items={[
+              ...(inquiry.agreedPrice
+                ? [
+                    {
+                      content: `${inquiry.agreedPrice} Kč`,
+                      icon: "Tag" as keyof typeof icons,
+                    },
+                  ]
+                : inquiry.quotedPrice
+                  ? [
+                      {
+                        content: `${inquiry.quotedPrice} Kč`,
+                        icon: "Tag" as keyof typeof icons,
+                      },
+                    ]
+                  : []),
+            ]}
             link={{
               pathname:
                 "/company-profile/companies/[companyId]/listings/[listingId]/inquiries/[inquiryId]",
-              params: { companyId, listingId, inquiryId: inquiry.id },
+              params: {
+                companyId,
+                listingId,
+                inquiryId: inquiry.id,
+              },
             }}
           />
         );

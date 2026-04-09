@@ -1,5 +1,7 @@
 import type { CollectionConfig } from 'payload'
 
+const INQUIRY_STATUS = ['pending', 'confirmed', 'cancelled']
+
 export const Inquiries: CollectionConfig = {
   slug: 'inquiries',
   admin: {
@@ -11,14 +13,33 @@ export const Inquiries: CollectionConfig = {
       type: 'select',
       required: true,
       defaultValue: 'pending',
-      options: ['pending', 'confirmed', 'declined'],
+      options: INQUIRY_STATUS,
     },
     {
       name: 'userStatus',
       type: 'select',
       required: true,
       defaultValue: 'pending',
-      options: ['pending', 'confirmed', 'cancelled'],
+      options: INQUIRY_STATUS,
+    },
+    {
+      name: 'pricingMode',
+      type: 'select',
+      required: true,
+      defaultValue: 'fixed',
+      options: ['fixed', 'open'],
+    },
+    {
+      name: 'quotedPrice',
+      type: 'number',
+    },
+    {
+      name: 'agreedPrice',
+      type: 'number',
+    },
+    {
+      name: 'customRequest',
+      type: 'textarea',
     },
     {
       name: 'sentAt',
@@ -48,9 +69,9 @@ export const Inquiries: CollectionConfig = {
       required: true,
     },
     {
-      name: 'company',
+      name: 'listing',
       type: 'relationship',
-      relationTo: 'companies',
+      relationTo: ['venue-listings', 'gastro-listings', 'entertainment-listings'],
       required: true,
     },
     {
@@ -69,7 +90,6 @@ export const Inquiries: CollectionConfig = {
       name: 'variant',
       type: 'relationship',
       relationTo: ['entertainment-variants', 'gastro-variants', 'venue-variants'],
-      required: true,
     },
   ],
 }

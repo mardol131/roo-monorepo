@@ -32,6 +32,7 @@ import { GastroListings } from './collections/listings/gastro-listings'
 import { EntertainmentListings } from './collections/listings/entertainment-listings'
 import { GastroVariants } from './collections/variants/gastro-variants'
 import { EntertainmentVariants } from './collections/variants/entertainment-variants'
+import { Admins } from './collections/admins'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -53,13 +54,14 @@ export default buildConfig({
     workflows: [],
   },
   admin: {
-    user: Users.slug,
+    user: Admins.slug,
     importMap: {
       baseDir: path.resolve(dirname),
     },
   },
   collections: [
     Users,
+    Admins,
     Media,
     VenueVariants,
     GastroVariants,

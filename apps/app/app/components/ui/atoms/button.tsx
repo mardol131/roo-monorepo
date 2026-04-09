@@ -3,10 +3,16 @@ import * as lucideIcons from "lucide-react";
 
 type ButtonVersion =
   | "primary"
+  | "primarySoft"
   | "secondary"
   | "plain"
   | "outlined"
   | "link"
+  | "listing"
+  | "listingFull"
+  | "variant"
+  | "variantFull"
+  | "none"
   | "white";
 type ButtonSize = "2xl" | "xl" | "lg" | "md" | "sm";
 type ButtonRounding = "none" | "sm" | "md" | "lg" | "xl" | "2xl" | "full";
@@ -38,20 +44,29 @@ export interface ButtonProps {
   iconRight?: LucideIcons;
   disabled?: boolean;
   htmlType?: HTMLButtonElement["type"];
+  ownColor?: string;
 }
 
 const getVersionClass = (
   version: ButtonVersion,
   disabled?: boolean,
+  ownColor?: string,
 ): string => {
   const versionClasses: Record<ButtonVersion, string> = {
-    primary: "bg-rose-500 text-white shadow hover:shadow-md",
+    primary: "bg-primary text-white shadow hover:shadow-md",
+    primarySoft:
+      "bg-primary-surface text-primary hover:bg-primary-surface hover:bg-opacity-90",
     secondary: "bg-zinc-900 text-white shadow hover:shadow-md",
     plain: "bg-transparent text-zinc-900",
+    listing: "bg-listing-surface text-listing hover:bg-listing-surface",
+    listingFull: "bg-listing text-white",
+    variant: "bg-variant-surface text-variant hover:bg-variant-surface",
+    variantFull: "bg-variant text-white",
     outlined:
       "bg-transparent text-zinc-900 border border-zinc-900 hover:bg-black/5",
     link: "bg-transparent text-rose-500 underline hover:opacity-80 active:opacity-60 transition-opacity p-0",
     white: "bg-white text-dark shadow hover:shadow-md",
+    none: ownColor || "",
   };
   return versionClasses[version];
 };
@@ -90,23 +105,20 @@ export default function Button({
   iconRight,
   disabled,
   htmlType = "button",
+  ownColor,
 }: ButtonProps) {
   const baseClasses = `${!disabled ? "cursor-pointer" : ""} inline-flex items-center ${getRoundingClass(rounding)} justify-center font-medium transition-all ease-in-out ${disabled ? "opacity-50" : "hover:scale-105"} gap-2`;
-  const versionClass = getVersionClass(version);
+  const versionClass = getVersionClass(version, disabled, ownColor);
   const sizeClass = getSizeClass(size);
   const iconSize = getIconSize(size);
   const buttonClass =
     `${baseClasses} ${versionClass} ${version !== "link" ? sizeClass : ""} ${className || ""}`.trim();
 
   const LeftIcon = iconLeft
-    ? (lucideIcons[
-        iconLeft as keyof typeof lucideIcons
-      ] as React.ComponentType<{ className?: string }>)
+    ? (lucideIcons[iconLeft] as React.ComponentType<{ className?: string }>)
     : null;
   const RightIcon = iconRight
-    ? (lucideIcons[
-        iconRight as keyof typeof lucideIcons
-      ] as React.ComponentType<{ className?: string }>)
+    ? (lucideIcons[iconRight] as React.ComponentType<{ className?: string }>)
     : null;
 
   const buttonContent = (

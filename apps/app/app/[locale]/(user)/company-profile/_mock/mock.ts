@@ -1,9 +1,19 @@
-import { Company, Listing, Variant } from "@roo/common";
+import {
+  Company,
+  VenueListing,
+  VenueVariant,
+  User,
+  GastroListing,
+  EntertainmentListing,
+} from "@roo/common";
 
-export const USER = {
-  name: "Jan Novák",
+export const USER: User = {
+  id: "user-1",
+  updatedAt: "2025-01-01T00:00:00.000Z",
+  createdAt: "2025-01-01T00:00:00.000Z",
+  firstName: "Jan",
+  lastName: "Novák",
   email: "jan.novak@email.cz",
-  initials: "JN",
 };
 
 export const COMPANIES: Company[] = [
@@ -16,7 +26,9 @@ export const COMPANIES: Company[] = [
     email: "info@novakevents.cz",
     phone: "+420 731 123 456",
     website: "https://novakevents.cz",
-    city: { id: "loc-1", label: "Praha" },
+    owner: "user-1",
+    updatedAt: "2025-01-01T00:00:00.000Z",
+    createdAt: "2025-01-01T00:00:00.000Z",
   },
   {
     id: "2",
@@ -26,7 +38,9 @@ export const COMPANIES: Company[] = [
     email: "booking@djstudiopraha.cz",
     phone: "+420 602 987 654",
     website: "https://djstudiopraha.cz",
-    city: { id: "loc-1", label: "Praha" },
+    owner: "user-1",
+    updatedAt: "2025-01-01T00:00:00.000Z",
+    createdAt: "2025-01-01T00:00:00.000Z",
   },
   {
     id: "3",
@@ -36,70 +50,109 @@ export const COMPANIES: Company[] = [
       "Fotografické a videografické služby pro svatby a firemní portrétní focení.",
     email: "martin@fotovideanovak.cz",
     phone: "+420 776 456 789",
-    city: { id: "loc-2", label: "Brno" },
+    owner: "user-1",
+    updatedAt: "2025-01-01T00:00:00.000Z",
+    createdAt: "2025-01-01T00:00:00.000Z",
   },
 ];
 
-export const LISTINGS: Listing[] = [
-  {
-    id: "101",
-    name: "Gastro catering",
-    description:
-      "Komplexní cateringové služby pro firemní akce, svatby a soukromé oslavy.",
-    city: { id: "loc-1", label: "Praha" },
-    priceFrom: 12000,
-    priceDuration: "za akci",
-    variantsCount: 3,
-    rating: 4.8,
-    reviewsCount: 24,
-  },
-  {
-    id: "102",
-    name: "Místo pro akce",
-    description:
-      "Pronájem exkluzivního prostoru pro firemní i soukromé události až pro 200 osob.",
-    city: { id: "loc-1", label: "Praha" },
-    priceFrom: 45000,
-    priceDuration: "za den",
-    variantsCount: 2,
-    rating: 4.6,
-    reviewsCount: 11,
-  },
-];
+export const LISTINGS: (VenueListing | GastroListing | EntertainmentListing)[] =
+  [
+    {
+      id: "101",
+      name: "Gastro catering",
+      slug: "gastro-catering",
+      company: "1",
+      description:
+        "Komplexní cateringové služby pro firemní akce, svatby a soukromé oslavy.",
+      location: {
+        address: "Václavské náměstí 1",
+        city: "loc-1",
+      },
+      status: "active",
+      price: { generalPrice: 4900 },
+      capacity: 200,
+      area: 500,
+      images: { coverImage: "img-101" },
+      updatedAt: "2025-01-01T00:00:00.000Z",
+      createdAt: "2025-01-01T00:00:00.000Z",
+    },
+    {
+      id: "102",
+      name: "Místo pro akce",
+      slug: "misto-pro-akce",
+      company: "1",
+      description:
+        "Pronájem exkluzivního prostoru pro firemní i soukromé události až pro 200 osob.",
+      location: {
+        address: "Náměstí Míru 5",
+        city: "loc-1",
+      },
+      status: "draft",
+      price: { generalPrice: 9900 },
+      capacity: 200,
+      area: 800,
+      images: { coverImage: "img-102" },
+      updatedAt: "2025-01-01T00:00:00.000Z",
+      createdAt: "2025-01-01T00:00:00.000Z",
+    },
+  ];
 
-export const MOCK_VARIANTS: Variant[] = [
+export const MOCK_VARIANTS: VenueVariant[] = [
   {
     id: "1",
-    title: "Základní balíček",
-    description: "Ideální pro menší akce a rodinné oslavy.",
-    price: 4900,
-    duration: "4 hodiny",
-    includes: ["Základní vybavení", "Obsluha", "Doprava"],
-    excludes: ["Catering", "Dekorace"],
-    idealFor: ["Rodinné oslavy", "Narozeniny"],
-    images: [],
-    availableDate: "1. 5. 2026",
+    name: "Základní balíček",
+    shortDescription: "Ideální pro menší akce a rodinné oslavy.",
+    availability: "selectedHours",
+    selectedHours: { from: "00:00", to: "04:00" },
+    price: { generalPrice: 4900 },
+    includes: [
+      { item: "Základní vybavení", id: "inc-1" },
+      { item: "Obsluha", id: "inc-2" },
+      { item: "Doprava", id: "inc-3" },
+    ],
+    excludes: [
+      { item: "Catering", id: "exc-1" },
+      { item: "Dekorace", id: "exc-2" },
+    ],
+
+    images: { mainImage: "img-var-1" },
+    updatedAt: "2025-01-01T00:00:00.000Z",
+    createdAt: "2025-01-01T00:00:00.000Z",
   },
   {
     id: "2",
-    title: "Prémiový balíček",
-    description: "Kompletní zajištění pro středně velké firemní akce.",
-    price: 9900,
-    duration: "8 hodin",
-    includes: ["Prémiové vybavení", "Obsluha", "Doprava", "Technická podpora"],
-    excludes: ["Catering"],
-    idealFor: ["Firemní akce", "Konference"],
-    images: [],
+    name: "Prémiový balíček",
+    shortDescription: "Kompletní zajištění pro středně velké firemní akce.",
+    availability: "selectedHours",
+    selectedHours: { from: "00:00", to: "08:00" },
+    price: { generalPrice: 9900 },
+    includes: [
+      { item: "Prémiové vybavení", id: "inc-1" },
+      { item: "Obsluha", id: "inc-2" },
+      { item: "Doprava", id: "inc-3" },
+      { item: "Technická podpora", id: "inc-4" },
+    ],
+    excludes: [{ item: "Catering", id: "exc-1" }],
+    images: { mainImage: "img-var-2" },
+    updatedAt: "2025-01-01T00:00:00.000Z",
+    createdAt: "2025-01-01T00:00:00.000Z",
   },
   {
     id: "3",
-    title: "VIP balíček",
-    description: "Všechno v jednom pro velké galavečery a svatby.",
-    price: 19900,
-    duration: "12 hodin",
-    includes: ["VIP vybavení", "Obsluha", "Doprava", "Catering", "Dekorace"],
-    excludes: [],
-    idealFor: ["Svatby", "Galavečery", "Velké firemní akce"],
-    images: [],
+    name: "VIP balíček",
+    shortDescription: "Všechno v jednom pro velké galavečery a svatby.",
+    availability: "allDay",
+    price: { generalPrice: 19900 },
+    includes: [
+      { item: "VIP vybavení", id: "inc-1" },
+      { item: "Obsluha", id: "inc-2" },
+      { item: "Doprava", id: "inc-3" },
+      { item: "Catering", id: "inc-4" },
+      { item: "Dekorace", id: "inc-5" },
+    ],
+    images: { mainImage: "img-var-3" },
+    updatedAt: "2025-01-01T00:00:00.000Z",
+    createdAt: "2025-01-01T00:00:00.000Z",
   },
 ];

@@ -13,9 +13,10 @@ import Text from "@/app/components/ui/atoms/text";
 import { useOrderStore } from "@/app/store/order-store";
 import EventSelectionButton from "./event-selection-button";
 import NewEventForm from "./new-event-form";
-import { Event, EventData } from "@roo/common";
+import { Event } from "@roo/common";
 import StepHeading from "../step-heading";
 import * as lucideIcons from "lucide-react";
+import { format } from "date-fns";
 
 type Props = {
   existingEvents: Event[];
@@ -34,11 +35,11 @@ export default function OrderStepSelectEvent({ existingEvents }: Props) {
     if (selectedEvent) {
       setEventData({
         id: eventId,
-        name: selectedEvent.data.name,
-        icon: selectedEvent.data.icon,
-        date: selectedEvent.data.date,
-        location: selectedEvent.data.location,
-        guests: selectedEvent.data.guests,
+        name: selectedEvent.name,
+        icon: selectedEvent.icon,
+        date: selectedEvent.date,
+        location: selectedEvent.location,
+        guests: selectedEvent.guests,
       });
     }
   };
@@ -89,7 +90,7 @@ export default function OrderStepSelectEvent({ existingEvents }: Props) {
                   key={event.id}
                   event={event}
                   handleSelectEvent={handleSelectEvent}
-                  eventData={eventData}
+                  isActive={eventData?.id === event.id}
                 />
               ))}
             </div>
@@ -142,63 +143,65 @@ export default function OrderStepSelectEvent({ existingEvents }: Props) {
 
 function EventCard({
   event,
-  eventData,
   handleSelectEvent,
+  isActive,
 }: {
   event: Event;
-  eventData: (EventData & { id?: string }) | undefined;
   handleSelectEvent: (eventId: string) => void;
+  isActive: boolean;
 }) {
-  const isSelected = eventData?.id === event.id;
-
-  const Icon =
-    lucideIcons[event.data.icon as keyof typeof lucideIcons] || Calendar;
+  const Icon = lucideIcons[event.icon as keyof typeof lucideIcons] || Calendar;
 
   return (
     <button
       onClick={() => handleSelectEvent(event.id)}
       className={`group w-full flex items-center gap-4 p-4 rounded-2xl border-2 transition-all text-left ${
-        isSelected
+        isActive
           ? "border-primary bg-zinc-50 shadow-sm"
           : "border-zinc-200 bg-white hover:border-zinc-300 hover:shadow-md"
       }`}
     >
       <div
         className={`shrink-0 w-11 h-11 rounded-xl flex items-center justify-center transition-colors ${
-          isSelected ? "bg-primary" : "bg-zinc-100 group-hover:bg-zinc-200"
+          isActive ? "bg-primary" : "bg-zinc-100 group-hover:bg-zinc-200"
         }`}
       >
         <Calendar
           className={`w-5 h-5 transition-colors ${
-            isSelected ? "text-white" : "text-zinc-600"
+            isActive ? "text-white" : "text-zinc-600"
           }`}
         />
       </div>
 
       <div className="flex flex-col gap-1 min-w-0 flex-1">
         <Text variant="label1" color="dark" className="font-semibold truncate">
-          {event.data.name}
+          {event.name}
         </Text>
         <div className="flex items-center flex-wrap gap-x-3 gap-y-1">
           <span className="flex items-center gap-1">
             <Calendar className="w-3 h-3 text-zinc-400 shrink-0" />
             <Text variant="label4" color="secondary">
-              {event.data.date.start.toLocaleDateString("cs-CZ")}
+              {format(new Date(event.date.start), "d. M. yyyy")} -{" "}
+              {format(new Date(event.date.end), "d. M. yyyy")}
             </Text>
           </span>
           <span className="flex items-center gap-1">
             <MapPin className="w-3 h-3 text-zinc-400 shrink-0" />
-            <Text variant="label4" color="secondary">
-              {event.data.location.name}
-            </Text>
+            {event.location && (
+              <Text variant="label4" color="secondary">
+                {event.location.city &&
+                  typeof event.location.city !== "string" &&
+                  `${event.location.city.name}, `}
+                {event.location.address}
+              </Text>
+            )}
           </span>
           <span className="flex items-center gap-1">
             <Users className="w-3 h-3 text-zinc-400 shrink-0" />
             <Text variant="label4" color="secondary">
-              Dosp.: {event.data.guests.adults}, Děti:{" "}
-              {event.data.guests.children}, ZTP:{" "}
-              {event.data.guests.ztp ? "ANO" : "NE"}, Mazlíčci:{" "}
-              {event.data.guests.pets ? "ANO" : "NE"}
+              Dosp.: {event.guests.adults}, Děti: {event.guests.children}, ZTP:{" "}
+              {event.guests.ztp ? "ANO" : "NE"}, Mazlíčci:{" "}
+              {event.guests.pets ? "ANO" : "NE"}
             </Text>
           </span>
         </div>
@@ -206,12 +209,12 @@ function EventCard({
 
       <div
         className={`shrink-0 w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${
-          isSelected
+          isActive
             ? "border-primary bg-primary"
             : "border-zinc-300 group-hover:border-zinc-400"
         }`}
       >
-        {isSelected && <Check className="w-3 h-3 text-white" strokeWidth={3} />}
+        {isActive && <Check className="w-3 h-3 text-white" strokeWidth={3} />}
       </div>
     </button>
   );

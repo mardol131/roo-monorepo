@@ -12,7 +12,7 @@ export default function PageHeading({ heading, description, button }: Props) {
   return (
     <div>
       <Breadcrumbs />
-      <div className="flex items-start justify-between mb-8">
+      <div className="flex items-start gap-10 justify-between mb-8">
         <div>
           <Text variant="heading4" color="dark" className="font-bold">
             {heading}
@@ -21,7 +21,11 @@ export default function PageHeading({ heading, description, button }: Props) {
             {description}
           </Text>
         </div>
-        {button && <Button {...button} />}
+        {button && (
+          <div className="shrink-0">
+            <Button {...button} />
+          </div>
+        )}
       </div>
     </div>
   );

@@ -9,42 +9,43 @@ import {
   Plus,
 } from "lucide-react";
 import { COMPANIES, LISTINGS } from "../../_mock/mock";
-import ListingRow from "../../../components/collection-components/listing-row";
 import RowContainer from "../../../components/row-container";
 import { SummaryCard } from "../../../user-profile/components/summary-card";
 import DashboardHeader from "../../components/dashboard-header";
+import EntityRow from "../../../components/entity-row";
+import Button from "@/app/components/ui/atoms/button";
+import EntityComponentTag from "../../../components/entity-component-tag";
+import { getTranslations } from "next-intl/server";
+import ListingStatusTag from "../../../components/listing-status-tag";
+import Breadcrumbs from "../../../components/breadcrumbs";
 
 export default async function CompanyDashboardPage({
   params,
 }: {
   params: Promise<{ companyId: string }>;
 }) {
+  const t = await getTranslations();
+
   const { companyId } = await params;
   const company = COMPANIES.find((c) => c.id === companyId) ?? COMPANIES[0];
   const listings = LISTINGS;
 
-  const avgRating =
-    listings.length > 0
-      ? (
-          listings.reduce((sum, l) => sum + (l.rating ?? 0), 0) /
-          listings.length
-        ).toFixed(1)
-      : "–";
+  //   const avgRating =
+  //     listings.length > 0
+  //       ? (
+  //           listings.reduce((sum, l) => sum + (l.rating ?? 0), 0) /
+  //           listings.length
+  //         ).toFixed(1)
+  //       : "–";
 
-  const totalInquiries = listings.reduce(
-    (sum, l) => sum + (l.reviewsCount ?? 0),
-    0,
-  );
+  //   const totalInquiries = listings.reduce(
+  //     (sum, l) => sum + (l.reviewsCount ?? 0),
+  //     0,
+  //   );
 
   return (
     <main className="w-full">
-      <Link
-        href="/company-profile/companies"
-        className="inline-flex items-center gap-1.5 text-sm text-zinc-500 hover:text-zinc-800 transition-colors mb-6"
-      >
-        <ArrowLeft className="w-4 h-4" />
-        Zpět na firmy
-      </Link>
+      <Breadcrumbs />
 
       <DashboardHeader
         icon={Building2}
@@ -55,7 +56,6 @@ export default async function CompanyDashboardPage({
           </span>
         }
         infoItems={[
-          { icon: "MapPin", text: company.city.label },
           { icon: "Mail", text: company.email },
           ...(company.phone ? [{ icon: "Phone", text: company.phone }] : []),
           ...(company.website
@@ -82,7 +82,7 @@ export default async function CompanyDashboardPage({
           iconBg="bg-violet-50"
           iconColor="text-violet-500"
         />
-        <SummaryCard
+        {/* <SummaryCard
           label="Celkem poptávek"
           value={String(totalInquiries)}
           icon={MessageSquare}
@@ -96,27 +96,42 @@ export default async function CompanyDashboardPage({
           iconBg="bg-amber-50"
           iconColor="text-amber-500"
           note="ze všech služeb"
-        />
+        /> */}
       </div>
 
       {/* Listings */}
       <RowContainer
         icon={<Briefcase className="w-4 h-4 text-violet-500" />}
-        label="Služby firmy"
+        label="Služby, které firma nabízí"
         headerRightComponent={
-          <Link
-            href={`/company-profile/companies/${companyId}/listings/new-listing`}
-            className="inline-flex items-center gap-1.5 text-xs font-medium text-violet-600 bg-violet-50 hover:bg-violet-100 transition-colors px-3 py-1.5 rounded-full"
-          >
-            <Plus className="w-3.5 h-3.5" />
-            Přidat službu
-          </Link>
+          <Button
+            text="Přidat službu"
+            version="listing"
+            size="sm"
+            iconLeft="Plus"
+            link={{
+              pathname:
+                "/company-profile/companies/[companyId]/listings/new-listing",
+              params: { companyId },
+            }}
+          />
         }
         rowComponents={listings.map((listing) => (
-          <ListingRow
+          <EntityRow
             key={listing.id}
-            listing={listing}
-            companyId={companyId}
+            icon="Briefcase"
+            iconColor="text-violet-500"
+            iconBackgroundColor="bg-violet-50"
+            label={listing.name}
+            items={[
+              { icon: "MapPin", content: listing.location.address },
+              { icon: "Banknote", content: `${listing.price.generalPrice} Kč` },
+            ]}
+            link={{
+              pathname: `/company-profile/companies/[companyId]/listings/[listingId]`,
+              params: { companyId, listingId: listing.id },
+            }}
+            rightComponent={<ListingStatusTag status={listing.status} />}
           />
         ))}
         emptyHeading="Zatím žádné služby"

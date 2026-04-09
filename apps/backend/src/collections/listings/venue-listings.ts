@@ -1,4 +1,5 @@
 import type { CollectionConfig } from 'payload'
+import { listingsCommonFields } from '../common-fields/common-fields'
 
 export const VenueListings: CollectionConfig = {
   slug: 'venue-listings',
@@ -6,30 +7,7 @@ export const VenueListings: CollectionConfig = {
     useAsTitle: 'name',
   },
   fields: [
-    {
-      name: 'name',
-      type: 'text',
-      required: true,
-    },
-    {
-      name: 'slug',
-      type: 'text',
-      required: true,
-    },
-    {
-      name: 'company',
-      type: 'relationship',
-      relationTo: 'companies',
-      required: true,
-    },
-    {
-      name: 'description',
-      type: 'textarea',
-    },
-    {
-      name: 'shortDescription',
-      type: 'text',
-    },
+    ...listingsCommonFields,
     {
       name: 'location',
       type: 'group',
@@ -59,46 +37,6 @@ export const VenueListings: CollectionConfig = {
         },
       ],
     },
-    {
-      name: 'indoor',
-      type: 'checkbox',
-    },
-    {
-      name: 'outdoor',
-      type: 'checkbox',
-    },
-    {
-      name: 'eventTypes',
-      type: 'relationship',
-      relationTo: 'event-types',
-      hasMany: true,
-    },
-    {
-      name: 'images',
-      type: 'group',
-      fields: [
-        {
-          name: 'coverImage',
-          type: 'text',
-          required: true,
-        },
-        {
-          name: 'logo',
-          type: 'text',
-        },
-        {
-          name: 'gallery',
-          type: 'array',
-          fields: [
-            {
-              name: 'url',
-              type: 'text',
-            },
-          ],
-        },
-      ],
-    },
-
     {
       name: 'placeTypes',
       type: 'relationship',

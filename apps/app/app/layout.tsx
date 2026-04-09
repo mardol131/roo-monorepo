@@ -1,7 +1,7 @@
 import { Metadata } from "next";
 import { ReactNode } from "react";
-import "./styles/global.css";
 import { NextIntlClientProvider } from "next-intl";
+import "./styles/global.css";
 
 export const metadata: Metadata = {};
 

@@ -9,6 +9,7 @@ import InquirySettings from "./components/inquiry-settings";
 import InquiryTimeline from "./components/inquiry-timeline";
 import DashboardHeader from "@/app/[locale]/(user)/company-profile/components/dashboard-header";
 import EventDashboardVariantSection from "./components/event-dashboard-variant-section";
+import { aggregateInquiryStatus } from "@roo/common";
 
 export default async function InquiryDetailPage({
   params,
@@ -21,7 +22,7 @@ export default async function InquiryDetailPage({
     getMessages(contractorId),
   ];
 
-  const status = INQUIRY_STATUS[inquiry.status];
+  const status = INQUIRY_STATUS[aggregateInquiryStatus(inquiry)];
 
   return (
     <main className="w-full">
@@ -36,7 +37,11 @@ export default async function InquiryDetailPage({
       <div className="flex flex-col gap-5">
         <DashboardHeader
           icon={Package}
-          name={inquiry.company.name}
+          name={
+            typeof inquiry.listing.value === "string"
+              ? inquiry.listing.value
+              : "Poptávka"
+          }
           nameSideComponent={
             <span
               className={`text-xs font-medium px-2.5 py-1 rounded-full ${status.className}`}
@@ -45,9 +50,8 @@ export default async function InquiryDetailPage({
             </span>
           }
           infoItems={[
-            { icon: "Tag", text: inquiry.company.category },
+            { icon: "Tag", text: inquiry.listingType },
             { icon: "Clock", text: `Odesláno ${inquiry.sentAt}` },
-            { icon: "PartyPopper", text: inquiry.event.name },
           ]}
           button={{
             version: "outlined",
@@ -56,21 +60,35 @@ export default async function InquiryDetailPage({
             size: "sm",
             link: {
               pathname: "/listing/[id]",
-              params: { id: inquiry.company.slug },
+              params: {
+                id:
+                  typeof inquiry.listing.value === "string"
+                    ? inquiry.listing.value
+                    : inquiry.listing.value.id,
+              },
             },
           }}
         />
-
         <div className="bg-white rounded-2xl border border-zinc-200 px-8 py-5">
-          <InquiryTimeline status={inquiry.status} />
+          <InquiryTimeline status={aggregateInquiryStatus(inquiry)} />
         </div>
-        <CompanyCard supplier={inquiry.company} />
-        <EventDashboardVariantSection variant={inquiry.variant} />
+        {typeof inquiry.listing.value !== "string" &&
+          typeof inquiry.listing.value.company !== "string" && (
+            <CompanyCard company={inquiry.listing.value.company} />
+          )}
+        {typeof inquiry.variant?.value !== "string" &&
+          inquiry.variant?.value && (
+            <EventDashboardVariantSection variant={inquiry.variant?.value} />
+          )}
         <ChatWindow
-          supplierName={inquiry.company.name}
+          supplierName={
+            typeof inquiry.listing.value !== "string"
+              ? inquiry.listing.value.name
+              : "Chat s dodavatelem"
+          }
           initialMessages={messages}
         />
-        {inquiry.status === "pending" && <InquirySettings />}
+        {aggregateInquiryStatus(inquiry) === "pending" && <InquirySettings />}
       </div>
     </main>
   );
