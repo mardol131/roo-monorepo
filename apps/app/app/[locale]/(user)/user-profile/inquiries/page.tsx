@@ -1,15 +1,20 @@
 import Text from "@/app/components/ui/atoms/text";
 import InquirySummary from "./components/inquiry-summary";
 import InquiryList from "./components/inquiry-list";
-import { getInquiries } from "../_mock/mock-data";
 import PageHeading from "../../components/page-heading";
+import { aggregateInquiryStatus } from "@roo/common";
+import { getInquiries } from "../../../../_mock/mock";
 
 export default async function InquiriesPage() {
   const inquiries = await getInquiries();
 
   const total = inquiries.length;
-  const pending = inquiries.filter((i) => i.status === "pending").length;
-  const confirmed = inquiries.filter((i) => i.status === "confirmed").length;
+  const pending = inquiries.filter(
+    (i) => aggregateInquiryStatus({ ...i }) === "pending",
+  ).length;
+  const confirmed = inquiries.filter(
+    (i) => aggregateInquiryStatus({ ...i }) === "confirmed",
+  ).length;
 
   return (
     <main className="w-full">

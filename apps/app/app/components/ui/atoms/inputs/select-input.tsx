@@ -17,7 +17,10 @@ type Props = React.InputHTMLAttributes<HTMLSelectElement> & {
 };
 
 const SelectInput = React.forwardRef<HTMLSelectElement, Props>(
-  ({ label, items, placeholder, id, value, onChange, error, ...props }, ref) => {
+  (
+    { label, items, placeholder, id, value, onChange, error, ...props },
+    ref,
+  ) => {
     const [isOpen, setIsOpen] = useState(false);
     const containerRef = useRef<HTMLDivElement>(null);
 
@@ -80,7 +83,7 @@ const SelectInput = React.forwardRef<HTMLSelectElement, Props>(
         <button
           type="button"
           onClick={() => setIsOpen(!isOpen)}
-          className="w-full px-3 py-2.5 border bg-white border-zinc-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-zinc-900 focus:border-transparent flex items-center justify-between text-left hover:border-zinc-400 transition-colors"
+          className="w-full px-3 py-2.5 text-sm border bg-white border-zinc-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-zinc-900 focus:border-transparent flex items-center justify-between text-left hover:border-zinc-400 transition-colors"
         >
           <span className={value ? "text-zinc-900" : "text-zinc-500"}>
             {displayValue}
@@ -129,7 +132,11 @@ const SelectInput = React.forwardRef<HTMLSelectElement, Props>(
           </div>
         )}
         {error && (
-          <Text variant="label4" color="secondary" className="text-red-500 mt-1">
+          <Text
+            variant="label4"
+            color="secondary"
+            className="text-red-500 mt-1"
+          >
             {error}
           </Text>
         )}

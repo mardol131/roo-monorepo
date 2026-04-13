@@ -3,9 +3,9 @@ import { Briefcase, Building2 } from "lucide-react";
 import PageHeading from "../../components/page-heading";
 import RowContainer from "../../components/row-container";
 import { SummaryCard } from "../../user-profile/components/summary-card";
-import { COMPANIES, LISTINGS } from "../_mock/mock";
+import { COMPANIES, LISTINGS } from "../../../../_mock/mock";
 import EntityRow from "../../components/entity-row";
-import EntityComponentTag from "../../components/entity-component-tag";
+import EntityComponentTag from "../../components/tags/entity-component-tag";
 
 export default function CompanyProfileDashboardPage() {
   const totalListings = LISTINGS.length;
@@ -23,22 +23,22 @@ export default function CompanyProfileDashboardPage() {
           label="Registrované firmy"
           value={String(COMPANIES.length)}
           icon={Building2}
-          iconBg="bg-rose-50"
-          iconColor="text-rose-500"
+          iconBg="bg-company-surface"
+          iconColor="text-company"
         />
         <SummaryCard
           label="Celkem služeb"
           value={String(totalListings)}
           icon={Briefcase}
-          iconBg="bg-violet-50"
-          iconColor="text-violet-500"
+          iconBg="bg-listing-surface"
+          iconColor="text-listing"
         />
         <SummaryCard
           label="Celkem poptávek"
           value={String(56)}
           icon={Briefcase}
-          iconBg="bg-amber-50"
-          iconColor="text-amber-500"
+          iconBg="bg-inquiry-surface"
+          iconColor="text-inquiry"
           note={`${30} celkem`}
         />
       </div>
@@ -48,16 +48,16 @@ export default function CompanyProfileDashboardPage() {
         label="Vaše firmy"
         subLabel="Zde jsou všechny firmy pod vaším účtem"
         icon={
-          <div className="w-8 h-8 rounded-xl bg-rose-50 flex items-center justify-center shrink-0">
-            <Building2 className="w-4 h-4 text-rose-500" />
+          <div className="w-8 h-8 rounded-xl bg-company-surface flex items-center justify-center shrink-0">
+            <Building2 className="w-4 h-4 text-company" />
           </div>
         }
         rowComponents={COMPANIES.map((company) => (
           <EntityRow
             key={company.id}
             icon="Building2"
-            iconColor="text-rose-500"
-            iconBackgroundColor="bg-rose-50"
+            iconColor="text-company"
+            iconBackgroundColor="bg-company-surface"
             label={company.name}
             items={[{ icon: "Mail", content: company.email }]}
             link={{
@@ -80,7 +80,7 @@ export default function CompanyProfileDashboardPage() {
             size="sm"
             iconLeft="Plus"
             link={{
-              pathname: "/company-profile/new-company",
+              pathname: "/company-profile/companies/new",
             }}
           />
         }

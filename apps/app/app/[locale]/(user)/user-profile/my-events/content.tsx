@@ -29,8 +29,8 @@ export default function PageContent({ items }: Props) {
             key={event.id}
             icon="Calendar"
             label={event.name}
-            iconColor="text-rose-500"
-            iconBackgroundColor="bg-rose-50"
+            iconColor="text-event"
+            iconBackgroundColor="bg-event-surface"
             items={[
               { icon: "MapPin", content: event.location?.address },
               {

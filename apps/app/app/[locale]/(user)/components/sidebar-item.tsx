@@ -22,14 +22,14 @@ export function SidebarNavItem({
         href={href}
         className={`flex flex-col items-center gap-1 px-1 py-2.5 rounded-xl transition-all ${
           active
-            ? "bg-rose-50 text-primary"
+            ? "bg-primary-surface text-primary"
             : "text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900"
         }`}
       >
         <Icon
           className={`w-5 h-5 shrink-0 ${active ? "text-primary" : "text-zinc-400"}`}
         />
-        <span className="text-[10px] font-medium leading-tight text-center">
+        <span className="text-[11px] font-semibold leading-tight text-center">
           {label}
         </span>
       </Link>

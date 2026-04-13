@@ -8,6 +8,11 @@
       "active": "Aktivní",
       "draft": "Neaktivní",
       "archived": "Archivované"
+    },
+    "type": {
+      "gastro": "Gastro",
+      "entertainment": "Zábava",
+      "venue": "Prostory"
     }
   },
   "inquiries": {

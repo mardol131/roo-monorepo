@@ -1,5 +1,3 @@
-"use client";
-
 import Text from "@/app/components/ui/atoms/text";
 import { EVENT_STATUS } from "@/app/data/event";
 import {
@@ -13,6 +11,7 @@ import type { LucideIcon } from "lucide-react";
 import * as lucideIcons from "lucide-react";
 import {
   ArrowLeft,
+  Banknote,
   Calendar,
   CheckCircle2,
   HelpCircle,
@@ -22,21 +21,24 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import RowContainer from "../../../components/row-container";
-import { getInquiries, MOCK_EVENT } from "../../_mock/mock-data";
 import { SummaryCard } from "../../components/summary-card";
 import { format } from "date-fns";
 import { cs } from "date-fns/locale";
 import DashboardHeader from "../../../company-profile/components/dashboard-header";
 import EntityRow from "../../../components/entity-row";
+import { getTranslations } from "next-intl/server";
+import { getInquiries, MOCK_EVENT } from "../../../../../_mock/mock";
+import InquiryStatusTag from "../../../components/tags/inquiry-status-tag";
 
 // ── Page ───────────────────────────────────────────────────────────────────────
 
-export default function EventDetailPage() {
+export default async function page() {
   const event = MOCK_EVENT;
   const eventStatus = EVENT_STATUS[event.status];
   const Icon =
     (lucideIcons[event.icon as keyof typeof lucideIcons] as LucideIcon) ??
     Calendar;
+  const t = await getTranslations();
 
   const MOCK_INQUIRIES = getInquiries();
 
@@ -47,7 +49,7 @@ export default function EventDetailPage() {
     (i) => aggregateInquiryStatus(i) === "pending",
   );
   const totalCost = confirmed
-    .reduce((sum, i) => sum + (i.price || 0), 0)
+    .reduce((sum, i) => sum + (i.agreedPrice || i.quotedPrice || 0), 0)
     .toLocaleString("cs-CZ");
 
   return (
@@ -106,7 +108,7 @@ export default function EventDetailPage() {
         <SummaryCard
           label="Odhadované náklady"
           value={`${totalCost} Kč`}
-          icon={HelpCircle}
+          icon={Banknote}
           iconBg="bg-rose-50"
           iconColor="text-rose-500"
           note="pouze potvrzené"
@@ -115,7 +117,11 @@ export default function EventDetailPage() {
 
       {/* Inquiries */}
       <RowContainer
-        icon={<MessageSquare className="w-4 h-4 text-rose-500" />}
+        icon={
+          <div className="w-8 h-8 rounded-xl bg-inquiry-surface flex items-center justify-center shrink-0">
+            <MessageSquare className="w-4 h-4 text-inquiry" />
+          </div>
+        }
         label="Poptávky dodavatelů"
         subLabel={`${MOCK_INQUIRIES.length} celkem, ${pending.length} čekají na odpověď`}
         headerRightComponent={
@@ -132,9 +138,26 @@ export default function EventDetailPage() {
                 : "Poptávka"
             }
             icon="MessageSquare"
-            iconBackgroundColor="bg-rose-50"
-            iconColor="text-rose-500"
-            items={[]}
+            iconBackgroundColor="bg-inquiry-surface"
+            iconColor="text-inquiry"
+            items={[
+              {
+                content: t(`listings.type.${inquiry.listingType}`),
+                icon: "Box",
+              },
+              {
+                content: inquiry.quotedPrice
+                  ? `${inquiry.quotedPrice.toLocaleString("cs-CZ")} Kč`
+                  : "Neoceněno",
+                icon: "Banknote",
+              },
+            ]}
+            rightComponent={
+              <InquiryStatusTag
+                userStatus={inquiry.userStatus}
+                companyStatus={inquiry.companyStatus}
+              />
+            }
             link={{
               pathname: "/user-profile/my-events/[eventId]/[inquiryId]",
               params: {

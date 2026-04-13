@@ -15,13 +15,7 @@ export const Spaces: CollectionConfig = {
       name: 'type',
       type: 'select',
       required: true,
-      options: [
-        { label: 'Areál', value: 'venue' },
-        { label: 'Budova', value: 'building' },
-        { label: 'Místnost', value: 'room' },
-        { label: 'Hala', value: 'hall' },
-        { label: 'Venkovní prostor', value: 'outdoor' },
-      ],
+      options: ['area', 'building', 'room'],
     },
     {
       name: 'parent',
@@ -30,9 +24,9 @@ export const Spaces: CollectionConfig = {
       hasMany: false,
     },
     {
-      name: 'company',
+      name: 'listing',
       type: 'relationship',
-      relationTo: 'venue-listings',
+      relationTo: 'listings',
       required: true,
     },
     {
@@ -97,6 +91,12 @@ export const Spaces: CollectionConfig = {
           hasMany: true,
         },
       ],
+    },
+    {
+      name: 'spaceRules',
+      type: 'relationship',
+      relationTo: 'rules',
+      hasMany: true,
     },
   ],
 }

@@ -1,5 +1,5 @@
+import { MOCK_EVENTS } from "../../../../_mock/mock";
 import PageHeading from "../../components/page-heading";
-import { MOCK_EVENTS } from "../_mock/mock-data";
 import PageContent from "./content";
 
 export default async function MyEventsPage() {
@@ -11,9 +11,9 @@ export default async function MyEventsPage() {
         description="Přehled všech vašich událostí a jejich stav."
         button={{
           text: "Vytvořit událost",
-          version: "primary",
+          version: "eventFull",
           iconRight: "Plus",
-          link: "/user-profile/new-event",
+          link: "/user-profile/new",
         }}
       />
 

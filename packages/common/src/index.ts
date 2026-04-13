@@ -4,3 +4,6 @@ export * from "./types/payload-types";
 export * from "./functions/event-utils";
 export * from "./functions/inquiry-utils";
 export * from "./functions/get-id-from-relationship-field";
+export * from "./functions/convert-image-to-webp";
+export * from "./functions/upload-file-to-cloud";
+export * from "./functions/slugify";

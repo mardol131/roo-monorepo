@@ -3,6 +3,8 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Search, ChevronDown, X } from "lucide-react";
 import Text from "@/app/components/ui/atoms/text";
+import InputLabel from "../input-label";
+import ErrorText from "./error-text";
 
 interface SearchOption {
   id: string;
@@ -16,14 +18,16 @@ interface SearchInputProps {
   isLoading?: boolean;
   nameInputProps?: React.InputHTMLAttributes<HTMLInputElement>;
   idInputProps?: React.InputHTMLAttributes<HTMLInputElement>;
-  value: {
+  value?: {
     id: string;
     label: string;
   };
   onSelect?: (option: SearchOption) => void;
+  onClear?: () => void;
   onSearchQueryChange?: (query: string) => void;
   error?: string;
   type?: "dropdown" | "fixed";
+  isRequired?: boolean;
 }
 
 export default function SearchInput({
@@ -35,14 +39,16 @@ export default function SearchInput({
   idInputProps,
   value,
   onSelect,
+  onClear,
   onSearchQueryChange,
   error,
+  isRequired,
   type = "dropdown",
 }: SearchInputProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [selected, setSelected] = useState<SearchOption | null>(
-    value ? { id: value.id, label: value.label } : null,
+  const [selected, setSelected] = useState<SearchOption | undefined>(
+    value ? value : undefined,
   );
   const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const ref = useRef<HTMLDivElement>(null);
@@ -88,8 +94,9 @@ export default function SearchInput({
   };
 
   const handleClear = () => {
-    setSelected(null);
+    setSelected(undefined);
     setSearchQuery("");
+    onClear?.();
   };
 
   // Filter options based on search query
@@ -137,12 +144,8 @@ export default function SearchInput({
   );
 
   return (
-    <div className="flex flex-col gap-2">
-      <label className="block">
-        <Text variant="label2" color="dark" className="font-semibold">
-          {label}
-        </Text>
-      </label>
+    <div className="flex flex-col">
+      <InputLabel label={label} isRequired={isRequired} />
 
       {type === "fixed" ? (
         <div className="flex flex-col gap-2">
@@ -186,9 +189,9 @@ export default function SearchInput({
         <div className="relative" ref={ref}>
           <div
             onClick={() => setIsOpen(!isOpen)}
-            className="w-full px-3 py-2.5 border border-zinc-200 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-rose-500 bg-white text-left flex items-center justify-between"
+            className={`w-full px-3 py-2.5 border ${error ? "border-rose-500" : "border-zinc-200"} rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-rose-500 bg-white text-left flex items-center justify-between`}
           >
-            <span className="text-zinc-900">
+            <span className="text-zinc-900 text-sm">
               {selected ? selected.label : placeholder}
             </span>
             {selected ? (
@@ -198,7 +201,7 @@ export default function SearchInput({
                   e.stopPropagation();
                   handleClear();
                 }}
-                className="p-1 hover:bg-zinc-100 rounded"
+                className="hover:bg-zinc-100 rounded"
               >
                 <X className="w-4 h-4 text-zinc-400" />
               </button>
@@ -252,11 +255,7 @@ export default function SearchInput({
           }
         }}
       />
-      {error && (
-        <Text variant="label4" color="secondary" className="text-red-500 mt-1">
-          {error}
-        </Text>
-      )}
+      {error && <ErrorText error={error} />}
     </div>
   );
 }

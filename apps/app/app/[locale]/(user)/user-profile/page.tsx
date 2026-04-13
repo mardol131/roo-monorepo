@@ -1,9 +1,9 @@
 import { Calendar, MessageSquare } from "lucide-react";
 import PageHeading from "../components/page-heading";
 import RowContainer from "../components/row-container";
-import { getInquiries, MOCK_EVENTS, STATS } from "./_mock/mock-data";
 import { SummaryCard } from "./components/summary-card";
 import EntityRow from "../components/entity-row";
+import { getInquiries, MOCK_EVENTS, STATS } from "../../../_mock/mock";
 
 export default function UserProfilePage() {
   const events = MOCK_EVENTS.slice(0, 3);
@@ -33,13 +33,17 @@ export default function UserProfilePage() {
 
       {/* Recent events */}
       <RowContainer
-        icon={<Calendar className="w-4 h-4 text-rose-500" />}
+        icon={
+          <div className="w-8 h-8 rounded-xl bg-event-surface flex items-center justify-center shrink-0">
+            <Calendar className="w-4 h-4 text-event" />
+          </div>
+        }
         label="Nedávné události"
         rowComponents={events.map((event) => (
           <EntityRow
             icon="Calendar"
-            iconColor="text-rose-500"
-            iconBackgroundColor="bg-rose-50"
+            iconColor="text-event"
+            iconBackgroundColor="bg-event-surface"
             key={event.id}
             label={event.name}
             items={[]}
@@ -57,15 +61,19 @@ export default function UserProfilePage() {
       {/* Recent inquiries */}
 
       <RowContainer
-        icon={<MessageSquare className="w-4 h-4 text-rose-500" />}
+        icon={
+          <div className="w-8 h-8 rounded-xl bg-inquiry-surface flex items-center justify-center shrink-0">
+            <MessageSquare className="w-4 h-4 text-inquiry" />
+          </div>
+        }
         label="Nedávné poptávky"
         rowComponents={inquiries.map((inquiry) =>
           typeof inquiry.event !== "string" ? (
             <EntityRow
               key={inquiry.id}
               icon="MessageSquare"
-              iconColor="text-rose-500"
-              iconBackgroundColor="bg-rose-50"
+              iconColor="text-inquiry"
+              iconBackgroundColor="bg-inquiry-surface"
               label={
                 typeof inquiry.listing.value === "string"
                   ? inquiry.listing.value

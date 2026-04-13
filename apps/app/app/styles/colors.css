@@ -9,12 +9,24 @@
   --color-textDark: var(--color-zinc-800);
   --color-textLight: var(--color-zinc-400);
 
-  --color-listing-surface: var(--color-violet-50);
-  --color-listing: var(--color-violet-600);
+  --color-company: var(--color-primary);
+  --color-company-surface: var(--color-primary-surface);
 
-  --color-variant-surface: var(--color-amber-50);
+  --color-event: var(--color-green-500);
+  --color-event-surface: var(--color-green-50);
+
+  --color-listing-surface: var(--color-indigo-50);
+  --color-listing: var(--color-indigo-600);
+
+  --color-variant-surface: var(--color-amber-100);
   --color-variant: var(--color-amber-600);
 
-  --color-inquiry-surface: var(--color-sky-50);
-  --color-inquiry: var(--color-sky-600);
+  --color-inquiry-surface: var(--color-orange-100);
+  --color-inquiry: var(--color-orange-600);
+
+  --color-danger: var(--color-red-600);
+  --color-danger-surface: var(--color-red-100);
+
+  --color-space: var(--color-cyan-500);
+  --color-space-surface: var(--color-cyan-50);
 }

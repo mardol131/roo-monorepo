@@ -8,11 +8,11 @@ import { fileURLToPath } from 'url'
 import { sendEmailTask } from './jobs/tasks/sendEmailTask'
 
 import { sendPushNotificationTask } from './jobs/tasks/sendPushNotification'
-import { VenueVariants } from './collections/variants/venue-variants'
+import { Variants } from './collections/variants'
 import { Activities } from './collections/filters/activities'
 import { Services } from './collections/filters/services'
 import { EventTypes } from './collections/filters/event-types'
-import { VenueListings } from './collections/listings/venue-listings'
+import { Listings } from './collections/listings'
 import { Spaces } from './collections/spaces'
 import { Personnel } from './collections/filters/personnel'
 import { Companies } from './collections/companies'
@@ -24,15 +24,18 @@ import { Rules } from './collections/specific/rules'
 import { Technologies } from './collections/filters/technologies'
 import { Amenities } from './collections/filters/amenities'
 import { RoomAmenities } from './collections/specific/room-amenities'
-import { FoodTypes } from './collections/filters/food-types'
+import { Cuisines } from './collections/filters/cuisines'
 import { Events } from './collections/events'
 import { Inquiries } from './collections/inquiries'
 import { ChatMessages } from './collections/chat-messages'
-import { GastroListings } from './collections/listings/gastro-listings'
-import { EntertainmentListings } from './collections/listings/entertainment-listings'
-import { GastroVariants } from './collections/variants/gastro-variants'
-import { EntertainmentVariants } from './collections/variants/entertainment-variants'
 import { Admins } from './collections/admins'
+import { Municipalities } from './collections/locality/municipalities'
+import { Regions } from './collections/locality/regions'
+import { DishTypes } from './collections/filters/dish-types'
+import { Necessities } from './collections/specific/necessities'
+import { EntertainmentTypes } from './collections/filters/entertainment-types'
+import { DietaryOptions } from './collections/filters/dietary-options'
+import { FoodServiceStyle } from './collections/filters/food-service-style'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -60,18 +63,21 @@ export default buildConfig({
     },
   },
   collections: [
+    Municipalities,
+    Necessities,
+    EntertainmentTypes,
+    DietaryOptions,
+    FoodServiceStyle,
+    Regions,
+    DishTypes,
     Users,
     Admins,
     Media,
-    VenueVariants,
-    GastroVariants,
-    EntertainmentVariants,
+    Variants,
     Activities,
     Services,
     EventTypes,
-    VenueListings,
-    GastroListings,
-    EntertainmentListings,
+    Listings,
     Spaces,
     Personnel,
     Companies,
@@ -81,7 +87,7 @@ export default buildConfig({
     Technologies,
     Amenities,
     RoomAmenities,
-    FoodTypes,
+    Cuisines,
     Events,
     ChatMessages,
     Inquiries,

@@ -1,21 +1,10 @@
 "use client";
 
-import {
-  Package,
-  Clock,
-  Banknote,
-  CheckCircle2,
-  XCircle,
-  Users,
-  ArrowLeft,
-} from "lucide-react";
-import Link from "next/link";
-import { Variant } from "@roo/common";
-import { IntlLink } from "@/app/i18n/navigation";
-import DashboardHeader from "@/app/[locale]/(user)/company-profile/components/dashboard-header";
-import { SummaryCard } from "@/app/[locale]/(user)/user-profile/components/summary-card";
-import Text from "@/app/components/ui/atoms/text";
 import Button from "@/app/components/ui/atoms/button";
+import Text from "@/app/components/ui/atoms/text";
+import { IntlLink } from "@/app/i18n/navigation";
+import { EntertainmentVariant, GastroVariant, VenueVariant } from "@roo/common";
+import { CheckCircle2, XCircle } from "lucide-react";
 import { useState } from "react";
 
 type SectionProps = {
@@ -67,7 +56,7 @@ function Section({ label, editLink, children }: SectionProps) {
 }
 
 type Props = {
-  variant: Variant;
+  variant: GastroVariant | EntertainmentVariant | VenueVariant;
   companyId: string;
   listingId: string;
   variantId: string;
@@ -97,15 +86,15 @@ export default function VariantDashboardContent({
       {/* Includes & Excludes */}
       <div className="grid grid-cols-2 gap-4">
         <Section label="Zahrnuto" editLink={editLink}>
-          {variant.includes.length > 0 ? (
+          {variant && variant.includes && variant.includes.length > 0 ? (
             <ul className="flex flex-col gap-2">
               {variant.includes.map((item) => (
                 <li
-                  key={item}
+                  key={item.item}
                   className="flex items-center gap-2 text-sm text-zinc-600"
                 >
                   <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
-                  {item}
+                  {item.item}
                 </li>
               ))}
             </ul>
@@ -117,15 +106,15 @@ export default function VariantDashboardContent({
         </Section>
 
         <Section label="Nezahrnuto" editLink={editLink}>
-          {variant.excludes.length > 0 ? (
+          {variant && variant.excludes && variant.excludes.length > 0 ? (
             <ul className="flex flex-col gap-2">
               {variant.excludes.map((item) => (
                 <li
-                  key={item}
+                  key={item.item}
                   className="flex items-center gap-2 text-sm text-zinc-600"
                 >
                   <XCircle className="w-3.5 h-3.5 text-rose-400 shrink-0" />
-                  {item}
+                  {item.item}
                 </li>
               ))}
             </ul>
@@ -139,16 +128,18 @@ export default function VariantDashboardContent({
 
       {/* Ideal for */}
       <Section label="Ideální pro" editLink={editLink}>
-        {variant.idealFor.length > 0 ? (
+        {variant && variant.eventTypes && variant.eventTypes.length > 0 ? (
           <div className="flex flex-wrap gap-2">
-            {variant.idealFor.map((item) => (
-              <span
-                key={item}
-                className="text-xs font-medium px-3 py-1 rounded-full bg-violet-50 text-violet-600"
-              >
-                {item}
-              </span>
-            ))}
+            {variant.eventTypes
+              .filter((item) => typeof item !== "string")
+              .map((item) => (
+                <span
+                  key={item.id}
+                  className="text-xs font-medium px-3 py-1 rounded-full bg-violet-50 text-violet-600"
+                >
+                  {item.name}
+                </span>
+              ))}
           </div>
         ) : (
           <Text variant="label4" color="secondary">

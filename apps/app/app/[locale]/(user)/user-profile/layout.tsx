@@ -1,7 +1,6 @@
 "use client";
 
-import React, { useCallback } from "react";
-import Sidebar, { SidebarProps } from "../components/sidebar";
+import { IntlPathname, usePathname } from "@/app/i18n/navigation";
 import {
   Calendar,
   Heart,
@@ -12,9 +11,8 @@ import {
   Plus,
   Settings,
 } from "lucide-react";
-import Text from "@/app/components/ui/atoms/text";
-import { USER } from "../company-profile/_mock/mock";
-import { IntlPathname, usePathname } from "@/app/i18n/navigation";
+import React, { useCallback } from "react";
+import Sidebar, { SidebarProps } from "../components/sidebar";
 
 type Props = {
   children: React.ReactNode;
@@ -38,11 +36,11 @@ export default function layout({ children }: Props) {
       { label: "Přehled", href: "/user-profile", icon: LayoutDashboard },
       {
         label: "Nová událost",
-        href: "/user-profile/new-event",
+        href: "/user-profile/new",
         icon: Plus,
       },
       {
-        label: "Moje události",
+        label: "Události",
         href: "/user-profile/my-events",
         icon: Calendar,
       },

@@ -16,8 +16,8 @@ export default function InquirySummary({ total, pending, confirmed }: Props) {
         label="Celkem poptávek"
         value={String(total)}
         icon={MessageSquare}
-        iconBg="bg-blue-50"
-        iconColor="text-blue-500"
+        iconBg="bg-inquiry-surface"
+        iconColor="text-inquiry"
       />
       <SummaryCard
         label="Čeká na odpověď"

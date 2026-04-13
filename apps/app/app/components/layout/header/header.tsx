@@ -32,7 +32,7 @@ const navigationItems: { label: string; href: IntlLink }[] = [
   {
     label: "Plánovač akcí",
     href: {
-      pathname: "/user-profile/new-event",
+      pathname: "/user-profile/new",
     },
   },
 ];

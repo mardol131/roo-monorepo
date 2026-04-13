@@ -1,14 +1,16 @@
+"use client";
+
 import PageHeading from "@/app/[locale]/(user)/components/page-heading";
-import { LISTINGS } from "../../../_mock/mock";
+import { LISTINGS } from "../../../../../../_mock/mock";
 import EntityCard from "@/app/[locale]/(user)/components/entity-card";
-import ListingStatusTag from "@/app/[locale]/(user)/components/listing-status-tag";
+import ListingStatusTag from "@/app/[locale]/(user)/components/tags/listing-status-tag";
+import { useParams } from "next/navigation";
+import { useListingsByCompany } from "@/app/react-query/listings/hooks";
 
-type Props = {
-  params: Promise<{ companyId: string }>;
-};
+export default function page() {
+  const { companyId } = useParams<{ companyId: string }>();
 
-export default async function page({ params }: Props) {
-  const { companyId } = await params;
+  const { data: listings } = useListingsByCompany(companyId);
 
   return (
     <main className="w-full">
@@ -17,7 +19,7 @@ export default async function page({ params }: Props) {
         description="Zde najdete přehled všech služeb, které vaše firma nabízí. Můžete je spravovat, upravovat nebo přidávat nové služby."
         button={{
           link: {
-            pathname: `/company-profile/companies/[companyId]/listings/new-listing`,
+            pathname: `/company-profile/companies/[companyId]/listings/new`,
             params: { companyId },
           },
           iconLeft: "Plus",
@@ -27,16 +29,16 @@ export default async function page({ params }: Props) {
         }}
       />
       <div className="flex flex-col gap-3 mt-6">
-        {LISTINGS.map((listing) => (
+        {listings?.map((listing) => (
           <EntityCard
             key={listing.id}
             icon="Briefcase"
-            iconColor="text-violet-500"
-            iconBackgroundColor="bg-violet-50"
+            iconColor="text-listing"
+            iconBackgroundColor="bg-listing-surface"
             label={listing.name}
             items={[
-              { icon: "MapPin", content: listing.location.address },
-              { icon: "Banknote", content: `${listing.price.generalPrice} Kč` },
+              { icon: "MapPin", content: listing.details[0].location.address },
+              { icon: "Banknote", content: `${listing.price.startsAt} Kč` },
             ]}
             link={{
               pathname: `/company-profile/companies/[companyId]/listings/[listingId]`,

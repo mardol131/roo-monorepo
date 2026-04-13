@@ -1,9 +1,18 @@
+"use client";
+
 import PageHeading from "@/app/[locale]/(user)/components/page-heading";
+import { useListing } from "@/app/react-query/listings/hooks";
+import { useParams } from "next/navigation";
 import React from "react";
 
-type Props = {};
+export default function page() {
+  const { companyId, listingId } = useParams<{
+    companyId: string;
+    listingId: string;
+  }>();
 
-export default function page({}: Props) {
+  const { data: listing } = useListing(listingId);
+
   return (
     <main className="w-full">
       <PageHeading

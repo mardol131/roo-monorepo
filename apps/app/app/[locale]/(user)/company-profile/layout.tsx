@@ -34,7 +34,7 @@ export default function layout({ children }: Props) {
       { label: "Firmy", href: "/company-profile/companies", icon: Building2 },
       {
         label: "Přidat firmu",
-        href: "/company-profile/new-company",
+        href: "/company-profile/companies/new",
         icon: Plus,
       },
     ],

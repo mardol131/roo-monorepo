@@ -2,9 +2,9 @@
 
 import PageHeading from "@/app/[locale]/(user)/components/page-heading";
 import React from "react";
-import CompanyForm from "../../../(company-profile-root)/new-company/components/new-company-form";
+import CompanyForm from "../../new/components/new-form";
 import { useParams, useRouter } from "next/navigation";
-import { COMPANIES } from "../../../_mock/mock";
+import { COMPANIES } from "../../../../../../_mock/mock";
 
 export default function EditCompanyPage({
   params,

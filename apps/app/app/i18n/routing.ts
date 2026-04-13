@@ -20,7 +20,7 @@ export const routing = defineRouting({
 
     // user profile
     "/user-profile": { cs: "/ucet" },
-    "/user-profile/new-event": { cs: "/ucet/nova-udalost" },
+    "/user-profile/my-events/new": { cs: "/ucet/moje-udalosti/nova-udalost" },
     "/user-profile/my-events": { cs: "/ucet/moje-udalosti" },
     "/user-profile/my-events/[eventId]": {
       cs: "/ucet/moje-udalosti/[eventId]",
@@ -36,7 +36,7 @@ export const routing = defineRouting({
     // company profile
     "/company-profile": { cs: "/firemni-ucet" },
     "/company-profile/companies": { cs: "/firemni-ucet/firmy" },
-    "/company-profile/new-company": {
+    "/company-profile/companies/new": {
       cs: "/firemni-ucet/firmy/nova-firma",
     },
     "/company-profile/profile-settings": { cs: "/firemni-ucet/nastaveni" },
@@ -56,7 +56,7 @@ export const routing = defineRouting({
     "/company-profile/companies/[companyId]/listings": {
       cs: "/firemni-ucet/firmy/[companyId]/sluzby",
     },
-    "/company-profile/companies/[companyId]/listings/new-listing": {
+    "/company-profile/companies/[companyId]/listings/new": {
       cs: "/firemni-ucet/firmy/[companyId]/sluzby/nova-sluzba",
     },
 
@@ -68,6 +68,16 @@ export const routing = defineRouting({
     },
     "/company-profile/companies/[companyId]/listings/[listingId]/edit": {
       cs: "/firemni-ucet/firmy/[companyId]/sluzby/[listingId]/upravit",
+    },
+    "/company-profile/companies/[companyId]/listings/[listingId]/spaces": {
+      cs: "/firemni-ucet/firmy/[companyId]/sluzby/[listingId]/prostory",
+    },
+    "/company-profile/companies/[companyId]/listings/[listingId]/spaces/[spaceId]":
+      {
+        cs: "/firemni-ucet/firmy/[companyId]/sluzby/[listingId]/prostory/[spaceId]",
+      },
+    "/company-profile/companies/[companyId]/listings/[listingId]/spaces/new": {
+      cs: "/firemni-ucet/firmy/[companyId]/sluzby/[listingId]/prostory/novy-prostor",
     },
     "/company-profile/companies/[companyId]/listings/[listingId]/calendar": {
       cs: "/firemni-ucet/firmy/[companyId]/sluzby/[listingId]/kalendar",
@@ -89,7 +99,7 @@ export const routing = defineRouting({
     "/company-profile/companies/[companyId]/listings/[listingId]/variants": {
       cs: "/firemni-ucet/firmy/[companyId]/sluzby/[listingId]/varianty",
     },
-    "/company-profile/companies/[companyId]/listings/[listingId]/variants/new-variant":
+    "/company-profile/companies/[companyId]/listings/[listingId]/variants/new":
       {
         cs: "/firemni-ucet/firmy/[companyId]/sluzby/[listingId]/varianty/nova-varianta",
       },

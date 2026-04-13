@@ -16,8 +16,11 @@ type Props = {
   iconBackgroundColor: string;
   label: string;
   items: Item[];
-  link: IntlLink;
+  link?: IntlLink;
+  labelComponent?: ReactNode;
   rightComponent?: ReactNode;
+  onClick?: () => void;
+  hideLinkIcon?: boolean;
 };
 
 export default function EntityCard({
@@ -27,14 +30,17 @@ export default function EntityCard({
   label,
   items,
   link,
+  labelComponent,
   rightComponent,
+  hideLinkIcon = false,
+  onClick,
 }: Props) {
   const Icon = icons[icon];
 
-  return (
-    <Link
-      href={link}
+  const content = (
+    <div
       className="group bg-white rounded-2xl border border-zinc-200 hover:border-zinc-300 hover:shadow-sm transition-all px-6 py-5 flex items-center gap-5"
+      onClick={onClick}
     >
       <div
         className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 ${iconBackgroundColor}`}
@@ -51,7 +57,7 @@ export default function EntityCard({
           >
             {label}
           </Text>
-          {rightComponent}
+          {labelComponent}
         </div>
         <div className="flex items-center gap-4 flex-wrap">
           {items
@@ -71,7 +77,20 @@ export default function EntityCard({
         </div>
       </div>
 
-      <ChevronRight className="w-4 h-4 text-zinc-400 group-hover:text-zinc-600 transition-colors shrink-0" />
-    </Link>
+      {rightComponent}
+      {!hideLinkIcon && (
+        <ChevronRight className="w-4 h-4 text-zinc-400 group-hover:text-zinc-600 transition-colors shrink-0" />
+      )}
+    </div>
   );
+
+  if (link) {
+    return (
+      <Link href={link} className="block">
+        {content}
+      </Link>
+    );
+  }
+
+  return content;
 }

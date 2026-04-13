@@ -1,16 +1,21 @@
+"use client";
+
+import { getInquiries } from "@/app/_mock/mock";
 import { EmptyState } from "@/app/[locale]/(user)/components/empty-state";
 import EntityCard from "@/app/[locale]/(user)/components/entity-card";
+import EntityComponentTag from "@/app/[locale]/(user)/components/tags/entity-component-tag";
 import PageHeading from "@/app/[locale]/(user)/components/page-heading";
-import { getInquiries } from "@/app/[locale]/(user)/user-profile/_mock/mock-data";
-import { getIdFromRelationshipField } from "@roo/common";
+import { format } from "date-fns";
+import { useListingsByCompany } from "@/app/react-query/listings/hooks";
+import { useInquiriesByListing } from "@/app/react-query/inquiries/hooks";
+import { useParams } from "next/navigation";
 
-export default async function page({
-  params,
-}: {
-  params: Promise<{ companyId: string; listingId: string }>;
-}) {
-  const { companyId, listingId } = await params;
-  const inquiries = getInquiries();
+export default function page() {
+  const { companyId, listingId } = useParams<{
+    companyId: string;
+    listingId: string;
+  }>();
+  const { data: inquiries } = useInquiriesByListing(listingId);
 
   return (
     <main className="w-full">
@@ -19,14 +24,14 @@ export default async function page({
         description="Poptávky s nepřečtenými zprávami."
       />
 
-      {inquiries.length === 0 ? (
+      {inquiries?.length === 0 ? (
         <EmptyState
           text="Zatím žádné zprávy"
           subtext="Zprávy se zobrazí, jakmile zákazníci projeví zájem o vaši službu."
         />
       ) : (
         <div className="flex flex-col gap-3">
-          {inquiries.map((inquiry) => (
+          {inquiries?.map((inquiry) => (
             <EntityCard
               key={inquiry.id}
               label={
@@ -35,13 +40,39 @@ export default async function page({
                   : "Poptávka"
               }
               icon="MessageSquare"
-              iconBackgroundColor="bg-rose-50"
-              iconColor="text-rose-500"
-              items={[]}
+              iconBackgroundColor="bg-inquiry-surface"
+              iconColor="text-inquiry"
+              items={[
+                {
+                  icon: "Banknote",
+                  content: `${inquiry.quotedPrice ? `${inquiry.quotedPrice} Kč (nabídka)` : inquiry.agreedPrice ? `${inquiry.agreedPrice} Kč (dohodnutá cena)` : "Cena neuvedena"}`,
+                },
+                {
+                  icon: "Calendar",
+                  content: `${inquiry.customRequest ? "Zákaznická poptávka" : "Standardní poptávka"}`,
+                },
+              ]}
+              labelComponent={
+                <span className="w-2 h-2 rounded-full bg-rose-500 shrink-0 self-center" />
+              }
+              rightComponent={
+                inquiry.lastUserMessageSentAt ? (
+                  <EntityComponentTag
+                    bgColor="bg-zinc-100"
+                    textColor="text-text-light"
+                    text={format(
+                      new Date(inquiry.lastUserMessageSentAt),
+                      "dd.MM.yyyy",
+                    )}
+                  />
+                ) : undefined
+              }
               link={{
-                pathname: "/user-profile/my-events/[eventId]/[inquiryId]",
+                pathname:
+                  "/company-profile/companies/[companyId]/listings/[listingId]/inquiries/[inquiryId]",
                 params: {
-                  eventId: getIdFromRelationshipField(inquiry.event),
+                  companyId,
+                  listingId,
                   inquiryId: inquiry.id,
                 },
               }}

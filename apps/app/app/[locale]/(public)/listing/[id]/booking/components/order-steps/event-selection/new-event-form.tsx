@@ -180,6 +180,7 @@ export default function NewEventForm() {
                 label="Město nebo obec"
                 options={MOCK_LOCATIONS}
                 onSelect={field.onChange}
+                type="fixed"
               />
             )}
           />
@@ -192,6 +193,7 @@ export default function NewEventForm() {
                 label="Vyberte počet hostů"
                 value={field.value}
                 onChange={field.onChange}
+                type="fixed"
               />
             )}
           />

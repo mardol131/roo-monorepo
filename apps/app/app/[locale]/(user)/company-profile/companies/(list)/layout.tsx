@@ -1,25 +1,33 @@
-import React from "react";
-import Sidebar, { SidebarProps } from "../../../components/sidebar";
+import { fetchCompanies } from "@/app/react-query/companies/fetch";
+import { companyKeys } from "@/app/react-query/query-keys";
 import {
-  Calendar,
-  Heart,
-  LayoutDashboard,
-  MessageCircle,
-  MessageSquare,
-} from "lucide-react";
+  dehydrate,
+  HydrationBoundary,
+  QueryClient,
+} from "@tanstack/react-query";
+import React from "react";
 
 type Props = {
   children: React.ReactNode;
 };
 
-export default function layout({ children }: Props) {
+export default async function layout({ children }: Props) {
+  const queryClient = new QueryClient();
+
+  queryClient.prefetchQuery({
+    queryKey: companyKeys.all(),
+    queryFn: () => fetchCompanies(),
+  });
+
   return (
     <>
-      <div className="flex-1 flex justify-center">
-        <div className="max-w-user-profile-content w-full flex flex-col px-8 py-20">
-          {children}
+      <HydrationBoundary state={dehydrate(queryClient)}>
+        <div className="flex-1 flex justify-center">
+          <div className="max-w-user-profile-content w-full flex flex-col px-8 py-20">
+            {children}
+          </div>
         </div>
-      </div>
+      </HydrationBoundary>
     </>
   );
 }

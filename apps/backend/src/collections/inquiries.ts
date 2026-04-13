@@ -71,7 +71,7 @@ export const Inquiries: CollectionConfig = {
     {
       name: 'listing',
       type: 'relationship',
-      relationTo: ['venue-listings', 'gastro-listings', 'entertainment-listings'],
+      relationTo: ['listings'],
       required: true,
     },
     {
@@ -89,7 +89,7 @@ export const Inquiries: CollectionConfig = {
     {
       name: 'variant',
       type: 'relationship',
-      relationTo: ['entertainment-variants', 'gastro-variants', 'venue-variants'],
+      relationTo: ['variants'],
     },
   ],
 }

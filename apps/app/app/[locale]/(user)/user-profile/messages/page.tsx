@@ -1,64 +1,144 @@
 import Text from "@/app/components/ui/atoms/text";
-import { getInquiries } from "../_mock/mock-data";
-import { MessageCircle } from "lucide-react";
+import { MessageCircle, MessageSquare } from "lucide-react";
+import { Link } from "@/app/i18n/navigation";
+import {
+  formatInquiryCountLabel,
+  getIdFromRelationshipField,
+  Inquiry,
+} from "@roo/common";
+import { format } from "date-fns";
+import { cs } from "date-fns/locale";
 import PageHeading from "../../components/page-heading";
-import { getIdFromRelationshipField } from "../../../../../../../packages/common/dist/functions/get-id-from-relationship-field";
+import RowContainer from "../../components/row-container";
 import EntityRow from "../../components/entity-row";
-import EntityCard from "../../components/entity-card";
+import { EmptyState } from "../../components/empty-state";
+import EntityComponentTag from "../../components/tags/entity-component-tag";
+import { getInquiries } from "../../../../_mock/mock";
+
+// ── Helpers ────────────────────────────────────────────────────────────────────
+
+function groupByEvent(
+  inquiries: Inquiry[],
+): { event: Inquiry["event"]; inquiries: Inquiry[] }[] {
+  const map = new Map<
+    string,
+    { event: Inquiry["event"]; inquiries: Inquiry[] }
+  >();
+  for (const inquiry of inquiries) {
+    const eventId = getIdFromRelationshipField(inquiry.event);
+    const existing = map.get(eventId);
+    if (existing) {
+      existing.inquiries.push(inquiry);
+    } else {
+      map.set(eventId, { event: inquiry.event, inquiries: [inquiry] });
+    }
+  }
+  return Array.from(map.values());
+}
+
+// ── Page ───────────────────────────────────────────────────────────────────────
 
 export default function MessagesPage() {
-  const inquiries = getInquiries();
+  const allInquiries = getInquiries();
+
+  const unread = allInquiries.filter((inquiry) => {
+    if (!inquiry.lastCompanyMessageSentAt) return false;
+    if (!inquiry.lastUserSeenAt) return true;
+    return (
+      new Date(inquiry.lastCompanyMessageSentAt) >
+      new Date(inquiry.lastUserSeenAt)
+    );
+  });
+  const grouped = groupByEvent(unread);
 
   return (
-    <main className="flex-1">
+    <main className="w-full">
       <PageHeading
         heading="Zprávy"
         description="Poptávky s nepřečtenými zprávami."
       />
 
-      {inquiries.length === 0 ? (
-        <EmptyState />
+      {grouped.length === 0 ? (
+        <EmptyState
+          text="Žádné nepřečtené zprávy"
+          subtext="Všechny zprávy jsou přečtené."
+        />
       ) : (
-        <div className="flex flex-col gap-3">
-          {inquiries.map((inquiry) => (
-            <EntityCard
-              key={inquiry.id}
-              label={
-                typeof inquiry.listing.value !== "string"
-                  ? inquiry.listing.value.name
-                  : "Poptávka"
-              }
-              icon="MessageSquare"
-              iconBackgroundColor="bg-rose-50"
-              iconColor="text-rose-500"
-              items={[]}
-              link={{
-                pathname: "/user-profile/my-events/[eventId]/[inquiryId]",
-                params: {
-                  eventId: getIdFromRelationshipField(inquiry.event),
-                  inquiryId: inquiry.id,
-                },
-              }}
-            />
-          ))}
+        <div className="flex flex-col gap-4">
+          {grouped.map(({ event, inquiries }) => {
+            if (typeof event === "string") return null;
+
+            return (
+              <RowContainer
+                key={event.id}
+                icon={<MessageSquare className="w-4 h-4 text-inquiry" />}
+                label={event.name}
+                subLabel={formatInquiryCountLabel(inquiries.length)}
+                headerRightComponent={
+                  <Link
+                    href={{
+                      pathname: "/user-profile/my-events/[eventId]",
+                      params: { eventId: event.id },
+                    }}
+                    className="text-xs text-rose-500 hover:text-rose-600 font-medium transition-colors"
+                  >
+                    Detail události →
+                  </Link>
+                }
+                rowComponents={inquiries
+                  .filter((i) => typeof i.listing.value !== "string")
+                  .map((inquiry) => (
+                    <EntityRow
+                      key={inquiry.id}
+                      label={
+                        typeof inquiry.listing.value !== "string"
+                          ? inquiry.listing.value.name
+                          : "Poptávka"
+                      }
+                      icon="MessageSquare"
+                      iconBackgroundColor="bg-inquiry-surface"
+                      iconColor="text-inquiry"
+                      items={[
+                        {
+                          icon: "Banknote",
+                          content: `${inquiry.quotedPrice ? `${inquiry.quotedPrice} Kč (nabídka)` : inquiry.agreedPrice ? `${inquiry.agreedPrice} Kč (dohodnutá cena)` : "Cena neuvedena"}`,
+                        },
+                        {
+                          icon: "Calendar",
+                          content: `${inquiry.customRequest ? "Zákaznická poptávka" : "Standardní poptávka"}`,
+                        },
+                      ]}
+                      link={{
+                        pathname:
+                          "/user-profile/my-events/[eventId]/[inquiryId]",
+                        params: {
+                          eventId: getIdFromRelationshipField(inquiry.event),
+                          inquiryId: inquiry.id,
+                        },
+                      }}
+                      rightComponent={
+                        inquiry.lastCompanyMessageSentAt ? (
+                          <EntityComponentTag
+                            bgColor="bg-zinc-100"
+                            textColor="text-text-light"
+                            text={format(
+                              new Date(inquiry.lastCompanyMessageSentAt),
+                              "dd.mm.yyyy",
+                              { locale: cs },
+                            )}
+                          />
+                        ) : undefined
+                      }
+                      labelComponent={
+                        <span className="w-2 h-2 rounded-full bg-rose-500 shrink-0 self-center" />
+                      }
+                    />
+                  ))}
+              />
+            );
+          })}
         </div>
       )}
     </main>
-  );
-}
-
-function EmptyState() {
-  return (
-    <div className="bg-white rounded-2xl border border-zinc-200 flex flex-col items-center justify-center py-16 px-8 text-center">
-      <div className="w-12 h-12 rounded-2xl bg-zinc-50 flex items-center justify-center mb-4">
-        <MessageCircle className="w-6 h-6 text-zinc-400" />
-      </div>
-      <Text variant="label1" color="dark" className="font-semibold mb-1">
-        Žádné nepřečtené zprávy
-      </Text>
-      <Text variant="label4" color="secondary" className="max-w-xs">
-        Všechny zprávy jsou přečtené.
-      </Text>
-    </div>
   );
 }

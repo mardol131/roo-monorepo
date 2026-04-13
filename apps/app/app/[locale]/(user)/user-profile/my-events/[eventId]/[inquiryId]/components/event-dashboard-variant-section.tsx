@@ -1,10 +1,10 @@
 import Text from "@/app/components/ui/atoms/text";
-import { EntertainmentVariant, GastroVariant, VenueVariant } from "@roo/common";
 import { Check, X } from "lucide-react";
 import SectionHeader from "./section-header";
+import { Variant } from "@roo/common";
 
 type Props = {
-  variant: VenueVariant | GastroVariant | EntertainmentVariant;
+  variant: Variant;
 };
 
 export default function EventDashboardVariantSection({ variant }: Props) {

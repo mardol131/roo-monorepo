@@ -97,8 +97,8 @@ export default function InquiryList({ inquiries }: { inquiries: Inquiry[] }) {
               <RowContainer
                 key={getIdFromRelationshipField(event)}
                 icon={
-                  <div className="w-8 h-8 rounded-xl bg-rose-50 flex items-center justify-center shrink-0">
-                    <MessageSquare className="w-4 h-4 text-rose-500" />
+                  <div className="w-8 h-8 rounded-xl bg-inquiry-surface flex items-center justify-center shrink-0">
+                    <MessageSquare className="w-4 h-4 text-inquiry" />
                   </div>
                 }
                 label={event.name}
@@ -118,8 +118,8 @@ export default function InquiryList({ inquiries }: { inquiries: Inquiry[] }) {
                           : "Poptávka"
                       }
                       icon="MessageSquare"
-                      iconBackgroundColor="bg-rose-50"
-                      iconColor="text-rose-500"
+                      iconBackgroundColor="bg-inquiry-surface"
+                      iconColor="text-inquiry"
                       items={[]}
                       link={{
                         pathname:

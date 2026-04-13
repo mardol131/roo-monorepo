@@ -1,9 +1,12 @@
+"use client";
+
+import { useCompanies } from "@/app/react-query/companies/hooks";
 import EntityCard from "../../../components/entity-card";
-import EntityComponentTag from "../../../components/entity-component-tag";
 import PageHeading from "../../../components/page-heading";
-import { COMPANIES } from "../../_mock/mock";
+import EntityComponentTag from "../../../components/tags/entity-component-tag";
 
 export default function page() {
+  const { data: companies } = useCompanies();
   return (
     <main className="w-full">
       <PageHeading
@@ -15,18 +18,18 @@ export default function page() {
           size: "sm",
           iconLeft: "Plus",
           link: {
-            pathname: "/company-profile/new-company",
+            pathname: "/company-profile/companies/new",
           },
         }}
       />
       <div className="flex flex-col gap-3 mt-6">
-        {COMPANIES.map((company) => (
+        {companies?.map((company) => (
           <EntityCard
             key={company.id}
             icon="Building2"
             label={company.name}
-            iconColor="text-rose-500"
-            iconBackgroundColor="bg-rose-50"
+            iconColor="text-company"
+            iconBackgroundColor="bg-company-surface"
             items={[{ icon: "Mail", content: company.email }]}
             link={{
               pathname: "/company-profile/companies/[companyId]",

@@ -24,7 +24,7 @@ export default function Sidebar({
   isActiveFunction,
 }: SidebarProps) {
   return (
-    <aside className="w-18 shrink-0 flex flex-col bg-white border-r border-zinc-200">
+    <aside className="w-20 shrink-0 flex flex-col bg-white border-r border-zinc-200">
       <div className="sticky top-0 flex flex-col h-screen">
         <Image src={logo} alt="Logo" className="p-3" />
         {headerComponent}

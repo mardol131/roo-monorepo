@@ -1,7 +1,6 @@
 import { ArrowLeft, Package } from "lucide-react";
 
 import Link from "next/link";
-import { getInquiry, getMessages } from "../../../_mock/mock-data";
 import { INQUIRY_STATUS } from "@/app/data/inquiry";
 import ChatWindow from "./components/chat-window";
 import CompanyCard from "./components/company-card";
@@ -10,17 +9,22 @@ import InquiryTimeline from "./components/inquiry-timeline";
 import DashboardHeader from "@/app/[locale]/(user)/company-profile/components/dashboard-header";
 import EventDashboardVariantSection from "./components/event-dashboard-variant-section";
 import { aggregateInquiryStatus } from "@roo/common";
+import { getTranslations } from "next-intl/server";
+import { format } from "date-fns";
+import { COMPANIES, getInquiry, getMessages } from "@/app/_mock/mock";
 
-export default async function InquiryDetailPage({
+export default async function page({
   params,
 }: {
   params: Promise<{ id: string; contractorId: string }>;
 }) {
   const { id, contractorId } = await params;
-  const [inquiry, messages] = [
+  const [inquiry, messages, company] = [
     getInquiry(id, contractorId),
     getMessages(contractorId),
+    COMPANIES[0],
   ];
+  const t = await getTranslations();
 
   const status = INQUIRY_STATUS[aggregateInquiryStatus(inquiry)];
 
@@ -50,8 +54,11 @@ export default async function InquiryDetailPage({
             </span>
           }
           infoItems={[
-            { icon: "Tag", text: inquiry.listingType },
-            { icon: "Clock", text: `Odesláno ${inquiry.sentAt}` },
+            { icon: "Tag", text: t(`listings.type.${inquiry.listingType}`) },
+            {
+              icon: "Clock",
+              text: `Odesláno ${format(new Date(inquiry.sentAt), "d. M. yyyy")}`,
+            },
           ]}
           button={{
             version: "outlined",
@@ -72,10 +79,7 @@ export default async function InquiryDetailPage({
         <div className="bg-white rounded-2xl border border-zinc-200 px-8 py-5">
           <InquiryTimeline status={aggregateInquiryStatus(inquiry)} />
         </div>
-        {typeof inquiry.listing.value !== "string" &&
-          typeof inquiry.listing.value.company !== "string" && (
-            <CompanyCard company={inquiry.listing.value.company} />
-          )}
+        {typeof company !== "string" && <CompanyCard company={company} />}
         {typeof inquiry.variant?.value !== "string" &&
           inquiry.variant?.value && (
             <EventDashboardVariantSection variant={inquiry.variant?.value} />

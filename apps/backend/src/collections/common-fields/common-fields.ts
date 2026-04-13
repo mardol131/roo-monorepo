@@ -108,14 +108,112 @@ export const listingsCommonFields: Field[] = [
       },
     ],
   },
-  priceField,
+  {
+    name: 'price',
+    type: 'group',
+    required: true,
+    fields: [
+      {
+        name: 'startsAt',
+        type: 'number',
+        required: true,
+      },
+    ],
+  },
+  {
+    name: 'faq',
+    type: 'array',
+    fields: [
+      {
+        name: 'active',
+        type: 'checkbox',
+        defaultValue: true,
+      },
+      {
+        name: 'question',
+        type: 'text',
+        required: true,
+      },
+      {
+        name: 'answer',
+        type: 'textarea',
+        required: true,
+      },
+      {
+        name: 'groupedBy',
+        type: 'select',
+        options: ['general', 'booking', 'cancellation', 'payment', 'other'],
+        defaultValue: 'general',
+      },
+    ],
+  },
+  {
+    name: 'references',
+    type: 'array',
+    fields: [
+      {
+        name: 'image',
+        type: 'text',
+      },
+      {
+        name: 'eventName',
+        type: 'text',
+      },
+      {
+        name: 'clientName',
+        type: 'text',
+      },
+      {
+        name: 'eventType',
+        type: 'relationship',
+        relationTo: 'event-types',
+      },
+    ],
+  },
+  {
+    name: 'employees',
+    type: 'array',
+    fields: [
+      {
+        name: 'name',
+        type: 'text',
+        required: true,
+      },
+      {
+        name: 'role',
+        type: 'text',
+        required: true,
+      },
+      {
+        name: 'description',
+        type: 'textarea',
+      },
+      {
+        name: 'image',
+        type: 'text',
+      },
+    ],
+  },
+  {
+    name: 'rules',
+    type: 'relationship',
+    relationTo: 'rules',
+    hasMany: true,
+  },
+  {
+    name: 'technologies',
+    type: 'relationship',
+    relationTo: 'technologies',
+    hasMany: true,
+  },
 ]
 
 export const variantsCommonFields: Field[] = [
   {
     name: 'listing',
     type: 'relationship',
-    relationTo: 'venue-listings',
+    relationTo: 'listings',
+    required: true,
     hasMany: false,
   },
   {
@@ -177,6 +275,33 @@ export const variantsCommonFields: Field[] = [
       {
         name: 'item',
         type: 'text',
+      },
+    ],
+  },
+  {
+    name: 'eventTypes',
+    type: 'relationship',
+    relationTo: 'event-types',
+    hasMany: true,
+  },
+  {
+    name: 'images',
+    type: 'group',
+    fields: [
+      {
+        name: 'mainImage',
+        type: 'text',
+        required: true,
+      },
+      {
+        name: 'gallery',
+        type: 'array',
+        fields: [
+          {
+            name: 'image',
+            type: 'text',
+          },
+        ],
       },
     ],
   },

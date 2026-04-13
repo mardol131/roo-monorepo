@@ -1,13 +1,17 @@
-import { MOCK_VARIANTS } from "@/app/[locale]/(user)/company-profile/_mock/mock";
+"use client";
+
 import EntityCard from "@/app/[locale]/(user)/components/entity-card";
 import PageHeading from "@/app/[locale]/(user)/components/page-heading";
+import { useVariantsByListing } from "@/app/react-query/variants/hooks";
+import { useParams } from "next/navigation";
 
-type Props = {
-  params: Promise<{ companyId: string; listingId: string }>;
-};
+export default function page() {
+  const { listingId, companyId } = useParams<{
+    companyId: string;
+    listingId: string;
+  }>();
 
-export default async function page({ params }: Props) {
-  const resolvedParams = await params;
+  const { data: variants } = useVariantsByListing(listingId);
 
   return (
     <main className="w-full">
@@ -16,34 +20,35 @@ export default async function page({ params }: Props) {
         description="Zde můžete spravovat varianty související s vaší službou."
         button={{
           text: "Přidat variantu",
-          version: "primary",
+          version: "variantFull",
           iconLeft: "Plus",
+          size: "sm",
           link: {
             pathname:
-              "/company-profile/companies/[companyId]/listings/[listingId]/variants/new-variant",
+              "/company-profile/companies/[companyId]/listings/[listingId]/variants/new",
             params: {
-              companyId: resolvedParams.companyId,
-              listingId: resolvedParams.listingId,
+              companyId: companyId,
+              listingId: listingId,
             },
           },
         }}
       />
       <div className="flex flex-col gap-3 mt-6">
-        {MOCK_VARIANTS.map((variant) => (
+        {variants?.map((variant) => (
           <EntityCard
             key={variant.id}
             link={{
               pathname:
                 "/company-profile/companies/[companyId]/listings/[listingId]/variants/[variantId]",
               params: {
-                companyId: resolvedParams.companyId,
-                listingId: resolvedParams.listingId,
+                companyId: companyId,
+                listingId: listingId,
                 variantId: variant.id,
               },
             }}
             icon="Package"
-            iconColor="text-green-500"
-            iconBackgroundColor="bg-green-50"
+            iconColor="text-variant"
+            iconBackgroundColor="bg-variant-surface"
             label={variant.name}
             items={[
               {

@@ -95,7 +95,7 @@ export const Events: CollectionConfig = {
         {
           name: 'venue',
           type: 'relationship',
-          relationTo: 'venue-listings',
+          relationTo: 'listings',
         },
       ],
     },

@@ -7,11 +7,17 @@ type ButtonVersion =
   | "secondary"
   | "plain"
   | "outlined"
+  | "company"
+  | "companyFull"
+  | "event"
+  | "eventFull"
   | "link"
   | "listing"
   | "listingFull"
   | "variant"
   | "variantFull"
+  | "inquiry"
+  | "inquiryFull"
   | "none"
   | "white";
 type ButtonSize = "2xl" | "xl" | "lg" | "md" | "sm";
@@ -58,10 +64,18 @@ const getVersionClass = (
       "bg-primary-surface text-primary hover:bg-primary-surface hover:bg-opacity-90",
     secondary: "bg-zinc-900 text-white shadow hover:shadow-md",
     plain: "bg-transparent text-zinc-900",
+    company:
+      "bg-company-surface text-company hover:bg-company-surface hover:bg-opacity-90",
+    companyFull: "bg-company text-white shadow hover:shadow-md",
+    event:
+      "bg-event-surface text-event hover:bg-event-surface hover:bg-opacity-90",
+    eventFull: "bg-event text-white shadow hover:shadow-md",
     listing: "bg-listing-surface text-listing hover:bg-listing-surface",
     listingFull: "bg-listing text-white",
     variant: "bg-variant-surface text-variant hover:bg-variant-surface",
     variantFull: "bg-variant text-white",
+    inquiry: "bg-inquiry-surface text-inquiry hover:bg-inquiry-surface",
+    inquiryFull: "bg-inquiry text-white",
     outlined:
       "bg-transparent text-zinc-900 border border-zinc-900 hover:bg-black/5",
     link: "bg-transparent text-rose-500 underline hover:opacity-80 active:opacity-60 transition-opacity p-0",

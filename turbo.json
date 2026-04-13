@@ -59,6 +59,9 @@
     "dev": {
       "persistent": true,
       "cache": false
+    },
+    "generate:types": {
+      "dependsOn": ["^generate:types"]
     }
   }
 }

@@ -2,6 +2,7 @@ import { Metadata } from "next";
 import { ReactNode } from "react";
 import { NextIntlClientProvider } from "next-intl";
 import "./styles/global.css";
+import { ReactQueryProvider } from "./react-query/react-query-provider";
 
 export const metadata: Metadata = {};
 
@@ -16,7 +17,9 @@ export default function RootLayout({
         <link rel="manifest" href="/manifest.json" />
       </head>
       <body className={`text-textDark`}>
-        <NextIntlClientProvider>{children}</NextIntlClientProvider>
+        <NextIntlClientProvider>
+          <ReactQueryProvider>{children}</ReactQueryProvider>
+        </NextIntlClientProvider>
       </body>
     </html>
   );

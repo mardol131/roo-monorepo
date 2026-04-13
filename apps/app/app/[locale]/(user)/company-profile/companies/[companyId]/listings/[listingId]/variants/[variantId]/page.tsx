@@ -8,7 +8,7 @@ import {
   ArrowLeft,
 } from "lucide-react";
 import Link from "next/link";
-import { MOCK_VARIANTS } from "@/app/[locale]/(user)/company-profile/_mock/mock";
+import { MOCK_VARIANTS } from "@/app/_mock/mock";
 import DashboardHeader from "@/app/[locale]/(user)/company-profile/components/dashboard-header";
 import { SummaryCard } from "@/app/[locale]/(user)/user-profile/components/summary-card";
 import Text from "@/app/components/ui/atoms/text";
@@ -31,35 +31,37 @@ export default async function VariantDashboardPage({ params }: Props) {
         icon={Package}
         iconBg="bg-emerald-50"
         iconColor="text-emerald-500"
-        name={variant.title}
+        name={variant.name}
         nameSideComponent={
           <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-600">
-            {variant.price.toLocaleString("cs-CZ")} Kč
+            {variant.price.generalPrice} Kč
           </span>
         }
-        infoItems={[
-          { icon: "Clock", text: variant.duration },
-          ...(variant.availableDate
-            ? [
-                {
-                  icon: "CalendarCheck",
-                  text: `Dostupné od ${variant.availableDate}`,
-                },
-              ]
-            : []),
-        ]}
+        infoItems={
+          [
+            //   { icon: "Clock", text: variant.duration },
+            //   ...(variant.availableDate
+            //     ? [
+            //         {
+            //           icon: "CalendarCheck",
+            //           text: `Dostupné od ${variant.availableDate}`,
+            //         },
+            //       ]
+            //     : []),
+          ]
+        }
       />
 
       {/* Summary cards */}
       <div className="grid grid-cols-3 gap-4 mb-4">
         <SummaryCard
           label="Cena"
-          value={`${variant.price.toLocaleString("cs-CZ")} Kč`}
+          value={`${variant.price.generalPrice} Kč`}
           icon={Banknote}
           iconBg="bg-emerald-50"
           iconColor="text-emerald-500"
         />
-        <SummaryCard
+        {/* <SummaryCard
           label="Délka trvání"
           value={variant.duration}
           icon={Clock}
@@ -73,7 +75,7 @@ export default async function VariantDashboardPage({ params }: Props) {
           iconBg="bg-violet-50"
           iconColor="text-violet-500"
           note={variant.idealFor.join(", ")}
-        />
+        /> */}
       </div>
       <VariantDashboardContent
         variant={variant}

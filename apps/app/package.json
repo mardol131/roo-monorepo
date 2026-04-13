@@ -9,8 +9,10 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@dnd-kit/react": "^0.4.0",
     "@hookform/resolvers": "^5.2.2",
     "@roo/common": "workspace:*",
+    "@tanstack/react-query": "^5.99.0",
     "lucide-react": "^0.563.0",
     "next": "16.1.6",
     "next-intl": "^4.8.3",
@@ -21,6 +23,7 @@
     "react-icons": "^5.5.0",
     "stripe": "^20.1.0",
     "yup": "^1.7.1",
+    "zod": "^4.3.6",
     "zustand": "^5.0.11"
   },
   "devDependencies": {

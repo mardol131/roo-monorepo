@@ -1,143 +1,41 @@
-"use client";
-
-import { IntlPathname, usePathname } from "@/app/i18n/navigation";
-import { useParams } from "next/navigation";
+import { fetchCompany } from "@/app/react-query/companies/fetch";
+import { companyKeys, listingKeys } from "@/app/react-query/query-keys";
 import {
-  Briefcase,
-  Calendar,
-  Layers,
-  LayoutDashboard,
-  MessageCircle,
-  MessageSquare,
-  Settings,
-} from "lucide-react";
-import React, { useCallback } from "react";
-import { SubSidebar, SubSidebarProps } from "../../../components/sub-sidebar";
+  dehydrate,
+  HydrationBoundary,
+  QueryClient,
+} from "@tanstack/react-query";
+import { PropsWithChildren } from "react";
+import ContentWrapper from "./content-wrapper";
+import CustomSidebar from "./custom-sidebar";
+import { fetchListingsByCompany } from "@/app/react-query/listings/fetch";
 
 type Props = {
-  children: React.ReactNode;
   params: Promise<{ companyId: string }>;
 };
 
-export default function layout({ children, params }: Props) {
-  const { companyId } = React.use(params);
-  const pathname = usePathname();
+export default async function layout({
+  children,
+  params,
+}: PropsWithChildren<Props>) {
+  const { companyId } = await params;
 
-  const routeParams = useParams();
-  const listingId =
-    typeof routeParams.listingId === "string" ? routeParams.listingId : null;
+  const queryClient = new QueryClient();
 
-  const isActive = useCallback(
-    (href: IntlPathname) => {
-      const path = typeof href === "string" ? href : href.pathname;
-      return pathname === path;
-    },
-    [pathname],
-  );
+  await queryClient.prefetchQuery({
+    queryKey: companyKeys.byId(companyId),
+    queryFn: () => fetchCompany(companyId),
+  });
 
-  const mainMenuItems: SubSidebarProps["mainMenuItems"] = [
-    {
-      label: "Přehled firmy",
-      href: {
-        pathname: "/company-profile/companies/[companyId]",
-        params: { companyId },
-      },
-      icon: LayoutDashboard,
-    },
-    {
-      label: "Služby",
-      href: {
-        pathname: "/company-profile/companies/[companyId]/listings",
-        params: { companyId },
-      },
-      icon: Briefcase,
-    },
-    {
-      label: "Nastavení firmy",
-      href: {
-        pathname: "/company-profile/companies/[companyId]/edit",
-        params: { companyId },
-      },
-      icon: Settings,
-    },
-  ];
-
-  const subMenuItems: SubSidebarProps["subMenuItems"] = listingId
-    ? [
-        {
-          label: "Přehled služby",
-          href: {
-            pathname:
-              "/company-profile/companies/[companyId]/listings/[listingId]",
-            params: { companyId, listingId },
-          },
-          icon: LayoutDashboard,
-        },
-        {
-          label: "Poptávky",
-          href: {
-            pathname:
-              "/company-profile/companies/[companyId]/listings/[listingId]/inquiries",
-            params: { companyId, listingId },
-          },
-          icon: MessageSquare,
-        },
-        {
-          label: "Zprávy",
-          href: {
-            pathname:
-              "/company-profile/companies/[companyId]/listings/[listingId]/messages",
-            params: { companyId, listingId },
-          },
-          icon: MessageCircle,
-        },
-
-        {
-          label: "Kalendář",
-          href: {
-            pathname:
-              "/company-profile/companies/[companyId]/listings/[listingId]/calendar",
-            params: { companyId, listingId },
-          },
-          icon: Calendar,
-        },
-        {
-          label: "Nabízené varianty",
-          href: {
-            pathname:
-              "/company-profile/companies/[companyId]/listings/[listingId]/variants",
-            params: { companyId, listingId },
-          },
-          icon: Layers,
-        },
-        {
-          label: "Nastavení služby",
-          href: {
-            pathname:
-              "/company-profile/companies/[companyId]/listings/[listingId]/edit",
-            params: { companyId, listingId },
-          },
-          icon: Settings,
-        },
-      ]
-    : undefined;
-
-  const subSidebar: SubSidebarProps = {
-    isActiveFunction: isActive,
-    mainMenuItems,
-    subMenuItems,
-    mainMenuLabel: "Navigace firmy",
-    subMenuLabel: listingId ? "Navigace služby" : undefined,
-  };
+  await queryClient.prefetchQuery({
+    queryKey: listingKeys.byCompany(companyId),
+    queryFn: () => fetchListingsByCompany(companyId),
+  });
 
   return (
-    <>
-      <SubSidebar {...subSidebar} />
-      <div className="flex-1 flex justify-center">
-        <div className="max-w-user-profile-content w-full flex flex-col px-8 py-20">
-          {children}
-        </div>
-      </div>
-    </>
+    <HydrationBoundary state={dehydrate(queryClient)}>
+      <CustomSidebar companyId={companyId} />
+      <ContentWrapper>{children}</ContentWrapper>
+    </HydrationBoundary>
   );
 }
