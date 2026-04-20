@@ -32,4 +32,7 @@
 
   --color-space: var(--color-fuchsia-600);
   --color-space-surface: var(--color-fuchsia-100);
+
+  --color-calendar: var(--color-blue-500);
+  --color-calendar-surface: var(--color-blue-50);
 }

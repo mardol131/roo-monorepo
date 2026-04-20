@@ -7,7 +7,7 @@ type Props = {
 export default function layout({ children }: Props) {
   return (
     <div>
-      <div className="flex min-h-screen bg-zinc-50 w-full">{children}</div>
+      <div className="flex min-h-screen bg-zinc-100 w-full">{children}</div>
     </div>
   );
 }

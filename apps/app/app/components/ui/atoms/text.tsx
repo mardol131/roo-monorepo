@@ -25,10 +25,15 @@ type TextVariant =
 type TextColor =
   | "dark"
   | "light"
+  | "muted"
   | "primary"
   | "onPrimary"
   | "secondary"
-  | "white";
+  | "white"
+  | "listing"
+  | "calendar"
+  | "inquiry"
+  | "danger";
 
 interface TextProps {
   variant?: TextVariant;
@@ -77,10 +82,15 @@ const getColorStyles = (color: TextColor): string => {
   const colorClasses: Record<TextColor, string> = {
     dark: "text-textDark",
     light: "text-textLight",
+    muted: "text-zinc-500",
     primary: "text-primary",
     onPrimary: "text-onPrimary",
     secondary: "text-secondary",
     white: "text-white",
+    listing: "text-listing",
+    calendar: "text-calendar",
+    inquiry: "text-inquiry",
+    danger: "text-danger",
   };
   return colorClasses[color];
 };
