@@ -12,7 +12,7 @@ import { Textarea } from "@/app/components/ui/atoms/inputs/textarea";
 import InputLabel from "@/app/components/ui/atoms/input-label";
 import Button from "@/app/components/ui/atoms/button";
 import { Trash2 } from "lucide-react";
-import type { FormInputs } from "./new-venue-listing-form";
+import type { FormInputs } from "./new-listing-form";
 
 interface RoomSpacesFieldsProps {
   control: Control<FormInputs>;

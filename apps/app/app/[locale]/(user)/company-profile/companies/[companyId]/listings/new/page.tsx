@@ -2,18 +2,13 @@
 
 import PageHeading from "@/app/[locale]/(user)/components/page-heading";
 import { useRouter } from "next/navigation";
-import NewVenueListingForm, {
-  VENUE_FORM_GROUPS,
-} from "./components/new-venue-listing-form";
+import NewListingForm, { FORM_GROUPS } from "./components/new-listing-form";
 import FormToc from "@/app/[locale]/(user)/components/form-toc";
 import { useState } from "react";
-import { ArrowLeft, Building2, Music, UtensilsCrossed } from "lucide-react";
-import Text from "@/app/components/ui/atoms/text";
 import Button from "@/app/components/ui/atoms/button";
 import IconCard from "./components/icon-card";
 import { LucideIcons } from "@roo/common";
-
-type ListingType = "venue" | "gastro" | "entertainment";
+import { ListingType } from "./components/new-listing-form";
 
 const LISTING_TYPES: {
   type: ListingType;
@@ -67,8 +62,6 @@ export default function NewListingPage() {
     );
   }
 
-  const isVenue = selectedType === "venue";
-
   return (
     <main className="w-full">
       <PageHeading
@@ -86,34 +79,17 @@ export default function NewListingPage() {
       />
 
       <div className="flex gap-6">
-        {/* Form */}
         <div className="flex-1 min-w-0">
-          {isVenue && (
-            <NewVenueListingForm
-              onSubmit={(data) => {
-                console.log("submit", data);
-              }}
-              onCancel={() => router.back()}
-            />
-          )}
-          {selectedType === "gastro" && (
-            <p className="text-zinc-400 text-sm">
-              Formulář pro gastronomii bude doplněn.
-            </p>
-          )}
-          {selectedType === "entertainment" && (
-            <p className="text-zinc-400 text-sm">
-              Formulář pro zábavu bude doplněn.
-            </p>
-          )}
+          <NewListingForm
+            type={selectedType}
+            onSubmit={(data) => console.log("submit", data)}
+            onCancel={() => router.back()}
+          />
         </div>
 
-        {/* TOC sidebar */}
-        {isVenue && (
-          <div className="w-52 shrink-0 hidden lg:block">
-            <FormToc groups={VENUE_FORM_GROUPS} />
-          </div>
-        )}
+        <div className="w-52 shrink-0 hidden lg:block">
+          <FormToc groups={FORM_GROUPS[selectedType]} />
+        </div>
       </div>
     </main>
   );

@@ -13,7 +13,7 @@ import Input from "@/app/components/ui/atoms/inputs/input";
 import { Textarea } from "@/app/components/ui/atoms/inputs/textarea";
 import Checkbox from "@/app/components/ui/atoms/inputs/checkbox";
 import RepeaterField from "@/app/components/ui/atoms/inputs/repeater-field";
-import type { FormInputs } from "./new-venue-listing-form";
+import type { FormInputs } from "./new-listing-form";
 
 // ── Building rooms (nested field array) ─────────────────────────────────────
 
@@ -191,6 +191,7 @@ interface AreaSpacesFieldsProps {
   errors: FieldErrors<FormInputs>;
   watch: UseFormWatch<FormInputs>;
 }
+
 
 export default function AreaSpacesFields({
   control,

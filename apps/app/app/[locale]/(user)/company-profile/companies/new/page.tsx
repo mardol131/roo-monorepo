@@ -3,7 +3,7 @@
 import React from "react";
 import { useRouter } from "next/navigation";
 import PageHeading from "../../../components/page-heading";
-import CompanyForm from "./components/new-form";
+import CompanyForm from "./components/new-company-form";
 
 export default function NewCompanyPage() {
   const router = useRouter();
