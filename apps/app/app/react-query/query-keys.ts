@@ -25,3 +25,9 @@ export const spaceKeys = {
   byListing: (listingId: string) => ["spaces", "listing", listingId] as const,
   byId: (id: string) => ["spaces", id] as const,
 };
+
+export const calendarEventKeys = {
+  byListing: (listingId: string) =>
+    ["calendarEvents", "listing", listingId] as const,
+  byId: (id: string) => ["calendarEvents", id] as const,
+};

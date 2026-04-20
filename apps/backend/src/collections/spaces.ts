@@ -49,9 +49,7 @@ export const Spaces: CollectionConfig = {
       fields: [
         {
           name: 'image',
-          type: 'upload',
-          relationTo: 'media',
-          required: true,
+          type: 'text',
         },
       ],
     },

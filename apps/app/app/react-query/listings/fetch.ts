@@ -2,7 +2,10 @@ import { LISTINGS } from "@/app/_mock/mock";
 import { Listing } from "@roo/common";
 
 export async function fetchListingsByCompany(companyId: string) {
-  const res = LISTINGS.filter((listing) => listing.company === companyId);
+  const res = LISTINGS.filter((listing) => {
+    if (typeof listing.company === "string") return listing.company === companyId;
+    return listing.company.id === companyId;
+  });
   if (!res) throw new Error("Failed to fetch listings");
   return res;
 }

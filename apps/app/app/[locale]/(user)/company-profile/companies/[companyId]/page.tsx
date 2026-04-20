@@ -1,22 +1,19 @@
 "use client";
 
 import Button from "@/app/components/ui/atoms/button";
+import { useRouter } from "@/app/i18n/navigation";
 import { useCompany } from "@/app/react-query/companies/hooks";
+import { useListingsByCompany } from "@/app/react-query/listings/hooks";
 import { Briefcase, Building2 } from "lucide-react";
-import { useTranslations } from "next-intl";
 import { useParams } from "next/navigation";
-import { LISTINGS } from "../../../../../_mock/mock";
 import Breadcrumbs from "../../../components/breadcrumbs";
 import EntityRow from "../../../components/entity-row";
 import RowContainer from "../../../components/row-container";
 import ListingStatusTag from "../../../components/tags/listing-status-tag";
 import { SummaryCard } from "../../../user-profile/components/summary-card";
 import DashboardHeader from "../../components/dashboard-header";
-import { useRouter } from "@/app/i18n/navigation";
-import { useListingsByCompany } from "@/app/react-query/listings/hooks";
 
 export default function page() {
-  const t = useTranslations();
   const { companyId } = useParams<{ companyId: string }>();
   const router = useRouter();
 

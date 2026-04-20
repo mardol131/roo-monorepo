@@ -11,6 +11,7 @@ import {
   Necessity,
   Personnel,
   PlaceType,
+  RoomAmenity,
   Rule,
   Service,
   Space,
@@ -21,6 +22,7 @@ import {
   Inquiry,
   ChatMessage,
   City,
+  CalendarEvent,
 } from "@roo/common";
 
 import { Calendar, Heart, MessageSquare, TrendingUp } from "lucide-react";
@@ -614,6 +616,65 @@ export const MOCK_SERVICES: Service[] = [
     id: "sv-10",
     name: "Bezpečnostní služba",
     slug: "bezpecnostni-sluzba",
+    updatedAt: "2025-01-01T00:00:00.000Z",
+    createdAt: "2025-01-01T00:00:00.000Z",
+  },
+];
+
+export const MOCK_ROOM_AMENITIES: RoomAmenity[] = [
+  {
+    id: "ra-1",
+    name: "Vlastní koupelna",
+    slug: "vlastni-koupelna",
+    updatedAt: "2025-01-01T00:00:00.000Z",
+    createdAt: "2025-01-01T00:00:00.000Z",
+  },
+  {
+    id: "ra-2",
+    name: "TV",
+    slug: "tv",
+    updatedAt: "2025-01-01T00:00:00.000Z",
+    createdAt: "2025-01-01T00:00:00.000Z",
+  },
+  {
+    id: "ra-3",
+    name: "Wi-Fi",
+    slug: "wi-fi",
+    updatedAt: "2025-01-01T00:00:00.000Z",
+    createdAt: "2025-01-01T00:00:00.000Z",
+  },
+  {
+    id: "ra-4",
+    name: "Klimatizace",
+    slug: "klimatizace",
+    updatedAt: "2025-01-01T00:00:00.000Z",
+    createdAt: "2025-01-01T00:00:00.000Z",
+  },
+  {
+    id: "ra-5",
+    name: "Mini bar",
+    slug: "mini-bar",
+    updatedAt: "2025-01-01T00:00:00.000Z",
+    createdAt: "2025-01-01T00:00:00.000Z",
+  },
+  {
+    id: "ra-6",
+    name: "Trezor",
+    slug: "trezor",
+    updatedAt: "2025-01-01T00:00:00.000Z",
+    createdAt: "2025-01-01T00:00:00.000Z",
+  },
+  {
+    id: "ra-7",
+    name: "Balkón",
+    slug: "balkon",
+    updatedAt: "2025-01-01T00:00:00.000Z",
+    createdAt: "2025-01-01T00:00:00.000Z",
+  },
+  {
+    id: "ra-8",
+    name: "Pracovní stůl",
+    slug: "pracovni-stul",
     updatedAt: "2025-01-01T00:00:00.000Z",
     createdAt: "2025-01-01T00:00:00.000Z",
   },
@@ -1777,5 +1838,286 @@ export const STATS = [
     value: "24",
     icon: TrendingUp,
     color: "bg-emerald-50 text-emerald-500",
+  },
+];
+
+export const CALENDAR_EVENTS: CalendarEvent[] = [
+  // ── Listing 101 (Kongresové centrum Praha) ────────────────────────────────
+
+  // Poptávka inq-1 → tentative blok na Hlavní sál
+  {
+    id: "ce-1",
+    listing: LISTINGS[0],
+    space: MOCK_SPACES[0], // sp-1 Hlavní sál
+    inquiry: "inq-1",
+    source: "inquiry",
+    status: "tentative",
+    name: "Firemní konference – Novák a.s.",
+    startsAt: "2026-05-10T09:00:00.000Z",
+    endsAt: "2026-05-10T18:00:00.000Z",
+    allDay: false,
+    updatedAt: "2026-02-10T00:00:00.000Z",
+    createdAt: "2026-02-10T00:00:00.000Z",
+  },
+  // Manuální blok – technická přestávka
+  {
+    id: "ce-2",
+    listing: LISTINGS[0],
+    source: "manual",
+    status: "confirmed",
+    name: "Technická údržba – výměna AV techniky",
+    description: "Plánovaná výměna projektoru a ozvučení v sálech A1 a A2.",
+    startsAt: "2026-05-05T07:00:00.000Z",
+    endsAt: "2026-05-05T15:00:00.000Z",
+    allDay: false,
+    updatedAt: "2026-04-01T00:00:00.000Z",
+    createdAt: "2026-04-01T00:00:00.000Z",
+  },
+  // Manuální blok – celý víkend nedostupný
+  {
+    id: "ce-3",
+    listing: LISTINGS[0],
+    source: "manual",
+    status: "confirmed",
+    name: "Soukromá rodinná oslava (přímá rezervace)",
+    startsAt: "2026-05-23T10:00:00.000Z",
+    endsAt: "2026-05-24T22:00:00.000Z",
+    allDay: false,
+    updatedAt: "2026-04-05T00:00:00.000Z",
+    createdAt: "2026-04-05T00:00:00.000Z",
+  },
+  // Confirmed rezervace – konferenční sál A1
+  {
+    id: "ce-4",
+    listing: LISTINGS[0],
+    space: MOCK_SPACES[6], // sp-7 Konferenční sál A1
+    source: "manual",
+    status: "confirmed",
+    name: "Výroční konference TechCorp 2026",
+    startsAt: "2026-06-12T08:00:00.000Z",
+    endsAt: "2026-06-12T20:00:00.000Z",
+    allDay: false,
+    updatedAt: "2026-03-20T00:00:00.000Z",
+    createdAt: "2026-03-20T00:00:00.000Z",
+  },
+  // Celý den blokovaný – dovolená majitele
+  {
+    id: "ce-5",
+    listing: LISTINGS[0],
+    source: "manual",
+    status: "confirmed",
+    name: "Dovolená – objekt uzavřen",
+    startsAt: "2026-07-01T00:00:00.000Z",
+    endsAt: "2026-07-07T23:59:00.000Z",
+    allDay: true,
+    updatedAt: "2026-03-01T00:00:00.000Z",
+    createdAt: "2026-03-01T00:00:00.000Z",
+  },
+  // VIP místnost – tentative z poptávky
+  {
+    id: "ce-6",
+    listing: LISTINGS[0],
+    space: MOCK_SPACES[1], // sp-2 VIP místnost
+    inquiry: "inq-1",
+    source: "inquiry",
+    status: "tentative",
+    name: "VIP sekce – Firemní konference Novák a.s.",
+    startsAt: "2026-05-10T09:00:00.000Z",
+    endsAt: "2026-05-10T18:00:00.000Z",
+    allDay: false,
+    updatedAt: "2026-02-10T00:00:00.000Z",
+    createdAt: "2026-02-10T00:00:00.000Z",
+  },
+  // Opakovaná schůzka majitele (manuální, kratší blok)
+  {
+    id: "ce-7",
+    listing: LISTINGS[0],
+    source: "manual",
+    status: "confirmed",
+    name: "Schůzka s dodavatelem cateringu",
+    startsAt: "2026-04-25T14:00:00.000Z",
+    endsAt: "2026-04-25T16:00:00.000Z",
+    allDay: false,
+    updatedAt: "2026-04-18T00:00:00.000Z",
+    createdAt: "2026-04-18T00:00:00.000Z",
+  },
+  // Konferenční sál A1 – confirmed blok
+  {
+    id: "ce-8",
+    listing: LISTINGS[0],
+    space: MOCK_SPACES[7], // sp-8 Zasedací místnost A2
+    source: "manual",
+    status: "confirmed",
+    name: "Workshop – Leadership & Management",
+    startsAt: "2026-06-03T09:00:00.000Z",
+    endsAt: "2026-06-03T17:00:00.000Z",
+    allDay: false,
+    updatedAt: "2026-04-10T00:00:00.000Z",
+    createdAt: "2026-04-10T00:00:00.000Z",
+  },
+
+  // ── Listing 102 (Novák Catering) ─────────────────────────────────────────
+
+  // Confirmed akce napojená na inq-2
+  {
+    id: "ce-9",
+    listing: LISTINGS[1],
+    inquiry: "inq-2",
+    source: "inquiry",
+    status: "confirmed",
+    name: "Firemní catering – TechCorp výroční večírek",
+    startsAt: "2026-06-12T17:00:00.000Z",
+    endsAt: "2026-06-12T23:00:00.000Z",
+    allDay: false,
+    updatedAt: "2026-03-20T00:00:00.000Z",
+    createdAt: "2026-03-20T00:00:00.000Z",
+  },
+  // Manuální – catering na soukromé akci (mimo platformu)
+  {
+    id: "ce-10",
+    listing: LISTINGS[1],
+    source: "manual",
+    status: "confirmed",
+    name: "Svatební catering – Novák & Procházková",
+    description: "Přímá poptávka, smlouva podepsána offline.",
+    startsAt: "2026-08-22T11:00:00.000Z",
+    endsAt: "2026-08-22T23:59:00.000Z",
+    allDay: false,
+    updatedAt: "2026-04-02T00:00:00.000Z",
+    createdAt: "2026-04-02T00:00:00.000Z",
+  },
+  // Manuální blok – příprava a degustace
+  {
+    id: "ce-11",
+    listing: LISTINGS[1],
+    source: "manual",
+    status: "confirmed",
+    name: "Degustace menu pro nového klienta",
+    startsAt: "2026-05-15T12:00:00.000Z",
+    endsAt: "2026-05-15T14:00:00.000Z",
+    allDay: false,
+    updatedAt: "2026-04-20T00:00:00.000Z",
+    createdAt: "2026-04-20T00:00:00.000Z",
+  },
+  // Tentative poptávka
+  {
+    id: "ce-12",
+    listing: LISTINGS[1],
+    source: "manual",
+    status: "tentative",
+    name: "Předběžná rezervace – firemní piknik ČEZ",
+    description: "Čeká na potvrzení počtu osob od klienta.",
+    startsAt: "2026-06-27T11:00:00.000Z",
+    endsAt: "2026-06-27T20:00:00.000Z",
+    allDay: false,
+    updatedAt: "2026-04-15T00:00:00.000Z",
+    createdAt: "2026-04-15T00:00:00.000Z",
+  },
+  // Manuální blok – dovolená kuchyně
+  {
+    id: "ce-13",
+    listing: LISTINGS[1],
+    source: "manual",
+    status: "confirmed",
+    name: "Letní přestávka – kuchyně mimo provoz",
+    startsAt: "2026-08-01T00:00:00.000Z",
+    endsAt: "2026-08-10T23:59:00.000Z",
+    allDay: true,
+    updatedAt: "2026-03-15T00:00:00.000Z",
+    createdAt: "2026-03-15T00:00:00.000Z",
+  },
+  // Manuální – galavečeře pro Senát
+  {
+    id: "ce-14",
+    listing: LISTINGS[1],
+    source: "manual",
+    status: "confirmed",
+    name: "Galavečeře – státní zakázka",
+    startsAt: "2026-09-18T18:00:00.000Z",
+    endsAt: "2026-09-18T23:00:00.000Z",
+    allDay: false,
+    updatedAt: "2026-04-12T00:00:00.000Z",
+    createdAt: "2026-04-12T00:00:00.000Z",
+  },
+
+  // ── Listing 103 (DJ Studio Praha) ─────────────────────────────────────────
+
+  // Confirmed – velká svatba
+  {
+    id: "ce-15",
+    listing: LISTINGS[2],
+    source: "manual",
+    status: "confirmed",
+    name: "Svatba Dvořák – hotel Zlatá Praha",
+    startsAt: "2026-06-06T16:00:00.000Z",
+    endsAt: "2026-06-07T04:00:00.000Z",
+    allDay: false,
+    updatedAt: "2026-02-28T00:00:00.000Z",
+    createdAt: "2026-02-28T00:00:00.000Z",
+  },
+  // Tentative – firemní večírek
+  {
+    id: "ce-16",
+    listing: LISTINGS[2],
+    source: "manual",
+    status: "tentative",
+    name: "Firemní party Alza.cz – předběžná rezervace",
+    startsAt: "2026-07-11T20:00:00.000Z",
+    endsAt: "2026-07-12T03:00:00.000Z",
+    allDay: false,
+    updatedAt: "2026-04-14T00:00:00.000Z",
+    createdAt: "2026-04-14T00:00:00.000Z",
+  },
+  // Manuální blok – nemoc/nepřítomnost
+  {
+    id: "ce-17",
+    listing: LISTINGS[2],
+    source: "manual",
+    status: "confirmed",
+    name: "Nedostupný – osobní závazek",
+    startsAt: "2026-05-30T00:00:00.000Z",
+    endsAt: "2026-05-31T23:59:00.000Z",
+    allDay: true,
+    updatedAt: "2026-04-16T00:00:00.000Z",
+    createdAt: "2026-04-16T00:00:00.000Z",
+  },
+  // Confirmed – festival
+  {
+    id: "ce-18",
+    listing: LISTINGS[2],
+    source: "manual",
+    status: "confirmed",
+    name: "Open-air festival Letná – main stage",
+    startsAt: "2026-08-15T14:00:00.000Z",
+    endsAt: "2026-08-15T23:00:00.000Z",
+    allDay: false,
+    updatedAt: "2026-03-10T00:00:00.000Z",
+    createdAt: "2026-03-10T00:00:00.000Z",
+  },
+  // Tentative – ples
+  {
+    id: "ce-19",
+    listing: LISTINGS[2],
+    source: "manual",
+    status: "tentative",
+    name: "Studentský ples ČVUT – Lucerna",
+    startsAt: "2026-11-20T19:00:00.000Z",
+    endsAt: "2026-11-21T03:00:00.000Z",
+    allDay: false,
+    updatedAt: "2026-04-19T00:00:00.000Z",
+    createdAt: "2026-04-19T00:00:00.000Z",
+  },
+  // Confirmed – narozeninová oslava VIP
+  {
+    id: "ce-20",
+    listing: LISTINGS[2],
+    source: "manual",
+    status: "confirmed",
+    name: "VIP narozeninová párty – soukromý klub",
+    startsAt: "2026-09-05T21:00:00.000Z",
+    endsAt: "2026-09-06T04:00:00.000Z",
+    allDay: false,
+    updatedAt: "2026-04-08T00:00:00.000Z",
+    createdAt: "2026-04-08T00:00:00.000Z",
   },
 ];

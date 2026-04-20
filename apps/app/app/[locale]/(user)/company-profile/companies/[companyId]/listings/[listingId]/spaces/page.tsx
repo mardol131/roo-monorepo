@@ -76,9 +76,9 @@ function getParentId(space: Space): string | null {
 }
 
 const DEPTH_STYLES = [
-  { iconColor: "text-listing", iconBg: "bg-listing-surface" },
-  { iconColor: "text-zinc-500", iconBg: "bg-zinc-100" },
-  { iconColor: "text-zinc-400", iconBg: "bg-zinc-50" },
+  { iconColor: "text-space", iconBg: "bg-space-surface" },
+  { iconColor: "text-space", iconBg: "bg-space-surface" },
+  { iconColor: "text-space", iconBg: "bg-space-surface" },
 ];
 
 function HollowSpaceCard({
@@ -96,6 +96,7 @@ function HollowSpaceCard({
 }) {
   const query: Record<string, string> = {};
   if (parentId) query.parentId = parentId;
+  query.type = type;
 
   return (
     <Link
@@ -170,16 +171,6 @@ function SpaceTree({
         </div>
         {childType && childLabel && (
           <div className="ml-10 flex flex-col gap-2">
-            {children.map((child) => (
-              <SpaceTree
-                key={child.id}
-                space={child}
-                allSpaces={allSpaces}
-                companyId={companyId}
-                listingId={listingId}
-                depth={depth + 1}
-              />
-            ))}
             <div className="flex items-center gap-3">
               <CornerDownRight size={16} className="text-zinc-300 w-6 h-6" />
               <div className="w-full">
@@ -192,6 +183,16 @@ function SpaceTree({
                 />
               </div>
             </div>
+            {children.map((child) => (
+              <SpaceTree
+                key={child.id}
+                space={child}
+                allSpaces={allSpaces}
+                companyId={companyId}
+                listingId={listingId}
+                depth={depth + 1}
+              />
+            ))}
           </div>
         )}
       </div>
@@ -257,9 +258,15 @@ export default function SpacesPage() {
           spacesType
             ? {
                 text: `Přidat ${TYPE_LABEL[spacesType].toLowerCase()}`,
-                version: "listingFull",
+                version: "spaceFull",
                 iconLeft: "Plus",
                 size: "sm",
+                link: {
+                  pathname:
+                    "/company-profile/companies/[companyId]/listings/[listingId]/spaces/new",
+                  params: { companyId, listingId },
+                  query: spacesType ? { type: spacesType } : undefined,
+                },
               }
             : undefined
         }
@@ -287,23 +294,23 @@ export default function SpacesPage() {
                   onClick={() => handleTypeClick(type)}
                   className={`flex flex-col items-start gap-2.5 p-4 rounded-xl border text-left transition-all ${
                     isSelected
-                      ? "border-listing bg-listing-surface"
+                      ? "border-space bg-space-surface"
                       : isPending
-                        ? "border-amber-400 bg-amber-50"
+                        ? "border-warning bg-warning-surface"
                         : "border-zinc-200 bg-white hover:border-zinc-300 hover:bg-zinc-50"
                   }`}
                 >
                   <div
-                    className={`p-2 rounded-lg ${isSelected ? "bg-listing/10" : isPending ? "bg-amber-100" : "bg-zinc-100"}`}
+                    className={`p-2 rounded-lg ${isSelected ? "bg-space/10" : isPending ? "bg-warning/10" : "bg-zinc-100"}`}
                   >
                     <Icon
-                      className={`w-4 h-4 ${isSelected ? "text-listing" : isPending ? "text-amber-600" : "text-zinc-500"}`}
+                      className={`w-4 h-4 ${isSelected ? "text-space" : isPending ? "text-warning" : "text-zinc-500"}`}
                     />
                   </div>
                   <div>
                     <Text
                       variant="label1"
-                      className={`font-semibold ${isSelected ? "text-listing" : isPending ? "text-amber-700" : ""}`}
+                      className={`font-semibold ${isSelected ? "text-space" : isPending ? "text-warning" : ""}`}
                     >
                       {label}
                     </Text>
@@ -323,18 +330,18 @@ export default function SpacesPage() {
         </div>
 
         {pendingType && (
-          <div className="mt-4 p-4 rounded-xl border border-amber-300 bg-amber-50 flex flex-col gap-3">
+          <div className="mt-4 p-4 rounded-xl border border-warning bg-warning-surface flex flex-col gap-3">
             <div className="flex items-start gap-2.5">
-              <AlertTriangle className="w-4 h-4 text-amber-600 mt-0.5 shrink-0" />
+              <AlertTriangle className="w-4 h-4 text-warning mt-0.5 shrink-0" />
               <div>
-                <Text variant="label1" className="font-semibold text-amber-800">
+                <Text variant="label1" className="font-semibold text-warning">
                   Změna typu prostorů
                 </Text>
                 <Text
                   variant="label2"
                   color="light"
                   as="p"
-                  className="mt-0.5 text-amber-700"
+                  className="mt-0.5 text-warning"
                 >
                   Změna typu změní strukturu prostorů. Bude nutné znovu nastavit
                   prostory v jednotlivých variantách. Pokud chcete i přesto
@@ -349,12 +356,12 @@ export default function SpacesPage() {
                 value={confirmValue}
                 onChange={(e) => setConfirmValue(e.target.value)}
                 placeholder="souhlasím"
-                className="w-32 px-3 py-1.5 text-sm border border-amber-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-transparent placeholder:text-zinc-300"
+                className="w-32 px-3 py-1.5 text-sm border border-warning rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-warning focus:border-transparent placeholder:text-zinc-300"
               />
               <button
                 onClick={handleConfirm}
                 disabled={confirmValue !== "souhlasím"}
-                className="px-4 py-1.5 text-sm font-semibold rounded-lg bg-amber-500 text-white hover:bg-amber-600 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                className="px-4 py-1.5 text-sm font-semibold rounded-lg bg-warning/80 text-white hover:bg-warning transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 Potvrdit změnu
               </button>
@@ -371,21 +378,23 @@ export default function SpacesPage() {
 
       {spacesType && (
         <div className="flex flex-col gap-3 mt-6">
-          {roots.map((root) => (
-            <SpaceTree
-              key={root.id}
-              space={root}
-              allSpaces={spaces}
-              companyId={companyId}
-              listingId={listingId}
-            />
-          ))}
           <HollowSpaceCard
             label={`Přidat ${TYPE_LABEL[spacesType].toLowerCase()}`}
             companyId={companyId}
             listingId={listingId}
             type={spacesType}
           />
+          {roots.map((root) => (
+            <div key={root.id} className="my-5">
+              <SpaceTree
+                key={root.id}
+                space={root}
+                allSpaces={spaces}
+                companyId={companyId}
+                listingId={listingId}
+              />
+            </div>
+          ))}
         </div>
       )}
     </main>

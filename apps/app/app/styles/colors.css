@@ -27,6 +27,9 @@
   --color-danger: var(--color-red-600);
   --color-danger-surface: var(--color-red-100);
 
-  --color-space: var(--color-cyan-500);
-  --color-space-surface: var(--color-cyan-50);
+  --color-warning: var(--color-amber-600);
+  --color-warning-surface: var(--color-amber-50);
+
+  --color-space: var(--color-fuchsia-600);
+  --color-space-surface: var(--color-fuchsia-100);
 }

@@ -7,7 +7,9 @@ export default function ContentWrapper({ children }: PropsWithChildren) {
   const pathname = usePathname();
 
   const dontRestraintWidth =
-    pathname.endsWith("/edit") || pathname.endsWith("/new");
+    pathname.endsWith("/edit") ||
+    pathname.endsWith("/new") ||
+    pathname.endsWith("/calendar");
   return (
     <div className="flex-1 flex justify-center">
       <div

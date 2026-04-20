@@ -36,6 +36,7 @@ import { Necessities } from './collections/specific/necessities'
 import { EntertainmentTypes } from './collections/filters/entertainment-types'
 import { DietaryOptions } from './collections/filters/dietary-options'
 import { FoodServiceStyle } from './collections/filters/food-service-style'
+import { CalendarEvents } from './collections/calendar-events'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -91,6 +92,7 @@ export default buildConfig({
     Events,
     ChatMessages,
     Inquiries,
+    CalendarEvents,
   ],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || '',

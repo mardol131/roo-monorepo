@@ -96,6 +96,7 @@ export interface Config {
     events: Event;
     'chat-messages': ChatMessage;
     inquiries: Inquiry;
+    'calendar-events': CalendarEvent;
     'payload-kv': PayloadKv;
     'payload-jobs': PayloadJob;
     'payload-locked-documents': PayloadLockedDocument;
@@ -132,6 +133,7 @@ export interface Config {
     events: EventsSelect<false> | EventsSelect<true>;
     'chat-messages': ChatMessagesSelect<false> | ChatMessagesSelect<true>;
     inquiries: InquiriesSelect<false> | InquiriesSelect<true>;
+    'calendar-events': CalendarEventsSelect<false> | CalendarEventsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-jobs': PayloadJobsSelect<false> | PayloadJobsSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -810,7 +812,7 @@ export interface Space {
   area?: number | null;
   images?:
     | {
-        image: string | Media;
+        image?: string | null;
         id?: string | null;
       }[]
     | null;
@@ -944,6 +946,25 @@ export interface Inquiry {
     relationTo: 'variants';
     value: string | Variant;
   } | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "calendar-events".
+ */
+export interface CalendarEvent {
+  id: string;
+  listing: string | Listing;
+  space?: (string | null) | Space;
+  inquiry?: (string | null) | Inquiry;
+  startsAt: string;
+  endsAt: string;
+  allDay?: boolean | null;
+  source: 'manual' | 'inquiry';
+  status: 'confirmed' | 'tentative' | 'cancelled';
+  name: string;
+  description?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1174,6 +1195,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'inquiries';
         value: string | Inquiry;
+      } | null)
+    | ({
+        relationTo: 'calendar-events';
+        value: string | CalendarEvent;
       } | null);
   globalSlug?: string | null;
   user:
@@ -1956,6 +1981,24 @@ export interface InquiriesSelect<T extends boolean = true> {
   event?: T;
   listingType?: T;
   variant?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "calendar-events_select".
+ */
+export interface CalendarEventsSelect<T extends boolean = true> {
+  listing?: T;
+  space?: T;
+  inquiry?: T;
+  startsAt?: T;
+  endsAt?: T;
+  allDay?: T;
+  source?: T;
+  status?: T;
+  name?: T;
+  description?: T;
   updatedAt?: T;
   createdAt?: T;
 }

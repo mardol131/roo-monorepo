@@ -7,6 +7,8 @@ type ButtonVersion =
   | "secondary"
   | "plain"
   | "outlined"
+  | "space"
+  | "spaceFull"
   | "company"
   | "companyFull"
   | "event"
@@ -76,6 +78,8 @@ const getVersionClass = (
     variantFull: "bg-variant text-white",
     inquiry: "bg-inquiry-surface text-inquiry hover:bg-inquiry-surface",
     inquiryFull: "bg-inquiry text-white",
+    space: "bg-space-surface text-space hover:bg-space-surface",
+    spaceFull: "bg-space text-white",
     outlined:
       "bg-transparent text-zinc-900 border border-zinc-900 hover:bg-black/5",
     link: "bg-transparent text-rose-500 underline hover:opacity-80 active:opacity-60 transition-opacity p-0",
