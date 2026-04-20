@@ -5,12 +5,15 @@ import {
   Cuisine,
   DietaryOption,
   DishType,
+  EntertainmentType,
   EventType,
   FoodServiceStyle,
   Listing,
+  Municipality,
   Necessity,
   Personnel,
   PlaceType,
+  Region,
   RoomAmenity,
   Rule,
   Service,
@@ -330,6 +333,34 @@ export const MOCK_NECESSITIES: Necessity[] = [
     updatedAt: "2025-01-01T00:00:00.000Z",
     createdAt: "2025-01-01T00:00:00.000Z",
   },
+];
+
+export const MOCK_MUNICIPALITIES: Municipality[] = [
+  { id: "mun-1", name: "Praha 1", slug: "praha-1", updatedAt: "2025-01-01T00:00:00.000Z", createdAt: "2025-01-01T00:00:00.000Z" },
+  { id: "mun-2", name: "Praha 2", slug: "praha-2", updatedAt: "2025-01-01T00:00:00.000Z", createdAt: "2025-01-01T00:00:00.000Z" },
+  { id: "mun-3", name: "Praha 3", slug: "praha-3", updatedAt: "2025-01-01T00:00:00.000Z", createdAt: "2025-01-01T00:00:00.000Z" },
+  { id: "mun-4", name: "Brno-střed", slug: "brno-stred", updatedAt: "2025-01-01T00:00:00.000Z", createdAt: "2025-01-01T00:00:00.000Z" },
+  { id: "mun-5", name: "Brno-sever", slug: "brno-sever", updatedAt: "2025-01-01T00:00:00.000Z", createdAt: "2025-01-01T00:00:00.000Z" },
+  { id: "mun-6", name: "Ostrava-město", slug: "ostrava-mesto", updatedAt: "2025-01-01T00:00:00.000Z", createdAt: "2025-01-01T00:00:00.000Z" },
+];
+
+export const MOCK_REGIONS: Region[] = [
+  { id: "reg-1", name: "Hlavní město Praha", slug: "hlavni-mesto-praha", updatedAt: "2025-01-01T00:00:00.000Z", createdAt: "2025-01-01T00:00:00.000Z" },
+  { id: "reg-2", name: "Jihomoravský kraj", slug: "jihomoravsky-kraj", updatedAt: "2025-01-01T00:00:00.000Z", createdAt: "2025-01-01T00:00:00.000Z" },
+  { id: "reg-3", name: "Moravskoslezský kraj", slug: "moravskoslezsky-kraj", updatedAt: "2025-01-01T00:00:00.000Z", createdAt: "2025-01-01T00:00:00.000Z" },
+  { id: "reg-4", name: "Středočeský kraj", slug: "stredocesky-kraj", updatedAt: "2025-01-01T00:00:00.000Z", createdAt: "2025-01-01T00:00:00.000Z" },
+  { id: "reg-5", name: "Jihočeský kraj", slug: "jihocesky-kraj", updatedAt: "2025-01-01T00:00:00.000Z", createdAt: "2025-01-01T00:00:00.000Z" },
+];
+
+export const MOCK_ENTERTAINMENT_TYPES: EntertainmentType[] = [
+  { id: "ent-1", name: "Živá hudba", slug: "ziva-hudba", updatedAt: "2025-01-01T00:00:00.000Z", createdAt: "2025-01-01T00:00:00.000Z" },
+  { id: "ent-2", name: "DJ", slug: "dj", updatedAt: "2025-01-01T00:00:00.000Z", createdAt: "2025-01-01T00:00:00.000Z" },
+  { id: "ent-3", name: "Moderátor / konferenciér", slug: "moderator", updatedAt: "2025-01-01T00:00:00.000Z", createdAt: "2025-01-01T00:00:00.000Z" },
+  { id: "ent-4", name: "Stand-up comedy", slug: "stand-up-comedy", updatedAt: "2025-01-01T00:00:00.000Z", createdAt: "2025-01-01T00:00:00.000Z" },
+  { id: "ent-5", name: "Tanečníci", slug: "tanecnici", updatedAt: "2025-01-01T00:00:00.000Z", createdAt: "2025-01-01T00:00:00.000Z" },
+  { id: "ent-6", name: "Animátoři pro děti", slug: "animatori-pro-deti", updatedAt: "2025-01-01T00:00:00.000Z", createdAt: "2025-01-01T00:00:00.000Z" },
+  { id: "ent-7", name: "Kouzelník / iluzionista", slug: "kouzelnik", updatedAt: "2025-01-01T00:00:00.000Z", createdAt: "2025-01-01T00:00:00.000Z" },
+  { id: "ent-8", name: "Fotograf / kameraman", slug: "fotograf-kameraman", updatedAt: "2025-01-01T00:00:00.000Z", createdAt: "2025-01-01T00:00:00.000Z" },
 ];
 
 export const MOCK_CITIES: City[] = [

@@ -24,22 +24,34 @@ import { Controller, useForm } from "react-hook-form";
 import type { Resolver } from "react-hook-form";
 import { z } from "zod";
 import { FormSection } from "@/app/[locale]/(user)/components/form-section";
+import { TocGroup } from "@/app/[locale]/(user)/components/form-toc";
 import { uploadFileToCloud } from "@roo/common";
 import AreaSpacesFields from "./area-spaces-fields";
 import BuildingSpacesFields from "./building-spaces-fields";
 import RoomSpacesFields from "./room-spaces-fields";
 import Text from "@/app/components/ui/atoms/text";
+import IconCard from "./icon-card";
 
-// ── Sections config (exported for TOC) ────────────────────────────────────────
+// ── TOC groups (exported for page sidebar) ────────────────────────────────────
 
-export const VENUE_FORM_SECTIONS = [
-  { id: "section-basic", title: "Základní informace", icon: Building2 },
-  { id: "section-price", title: "Cena", icon: Banknote },
-  { id: "section-images", title: "Obrázky", icon: Image },
-  { id: "section-location", title: "Lokalita", icon: MapPin },
-  { id: "section-capacity", title: "Kapacita a prostor", icon: Maximize2 },
-  { id: "section-spaces", title: "Prostory", icon: DoorOpen },
-] as const;
+export const VENUE_FORM_GROUPS: readonly TocGroup[] = [
+  {
+    label: "Základní",
+    sections: [
+      { id: "section-basic", title: "Základní informace", icon: Building2 },
+      { id: "section-price", title: "Cena", icon: Banknote },
+      { id: "section-images", title: "Obrázky", icon: Image },
+    ],
+  },
+  {
+    label: "Místo a prostor",
+    sections: [
+      { id: "section-location", title: "Lokalita", icon: MapPin },
+      { id: "section-capacity", title: "Kapacita a prostor", icon: Maximize2 },
+      { id: "section-spaces", title: "Prostory", icon: DoorOpen },
+    ],
+  },
+];
 
 // ── Helpers ─────────────────────────────────────────────────────────────────────
 
@@ -266,7 +278,8 @@ export default function NewVenueListingForm({
       <FormSection
         id="section-price"
         icon={Banknote}
-        title="Cena"
+        title="Od jaké ceny nabízíte služby"
+        subtitle="Tato cena slouží pouze jako orientační. Konkrétní cenu nastavujete následně ve variantách služby nebo přímo v komunikaci se zákazníkem."
         surfaceColor="bg-listing-surface"
         color="text-listing"
       >
@@ -448,46 +461,30 @@ export default function NewVenueListingForm({
                       label: "Areál",
                       description:
                         "Nabízíme celý areál s více budovami a prostory",
-                      icon: TreePine,
+                      icon: "TreePine",
                     },
                     {
                       value: "building",
                       label: "Budova",
                       description: "Nabízíme budovu s více místnostmi",
-                      icon: Landmark,
+                      icon: "Landmark",
                     },
                     {
                       value: "room",
                       label: "Místnosti",
                       description: "Nabízíme jednotlivé místnosti",
-                      icon: DoorOpen,
+                      icon: "DoorOpen",
                     },
                   ] as const
                 ).map((option) => {
-                  const isSelected = field.value === option.value;
-                  const Icon = option.icon;
                   return (
-                    <button
+                    <IconCard
                       key={option.value}
-                      type="button"
+                      label={option.label}
+                      description={option.description}
+                      icon={option.icon}
                       onClick={() => field.onChange(option.value)}
-                      className={`flex flex-col items-center gap-2 rounded-lg border-2 p-4 text-center transition-colors cursor-pointer ${
-                        isSelected
-                          ? "border-listing bg-listing-surface"
-                          : "border-zinc-400 hover:border-listing"
-                      }`}
-                    >
-                      <Icon
-                        size={28}
-                        className={
-                          isSelected ? "text-listing" : "text-muted-foreground"
-                        }
-                      />
-                      <Text variant="label1">{option.label}</Text>
-                      <Text variant="label2" color="light">
-                        {option.description}
-                      </Text>
-                    </button>
+                    />
                   );
                 })}
               </div>

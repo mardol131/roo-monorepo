@@ -1,5 +1,6 @@
 "use client";
 
+import { ChevronDown } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
 
 export type TocSection = {
@@ -8,14 +9,28 @@ export type TocSection = {
   icon: React.ElementType;
 };
 
-export default function FormToc({
-  sections,
-}: {
+export type TocGroup = {
+  label: string;
   sections: readonly TocSection[];
+};
+
+export default function FormToc({
+  groups,
+  sticky = true,
+  textColor = "text-listing",
+  surfaceColor = "bg-listing-surface",
+  dotColor = "bg-listing",
+}: {
+  groups: readonly TocGroup[];
+  sticky?: boolean;
+  textColor?: string;
+  surfaceColor?: string;
+  dotColor?: string;
 }) {
   const [visibleIds, setVisibleIds] = useState<Set<string>>(
-    () => new Set([sections[0]?.id ?? ""]),
+    () => new Set([groups[0]?.sections[0]?.id ?? ""]),
   );
+  const [openGroups, setOpenGroups] = useState<Set<number>>(() => new Set([0]));
   const observerRef = useRef<IntersectionObserver | null>(null);
 
   useEffect(() => {
@@ -36,13 +51,30 @@ export default function FormToc({
       { rootMargin: "-5% 0px -10% 0px", threshold: 0 },
     );
 
-    sections.forEach(({ id }) => {
-      const el = document.getElementById(id);
-      if (el) observerRef.current!.observe(el);
-    });
+    groups.forEach((group) =>
+      group.sections.forEach(({ id }) => {
+        const el = document.getElementById(id);
+        if (el) observerRef.current!.observe(el);
+      }),
+    );
 
     return () => observerRef.current?.disconnect();
-  }, [sections]);
+  }, [groups]);
+
+  // Auto-open/close groups based on which sections are visible
+  useEffect(() => {
+    setOpenGroups((prev) => {
+      const next = new Set(prev);
+      groups.forEach((group, idx) => {
+        if (group.sections.some((s) => visibleIds.has(s.id))) {
+          next.add(idx);
+        } else {
+          next.delete(idx);
+        }
+      });
+      return next;
+    });
+  }, [visibleIds, groups]);
 
   const handleClick = (id: string) => {
     document
@@ -50,45 +82,100 @@ export default function FormToc({
       ?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
+  const toggleGroup = (idx: number) => {
+    setOpenGroups((prev) => {
+      const next = new Set(prev);
+      next.has(idx) ? next.delete(idx) : next.add(idx);
+      return next;
+    });
+  };
+
   return (
-    <nav className="sticky top-6 flex flex-col gap-0.5">
-      {sections.map((section) => {
-        const isActive = visibleIds.has(section.id);
-        const Icon = section.icon;
+    <nav className={`${sticky ? "sticky top-6" : ""} flex flex-col gap-0.5`}>
+      <span
+        className={`px-3 py-1.5 text-xs border-b border-zinc-500/20 font-medium uppercase tracking-wide ${textColor}`}
+      >
+        Sekce formuláře
+      </span>
+      {groups.map((group, idx) => {
+        const isOpen = openGroups.has(idx);
+        const hasActive = group.sections.some((s) => visibleIds.has(s.id));
 
         return (
-          <button
-            key={section.id}
-            type="button"
-            onClick={() => handleClick(section.id)}
-            className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-left transition-all duration-150 w-full group ${
-              isActive
-                ? "bg-listing-surface"
-                : "text-zinc-500 hover:text-zinc-800 hover:bg-zinc-50"
-            }`}
-          >
-            <div
-              className={`w-6 h-6 rounded-md flex items-center justify-center shrink-0 transition-colors ${
-                isActive
-                  ? "bg-listing-surface"
-                  : "bg-zinc-100 group-hover:bg-zinc-200"
-              }`}
+          <div key={idx}>
+            <button
+              type="button"
+              onClick={() => toggleGroup(idx)}
+              className={`flex items-center gap-2 w-full px-3  py-3 ${hasActive ? surfaceColor : ""} rounded-lg hover:bg-zinc-50 transition-colors`}
             >
-              <Icon
-                className={`w-3.5 h-3.5 ${isActive ? "text-listing" : "text-zinc-400"}`}
+              <span
+                className={`text-[12px] font-medium leading-tight tracking-wide flex-1 text-left transition-colors ${
+                  hasActive ? textColor : "text-zinc-500"
+                }`}
+              >
+                {group.label}
+              </span>
+              <ChevronDown
+                className={`w-3 h-3 text-zinc-500 shrink-0 transition-transform duration-150 ${
+                  isOpen ? "rotate-180" : ""
+                }`}
               />
-            </div>
-            <span
-              className={`text-xs font-medium leading-tight ${
-                isActive ? "text-listing" : ""
+            </button>
+
+            <div
+              className={`grid transition-[grid-template-rows] duration-200 ease-in-out ${
+                isOpen ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
               }`}
             >
-              {section.title}
-            </span>
-            {isActive && (
-              <div className="ml-auto w-1 h-1 rounded-full bg-listing shrink-0" />
-            )}
-          </button>
+              <div className="overflow-hidden">
+                <div className="flex flex-col gap-0.5 pb-1">
+                  {group.sections.map((section) => {
+                    const isActive = visibleIds.has(section.id);
+                    const Icon = section.icon;
+
+                    return (
+                      <button
+                        key={section.id}
+                        type="button"
+                        onClick={() => handleClick(section.id)}
+                        className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-left transition-all duration-150 w-full group ${
+                          isActive
+                            ? surfaceColor
+                            : "text-zinc-500 hover:text-zinc-800 hover:bg-zinc-50"
+                        }`}
+                      >
+                        <div
+                          className={`w-6 h-6 rounded-md flex items-center justify-center shrink-0 transition-colors ${
+                            isActive
+                              ? surfaceColor
+                              : "bg-zinc-100 group-hover:bg-zinc-200"
+                          }`}
+                        >
+                          {Icon && (
+                            <Icon
+                              className={`w-3.5 h-3.5 ${isActive ? textColor : "text-zinc-400"}`}
+                            />
+                          )}
+                        </div>
+                        <span
+                          className={`text-xs font-medium leading-tight ${
+                            isActive ? textColor : ""
+                          }`}
+                        >
+                          {section.title}
+                        </span>
+                        {isActive && (
+                          <div
+                            className={`ml-auto w-1 h-1 rounded-full ${dotColor} shrink-0`}
+                          />
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          </div>
         );
       })}
     </nav>

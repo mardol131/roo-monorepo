@@ -7,6 +7,7 @@ import GalleryInput from "@/app/components/ui/atoms/inputs/images/gallery-input"
 import ImageInput from "@/app/components/ui/atoms/inputs/images/image-input";
 import Input from "@/app/components/ui/atoms/inputs/input";
 import RepeaterField from "@/app/components/ui/atoms/inputs/repeater-field";
+import CheckboxGroup from "@/app/components/ui/atoms/inputs/checkbox-group";
 import SearchInput from "@/app/components/ui/atoms/inputs/search-input";
 import SelectInput from "@/app/components/ui/atoms/inputs/select-input";
 import Text from "@/app/components/ui/atoms/text";
@@ -48,39 +49,72 @@ import React, { useEffect } from "react";
 import { Controller, useFieldArray, useForm } from "react-hook-form";
 import { z } from "zod";
 import { FormSection } from "@/app/[locale]/(user)/components/form-section";
+import { TocGroup } from "@/app/[locale]/(user)/components/form-toc";
 import { Textarea } from "@/app/components/ui/atoms/inputs/textarea";
 import { uploadFileToCloud } from "@roo/common";
 import InputLabel from "@/app/components/ui/atoms/input-label";
+import { useListing } from "@/app/react-query/listings/hooks";
+import { useParams } from "next/navigation";
 
-// ── Sections config (exported for TOC) ────────────────────────────────────────
+// ── TOC groups (exported for page sidebar) ────────────────────────────────────
 
-export const VENUE_FORM_SECTIONS = [
-  { id: "section-basic", title: "Základní informace", icon: Building2 },
-  { id: "section-price", title: "Cena", icon: Banknote },
-  { id: "section-images", title: "Obrázky", icon: Image },
-  { id: "section-location", title: "Lokalita", icon: MapPin },
-  { id: "section-capacity", title: "Kapacita a prostor", icon: Maximize2 },
-  { id: "section-place-types", title: "Typ místa", icon: Building2 },
-  { id: "section-event-types", title: "Typy akcí", icon: Calendar },
-  { id: "section-activities", title: "Aktivity", icon: Activity },
+export const VENUE_FORM_GROUPS: readonly TocGroup[] = [
   {
-    id: "section-activity-addons",
-    title: "Příplatky za aktivity",
-    icon: Trophy,
+    label: "Základní",
+    sections: [
+      { id: "section-basic", title: "Základní informace", icon: Building2 },
+      { id: "section-price", title: "Cena", icon: Banknote },
+      { id: "section-images", title: "Obrázky", icon: Image },
+      { id: "section-location", title: "Lokalita", icon: MapPin },
+    ],
   },
-  { id: "section-services", title: "Služby", icon: Star },
-  { id: "section-personnel", title: "Personál", icon: UserCheck },
-  { id: "section-amenities", title: "Vybavení", icon: Package },
-  { id: "section-technology", title: "Technologie", icon: Monitor },
-  { id: "section-storage", title: "Skladování", icon: Warehouse },
-  { id: "section-rules", title: "Pravidla", icon: ScrollText },
-  { id: "section-access", title: "Přístup a zásobování", icon: Truck },
-  { id: "section-parking", title: "Parkování", icon: ParkingSquare },
-  { id: "section-breakfast", title: "Snídaně", icon: Coffee },
-  { id: "section-employees", title: "Zaměstnanci", icon: Users },
-  { id: "section-faq", title: "FAQ", icon: CircleHelp },
-  { id: "section-references", title: "Reference", icon: BookOpen },
-] as const;
+  {
+    label: "Prostor",
+    sections: [
+      { id: "section-capacity", title: "Kapacita a prostor", icon: Maximize2 },
+      { id: "section-place-types", title: "Typ místa", icon: Building2 },
+    ],
+  },
+  {
+    label: "Program a nabídka",
+    sections: [
+      { id: "section-event-types", title: "Typy akcí", icon: Calendar },
+      { id: "section-activities", title: "Aktivity", icon: Activity },
+      {
+        id: "section-activity-addons",
+        title: "Příplatky za aktivity",
+        icon: Trophy,
+      },
+      { id: "section-services", title: "Služby", icon: Star },
+    ],
+  },
+  {
+    label: "Vybavenost",
+    sections: [
+      { id: "section-personnel", title: "Personál", icon: UserCheck },
+      { id: "section-amenities", title: "Vybavení", icon: Package },
+      { id: "section-technology", title: "Technologie", icon: Monitor },
+    ],
+  },
+  {
+    label: "Logistika",
+    sections: [
+      { id: "section-storage", title: "Skladování", icon: Warehouse },
+      { id: "section-rules", title: "Pravidla", icon: ScrollText },
+      { id: "section-access", title: "Přístup a zásobování", icon: Truck },
+      { id: "section-parking", title: "Parkování", icon: ParkingSquare },
+      { id: "section-breakfast", title: "Snídaně", icon: Coffee },
+    ],
+  },
+  {
+    label: "Prezentace",
+    sections: [
+      { id: "section-employees", title: "Zaměstnanci", icon: Users },
+      { id: "section-faq", title: "FAQ", icon: CircleHelp },
+      { id: "section-references", title: "Reference", icon: BookOpen },
+    ],
+  },
+];
 
 // ── Schema ─────────────────────────────────────────────────────────────────────
 
@@ -225,16 +259,20 @@ function toggleArrayItem(arr: string[], id: string, checked: boolean) {
 }
 // ── Component ──────────────────────────────────────────────────────────────────
 
-export default function NewVenueListingForm({
+export default function EditVenueListingForm({
   onSubmit,
   onCancel,
   onFormChange,
 }: Props) {
+  const { listingId } = useParams<{ listingId: string }>();
+  const { data: listing } = useListing(listingId);
+
   const {
     control,
     register,
     handleSubmit,
     watch,
+    reset,
     formState: { errors },
   } = useForm({
     resolver: zodResolver(schema),
@@ -286,6 +324,111 @@ export default function NewVenueListingForm({
     return () => subscription.unsubscribe();
   }, [watch, onFormChange]);
 
+  // Populate form from listing data once loaded
+  useEffect(() => {
+    if (!listing) return;
+    const d = listing.details.find((d) => d.blockType === "venue");
+    if (!d) return;
+
+    const id = <T extends string | { id: string }>(v: T) =>
+      typeof v === "string" ? v : v.id;
+
+    reset({
+      name: listing.name,
+      slug: listing.slug,
+      shortDescription: listing.shortDescription ?? undefined,
+      description: listing.description ?? undefined,
+      indoor: listing.indoor ?? false,
+      outdoor: listing.outdoor ?? false,
+      eventTypes: listing.eventTypes?.map(id) ?? [],
+      images: {
+        coverImage: listing.images.coverImage,
+        logo: listing.images.logo ?? undefined,
+        gallery:
+          listing.images.gallery?.map((g) => g.url ?? "").filter(Boolean) ?? [],
+      },
+      price: { startsAt: listing.price.startsAt },
+      location: {
+        address: d.location.address,
+        city: id(d.location.city),
+        postalCode: d.location.postalCode ?? undefined,
+      },
+      capacity: d.capacity,
+      area: d.area,
+      canBeBookedAsWhole: d.canBeBookedAsWhole ?? false,
+      hasAccommodation: d.hasAccommodation ?? false,
+      accommodationCapacity: d.accommodationCapacity ?? undefined,
+      activities: d.activities?.map(id) ?? [],
+      activityAddons:
+        d.activityAddons?.map((a) => ({
+          activity: id(a.activity),
+          price: a.price,
+          space: a.space ? id(a.space as string | { id: string }) : undefined,
+          type: a.type,
+        })) ?? [],
+      services: d.services?.map(id) ?? [],
+      personnel: d.personnel?.map(id) ?? [],
+      amenities: d.amenities?.map(id) ?? [],
+      technology: d.technology?.map(id) ?? [],
+      placeTypes: d.placeTypes?.map(id) ?? [],
+      foodAndDrinkRules: d.foodAndDrinkRules?.map(id) ?? [],
+      venueRules: d.venueRules?.map(id) ?? [],
+      rules: listing.rules?.map(id) ?? [],
+      storage: d.storage?.map((s) => ({ name: s.name, area: s.area })) ?? [],
+      access: {
+        vehicleTypes: (d.access?.vehicleTypes ?? []) as string[],
+        helpWithLoadingAndUnloading:
+          d.access?.helpWithLoadingAndUnloading ?? false,
+        loadingRamp: d.access?.loadingRamp ?? false,
+        loadingElevator: d.access?.loadingElevator ?? false,
+        serviceAccess: d.access?.serviceAccess ?? false,
+        serviceArea: d.access?.serviceArea ?? false,
+      },
+      parking: {
+        hasParking: d.parking?.hasParking ?? false,
+        parkingCapacity: d.parking?.parkingCapacity ?? undefined,
+        parkingIsIncludedInPrice: d.parking?.parkingIsIncludedInPrice ?? false,
+        parkingPrice: d.parking?.parkingPrice ?? undefined,
+      },
+      breakfast: {
+        included: d.breakfast?.included ?? false,
+        allowAccommodationWithoutBreakfast:
+          d.breakfast?.allowAccommodationWithoutBreakfast ?? false,
+        allowMoreBreakfastsThanAccommodation:
+          d.breakfast?.allowMoreBreakfastsThanAccommodation ?? false,
+        breakfastIsIncludedInPrice:
+          d.breakfast?.breakfastIsIncludedInPrice ?? false,
+        price: d.breakfast?.price ?? undefined,
+        pricePer: d.breakfast?.pricePer ?? undefined,
+        timeFrom: d.breakfast?.timeFrom ?? undefined,
+        timeTo: d.breakfast?.timeTo ?? undefined,
+      },
+      employees:
+        listing.employees?.map((e) => ({
+          name: e.name,
+          role: e.role,
+          description: e.description ?? undefined,
+          image: e.image ? id(e.image as string | { id: string }) : undefined,
+        })) ?? [],
+      faq:
+        listing.faq?.map((f) => ({
+          active: f.active ?? true,
+          question: f.question,
+          answer: f.answer,
+          groupedBy: f.groupedBy ?? "general",
+        })) ?? [],
+      references:
+        listing.references?.map((r) => ({
+          image: r.image ? id(r.image as string | { id: string }) : undefined,
+          eventName: r.eventName ?? undefined,
+          clientName: r.clientName ?? undefined,
+          eventType: r.eventType
+            ? id(r.eventType as string | { id: string })
+            : undefined,
+        })) ?? [],
+    });
+  }, [listing, reset]);
+
   const storageFieldArray = useFieldArray({ control, name: "storage" });
   const activityAddonsFieldArray = useFieldArray({
     control,
@@ -325,6 +468,8 @@ export default function NewVenueListingForm({
         id="section-basic"
         icon={Building2}
         title="Základní informace"
+        color="text-listing"
+        surfaceColor="bg-listing-surface"
       >
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <Input
@@ -372,6 +517,7 @@ export default function NewVenueListingForm({
                   checked={field.value ?? false}
                   onChange={field.onChange}
                   label="Interiér"
+                  checkColor="text-listing"
                 />
               )}
             />
@@ -383,6 +529,7 @@ export default function NewVenueListingForm({
                   checked={field.value ?? false}
                   onChange={field.onChange}
                   label="Exteriér"
+                  checkColor="text-listing"
                 />
               )}
             />
@@ -391,7 +538,13 @@ export default function NewVenueListingForm({
       </FormSection>
 
       {/* ── 2. Cena ───────────────────────────────────────────────────────────── */}
-      <FormSection id="section-price" icon={Banknote} title="Cena">
+      <FormSection
+        color="text-listing"
+        surfaceColor="bg-listing-surface"
+        id="section-price"
+        icon={Banknote}
+        title="Cena"
+      >
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <Input
             label="Cena od (Kč)"
@@ -412,6 +565,8 @@ export default function NewVenueListingForm({
         icon={Image}
         title="Obrázky"
         subtitle="Podporované formáty: jpg, png, webp"
+        color="text-listing"
+        surfaceColor="bg-listing-surface"
       >
         <Controller
           control={control}
@@ -456,7 +611,13 @@ export default function NewVenueListingForm({
       </FormSection>
 
       {/* ── 4. Lokalita ───────────────────────────────────────────────────────── */}
-      <FormSection id="section-location" icon={MapPin} title="Lokalita">
+      <FormSection
+        color="text-listing"
+        surfaceColor="bg-listing-surface"
+        id="section-location"
+        icon={MapPin}
+        title="Lokalita"
+      >
         <Input
           label="Adresa"
           inputProps={{
@@ -500,6 +661,8 @@ export default function NewVenueListingForm({
 
       {/* ── 5. Kapacita a prostor ─────────────────────────────────────────────── */}
       <FormSection
+        color="text-listing"
+        surfaceColor="bg-listing-surface"
         id="section-capacity"
         icon={Maximize2}
         title="Kapacita a prostor"
@@ -534,6 +697,7 @@ export default function NewVenueListingForm({
               checked={field.value ?? false}
               onChange={field.onChange}
               label="Lze rezervovat jako celek"
+              checkColor="text-listing"
             />
           )}
         />
@@ -545,6 +709,7 @@ export default function NewVenueListingForm({
               checked={field.value ?? false}
               onChange={field.onChange}
               label="Ubytování k dispozici"
+              checkColor="text-listing"
             />
           )}
         />
@@ -565,73 +730,67 @@ export default function NewVenueListingForm({
       </FormSection>
 
       {/* ── 6. Typ místa ──────────────────────────────────────────────────────── */}
-      <FormSection id="section-place-types" icon={Building2} title="Typ místa">
+      <FormSection
+        color="text-listing"
+        surfaceColor="bg-listing-surface"
+        id="section-place-types"
+        icon={Building2}
+        title="Typ místa"
+      >
         <Controller
           control={control}
           name="placeTypes"
           render={({ field }) => (
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-              {MOCK_PLACE_TYPES.map((pt) => (
-                <Checkbox
-                  key={pt.id}
-                  checked={field.value?.includes(pt.id) ?? false}
-                  onChange={(checked) =>
-                    field.onChange(
-                      toggleArrayItem(field.value ?? [], pt.id, checked),
-                    )
-                  }
-                  label={pt.name}
-                />
-              ))}
-            </div>
+            <CheckboxGroup
+              items={MOCK_PLACE_TYPES}
+              value={field.value ?? []}
+              onChange={field.onChange}
+              checkColor="text-listing"
+            />
           )}
         />
       </FormSection>
 
       {/* ── 7. Typy akcí ─────────────────────────────────────────────────────── */}
-      <FormSection id="section-event-types" icon={Calendar} title="Typy akcí">
+      <FormSection
+        color="text-listing"
+        surfaceColor="bg-listing-surface"
+        id="section-event-types"
+        icon={Calendar}
+        title="Typy akcí"
+      >
         <Controller
           control={control}
           name="eventTypes"
           render={({ field }) => (
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-              {MOCK_EVENT_TYPES.map((et) => (
-                <Checkbox
-                  key={et.id}
-                  checked={field.value?.includes(et.id) ?? false}
-                  onChange={(checked) =>
-                    field.onChange(
-                      toggleArrayItem(field.value ?? [], et.id, checked),
-                    )
-                  }
-                  label={et.name}
-                />
-              ))}
-            </div>
+            <CheckboxGroup
+              items={MOCK_EVENT_TYPES}
+              value={field.value ?? []}
+              onChange={field.onChange}
+              checkColor="text-listing"
+            />
           )}
         />
       </FormSection>
 
       {/* ── 7. Aktivity ──────────────────────────────────────────────────────── */}
-      <FormSection id="section-activities" icon={Activity} title="Aktivity">
+      <FormSection
+        color="text-listing"
+        surfaceColor="bg-listing-surface"
+        id="section-activities"
+        icon={Activity}
+        title="Aktivity"
+      >
         <Controller
           control={control}
           name="activities"
           render={({ field }) => (
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-              {MOCK_ACTIVITIES.map((a) => (
-                <Checkbox
-                  key={a.id}
-                  checked={field.value?.includes(a.id) ?? false}
-                  onChange={(checked) =>
-                    field.onChange(
-                      toggleArrayItem(field.value ?? [], a.id, checked),
-                    )
-                  }
-                  label={a.name}
-                />
-              ))}
-            </div>
+            <CheckboxGroup
+              items={MOCK_ACTIVITIES}
+              value={field.value ?? []}
+              onChange={field.onChange}
+              checkColor="text-listing"
+            />
           )}
         />
       </FormSection>
@@ -641,6 +800,8 @@ export default function NewVenueListingForm({
         id="section-activity-addons"
         icon={Trophy}
         title="Příplatky za aktivity"
+        color="text-listing"
+        surfaceColor="bg-listing-surface"
       >
         <RepeaterField
           label="Příplatky"
@@ -712,103 +873,100 @@ export default function NewVenueListingForm({
       </FormSection>
 
       {/* ── 10. Služby ────────────────────────────────────────────────────────── */}
-      <FormSection id="section-services" icon={Star} title="Služby">
+      <FormSection
+        color="text-listing"
+        surfaceColor="bg-listing-surface"
+        id="section-services"
+        icon={Star}
+        title="Služby"
+      >
         <Controller
           control={control}
           name="services"
           render={({ field }) => (
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-              {MOCK_SERVICES.map((s) => (
-                <Checkbox
-                  key={s.id}
-                  checked={field.value?.includes(s.id) ?? false}
-                  onChange={(checked) =>
-                    field.onChange(
-                      toggleArrayItem(field.value ?? [], s.id, checked),
-                    )
-                  }
-                  label={s.name}
-                />
-              ))}
-            </div>
+            <CheckboxGroup
+              items={MOCK_SERVICES}
+              value={field.value ?? []}
+              onChange={field.onChange}
+              checkColor="text-listing"
+            />
           )}
         />
       </FormSection>
 
       {/* ── 11. Personál ──────────────────────────────────────────────────────── */}
-      <FormSection id="section-personnel" icon={UserCheck} title="Personál">
+      <FormSection
+        color="text-listing"
+        surfaceColor="bg-listing-surface"
+        id="section-personnel"
+        icon={UserCheck}
+        title="Personál"
+      >
         <Controller
           control={control}
           name="personnel"
           render={({ field }) => (
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-              {MOCK_PERSONNEL.map((p) => (
-                <Checkbox
-                  key={p.id}
-                  checked={field.value?.includes(p.id) ?? false}
-                  onChange={(checked) =>
-                    field.onChange(
-                      toggleArrayItem(field.value ?? [], p.id, checked),
-                    )
-                  }
-                  label={p.name}
-                />
-              ))}
-            </div>
+            <CheckboxGroup
+              items={MOCK_PERSONNEL}
+              value={field.value ?? []}
+              onChange={field.onChange}
+              checkColor="text-listing"
+            />
           )}
         />
       </FormSection>
 
       {/* ── 9. Vybavení ──────────────────────────────────────────────────────── */}
-      <FormSection id="section-amenities" icon={Package} title="Vybavení">
+      <FormSection
+        color="text-listing"
+        surfaceColor="bg-listing-surface"
+        id="section-amenities"
+        icon={Package}
+        title="Vybavení"
+      >
         <Controller
           control={control}
           name="amenities"
           render={({ field }) => (
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-              {MOCK_AMENITIES.map((a) => (
-                <Checkbox
-                  key={a.id}
-                  checked={field.value?.includes(a.id) ?? false}
-                  onChange={(checked) =>
-                    field.onChange(
-                      toggleArrayItem(field.value ?? [], a.id, checked),
-                    )
-                  }
-                  label={a.name}
-                />
-              ))}
-            </div>
+            <CheckboxGroup
+              items={MOCK_AMENITIES}
+              value={field.value ?? []}
+              onChange={field.onChange}
+              checkColor="text-listing"
+            />
           )}
         />
       </FormSection>
 
       {/* ── 10. Technologie ───────────────────────────────────────────────────── */}
-      <FormSection id="section-technology" icon={Monitor} title="Technologie">
+      <FormSection
+        color="text-listing"
+        surfaceColor="bg-listing-surface"
+        id="section-technology"
+        icon={Monitor}
+        title="Technologie"
+      >
         <Controller
           control={control}
           name="technology"
           render={({ field }) => (
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-              {MOCK_TECHNOLOGIES.map((t) => (
-                <Checkbox
-                  key={t.id}
-                  checked={field.value?.includes(t.id) ?? false}
-                  onChange={(checked) =>
-                    field.onChange(
-                      toggleArrayItem(field.value ?? [], t.id, checked),
-                    )
-                  }
-                  label={t.name}
-                />
-              ))}
-            </div>
+            <CheckboxGroup
+              items={MOCK_TECHNOLOGIES}
+              value={field.value ?? []}
+              onChange={field.onChange}
+            />
           )}
         />
       </FormSection>
 
       {/* ── 14. Skladování ────────────────────────────────────────────────────── */}
-      <FormSection id="section-storage" icon={Warehouse} title="Skladování">
+      <FormSection
+        color="text-listing"
+        surfaceColor="bg-listing-surface"
+        id="section-storage"
+        icon={Warehouse}
+        title="Skladování"
+      >
         <RepeaterField
           label="Skladovací prostory"
           fields={storageFieldArray.fields}
@@ -840,74 +998,47 @@ export default function NewVenueListingForm({
       </FormSection>
 
       {/* ── 15. Pravidla ──────────────────────────────────────────────────────── */}
-      <FormSection id="section-rules" icon={ScrollText} title="Pravidla">
+      <FormSection
+        color="text-listing"
+        surfaceColor="bg-listing-surface"
+        id="section-rules"
+        icon={ScrollText}
+        title="Pravidla"
+      >
         <Controller
           control={control}
           name="rules"
           render={({ field }) => (
-            <div>
-              <InputLabel label="Obecná pravidla" />
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mt-2">
-                {MOCK_RULES.map((r) => (
-                  <Checkbox
-                    key={r.id}
-                    checked={field.value?.includes(r.id) ?? false}
-                    onChange={(checked) =>
-                      field.onChange(
-                        toggleArrayItem(field.value ?? [], r.id, checked),
-                      )
-                    }
-                    label={r.name}
-                  />
-                ))}
-              </div>
-            </div>
+            <CheckboxGroup
+              label="Obecná pravidla"
+              items={MOCK_RULES}
+              value={field.value ?? []}
+              onChange={field.onChange}
+            />
           )}
         />
         <Controller
           control={control}
           name="foodAndDrinkRules"
           render={({ field }) => (
-            <div>
-              <InputLabel label="Pravidla pro jídlo a pití" />
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mt-2">
-                {MOCK_RULES.map((r) => (
-                  <Checkbox
-                    key={r.id}
-                    checked={field.value?.includes(r.id) ?? false}
-                    onChange={(checked) =>
-                      field.onChange(
-                        toggleArrayItem(field.value ?? [], r.id, checked),
-                      )
-                    }
-                    label={r.name}
-                  />
-                ))}
-              </div>
-            </div>
+            <CheckboxGroup
+              label="Pravidla pro jídlo a pití"
+              items={MOCK_RULES}
+              value={field.value ?? []}
+              onChange={field.onChange}
+            />
           )}
         />
         <Controller
           control={control}
           name="venueRules"
           render={({ field }) => (
-            <div>
-              <InputLabel label="Pravidla prostoru" />
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mt-2">
-                {MOCK_RULES.map((r) => (
-                  <Checkbox
-                    key={r.id}
-                    checked={field.value?.includes(r.id) ?? false}
-                    onChange={(checked) =>
-                      field.onChange(
-                        toggleArrayItem(field.value ?? [], r.id, checked),
-                      )
-                    }
-                    label={r.name}
-                  />
-                ))}
-              </div>
-            </div>
+            <CheckboxGroup
+              label="Pravidla prostoru"
+              items={MOCK_RULES}
+              value={field.value ?? []}
+              onChange={field.onChange}
+            />
           )}
         />
       </FormSection>
@@ -917,6 +1048,8 @@ export default function NewVenueListingForm({
         id="section-access"
         icon={Truck}
         title="Přístup a zásobování"
+        color="text-listing"
+        surfaceColor="bg-listing-surface"
       >
         <div className="flex flex-col gap-2">
           <InputLabel label="Typ vozidel, které zvládnou vjezd" />
@@ -928,6 +1061,7 @@ export default function NewVenueListingForm({
                 name="access.vehicleTypes"
                 render={({ field }) => (
                   <Checkbox
+                    checkColor="text-listing"
                     checked={field.value?.includes(v) ?? false}
                     onChange={(checked) =>
                       field.onChange(
@@ -972,6 +1106,7 @@ export default function NewVenueListingForm({
                     checked={field.value ?? false}
                     onChange={field.onChange}
                     label={label}
+                    checkColor="text-listing"
                   />
                 )}
               />
@@ -981,7 +1116,13 @@ export default function NewVenueListingForm({
       </FormSection>
 
       {/* ── 12. Parkování ─────────────────────────────────────────────────────── */}
-      <FormSection id="section-parking" icon={ParkingSquare} title="Parkování">
+      <FormSection
+        color="text-listing"
+        surfaceColor="bg-listing-surface"
+        id="section-parking"
+        icon={ParkingSquare}
+        title="Parkování"
+      >
         <Controller
           control={control}
           name="parking.hasParking"
@@ -990,6 +1131,7 @@ export default function NewVenueListingForm({
               checked={field.value ?? false}
               onChange={field.onChange}
               label="Parkování k dispozici"
+              checkColor="text-listing"
             />
           )}
         />
@@ -1013,6 +1155,7 @@ export default function NewVenueListingForm({
                   checked={field.value ?? false}
                   onChange={field.onChange}
                   label="Parkování v ceně"
+                  checkColor="text-listing"
                 />
               )}
             />
@@ -1039,7 +1182,13 @@ export default function NewVenueListingForm({
       </FormSection>
 
       {/* ── 13. Snídaně ───────────────────────────────────────────────────────── */}
-      <FormSection id="section-breakfast" icon={Coffee} title="Snídaně">
+      <FormSection
+        color="text-listing"
+        surfaceColor="bg-listing-surface"
+        id="section-breakfast"
+        icon={Coffee}
+        title="Snídaně"
+      >
         <Controller
           control={control}
           name="breakfast.included"
@@ -1048,6 +1197,7 @@ export default function NewVenueListingForm({
               checked={field.value ?? false}
               onChange={field.onChange}
               label="Snídaně k dispozici"
+              checkColor="text-listing"
             />
           )}
         />
@@ -1063,6 +1213,7 @@ export default function NewVenueListingForm({
                   checked={field.value ?? false}
                   onChange={field.onChange}
                   label="Snídaně v ceně ubytování"
+                  checkColor="text-listing"
                 />
               )}
             />
@@ -1074,6 +1225,7 @@ export default function NewVenueListingForm({
                   checked={field.value ?? false}
                   onChange={field.onChange}
                   label="Povolit ubytování bez snídaně"
+                  checkColor="text-listing"
                 />
               )}
             />
@@ -1085,6 +1237,7 @@ export default function NewVenueListingForm({
                   checked={field.value ?? false}
                   onChange={field.onChange}
                   label="Povolit více snídaní než ubytovaných"
+                  checkColor="text-listing"
                 />
               )}
             />
@@ -1140,7 +1293,13 @@ export default function NewVenueListingForm({
       </FormSection>
 
       {/* ── 19. Zaměstnanci ───────────────────────────────────────────────────── */}
-      <FormSection id="section-employees" icon={Users} title="Zaměstnanci">
+      <FormSection
+        color="text-listing"
+        surfaceColor="bg-listing-surface"
+        id="section-employees"
+        icon={Users}
+        title="Zaměstnanci"
+      >
         <RepeaterField
           label="Zaměstnanci"
           fields={employeesFieldArray.fields}
@@ -1201,7 +1360,13 @@ export default function NewVenueListingForm({
       </FormSection>
 
       {/* ── 20. FAQ ───────────────────────────────────────────────────────────── */}
-      <FormSection id="section-faq" icon={CircleHelp} title="FAQ">
+      <FormSection
+        color="text-listing"
+        surfaceColor="bg-listing-surface"
+        id="section-faq"
+        icon={CircleHelp}
+        title="FAQ"
+      >
         <RepeaterField
           label="Často kladené otázky"
           fields={faqFieldArray.fields}
@@ -1262,6 +1427,7 @@ export default function NewVenueListingForm({
                         checked={field.value ?? true}
                         onChange={field.onChange}
                         label="Aktivní"
+                        checkColor="text-listing"
                       />
                     </div>
                   )}
@@ -1273,7 +1439,13 @@ export default function NewVenueListingForm({
       </FormSection>
 
       {/* ── 21. Reference ─────────────────────────────────────────────────────── */}
-      <FormSection id="section-references" icon={BookOpen} title="Reference">
+      <FormSection
+        color="text-listing"
+        surfaceColor="bg-listing-surface"
+        id="section-references"
+        icon={BookOpen}
+        title="Reference"
+      >
         <RepeaterField
           label="Reference"
           fields={referencesFieldArray.fields}
@@ -1354,8 +1526,8 @@ export default function NewVenueListingForm({
           version="plain"
         />
         <Button
-          text="Vytvořit listing"
-          version="primary"
+          text="Uložit úpravy"
+          version="listingFull"
           disabled={isSubmitDisabled}
           htmlType="submit"
         />

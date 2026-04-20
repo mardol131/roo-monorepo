@@ -1,0 +1,34 @@
+import Text from "@/app/components/ui/atoms/text";
+import { LucideIcons } from "@roo/common";
+import React from "react";
+import * as lucideIcons from "lucide-react";
+
+type Props = {
+  label: string;
+  description: string;
+  icon: LucideIcons;
+  onClick: () => void;
+};
+
+export default function IconCard({ label, description, icon, onClick }: Props) {
+  const Icon = lucideIcons[icon] as unknown as React.FC<
+    React.SVGProps<SVGSVGElement>
+  >;
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="flex cursor-pointer flex-col items-start gap-3 p-6 rounded-2xl border border-zinc-200 bg-white hover:border-listing hover:bg-listing-surface transition-all text-left group"
+    >
+      <div className="p-3 rounded-xl bg-zinc-100 group-hover:bg-listing/10 transition-colors">
+        <Icon className="w-6 h-6 text-zinc-500 group-hover:text-listing transition-colors" />
+      </div>
+      <div className="flex flex-col gap-2">
+        <Text variant="subheading2">{label}</Text>
+        <Text variant="label2" color="light">
+          {description}
+        </Text>
+      </div>
+    </button>
+  );
+}
