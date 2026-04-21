@@ -29,7 +29,7 @@ import { Events } from './collections/events'
 import { Inquiries } from './collections/inquiries'
 import { ChatMessages } from './collections/chat-messages'
 import { Admins } from './collections/admins'
-import { Municipalities } from './collections/locality/municipalities'
+import { Districts } from './collections/locality/districts'
 import { Regions } from './collections/locality/regions'
 import { DishTypes } from './collections/filters/dish-types'
 import { Necessities } from './collections/specific/necessities'
@@ -64,7 +64,7 @@ export default buildConfig({
     },
   },
   collections: [
-    Municipalities,
+    Districts,
     Necessities,
     EntertainmentTypes,
     DietaryOptions,

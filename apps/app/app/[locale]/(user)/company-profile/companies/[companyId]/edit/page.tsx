@@ -1,10 +1,9 @@
 "use client";
 
 import PageHeading from "@/app/[locale]/(user)/components/page-heading";
-import React from "react";
-import CompanyForm from "../../new/components/new-form";
 import { useParams, useRouter } from "next/navigation";
 import { COMPANIES } from "../../../../../../_mock/mock";
+import CompanyForm from "../../new/components/new-company-form";
 
 export default function EditCompanyPage({
   params,
@@ -29,11 +28,10 @@ export default function EditCompanyPage({
         defaultValues={{
           name: company.name,
           ico: company.ico,
-          description: company.description,
+          description: company.description ?? undefined,
           email: company.email,
           phone: company.phone,
-          website: company.website,
-          city: company.city,
+          website: company.website ?? undefined,
         }}
       />
     </main>

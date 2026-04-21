@@ -2,7 +2,6 @@
 
 import Button from "@/app/components/ui/atoms/button";
 import Checkbox from "@/app/components/ui/atoms/inputs/checkbox";
-import ErrorText from "@/app/components/ui/atoms/inputs/error-text";
 import GalleryInput from "@/app/components/ui/atoms/inputs/images/gallery-input";
 import ImageInput from "@/app/components/ui/atoms/inputs/images/image-input";
 import Input from "@/app/components/ui/atoms/inputs/input";
@@ -10,7 +9,6 @@ import RepeaterField from "@/app/components/ui/atoms/inputs/repeater-field";
 import CheckboxGroup from "@/app/components/ui/atoms/inputs/checkbox-group";
 import SearchInput from "@/app/components/ui/atoms/inputs/search-input";
 import SelectInput from "@/app/components/ui/atoms/inputs/select-input";
-import Text from "@/app/components/ui/atoms/text";
 import {
   MOCK_ACTIVITIES,
   MOCK_AMENITIES,
@@ -138,8 +136,10 @@ const schema = z.object({
   }),
   location: z.object({
     address: z.string().min(1, "Adresa je povinná"),
-    city: z.string().min(1, "Město je povinné"),
-    postalCode: z.string().optional(),
+    city: z.object({
+      id: z.string().min(1, "Město je povinné"),
+      name: z.string(),
+    }),
   }),
   capacity: z.coerce
     .number({ message: "Zadejte číslo" })
@@ -350,8 +350,13 @@ export default function EditVenueListingForm({
       price: { startsAt: listing.price.startsAt },
       location: {
         address: d.location.address,
-        city: id(d.location.city),
-        postalCode: d.location.postalCode ?? undefined,
+        city: {
+          id: id(d.location.city),
+          name:
+            typeof d.location.city === "object" && d.location.city !== null
+              ? (d.location.city as { name: string }).name
+              : "",
+        },
       },
       capacity: d.capacity,
       area: d.area,
@@ -442,24 +447,9 @@ export default function EditVenueListingForm({
   const hasParking = watch("parking.hasParking");
   const breakfastIncluded = watch("breakfast.included");
   const parkingIsIncludedInPrice = watch("parking.parkingIsIncludedInPrice");
-  const nameValue = watch("name");
-  const coverImageValue = watch("images.coverImage");
-  const addressValue = watch("location.address");
-  const cityValue = watch("location.city");
-  const capacityValue = watch("capacity");
-  const areaValue = watch("area");
-  const startsAtValue = watch("price.startsAt");
-
-  const isSubmitDisabled =
-    !nameValue ||
-    !coverImageValue ||
-    !addressValue ||
-    !cityValue ||
-    !capacityValue ||
-    !areaValue ||
-    !startsAtValue;
 
   // ── Helpers ──────────────────────────────────────────────────────────────────
+  console.log("form errors", errors);
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
@@ -626,35 +616,31 @@ export default function EditVenueListingForm({
           }}
           error={errors.location?.address?.message}
         />
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
           <Controller
             control={control}
             name="location.city"
             render={({ field }) => (
               <SearchInput
+                ref={field.ref}
                 label="Město"
                 placeholder="Vyberte město..."
                 options={MOCK_CITIES.map((c) => ({
                   id: c.id,
                   label: c.name,
                 }))}
-                value={{
-                  id: field.value ?? "",
-                  label:
-                    MOCK_CITIES.find((c) => c.id === field.value)?.name ?? "",
-                }}
-                onSelect={(option) => field.onChange(option.id)}
-                error={errors.location?.city?.message}
+                value={
+                  field.value?.id
+                    ? { id: field.value.id, label: field.value.name }
+                    : undefined
+                }
+                onSelect={(option) =>
+                  field.onChange({ id: option.id, name: option.label })
+                }
+                onClear={() => field.onChange({ id: "", name: "" })}
+                error={errors.location?.city?.id?.message}
               />
             )}
-          />
-          <Input
-            label="PSČ"
-            inputProps={{
-              ...register("location.postalCode"),
-              placeholder: "110 00",
-            }}
-            error={errors.location?.postalCode?.message}
           />
         </div>
       </FormSection>
@@ -746,6 +732,7 @@ export default function EditVenueListingForm({
               value={field.value ?? []}
               onChange={field.onChange}
               checkColor="text-listing"
+              searchable
             />
           )}
         />
@@ -768,6 +755,7 @@ export default function EditVenueListingForm({
               value={field.value ?? []}
               onChange={field.onChange}
               checkColor="text-listing"
+              searchable
             />
           )}
         />
@@ -790,6 +778,7 @@ export default function EditVenueListingForm({
               value={field.value ?? []}
               onChange={field.onChange}
               checkColor="text-listing"
+              searchable
             />
           )}
         />
@@ -824,6 +813,7 @@ export default function EditVenueListingForm({
                   name={`activityAddons.${index}.activity`}
                   render={({ field }) => (
                     <SearchInput
+                      ref={field.ref}
                       label="Aktivita"
                       placeholder="Vyberte aktivitu..."
                       options={MOCK_ACTIVITIES.map((a) => ({
@@ -889,6 +879,7 @@ export default function EditVenueListingForm({
               value={field.value ?? []}
               onChange={field.onChange}
               checkColor="text-listing"
+              searchable
             />
           )}
         />
@@ -911,6 +902,7 @@ export default function EditVenueListingForm({
               value={field.value ?? []}
               onChange={field.onChange}
               checkColor="text-listing"
+              searchable
             />
           )}
         />
@@ -933,6 +925,7 @@ export default function EditVenueListingForm({
               value={field.value ?? []}
               onChange={field.onChange}
               checkColor="text-listing"
+              searchable
             />
           )}
         />
@@ -954,6 +947,8 @@ export default function EditVenueListingForm({
               items={MOCK_TECHNOLOGIES}
               value={field.value ?? []}
               onChange={field.onChange}
+              checkColor="text-listing"
+              searchable
             />
           )}
         />
@@ -1014,6 +1009,8 @@ export default function EditVenueListingForm({
               items={MOCK_RULES}
               value={field.value ?? []}
               onChange={field.onChange}
+              checkColor="text-listing"
+              searchable
             />
           )}
         />
@@ -1026,6 +1023,8 @@ export default function EditVenueListingForm({
               items={MOCK_RULES}
               value={field.value ?? []}
               onChange={field.onChange}
+              checkColor="text-listing"
+              searchable
             />
           )}
         />
@@ -1038,6 +1037,8 @@ export default function EditVenueListingForm({
               items={MOCK_RULES}
               value={field.value ?? []}
               onChange={field.onChange}
+              checkColor="text-listing"
+              searchable
             />
           )}
         />
@@ -1525,12 +1526,7 @@ export default function EditVenueListingForm({
           onClick={onCancel}
           version="plain"
         />
-        <Button
-          text="Uložit úpravy"
-          version="listingFull"
-          disabled={isSubmitDisabled}
-          htmlType="submit"
-        />
+        <Button text="Uložit úpravy" version="listingFull" htmlType="submit" />
       </div>
     </form>
   );

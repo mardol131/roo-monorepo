@@ -31,6 +31,7 @@ export const Companies: CollectionConfig = {
     {
       name: 'phone',
       type: 'text',
+      required: true,
     },
     {
       name: 'website',

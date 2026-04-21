@@ -1,6 +1,10 @@
 import { fetchCalendarEventsByListing } from "@/app/react-query/calendar-events/fetch";
 import { calendarEventKeys } from "@/app/react-query/query-keys";
-import { QueryClient } from "@tanstack/react-query";
+import {
+  dehydrate,
+  HydrationBoundary,
+  QueryClient,
+} from "@tanstack/react-query";
 import React, { PropsWithChildren } from "react";
 
 type Props = {
@@ -20,5 +24,9 @@ export default async function layout({
     queryFn: () => fetchCalendarEventsByListing(listingId),
   });
 
-  return <>{children}</>;
+  return (
+    <HydrationBoundary state={dehydrate(queryClient)}>
+      {children}
+    </HydrationBoundary>
+  );
 }

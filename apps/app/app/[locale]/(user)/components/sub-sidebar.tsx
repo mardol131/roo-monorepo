@@ -1,9 +1,10 @@
 "use client";
 
-import { IntlPathname, Link } from "@/app/i18n/navigation";
+import { IntlPathname, Link, usePathname } from "@/app/i18n/navigation";
 import { SidebarItem } from "./sidebar-item";
 import { LucideIcons } from "@roo/common";
 import * as lucideIcons from "lucide-react";
+import { useCallback } from "react";
 
 type ColorVariant = "company" | "listing";
 
@@ -38,7 +39,6 @@ export type SubSidebarProps = {
   mainMenuItems: SidebarItem[];
   subMenuLabel?: string;
   subMenuItems?: SidebarItem[];
-  isActiveFunction: (href: IntlPathname) => boolean;
 };
 
 export function SubSidebar({
@@ -46,8 +46,22 @@ export function SubSidebar({
   mainMenuItems,
   subMenuLabel,
   subMenuItems,
-  isActiveFunction,
 }: SubSidebarProps) {
+  const pathname = usePathname();
+
+  const isActive = useCallback(
+    (href: IntlPathname) => {
+      if (typeof href === "string") {
+        return pathname === href;
+      } else if ("params" in href) {
+        const { pathname: hrefPathname } = href;
+        return pathname === hrefPathname;
+      } else {
+        return pathname.startsWith(href.pathname);
+      }
+    },
+    [pathname],
+  );
   return (
     <aside className="w-48 shrink-0 flex flex-col bg-white border-r border-zinc-200">
       <div className="sticky top-0 flex flex-col h-screen">
@@ -67,7 +81,7 @@ export function SubSidebar({
               <SubSidebarNavItem
                 key={item.label}
                 {...item}
-                active={isActiveFunction(item.href)}
+                active={isActive(item.href)}
                 variant="company"
               />
             ))}
@@ -91,7 +105,7 @@ export function SubSidebar({
                   <SubSidebarNavItem
                     key={item.label}
                     {...item}
-                    active={isActiveFunction(item.href)}
+                    active={isActive(item.href)}
                     variant="listing"
                   />
                 ))}

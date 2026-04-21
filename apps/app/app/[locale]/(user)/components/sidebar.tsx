@@ -1,19 +1,19 @@
 "use client";
 
 import Button, { ButtonProps } from "@/app/components/ui/atoms/button";
-import { IntlPathname, Link } from "@/app/i18n/navigation";
+import { IntlPathname, Link, usePathname } from "@/app/i18n/navigation";
 import { LucideIcon } from "lucide-react";
 import Image from "next/image";
 import logo from "../../../../public/logo.png";
 import ProfileSwitchButton from "./profile-switch-button";
 import { SidebarItem, SidebarNavItem } from "./sidebar-item";
+import { useCallback } from "react";
 
 export type SidebarProps = {
   button?: ButtonProps;
   mainMenuItems: SidebarItem[];
   subMenuItems?: SidebarItem[];
   headerComponent?: React.ReactNode;
-  isActiveFunction: (href: IntlPathname) => boolean;
 };
 
 export default function Sidebar({
@@ -21,8 +21,22 @@ export default function Sidebar({
   mainMenuItems,
   subMenuItems,
   headerComponent,
-  isActiveFunction,
 }: SidebarProps) {
+  const pathname = usePathname();
+
+  const isActive = useCallback(
+    (href: IntlPathname) => {
+      if (typeof href === "string") {
+        return pathname === href;
+      } else if ("params" in href) {
+        const { pathname: hrefPathname } = href;
+        return pathname === hrefPathname;
+      } else {
+        return pathname.startsWith(href.pathname);
+      }
+    },
+    [pathname],
+  );
   return (
     <aside className="w-20 shrink-0 flex flex-col bg-white border-r border-zinc-200">
       <div className="sticky top-0 flex flex-col h-screen">
@@ -41,7 +55,7 @@ export default function Sidebar({
               <SidebarNavItem
                 key={item.href.toString()}
                 {...item}
-                active={isActiveFunction(item.href)}
+                active={isActive(item.href)}
               />
             ))}
           </ul>
@@ -55,7 +69,7 @@ export default function Sidebar({
                 <SidebarNavItem
                   key={item.href.toString()}
                   {...item}
-                  active={isActiveFunction(item.href)}
+                  active={isActive(item.href)}
                 />
               ))}
             </ul>

@@ -8,9 +8,10 @@ type Props = {
   description: string;
   icon: LucideIcons;
   onClick: () => void;
+  selected?: boolean;
 };
 
-export default function IconCard({ label, description, icon, onClick }: Props) {
+export default function IconCard({ label, description, icon, onClick, selected }: Props) {
   const Icon = lucideIcons[icon] as unknown as React.FC<
     React.SVGProps<SVGSVGElement>
   >;
@@ -18,10 +19,14 @@ export default function IconCard({ label, description, icon, onClick }: Props) {
     <button
       type="button"
       onClick={onClick}
-      className="flex cursor-pointer flex-col items-start gap-3 p-6 rounded-2xl border border-zinc-200 bg-white hover:border-listing hover:bg-listing-surface transition-all text-left group"
+      className={`flex cursor-pointer flex-col items-start gap-3 p-6 rounded-2xl border transition-all text-left group ${
+        selected
+          ? "border-listing bg-listing-surface"
+          : "border-zinc-200 bg-white hover:border-listing hover:bg-listing-surface"
+      }`}
     >
-      <div className="p-3 rounded-xl bg-zinc-100 group-hover:bg-listing/10 transition-colors">
-        <Icon className="w-6 h-6 text-zinc-500 group-hover:text-listing transition-colors" />
+      <div className={`p-3 rounded-xl transition-colors ${selected ? "bg-listing/10" : "bg-zinc-100 group-hover:bg-listing/10"}`}>
+        <Icon className={`w-6 h-6 transition-colors ${selected ? "text-listing" : "text-zinc-500 group-hover:text-listing"}`} />
       </div>
       <div className="flex flex-col gap-2">
         <Text variant="subheading2">{label}</Text>

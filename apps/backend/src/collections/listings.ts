@@ -18,10 +18,6 @@ export const venueListingDetails: Field[] = [
         required: true,
       },
       {
-        name: 'postalCode',
-        type: 'text',
-      },
-      {
         name: 'latitude',
         type: 'number',
       },
@@ -263,6 +259,24 @@ export const venueListingDetails: Field[] = [
   },
 ]
 
+type LocationSiblings = {
+  municipality?: unknown[]
+  region?: unknown[]
+  city?: unknown[]
+}
+
+const validateAtLeastOneLocation = (
+  value: string | null | undefined,
+  { siblingData }: { siblingData: LocationSiblings },
+): true | string => {
+  const hasAny =
+    value?.trim() ||
+    siblingData.municipality?.length ||
+    siblingData.region?.length ||
+    siblingData.city?.length
+  return hasAny ? true : 'Zadejte alespoň adresu, část obce, kraj nebo město'
+}
+
 const fullLocationFields: Field[] = [
   {
     name: 'location',
@@ -271,39 +285,25 @@ const fullLocationFields: Field[] = [
       {
         name: 'address',
         type: 'text',
-        required: true,
-      },
-      {
-        name: 'municipality',
-        type: 'relationship',
-        relationTo: 'municipalities',
-        hasMany: true,
-        required: true,
+        validate: validateAtLeastOneLocation,
       },
       {
         name: 'region',
         type: 'relationship',
         relationTo: 'regions',
         hasMany: true,
-        required: true,
+      },
+      {
+        name: 'district',
+        type: 'relationship',
+        relationTo: 'districts',
+        hasMany: true,
       },
       {
         name: 'city',
         type: 'relationship',
         relationTo: 'cities',
-        required: true,
-      },
-      {
-        name: 'postalCode',
-        type: 'text',
-      },
-      {
-        name: 'latitude',
-        type: 'number',
-      },
-      {
-        name: 'longitude',
-        type: 'number',
+        hasMany: true,
       },
     ],
   },

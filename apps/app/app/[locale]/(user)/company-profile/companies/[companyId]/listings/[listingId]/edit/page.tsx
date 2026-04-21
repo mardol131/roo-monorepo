@@ -6,9 +6,10 @@ import EditVenueListingForm, {
   VENUE_FORM_GROUPS,
 } from "./components/edit-venue-listing-form";
 import { useListing } from "@/app/react-query/listings/hooks";
-import { useParams, useRouter } from "next/navigation";
 import FormToc from "@/app/[locale]/(user)/components/form-toc";
 import Button from "@/app/components/ui/atoms/button";
+import { useRouter } from "@/app/i18n/navigation";
+import { useParams } from "next/navigation";
 
 type Props = {};
 
@@ -54,11 +55,16 @@ export default function page({}: Props) {
             <div className="flex flex-col gap-5 sticky top-5">
               <FormToc groups={VENUE_FORM_GROUPS} sticky={false} />
               <div className="flex flex-col gap-2">
-                {" "}
                 <Button
-                  text="Uložit"
+                  text="Přejít na uložení"
                   version="listingFull"
                   className="w-full"
+                  onClick={() => {
+                    window.scrollTo({
+                      top: document.body.scrollHeight,
+                      behavior: "smooth",
+                    });
+                  }}
                 />
                 <Button
                   text="Zrušit"

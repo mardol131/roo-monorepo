@@ -8,6 +8,7 @@ export function FormSection({
   children,
   surfaceColor = "bg-primary-surface",
   color = "text-primary",
+  error,
 }: {
   id?: string;
   icon: React.ElementType;
@@ -16,12 +17,13 @@ export function FormSection({
   children: React.ReactNode;
   surfaceColor?: string;
   color?: string;
+  error?: boolean;
 }) {
   const Icon = icon;
   return (
     <div
       id={id}
-      className="bg-white rounded-2xl border border-zinc-200 scroll-mt-6"
+      className={`bg-white rounded-2xl border ${error ? "border-red-500" : "border-zinc-200"} scroll-mt-6`}
     >
       <div className="px-6 py-4 border-b border-zinc-100 flex items-center gap-2.5">
         <div

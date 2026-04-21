@@ -12,8 +12,8 @@ const schema = z.object({
   name: z.string().min(1, "Název firmy je povinný"),
   ico: z.string().regex(/^\d{8}$/, "IČO musí mít přesně 8 číslic"),
   description: z.string().optional(),
-  email: z.string(),
-  phone: z.string().optional(),
+  email: z.string().min(1, "E-mail je povinný"),
+  phone: z.string().min(1, "Telefon je povinný"),
   website: z.string().optional(),
 });
 
@@ -22,7 +22,7 @@ type FormInputs = {
   ico: string;
   description?: string;
   email: string;
-  phone?: string;
+  phone: string;
   website?: string;
 };
 
@@ -45,23 +45,19 @@ export default function CompanyForm({
     register,
     handleSubmit,
     formState: { errors },
-    watch,
   } = useForm<FormInputs>({
     resolver: zodResolver(schema),
     defaultValues,
   });
 
-  const nameValue = watch("name");
-  const icoValue = watch("ico");
-  const emailValue = watch("email");
-
-  const buttonIsDisabled = !nameValue || !icoValue || !emailValue;
-  console.log("errors", errors);
-
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
       {/* Section 1 — Základní informace */}
-      <FormSection icon={Building2} title="Základní informace">
+      <FormSection
+        icon={Building2}
+        title="Základní informace"
+        error={Boolean(errors.name || errors.ico)}
+      >
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <Input
             isRequired
@@ -88,7 +84,11 @@ export default function CompanyForm({
       </FormSection>
 
       {/* Section 2 — Kontaktní údaje */}
-      <FormSection icon={Phone} title="Kontaktní údaje">
+      <FormSection
+        icon={Phone}
+        title="Kontaktní údaje"
+        error={Boolean(errors.email || errors.phone)}
+      >
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <Input
             label="E-mail"
@@ -119,12 +119,7 @@ export default function CompanyForm({
           onClick={onBackClick}
           version="plain"
         />
-        <Button
-          text={submitLabel}
-          version="primary"
-          disabled={buttonIsDisabled}
-          htmlType="submit"
-        />
+        <Button text={submitLabel} version="primary" htmlType="submit" />
       </div>
     </form>
   );

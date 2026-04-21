@@ -5,6 +5,7 @@ import { useRouter } from "@/app/i18n/navigation";
 import { useCompany } from "@/app/react-query/companies/hooks";
 import { useListingsByCompany } from "@/app/react-query/listings/hooks";
 import { Briefcase, Building2 } from "lucide-react";
+import { useEffect } from "react";
 import { useParams } from "next/navigation";
 import Breadcrumbs from "../../../components/breadcrumbs";
 import EntityRow from "../../../components/entity-row";
@@ -17,11 +18,17 @@ export default function page() {
   const { companyId } = useParams<{ companyId: string }>();
   const router = useRouter();
 
-  const { data: company } = useCompany(companyId);
+  const { data: company, isLoading } = useCompany(companyId);
   const { data: listings } = useListingsByCompany(companyId);
 
+  useEffect(() => {
+    if (!isLoading && !company) {
+      router.push("/company-profile/companies");
+    }
+  }, [isLoading, company, router]);
+
   if (!company) {
-    return router.push("/company-profile/companies");
+    return null;
   }
 
   return (
@@ -109,10 +116,6 @@ export default function page() {
               iconBackgroundColor="bg-listing-surface"
               label={listing.name}
               items={[
-                {
-                  icon: "MapPin",
-                  content: listing.details[0].location.address,
-                },
                 { icon: "Banknote", content: `${listing.price.startsAt} Kč` },
               ]}
               link={{

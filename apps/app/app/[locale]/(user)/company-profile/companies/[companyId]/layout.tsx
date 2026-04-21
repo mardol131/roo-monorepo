@@ -7,7 +7,6 @@ import {
 } from "@tanstack/react-query";
 import { PropsWithChildren } from "react";
 import ContentWrapper from "./content-wrapper";
-import CustomSidebar from "./custom-sidebar";
 import { fetchListingsByCompany } from "@/app/react-query/listings/fetch";
 
 type Props = {
@@ -34,7 +33,6 @@ export default async function layout({
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
-      <CustomSidebar companyId={companyId} />
       <ContentWrapper>{children}</ContentWrapper>
     </HydrationBoundary>
   );

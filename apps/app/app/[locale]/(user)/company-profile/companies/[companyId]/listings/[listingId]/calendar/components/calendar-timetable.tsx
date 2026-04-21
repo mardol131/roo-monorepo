@@ -1,12 +1,19 @@
 "use client";
 
 import Text from "@/app/components/ui/atoms/text";
-import { useCalendarEventsByListing } from "@/app/react-query/calendar-events/hooks";
+import {
+  useCalendarEventsByListing,
+  useDeleteCalendarEvent,
+  useUpdateCalendarEvent,
+} from "@/app/react-query/calendar-events/hooks";
 import { CalendarEvent } from "@roo/common";
 import { format, isToday, isTomorrow, parseISO, startOfDay } from "date-fns";
 import { cs } from "date-fns/locale";
-import { MessageSquare, PenLine } from "lucide-react";
+import { LinkIcon, MessageSquare, Pencil, PenLine } from "lucide-react";
 import { useParams } from "next/navigation";
+import { useState } from "react";
+import CalendarEditPopover from "./calendar-edit-popover";
+import { Link } from "@/app/i18n/navigation";
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -77,63 +84,135 @@ function groupByDay(events: CalendarEvent[]): DayGroup[] {
   }));
 }
 
+// ── Types ─────────────────────────────────────────────────────────────────────
+
+type PendingEdit = {
+  event: CalendarEvent;
+  x: number;
+  y: number;
+};
+
 // ── Component ─────────────────────────────────────────────────────────────────
 
 export default function CalendarTimetable() {
   const { listingId } = useParams<{ listingId: string }>();
   const { data: events = [] } = useCalendarEventsByListing(listingId);
+  const { mutate: updateEvent, isPending: isUpdating } =
+    useUpdateCalendarEvent(listingId);
+  const { mutate: deleteEvent, isPending: isDeleting } =
+    useDeleteCalendarEvent(listingId);
+
+  const [pendingEdit, setPendingEdit] = useState<PendingEdit | null>(null);
+  const [editError, setEditError] = useState<string | undefined>();
+
+  function handleEditSave(name: string, status: CalendarEvent["status"]) {
+    if (!pendingEdit) return;
+    updateEvent(
+      { id: pendingEdit.event.id, name, status },
+      {
+        onSuccess: () => {
+          setPendingEdit(null);
+          setEditError(undefined);
+        },
+      },
+    );
+  }
+
+  function handleEditDelete() {
+    if (!pendingEdit) return;
+    deleteEvent(pendingEdit.event.id, {
+      onSuccess: () => {
+        setPendingEdit(null);
+        setEditError(undefined);
+      },
+    });
+  }
 
   const groups = groupByDay(events);
 
   return (
-    <div className=" mt-6 flex flex-col gap-3">
-      <Text variant="heading5" color="dark">
-        Nadcházející události
-      </Text>
+    <>
+      <div className="mt-6 flex flex-col gap-3">
+        <Text variant="heading5" color="dark">
+          Nadcházející události
+        </Text>
 
-      {groups.length === 0 ? (
-        <div className="bg-white rounded-2xl  border border-zinc-300 px-6 py-10 text-center">
-          <Text variant="label1" color="muted">
-            Žádné nadcházející události
-          </Text>
-        </div>
-      ) : (
-        <div className="flex flex-col gap-2">
-          {groups.map(({ day, events: dayEvents }) => (
-            <div
-              key={day.toISOString()}
-              className="bg-white rounded-2xl border border-zinc-200 overflow-hidden"
-            >
-              {/* Day header */}
-              <div className="flex items-center justify-between py-3 px-5 border-b border-zinc-300 bg-zinc-50">
-                <Text variant="label1" color="dark">
-                  {formatDayHeading(day)}
-                </Text>
-                <Text variant="label4" color="muted" as="span">
-                  {dayEvents.length === 1
-                    ? "1 událost"
-                    : `${dayEvents.length} události`}
-                </Text>
-              </div>
+        {groups.length === 0 ? (
+          <div className="bg-white rounded-2xl border border-zinc-300 px-6 py-10 text-center">
+            <Text variant="label1" color="muted">
+              Žádné nadcházející události
+            </Text>
+          </div>
+        ) : (
+          <div className="flex flex-col gap-2">
+            {groups.map(({ day, events: dayEvents }) => (
+              <div
+                key={day.toISOString()}
+                className="bg-white rounded-2xl border border-zinc-200 overflow-hidden"
+              >
+                {/* Day header */}
+                <div className="flex items-center justify-between py-3 px-5 border-b border-zinc-300 bg-zinc-50">
+                  <Text variant="label1" color="dark">
+                    {formatDayHeading(day)}
+                  </Text>
+                  <Text variant="label4" color="muted" as="span">
+                    {dayEvents.length === 1
+                      ? "1 událost"
+                      : `${dayEvents.length} události`}
+                  </Text>
+                </div>
 
-              {/* Events */}
-              <div className="divide-y divide-zinc-100">
-                {dayEvents.map((event) => (
-                  <EventRow key={event.id} event={event} />
-                ))}
+                {/* Events */}
+                <div className="divide-y divide-zinc-100">
+                  {dayEvents.map((event) => (
+                    <EventRow
+                      key={event.id}
+                      event={event}
+                      onEditClick={(e, x, y) => {
+                        setEditError(undefined);
+                        setPendingEdit({ event: e, x, y });
+                      }}
+                    />
+                  ))}
+                </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {pendingEdit && (
+        <CalendarEditPopover
+          event={pendingEdit.event}
+          position={{ x: pendingEdit.x, y: pendingEdit.y }}
+          onSave={handleEditSave}
+          onDelete={handleEditDelete}
+          onClose={() => {
+            setPendingEdit(null);
+            setEditError(undefined);
+          }}
+          isPending={isUpdating || isDeleting}
+          error={editError}
+        />
       )}
-    </div>
+    </>
   );
 }
 
 // ── Event row ─────────────────────────────────────────────────────────────────
 
-function EventRow({ event }: { event: CalendarEvent }) {
+type EventRowProps = {
+  event: CalendarEvent;
+  onEditClick: (event: CalendarEvent, x: number, y: number) => void;
+};
+
+function EventRow({ event, onEditClick }: EventRowProps) {
   const isInquiry = !!event.inquiry;
+
+  const { companyId, listingId } = useParams<{
+    companyId: string;
+    listingId: string;
+  }>();
 
   return (
     <div className="flex items-center gap-4 px-5 py-3">
@@ -174,8 +253,40 @@ function EventRow({ event }: { event: CalendarEvent }) {
         </Text>
       </div>
 
-      {/* Status badge */}
-      <div className="shrink-0">
+      {/* Status badge + edit button */}
+      <div className="shrink-0 flex items-center gap-2">
+        {" "}
+        {event.source === "manual" && (
+          <button
+            onClick={(e) => {
+              const rect = e.currentTarget.getBoundingClientRect();
+              onEditClick(event, rect.left, rect.bottom + 4);
+            }}
+            className="p-1.5 rounded-lg text-zinc-400 hover:text-zinc-600 hover:bg-zinc-100 transition-colors"
+            title="Upravit událost"
+          >
+            <Pencil className="w-3.5 h-3.5" />
+          </button>
+        )}
+        {event.source === "inquiry" && event.inquiry && (
+          <Link
+            href={{
+              pathname:
+                "/company-profile/companies/[companyId]/listings/[listingId]/inquiries/[inquiryId]",
+              params: {
+                inquiryId:
+                  typeof event.inquiry === "string"
+                    ? event.inquiry
+                    : event.inquiry.id,
+                listingId: listingId,
+                companyId: companyId,
+              },
+            }}
+            className="p-1.5 rounded-lg text-zinc-400 hover:text-zinc-600 hover:bg-zinc-100 transition-colors"
+          >
+            <LinkIcon className="w-3.5 h-3.5" />
+          </Link>
+        )}
         <span
           className={`text-[11px] font-medium px-2.5 py-1 rounded-full ${STATUS_BADGE[event.source][event.status]}`}
         >

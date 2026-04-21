@@ -1,6 +1,6 @@
 "use client";
 
-import Button from "@/app/components/ui/atoms/button";
+import Button, { ButtonProps } from "@/app/components/ui/atoms/button";
 import Checkbox from "@/app/components/ui/atoms/inputs/checkbox";
 import CheckboxGroup from "@/app/components/ui/atoms/inputs/checkbox-group";
 import ErrorText from "@/app/components/ui/atoms/inputs/error-text";
@@ -16,7 +16,7 @@ import {
   MOCK_DISH_TYPES,
   MOCK_ENTERTAINMENT_TYPES,
   MOCK_FOOD_SERVICE_STYLES,
-  MOCK_MUNICIPALITIES,
+  MOCK_DISTRICTS,
   MOCK_NECESSITIES,
   MOCK_REGIONS,
 } from "@/app/_mock/mock";
@@ -25,11 +25,13 @@ import {
   Banknote,
   Building2,
   Clock,
+  ClipboardList,
   DoorOpen,
   Image,
+  Lock,
   MapPin,
-  Maximize2,
   Music,
+  Package,
   Users,
   UtensilsCrossed,
 } from "lucide-react";
@@ -44,6 +46,7 @@ import AreaSpacesFields from "./area-spaces-fields";
 import BuildingSpacesFields from "./building-spaces-fields";
 import RoomSpacesFields from "./room-spaces-fields";
 import IconCard from "./icon-card";
+import { text } from "stream/consumers";
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 
@@ -61,6 +64,11 @@ const SECTION_IMAGES = { id: "section-images", title: "Obrázky", icon: Image };
 const SECTION_LOCATION = {
   id: "section-location",
   title: "Lokalita",
+  icon: MapPin,
+};
+const SECTION_LOCATION_GASTRO_ENTERTAINMENT = {
+  id: "section-location",
+  title: "Místo působení",
   icon: MapPin,
 };
 const SECTION_CAPACITY = {
@@ -88,6 +96,24 @@ const SECTION_LOGISTICS = {
   title: "Logistika",
   icon: Clock,
 };
+const SECTION_EXTRAS = {
+  id: "section-extras",
+  title: "Doplňky",
+  icon: Package,
+};
+const SECTION_REQUIREMENTS = {
+  id: "section-requirements",
+  title: "Provozní požadavky",
+  icon: ClipboardList,
+};
+
+const COLOR_SCHEME = {
+  text: "text-listing",
+  surface: "bg-listing-surface",
+  fullBg: "bg-listing",
+};
+
+const BUTTON_COLOR: ButtonProps["version"] = "listingFull";
 
 export const FORM_GROUPS: Record<ListingType, readonly TocGroup[]> = {
   venue: [
@@ -105,18 +131,37 @@ export const FORM_GROUPS: Record<ListingType, readonly TocGroup[]> = {
       label: "Základní",
       sections: [SECTION_BASIC, SECTION_PRICE, SECTION_IMAGES],
     },
-    { label: "Lokalita", sections: [SECTION_LOCATION] },
-    { label: "Nabídka", sections: [SECTION_CAPACITY, SECTION_CUISINE] },
+    {
+      label: "Místo působení",
+      sections: [SECTION_LOCATION_GASTRO_ENTERTAINMENT],
+    },
+    {
+      label: "Nabídka",
+      sections: [
+        SECTION_CAPACITY,
+        SECTION_CUISINE,
+        SECTION_EXTRAS,
+        SECTION_REQUIREMENTS,
+      ],
+    },
   ],
   entertainment: [
     {
       label: "Základní",
       sections: [SECTION_BASIC, SECTION_PRICE, SECTION_IMAGES],
     },
-    { label: "Lokalita", sections: [SECTION_LOCATION] },
+    {
+      label: "Místo působení",
+      sections: [SECTION_LOCATION_GASTRO_ENTERTAINMENT],
+    },
     {
       label: "Program",
-      sections: [SECTION_CAPACITY, SECTION_ENT_TYPES, SECTION_LOGISTICS],
+      sections: [
+        SECTION_CAPACITY,
+        SECTION_ENT_TYPES,
+        SECTION_REQUIREMENTS,
+        SECTION_LOGISTICS,
+      ],
     },
   ],
 };
@@ -148,105 +193,176 @@ const buildingSchema = z.object({
 
 // ── Schema ─────────────────────────────────────────────────────────────────────
 
-const schema = z
-  .object({
-    // ── Shared ──────────────────────────────────────────────────────────
-    name: z.string().min(1, "Název je povinný"),
-    images: z.object({
-      coverImage: z.string().min(1, "Titulní obrázek je povinný"),
-      logo: z.string().optional(),
-      gallery: z.array(z.string()).min(4, "Přidejte alespoň čtyři obrázky"),
-    }),
-    price: z.object({
-      startsAt: z.coerce
-        .number({ message: "Zadejte číslo" })
-        .positive("Cena musí být kladná"),
-    }),
-    location: z.object({
-      address: z.string().min(1, "Adresa je povinná"),
-      city: z.string().min(1, "Město je povinné"),
-      postalCode: z.string().optional(),
-      municipality: z.string().optional(),
-      region: z.string().optional(),
-    }),
-    capacity: z.coerce
+const baseSchema = z.object({
+  // ── Shared ──────────────────────────────────────────────────────────
+  name: z.string().min(1, "Název je povinný"),
+  images: z.object({
+    coverImage: z.string().min(1, "Titulní obrázek je povinný"),
+    logo: z.string().optional(),
+    gallery: z.array(z.string()).min(4, "Přidejte alespoň čtyři obrázky"),
+  }),
+  price: z.object({
+    startsAt: z.coerce
       .number({ message: "Zadejte číslo" })
-      .positive("Kapacita musí být kladná")
-      .int("Zadejte celé číslo"),
-    minimumCapacity: optionalPositiveNumber,
+      .positive("Cena musí být kladná"),
+  }),
+  location: z.object({
+    address: z.string().optional(),
+    city: z.string().optional(), // venue: single required city
+    districts: z.array(z.string()).default([]), // gastro/entertainment
+    regions: z.array(z.string()).default([]), // gastro/entertainment
+    cities: z.array(z.string()).default([]), // gastro/entertainment
+  }),
+  capacity: z.coerce
+    .number({ message: "Zadejte číslo" })
+    .positive("Kapacita musí být kladná")
+    .int("Zadejte celé číslo"),
+  minimumCapacity: optionalPositiveNumber,
 
-    // ── Venue-specific ───────────────────────────────────────────────────
-    area: z.coerce.number().positive().optional(),
-    spaceType: z.enum(["area", "building", "room"]).optional(),
-    areaName: z.string().optional(),
-    areaDescription: z.string().optional(),
-    areaCapacity: optionalPositiveNumber,
-    areaArea: optionalPositiveNumber,
-    hasBuildings: z.boolean().default(false),
-    buildings: z.array(buildingSchema).default([]),
-    buildingName: z.string().optional(),
-    buildingDescription: z.string().optional(),
-    buildingCapacity: optionalPositiveNumber,
-    buildingArea: optionalPositiveNumber,
-    buildingHasRooms: z.boolean().default(false),
-    buildingRooms: z.array(roomSchema).default([]),
-    rooms: z.array(roomSchema).default([]),
+  // ── Venue-specific ───────────────────────────────────────────────────
+  area: optionalPositiveNumber,
+  spaceType: z.enum(["area", "building", "room"]).optional(),
+  areaName: z.string().optional(),
+  areaDescription: z.string().optional(),
+  areaCapacity: optionalPositiveNumber,
+  areaArea: optionalPositiveNumber,
+  hasBuildings: z.boolean().default(false),
+  buildings: z.array(buildingSchema).default([]),
+  buildingName: z.string().optional(),
+  buildingDescription: z.string().optional(),
+  buildingCapacity: optionalPositiveNumber,
+  buildingArea: optionalPositiveNumber,
+  buildingHasRooms: z.boolean().default(false),
+  buildingRooms: z.array(roomSchema).default([]),
+  rooms: z.array(roomSchema).default([]),
 
-    // ── Gastro-specific ──────────────────────────────────────────────────
-    cuisines: z.array(z.string()).default([]),
-    dishTypes: z.array(z.string()).default([]),
-    dietaryOptions: z.array(z.string()).default([]),
-    foodServiceStyles: z.array(z.string()).default([]),
-    hasAlcoholLicense: z.boolean().default(false),
-    kidsMenu: z.boolean().default(false),
-    necessities: z.array(z.string()).default([]),
+  // ── Gastro-specific ──────────────────────────────────────────────────
+  cuisines: z.array(z.string()).default([]),
+  dishTypes: z.array(z.string()).default([]),
+  dietaryOptions: z.array(z.string()).default([]),
+  foodServiceStyles: z.array(z.string()).default([]),
+  hasAlcoholLicense: z.boolean().default(false),
+  kidsMenu: z.boolean().default(false),
+  necessities: z.array(z.string()).default([]),
 
-    // ── Entertainment-specific ───────────────────────────────────────────
-    entertainmentTypes: z.array(z.string()).default([]),
-    audience: z.array(z.enum(["adults", "kids", "seniors"])).default([]),
-    setupTime: optionalPositiveNumber,
-    tearDownTime: optionalPositiveNumber,
-  })
-  .superRefine((data, ctx) => {
-    if (data.spaceType === "area") {
-      if (!data.areaName?.trim()) {
-        ctx.addIssue({
-          code: "custom",
-          message: "Název areálu je povinný",
-          path: ["areaName"],
-        });
+  // ── Entertainment-specific ───────────────────────────────────────────
+  entertainmentTypes: z.array(z.string()).default([]),
+  audience: z.array(z.enum(["adults", "kids", "seniors"])).default([]),
+  setupTime: optionalPositiveNumber,
+  tearDownTime: optionalPositiveNumber,
+});
+
+export type FormInputs = z.infer<typeof baseSchema>;
+
+// ── Resolver ───────────────────────────────────────────────────────────────────
+
+type ResolverResult = {
+  values: Partial<FormInputs>;
+  errors: Record<string, unknown>;
+};
+type ResolverFn = (
+  values: unknown,
+  ctx: unknown,
+  opts: unknown,
+) => Promise<ResolverResult>;
+
+function makeResolver(listingType: ListingType): ResolverFn {
+  const zResolver = zodResolver(baseSchema) as unknown as ResolverFn;
+
+  return async (values, ctx, opts) => {
+    const result = await zResolver(values, ctx, opts);
+    const v = values as FormInputs;
+
+    const locErrors = (result.errors.location as Record<string, unknown>) ?? {};
+
+    if (listingType === "venue") {
+      if (!v.location?.address?.trim()) {
+        result.errors = {
+          ...result.errors,
+          location: {
+            ...locErrors,
+            address: { type: "required", message: "Adresa je povinná" },
+          },
+        };
       }
-      if (data.hasBuildings) {
-        data.buildings?.forEach((b, bi) => {
-          if (!b.name?.trim()) {
-            ctx.addIssue({
-              code: "custom",
-              message: "Název budovy je povinný",
-              path: ["buildings", bi, "name"],
-            });
-          }
-        });
+      if (!v.location?.city) {
+        result.errors = {
+          ...result.errors,
+          location: {
+            ...((result.errors.location as Record<string, unknown>) ?? {}),
+            city: { type: "required", message: "Město je povinné" },
+          },
+        };
       }
-    } else if (data.spaceType === "building") {
-      if (!data.buildingName?.trim()) {
-        ctx.addIssue({
-          code: "custom",
-          message: "Název budovy je povinný",
-          path: ["buildingName"],
-        });
-      }
-    } else if (data.spaceType === "room") {
-      if (!data.rooms || data.rooms.length === 0) {
-        ctx.addIssue({
-          code: "custom",
-          message: "Přidejte alespoň jednu místnost",
-          path: ["rooms"],
-        });
+    } else {
+      if (!v.location?.regions?.length) {
+        result.errors = {
+          ...result.errors,
+          location: {
+            ...locErrors,
+            regions: {
+              type: "required",
+              message: "Vyberte alespoň jeden kraj",
+            },
+          },
+        };
       }
     }
-  });
 
-export type FormInputs = z.infer<typeof schema>;
+    if (listingType !== "venue") return result;
+
+    if (!v.spaceType) {
+      result.errors = {
+        ...result.errors,
+        spaceType: { type: "required", message: "Vyberte typ prostoru" },
+      };
+    }
+
+    if (v.spaceType === "area") {
+      if (!v.areaName?.trim()) {
+        result.errors = {
+          ...result.errors,
+          areaName: { type: "required", message: "Název areálu je povinný" },
+        };
+      }
+      if (v.hasBuildings) {
+        const prev = (result.errors.buildings as Record<string, unknown>) ?? {};
+        const buildingsErrors: Record<string, unknown> = { ...prev };
+        v.buildings?.forEach((b, bi) => {
+          if (!b.name?.trim()) {
+            buildingsErrors[bi] = {
+              ...((buildingsErrors[bi] as Record<string, unknown>) ?? {}),
+              name: { type: "required", message: "Název budovy je povinný" },
+            };
+          }
+        });
+        result.errors = { ...result.errors, buildings: buildingsErrors };
+      }
+    } else if (v.spaceType === "building") {
+      if (!v.buildingName?.trim()) {
+        result.errors = {
+          ...result.errors,
+          buildingName: {
+            type: "required",
+            message: "Název budovy je povinný",
+          },
+        };
+      }
+    } else if (v.spaceType === "room") {
+      if (!v.rooms || v.rooms.length === 0) {
+        result.errors = {
+          ...result.errors,
+          rooms: {
+            type: "required",
+            message: "Přidejte alespoň jednu místnost",
+          },
+        };
+      }
+    }
+
+    return result;
+  };
+}
 
 // ── Props ──────────────────────────────────────────────────────────────────────
 
@@ -272,8 +388,9 @@ export default function NewListingForm({
     watch,
     formState: { errors },
   } = useForm<FormInputs>({
-    resolver: zodResolver(schema) as unknown as Resolver<FormInputs>,
+    resolver: makeResolver(type) as unknown as Resolver<FormInputs>,
     defaultValues: {
+      location: { districts: [], regions: [], cities: [] },
       images: { gallery: [] },
       cuisines: [],
       dishTypes: [],
@@ -295,16 +412,20 @@ export default function NewListingForm({
   }, [watch, onFormChange]);
 
   const spaceTypeValue = watch("spaceType");
+  const regionsValue = watch("location.regions");
+  const districtsValue = watch("location.districts");
+  const citiesValue = watch("location.cities");
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
       {/* ── 1. Základní informace ──────────────────────────────────────────── */}
       <FormSection
-        id="section-basic"
-        icon={Building2}
-        title="Základní informace"
-        surfaceColor="bg-listing-surface"
-        color="text-listing"
+        id={SECTION_BASIC.id}
+        icon={SECTION_BASIC.icon}
+        title={SECTION_BASIC.title}
+        surfaceColor={COLOR_SCHEME.surface}
+        color={COLOR_SCHEME.text}
+        error={!!errors.name}
       >
         <Input
           label="Název"
@@ -323,11 +444,12 @@ export default function NewListingForm({
 
       {/* ── 2. Cena ───────────────────────────────────────────────────────── */}
       <FormSection
-        id="section-price"
-        icon={Banknote}
-        title="Cena"
-        surfaceColor="bg-listing-surface"
-        color="text-listing"
+        id={SECTION_PRICE.id}
+        icon={SECTION_PRICE.icon}
+        title={SECTION_PRICE.title}
+        surfaceColor={COLOR_SCHEME.surface}
+        color={COLOR_SCHEME.text}
+        error={!!errors.price?.startsAt}
       >
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <Input
@@ -345,12 +467,13 @@ export default function NewListingForm({
 
       {/* ── 3. Obrázky ────────────────────────────────────────────────────── */}
       <FormSection
-        id="section-images"
-        icon={Image}
-        title="Obrázky"
+        id={SECTION_IMAGES.id}
+        icon={SECTION_IMAGES.icon}
+        title={SECTION_IMAGES.title}
         subtitle="Podporované formáty: jpg, png, webp"
-        surfaceColor="bg-listing-surface"
-        color="text-listing"
+        surfaceColor={COLOR_SCHEME.surface}
+        color={COLOR_SCHEME.text}
+        error={!!(errors.images?.coverImage || errors.images?.gallery)}
       >
         <Controller
           control={control}
@@ -400,114 +523,132 @@ export default function NewListingForm({
 
       {/* ── 4. Lokalita ───────────────────────────────────────────────────── */}
       <FormSection
-        id="section-location"
-        icon={MapPin}
-        title="Lokalita"
-        surfaceColor="bg-listing-surface"
-        color="text-listing"
+        id={
+          type === "venue"
+            ? SECTION_LOCATION.id
+            : SECTION_LOCATION_GASTRO_ENTERTAINMENT.id
+        }
+        icon={
+          type === "venue"
+            ? SECTION_LOCATION.icon
+            : SECTION_LOCATION_GASTRO_ENTERTAINMENT.icon
+        }
+        title={
+          type === "venue"
+            ? SECTION_LOCATION.title
+            : SECTION_LOCATION_GASTRO_ENTERTAINMENT.title
+        }
+        surfaceColor={COLOR_SCHEME.surface}
+        color={COLOR_SCHEME.text}
+        error={!!(errors.location?.regions || errors.location?.city)}
       >
-        <Input
-          label="Adresa"
-          inputProps={{
-            ...register("location.address"),
-            placeholder: "Václavské náměstí 1",
-          }}
-          error={errors.location?.address?.message}
-        />
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <Controller
-            control={control}
-            name="location.city"
-            render={({ field }) => (
-              <SearchInput
-                label="Město"
-                placeholder="Vyberte město..."
-                options={MOCK_CITIES.map((c) => ({ id: c.id, label: c.name }))}
-                value={
-                  field.value
-                    ? {
-                        id: field.value,
-                        label:
-                          MOCK_CITIES.find((c) => c.id === field.value)?.name ??
-                          "",
-                      }
-                    : undefined
-                }
-                onSelect={(o) => field.onChange(o.id)}
-                onClear={() => field.onChange("")}
-                error={errors.location?.city?.message}
-              />
-            )}
-          />
-          <Input
-            label="PSČ"
-            inputProps={{
-              ...register("location.postalCode"),
-              placeholder: "110 00",
-            }}
-            error={errors.location?.postalCode?.message}
-          />
-        </div>
-
-        {/* Municipality + Region — only for gastro and entertainment */}
-        {type !== "venue" && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <Controller
-              control={control}
-              name="location.municipality"
-              render={({ field }) => (
-                <SearchInput
-                  label="Městská část"
-                  placeholder="Vyberte část..."
-                  options={MOCK_MUNICIPALITIES.map((m) => ({
-                    id: m.id,
-                    label: m.name,
-                  }))}
-                  value={
-                    field.value
-                      ? {
-                          id: field.value,
-                          label:
-                            MOCK_MUNICIPALITIES.find(
-                              (m) => m.id === field.value,
-                            )?.name ?? "",
-                        }
-                      : undefined
-                  }
-                  onSelect={(o) => field.onChange(o.id)}
-                  onClear={() => field.onChange("")}
-                  error={errors.location?.municipality?.message}
-                />
-              )}
+        {/* Venue: adresa + město (oboje povinné) */}
+        {type === "venue" && (
+          <>
+            <Input
+              label="Adresa *"
+              inputProps={{
+                ...register("location.address"),
+                placeholder: "Václavské náměstí 1",
+              }}
+              error={errors.location?.address?.message}
             />
             <Controller
               control={control}
-              name="location.region"
+              name="location.city"
               render={({ field }) => (
                 <SearchInput
-                  label="Kraj"
-                  placeholder="Vyberte kraj..."
-                  options={MOCK_REGIONS.map((r) => ({
-                    id: r.id,
-                    label: r.name,
+                  label="Město *"
+                  placeholder="Vyberte město..."
+                  options={MOCK_CITIES.map((c) => ({
+                    id: c.id,
+                    label: c.name,
                   }))}
+                  type="dropdown"
                   value={
                     field.value
                       ? {
                           id: field.value,
                           label:
-                            MOCK_REGIONS.find((r) => r.id === field.value)
+                            MOCK_CITIES.find((c) => c.id === field.value)
                               ?.name ?? "",
                         }
                       : undefined
                   }
                   onSelect={(o) => field.onChange(o.id)}
                   onClear={() => field.onChange("")}
-                  error={errors.location?.region?.message}
+                  error={errors.location?.city?.message}
                 />
               )}
             />
-          </div>
+          </>
+        )}
+
+        {/* Gastro / Entertainment: kraj → část → město → adresa */}
+        {type !== "venue" && (
+          <>
+            <Controller
+              control={control}
+              name="location.regions"
+              render={({ field }) => (
+                <CheckboxGroup
+                  label="Kraj"
+                  items={MOCK_REGIONS}
+                  value={field.value}
+                  onChange={field.onChange}
+                  checkColor={COLOR_SCHEME.text}
+                  searchable
+                />
+              )}
+            />
+            <Controller
+              control={control}
+              name="location.districts"
+              render={({ field }) => (
+                <CheckboxGroup
+                  label="Okres"
+                  items={MOCK_DISTRICTS}
+                  value={field.value}
+                  onChange={field.onChange}
+                  checkColor={COLOR_SCHEME.text}
+                  searchable
+                  closed={!regionsValue?.length}
+                  closedMessage="Nejprve vyplňte předchozí pole
+"
+                />
+              )}
+            />
+            <Controller
+              control={control}
+              name="location.cities"
+              render={({ field }) => (
+                <CheckboxGroup
+                  label="Město"
+                  items={MOCK_CITIES}
+                  value={field.value}
+                  onChange={field.onChange}
+                  checkColor={COLOR_SCHEME.text}
+                  searchable
+                  closed={!districtsValue?.length}
+                  closedMessage="Nejprve vyplňte předchozí pole"
+                />
+              )}
+            />
+            <Input
+              label="Adresa"
+              subLabel={
+                !citiesValue?.length
+                  ? "Nejprve vyplňte předchozí pole"
+                  : undefined
+              }
+              inputProps={{
+                ...register("location.address"),
+                placeholder: "Václavské náměstí 1",
+              }}
+              disabled={!citiesValue?.length}
+              error={errors.location?.address?.message}
+            />
+          </>
         )}
       </FormSection>
 
@@ -515,11 +656,12 @@ export default function NewListingForm({
       {type === "venue" && (
         <>
           <FormSection
-            id="section-capacity"
-            icon={Maximize2}
-            title="Kapacita a prostor"
-            surfaceColor="bg-listing-surface"
-            color="text-listing"
+            id={SECTION_CAPACITY.id}
+            icon={SECTION_CAPACITY.icon}
+            title={SECTION_CAPACITY.title}
+            surfaceColor={COLOR_SCHEME.surface}
+            color={COLOR_SCHEME.text}
+            error={!!errors.capacity}
           >
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <Input
@@ -546,11 +688,20 @@ export default function NewListingForm({
           </FormSection>
 
           <FormSection
-            id="section-spaces"
-            icon={DoorOpen}
-            title="Prostory"
-            surfaceColor="bg-listing-surface"
-            color="text-listing"
+            id={SECTION_SPACES.id}
+            icon={SECTION_SPACES.icon}
+            title={SECTION_SPACES.title}
+            surfaceColor={COLOR_SCHEME.surface}
+            color={COLOR_SCHEME.text}
+            error={
+              !!(
+                errors.spaceType ||
+                errors.areaName ||
+                errors.buildings ||
+                errors.buildingName ||
+                errors.rooms
+              )
+            }
           >
             <Controller
               control={control}
@@ -587,6 +738,7 @@ export default function NewListingForm({
                         label={option.label}
                         description={option.description}
                         icon={option.icon}
+                        selected={field.value === option.value}
                         onClick={() => field.onChange(option.value)}
                       />
                     ))}
@@ -628,11 +780,12 @@ export default function NewListingForm({
       {type === "gastro" && (
         <>
           <FormSection
-            id="section-capacity"
-            icon={Users}
-            title="Kapacita"
-            surfaceColor="bg-listing-surface"
-            color="text-listing"
+            id={SECTION_CAPACITY.id}
+            icon={SECTION_CAPACITY.icon}
+            title={SECTION_CAPACITY.title}
+            surfaceColor={COLOR_SCHEME.surface}
+            color={COLOR_SCHEME.text}
+            error={!!errors.capacity}
           >
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <Input
@@ -659,22 +812,23 @@ export default function NewListingForm({
           </FormSection>
 
           <FormSection
-            id="section-cuisine"
-            icon={UtensilsCrossed}
-            title="Kuchyně a styl"
-            surfaceColor="bg-listing-surface"
-            color="text-listing"
+            id={SECTION_CUISINE.id}
+            icon={SECTION_CUISINE.icon}
+            title={SECTION_CUISINE.title}
+            surfaceColor={COLOR_SCHEME.surface}
+            color={COLOR_SCHEME.text}
           >
             <Controller
               control={control}
               name="cuisines"
               render={({ field }) => (
                 <CheckboxGroup
+                  searchable
                   label="Kuchyně"
                   items={MOCK_CUISINES}
                   value={field.value}
                   onChange={field.onChange}
-                  checkColor="text-listing"
+                  checkColor={COLOR_SCHEME.text}
                 />
               )}
             />
@@ -687,7 +841,8 @@ export default function NewListingForm({
                   items={MOCK_DISH_TYPES}
                   value={field.value}
                   onChange={field.onChange}
-                  checkColor="text-listing"
+                  checkColor={COLOR_SCHEME.text}
+                  searchable
                 />
               )}
             />
@@ -700,7 +855,8 @@ export default function NewListingForm({
                   items={MOCK_FOOD_SERVICE_STYLES}
                   value={field.value}
                   onChange={field.onChange}
-                  checkColor="text-listing"
+                  checkColor={COLOR_SCHEME.text}
+                  searchable
                 />
               )}
             />
@@ -713,49 +869,66 @@ export default function NewListingForm({
                   items={MOCK_DIETARY_OPTIONS}
                   value={field.value}
                   onChange={field.onChange}
-                  checkColor="text-listing"
+                  checkColor={COLOR_SCHEME.text}
+                  searchable
                 />
               )}
             />
+          </FormSection>
+
+          <FormSection
+            id={SECTION_EXTRAS.id}
+            icon={SECTION_EXTRAS.icon}
+            title={SECTION_EXTRAS.title}
+            surfaceColor={COLOR_SCHEME.surface}
+            color={COLOR_SCHEME.text}
+          >
             <div className="flex flex-col gap-2">
-              <InputLabel label="Doplňky" />
-              <div className="flex flex-col gap-2">
-                <Controller
-                  control={control}
-                  name="hasAlcoholLicense"
-                  render={({ field }) => (
-                    <Checkbox
-                      checked={field.value}
-                      onChange={field.onChange}
-                      label="Alkoholová licence"
-                      checkColor="text-listing"
-                    />
-                  )}
-                />
-                <Controller
-                  control={control}
-                  name="kidsMenu"
-                  render={({ field }) => (
-                    <Checkbox
-                      checked={field.value}
-                      onChange={field.onChange}
-                      label="Dětské menu"
-                      checkColor="text-listing"
-                    />
-                  )}
-                />
-              </div>
+              <Controller
+                control={control}
+                name="hasAlcoholLicense"
+                render={({ field }) => (
+                  <Checkbox
+                    checked={field.value}
+                    onChange={field.onChange}
+                    label="Alkoholová licence"
+                    checkColor={COLOR_SCHEME.text}
+                  />
+                )}
+              />
+              <Controller
+                control={control}
+                name="kidsMenu"
+                render={({ field }) => (
+                  <Checkbox
+                    checked={field.value}
+                    onChange={field.onChange}
+                    label="Dětské menu"
+                    checkColor={COLOR_SCHEME.text}
+                  />
+                )}
+              />
             </div>
+          </FormSection>
+
+          <FormSection
+            id={SECTION_REQUIREMENTS.id}
+            icon={SECTION_REQUIREMENTS.icon}
+            title={SECTION_REQUIREMENTS.title}
+            surfaceColor={COLOR_SCHEME.surface}
+            color={COLOR_SCHEME.text}
+          >
             <Controller
               control={control}
               name="necessities"
               render={({ field }) => (
                 <CheckboxGroup
-                  label="Technické požadavky"
+                  label="Provozní požadavky"
                   items={MOCK_NECESSITIES}
                   value={field.value}
                   onChange={field.onChange}
-                  checkColor="text-listing"
+                  checkColor={COLOR_SCHEME.text}
+                  searchable
                 />
               )}
             />
@@ -767,11 +940,12 @@ export default function NewListingForm({
       {type === "entertainment" && (
         <>
           <FormSection
-            id="section-capacity"
-            icon={Users}
-            title="Kapacita"
-            surfaceColor="bg-listing-surface"
-            color="text-listing"
+            id={SECTION_CAPACITY.id}
+            icon={SECTION_CAPACITY.icon}
+            title={SECTION_CAPACITY.title}
+            surfaceColor={COLOR_SCHEME.surface}
+            color={COLOR_SCHEME.text}
+            error={!!errors.capacity}
           >
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <Input
@@ -798,11 +972,11 @@ export default function NewListingForm({
           </FormSection>
 
           <FormSection
-            id="section-ent-types"
-            icon={Music}
-            title="Typ programu"
-            surfaceColor="bg-listing-surface"
-            color="text-listing"
+            id={SECTION_ENT_TYPES.id}
+            icon={SECTION_ENT_TYPES.icon}
+            title={SECTION_ENT_TYPES.title}
+            surfaceColor={COLOR_SCHEME.surface}
+            color={COLOR_SCHEME.text}
           >
             <Controller
               control={control}
@@ -813,7 +987,7 @@ export default function NewListingForm({
                   items={MOCK_ENTERTAINMENT_TYPES}
                   value={field.value}
                   onChange={field.onChange}
-                  checkColor="text-listing"
+                  checkColor={COLOR_SCHEME.text}
                 />
               )}
             />
@@ -842,34 +1016,43 @@ export default function NewListingForm({
                           )
                         }
                         label={label}
-                        checkColor="text-listing"
+                        checkColor={COLOR_SCHEME.text}
                       />
                     )}
                   />
                 ))}
               </div>
             </div>
+          </FormSection>
+
+          <FormSection
+            id={SECTION_REQUIREMENTS.id}
+            icon={SECTION_REQUIREMENTS.icon}
+            title={SECTION_REQUIREMENTS.title}
+            surfaceColor={COLOR_SCHEME.surface}
+            color={COLOR_SCHEME.text}
+          >
             <Controller
               control={control}
               name="necessities"
               render={({ field }) => (
                 <CheckboxGroup
-                  label="Technické požadavky"
+                  label="Provozní požadavky"
                   items={MOCK_NECESSITIES}
                   value={field.value}
                   onChange={field.onChange}
-                  checkColor="text-listing"
+                  checkColor={COLOR_SCHEME.text}
                 />
               )}
             />
           </FormSection>
 
           <FormSection
-            id="section-logistics"
-            icon={Clock}
-            title="Logistika"
-            surfaceColor="bg-listing-surface"
-            color="text-listing"
+            id={SECTION_LOGISTICS.id}
+            icon={SECTION_LOGISTICS.icon}
+            title={SECTION_LOGISTICS.title}
+            surfaceColor={COLOR_SCHEME.surface}
+            color={COLOR_SCHEME.text}
           >
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <Input
@@ -907,7 +1090,7 @@ export default function NewListingForm({
         />
         <Button
           text="Vytvořit listing"
-          version="listingFull"
+          version={BUTTON_COLOR}
           htmlType="submit"
         />
       </div>

@@ -68,7 +68,7 @@ export interface Config {
   };
   blocks: {};
   collections: {
-    municipalities: Municipality;
+    districts: District;
     necessities: Necessity;
     'entertainment-types': EntertainmentType;
     'dietary-options': DietaryOption;
@@ -105,7 +105,7 @@ export interface Config {
   };
   collectionsJoins: {};
   collectionsSelect: {
-    municipalities: MunicipalitiesSelect<false> | MunicipalitiesSelect<true>;
+    districts: DistrictsSelect<false> | DistrictsSelect<true>;
     necessities: NecessitiesSelect<false> | NecessitiesSelect<true>;
     'entertainment-types': EntertainmentTypesSelect<false> | EntertainmentTypesSelect<true>;
     'dietary-options': DietaryOptionsSelect<false> | DietaryOptionsSelect<true>;
@@ -204,9 +204,9 @@ export interface AdminAuthOperations {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "municipalities".
+ * via the `definition` "districts".
  */
-export interface Municipality {
+export interface District {
   id: string;
   name: string;
   slug: string;
@@ -552,7 +552,6 @@ export interface Listing {
         location: {
           address: string;
           city: string | City;
-          postalCode?: string | null;
           latitude?: number | null;
           longitude?: number | null;
         };
@@ -623,14 +622,11 @@ export interface Listing {
         blockType: 'venue';
       }
     | {
-        location: {
-          address: string;
-          municipality: (string | Municipality)[];
-          region: (string | Region)[];
-          city: string | City;
-          postalCode?: string | null;
-          latitude?: number | null;
-          longitude?: number | null;
+        location?: {
+          address?: string | null;
+          region?: (string | Region)[] | null;
+          district?: (string | District)[] | null;
+          city?: (string | City)[] | null;
         };
         cuisines?: (string | Cuisine)[] | null;
         dishTypes?: (string | DishType)[] | null;
@@ -648,14 +644,11 @@ export interface Listing {
         blockType: 'gastro';
       }
     | {
-        location: {
-          address: string;
-          municipality: (string | Municipality)[];
-          region: (string | Region)[];
-          city: string | City;
-          postalCode?: string | null;
-          latitude?: number | null;
-          longitude?: number | null;
+        location?: {
+          address?: string | null;
+          region?: (string | Region)[] | null;
+          district?: (string | District)[] | null;
+          city?: (string | City)[] | null;
         };
         entertainmentTypes?: (string | EntertainmentType)[] | null;
         capacity: number;
@@ -686,7 +679,7 @@ export interface Company {
   ico: string;
   description?: string | null;
   email: string;
-  phone?: string | null;
+  phone: string;
   website?: string | null;
   owner: string | User;
   updatedAt: string;
@@ -1085,8 +1078,8 @@ export interface PayloadLockedDocument {
   id: string;
   document?:
     | ({
-        relationTo: 'municipalities';
-        value: string | Municipality;
+        relationTo: 'districts';
+        value: string | District;
       } | null)
     | ({
         relationTo: 'necessities';
@@ -1254,9 +1247,9 @@ export interface PayloadMigration {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "municipalities_select".
+ * via the `definition` "districts_select".
  */
-export interface MunicipalitiesSelect<T extends boolean = true> {
+export interface DistrictsSelect<T extends boolean = true> {
   name?: T;
   slug?: T;
   updatedAt?: T;
@@ -1638,7 +1631,6 @@ export interface ListingsSelect<T extends boolean = true> {
                 | {
                     address?: T;
                     city?: T;
-                    postalCode?: T;
                     latitude?: T;
                     longitude?: T;
                   };
@@ -1714,12 +1706,9 @@ export interface ListingsSelect<T extends boolean = true> {
                 | T
                 | {
                     address?: T;
-                    municipality?: T;
                     region?: T;
+                    district?: T;
                     city?: T;
-                    postalCode?: T;
-                    latitude?: T;
-                    longitude?: T;
                   };
               cuisines?: T;
               dishTypes?: T;
@@ -1742,12 +1731,9 @@ export interface ListingsSelect<T extends boolean = true> {
                 | T
                 | {
                     address?: T;
-                    municipality?: T;
                     region?: T;
+                    district?: T;
                     city?: T;
-                    postalCode?: T;
-                    latitude?: T;
-                    longitude?: T;
                   };
               entertainmentTypes?: T;
               capacity?: T;
