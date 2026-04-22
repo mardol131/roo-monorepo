@@ -1,6 +1,6 @@
 import {
   AlertCircle,
-  Briefcase,
+  Tag,
   Flame,
   Refrigerator,
   Tv,
@@ -35,7 +35,7 @@ const amenities: Item[] = [
   {
     id: "workspace",
     label: "Vyhrazený prostor pro práci",
-    icon: <Briefcase className="w-6 h-6" />,
+    icon: <Tag className="w-6 h-6" />,
   },
 
   {

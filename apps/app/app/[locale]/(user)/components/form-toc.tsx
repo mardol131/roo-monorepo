@@ -106,7 +106,7 @@ export default function FormToc({
             <button
               type="button"
               onClick={() => toggleGroup(idx)}
-              className={`flex items-center gap-2 w-full px-3  py-3 ${hasActive ? surfaceColor : ""} rounded-lg hover:bg-zinc-50 transition-colors`}
+              className={`flex items-center gap-2 w-full px-3  py-3 rounded-lg hover:bg-zinc-50 transition-colors`}
             >
               <span
                 className={`text-[12px] font-medium leading-tight tracking-wide flex-1 text-left transition-colors ${

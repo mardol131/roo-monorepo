@@ -4,7 +4,7 @@ import Button from "@/app/components/ui/atoms/button";
 import { useRouter } from "@/app/i18n/navigation";
 import { useCompany } from "@/app/react-query/companies/hooks";
 import { useListingsByCompany } from "@/app/react-query/listings/hooks";
-import { Briefcase, Building2 } from "lucide-react";
+import { Tag, Building2 } from "lucide-react";
 import { useEffect } from "react";
 import { useParams } from "next/navigation";
 import Breadcrumbs from "../../../components/breadcrumbs";
@@ -66,7 +66,7 @@ export default function page() {
         <SummaryCard
           label="Aktivní služby"
           value={String(listings?.length || 0)}
-          icon={Briefcase}
+          icon={Tag}
           iconBg="bg-listing-surface"
           iconColor="text-listing"
         />
@@ -92,7 +92,7 @@ export default function page() {
         <RowContainer
           icon={
             <div className="w-8 h-8 rounded-xl bg-listing-surface flex items-center justify-center shrink-0">
-              <Briefcase className="w-4 h-4 text-listing" />
+              <Tag className="w-4 h-4 text-listing" />
             </div>
           }
           label="Služby, které firma nabízí"
@@ -111,7 +111,7 @@ export default function page() {
           rowComponents={listings?.map((listing) => (
             <EntityRow
               key={listing.id}
-              icon="Briefcase"
+              icon="Tag"
               iconColor="text-listing"
               iconBackgroundColor="bg-listing-surface"
               label={listing.name}

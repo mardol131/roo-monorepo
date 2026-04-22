@@ -1172,8 +1172,9 @@ export const MOCK_VARIANTS: Variant[] = [
     listing: LISTINGS[0],
     name: "Základní balíček",
     shortDescription: "Ideální pro menší akce a rodinné oslavy.",
+    type: "allYear",
     availability: "selectedHours",
-    selectedHours: { from: "10:00", to: "18:00" },
+    selectedHours: [{ from: "10:00", to: "18:00" }],
     price: { generalPrice: 4900 },
     includes: [
       { item: "Hlavní sál", id: "inc-1" },
@@ -1209,8 +1210,9 @@ export const MOCK_VARIANTS: Variant[] = [
     listing: LISTINGS[0],
     name: "Prémiový balíček",
     shortDescription: "Kompletní zajištění pro středně velké firemní akce.",
+    type: "allYear",
     availability: "selectedHours",
-    selectedHours: { from: "08:00", to: "22:00" },
+    selectedHours: [{ from: "08:00", to: "22:00" }],
     price: { generalPrice: 9900 },
     includes: [
       { item: "Hlavní sál + VIP místnost", id: "inc-1" },
@@ -1248,6 +1250,7 @@ export const MOCK_VARIANTS: Variant[] = [
     listing: LISTINGS[0],
     name: "VIP balíček",
     shortDescription: "Celý komplex pro velké galavečery a svatby.",
+    type: "seasonal",
     availability: "allDay",
     price: {
       generalPrice: 19900,
@@ -1332,8 +1335,9 @@ export const MOCK_VARIANTS: Variant[] = [
     listing: LISTINGS[1],
     name: "Catering základní",
     shortDescription: "Studené i teplé předkrmy pro menší akce do 50 osob.",
+    type: "allYear",
     availability: "selectedHours",
-    selectedHours: { from: "12:00", to: "20:00" },
+    selectedHours: [{ from: "12:00", to: "20:00" }],
     price: { generalPrice: 2900 },
     includes: [
       { item: "Studené předkrmy", id: "inc-1" },
@@ -1371,8 +1375,9 @@ export const MOCK_VARIANTS: Variant[] = [
     listing: LISTINGS[2],
     name: "DJ set 4 hodiny",
     shortDescription: "Čtyřhodinový DJ set včetně základní zvukové techniky.",
+    type: "allYear",
     availability: "selectedHours",
-    selectedHours: { from: "20:00", to: "00:00" },
+    selectedHours: [{ from: "20:00", to: "00:00" }],
     price: { generalPrice: 7900 },
     includes: [
       { item: "DJ set 4h", id: "inc-1" },
@@ -1457,7 +1462,7 @@ export const MOCK_EVENTS: Event[] = [
     name: "Teambuilding Q2",
     status: "planning",
     eventType: MOCK_EVENT_TYPES[1],
-    icon: "Briefcase",
+    icon: "Tag",
     date: {
       start: "2025-06-20T09:00:00.000Z",
       end: "2025-06-21T17:00:00.000Z",
@@ -1557,6 +1562,7 @@ export function getInquiries(): Inquiry[] {
           name: "Firemní catering",
           shortDescription:
             "Kompletní catering pro firemní akce včetně obsluhy.",
+          type: "allYear",
           availability: "allDay",
           listing: "lst-2",
           price: { generalPrice: 42000 },
@@ -1626,6 +1632,7 @@ export function getInquiries(): Inquiry[] {
           name: "Foto + video balíček",
           shortDescription:
             "Profesionální fotograf a kameraman po celou dobu akce.",
+          type: "allYear",
           availability: "allDay",
           listing: "lst-3",
           price: { generalPrice: 12000 },
@@ -1692,6 +1699,7 @@ export function getInquiries(): Inquiry[] {
           id: "var-4",
           name: "Firemní dekorace",
           shortDescription: "Kompletní květinová výzdoba prostoru.",
+          type: "allYear",
           availability: "allDay",
           listing: "lst-4",
           price: { generalPrice: 6200 },
@@ -1760,8 +1768,9 @@ export function getInquiries(): Inquiry[] {
           name: "Magic show 60 min",
           shortDescription:
             "Interaktivní kouzelnická show pro hosty všech věků.",
+          type: "allYear",
           availability: "selectedHours",
-          selectedHours: { from: "00:00", to: "01:00" },
+          selectedHours: [{ from: "00:00", to: "01:00" }],
           listing: "lst-5",
           price: { generalPrice: 15000 },
           includes: [
@@ -1829,6 +1838,7 @@ export function getInquiries(): Inquiry[] {
           id: "var-6",
           name: "Ozvučení + světla",
           shortDescription: "Profesionální ozvučovací a světelná technika.",
+          type: "allYear",
           availability: "allDay",
           listing: "lst-6",
           price: { generalPrice: 9800 },

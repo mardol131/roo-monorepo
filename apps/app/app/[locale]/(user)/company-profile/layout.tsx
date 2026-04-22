@@ -2,7 +2,6 @@
 
 import { IntlPathname, usePathname } from "@/app/i18n/navigation";
 import {
-  Briefcase,
   Building2,
   Calendar,
   LandPlot,
@@ -13,6 +12,7 @@ import {
   MessageSquare,
   Plus,
   Settings,
+  Tag,
 } from "lucide-react";
 import React, { useCallback, useMemo } from "react";
 import Sidebar, { SidebarProps } from "../components/sidebar";
@@ -68,21 +68,30 @@ export default function layout({ children }: Props) {
         },
         icon: LayoutDashboard,
       },
+
+      {
+        label: "Detailní nastavení firmy",
+        href: {
+          pathname: "/company-profile/companies/[companyId]/edit",
+          params: { companyId },
+        },
+        icon: Settings,
+      },
       {
         label: "Služby",
         href: {
           pathname: "/company-profile/companies/[companyId]/listings",
           params: { companyId },
         },
-        icon: Briefcase,
+        icon: Tag,
       },
       {
-        label: "Nastavení",
+        label: "Nová služba",
         href: {
-          pathname: "/company-profile/companies/[companyId]/edit",
+          pathname: "/company-profile/companies/[companyId]/listings/new",
           params: { companyId },
         },
-        icon: Settings,
+        icon: Plus,
       },
     ];
 
@@ -106,6 +115,15 @@ export default function layout({ children }: Props) {
               params: { companyId, listingId },
             },
             icon: LayoutDashboard,
+          },
+          {
+            label: "Detailní nastavení služby",
+            href: {
+              pathname:
+                "/company-profile/companies/[companyId]/listings/[listingId]/edit",
+              params: { companyId, listingId },
+            },
+            icon: Settings,
           },
           {
             label: "Poptávky",
@@ -135,6 +153,10 @@ export default function layout({ children }: Props) {
             },
             icon: Calendar,
           },
+
+          ...(listing?.details[0]?.blockType === "venue"
+            ? [spaceMenuItem]
+            : []),
           {
             label: "Varianty",
             href: {
@@ -145,17 +167,14 @@ export default function layout({ children }: Props) {
             icon: Layers,
           },
           {
-            label: "Nastavení služby",
+            label: "Nová varianta",
             href: {
               pathname:
-                "/company-profile/companies/[companyId]/listings/[listingId]/edit",
+                "/company-profile/companies/[companyId]/listings/[listingId]/variants/new",
               params: { companyId, listingId },
             },
-            icon: Settings,
+            icon: Plus,
           },
-          ...(listing?.details[0]?.blockType === "venue"
-            ? [spaceMenuItem]
-            : []),
         ]
       : undefined;
 

@@ -1,5 +1,5 @@
 import Button from "@/app/components/ui/atoms/button";
-import { Briefcase, Building2 } from "lucide-react";
+import { Tag, Building2 } from "lucide-react";
 import PageHeading from "../../components/page-heading";
 import RowContainer from "../../components/row-container";
 import { SummaryCard } from "../../user-profile/components/summary-card";
@@ -29,14 +29,14 @@ export default function CompanyProfileDashboardPage() {
         <SummaryCard
           label="Celkem služeb"
           value={String(totalListings)}
-          icon={Briefcase}
+          icon={Tag}
           iconBg="bg-listing-surface"
           iconColor="text-listing"
         />
         <SummaryCard
           label="Celkem poptávek"
           value={String(56)}
-          icon={Briefcase}
+          icon={Tag}
           iconBg="bg-inquiry-surface"
           iconColor="text-inquiry"
           note={`${30} celkem`}

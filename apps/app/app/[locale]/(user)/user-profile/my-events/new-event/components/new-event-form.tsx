@@ -106,7 +106,7 @@ export default function NewEventForm() {
               iconsOptions={[
                 "Calendar",
                 "PartyPopper",
-                "Briefcase",
+                "Tag",
                 "Heart",
                 "GraduationCap",
                 "Music",

@@ -94,7 +94,7 @@ export function SubSidebar({
               <SectionLabel
                 label={subMenuLabel}
                 variant="listing"
-                icon="Briefcase"
+                icon="Tag"
                 iconBgColor="bg-listing-surface"
                 iconColor="text-listing"
               />

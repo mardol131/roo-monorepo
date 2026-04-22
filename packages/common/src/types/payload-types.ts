@@ -360,14 +360,17 @@ export interface Variant {
   id: string;
   listing: string | Listing;
   name: string;
-  shortDescription?: string | null;
+  shortDescription: string;
   description?: string | null;
-  type?: ('allYear' | 'seasonal') | null;
+  type: 'allYear' | 'seasonal';
   availability: 'allDay' | 'selectedHours';
-  selectedHours?: {
-    from?: string | null;
-    to?: string | null;
-  };
+  selectedHours?:
+    | {
+        from: string;
+        to: string;
+        id?: string | null;
+      }[]
+    | null;
   price: {
     generalPrice: number;
     seasonalPrices?:
@@ -1399,6 +1402,7 @@ export interface VariantsSelect<T extends boolean = true> {
     | {
         from?: T;
         to?: T;
+        id?: T;
       };
   price?:
     | T

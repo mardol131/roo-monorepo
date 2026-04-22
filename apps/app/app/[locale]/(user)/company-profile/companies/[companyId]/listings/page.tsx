@@ -32,7 +32,7 @@ export default function page() {
         {listings?.map((listing) => (
           <EntityCard
             key={listing.id}
-            icon="Briefcase"
+            icon="Tag"
             iconColor="text-listing"
             iconBackgroundColor="bg-listing-surface"
             label={listing.name}

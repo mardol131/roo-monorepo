@@ -18,11 +18,11 @@
   --color-listing-surface: var(--color-indigo-50);
   --color-listing: var(--color-indigo-600);
 
-  --color-variant-surface: var(--color-amber-100);
-  --color-variant: var(--color-amber-600);
+  --color-variant-surface: var(--color-purple-100);
+  --color-variant: var(--color-purple-600);
 
-  --color-inquiry-surface: var(--color-orange-100);
-  --color-inquiry: var(--color-orange-600);
+  --color-inquiry-surface: var(--color-pink-100);
+  --color-inquiry: var(--color-pink-600);
 
   --color-danger: var(--color-red-600);
   --color-danger-surface: var(--color-red-100);
@@ -30,8 +30,8 @@
   --color-warning: var(--color-amber-600);
   --color-warning-surface: var(--color-amber-50);
 
-  --color-space: var(--color-fuchsia-600);
-  --color-space-surface: var(--color-fuchsia-100);
+  --color-space: var(--color-blue-600);
+  --color-space-surface: var(--color-blue-100);
 
   --color-calendar: var(--color-blue-500);
   --color-calendar-surface: var(--color-blue-50);

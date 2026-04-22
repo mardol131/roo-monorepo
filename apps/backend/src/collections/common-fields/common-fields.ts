@@ -225,6 +225,7 @@ export const variantsCommonFields: Field[] = [
     name: 'shortDescription',
     type: 'text',
     maxLength: 50,
+    required: true,
   },
   {
     name: 'description',
@@ -235,6 +236,7 @@ export const variantsCommonFields: Field[] = [
     name: 'type',
     type: 'select',
     options: ['allYear', 'seasonal'],
+    required: true,
   },
   {
     name: 'availability',
@@ -244,19 +246,20 @@ export const variantsCommonFields: Field[] = [
   },
   {
     name: 'selectedHours',
-    type: 'group',
+    type: 'array',
     fields: [
       {
         name: 'from',
         type: 'text',
+        required: true,
       },
       {
         name: 'to',
         type: 'text',
+        required: true,
       },
     ],
   },
-
   priceField,
   {
     name: 'includes',
@@ -287,6 +290,7 @@ export const variantsCommonFields: Field[] = [
   {
     name: 'images',
     type: 'group',
+    required: true,
     fields: [
       {
         name: 'mainImage',
