@@ -101,7 +101,7 @@ export default function CatalogFilters({
       <div className="bg-white relative pb-10 rounded-xl border border-zinc-200 p-5 overflow-y-auto flex-1 shadow-sm">
         <div className="flex items-center gap-2 mb-6 pb-4 border-b border-zinc-100">
           <Sliders className="h-5 w-5 text-rose-500" />
-          <Text variant="heading5" className="text-zinc-900">
+          <Text variant="h4" className="text-zinc-900">
             Filtry
           </Text>
 

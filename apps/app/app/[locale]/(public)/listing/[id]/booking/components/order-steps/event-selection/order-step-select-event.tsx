@@ -78,8 +78,8 @@ export default function OrderStepSelectEvent({ existingEvents }: Props) {
         {eventVariant === "existing-event" && (
           <div className=" mt-12">
             <Text
-              variant="heading5"
-              color="dark"
+              variant="h4"
+              color="textDark"
               className="font-semibold mb-4"
             >
               Vaše události
@@ -174,13 +174,17 @@ function EventCard({
       </div>
 
       <div className="flex flex-col gap-1 min-w-0 flex-1">
-        <Text variant="label1" color="dark" className="font-semibold truncate">
+        <Text
+          variant="label-lg"
+          color="textDark"
+          className="font-semibold truncate"
+        >
           {event.name}
         </Text>
         <div className="flex items-center flex-wrap gap-x-3 gap-y-1">
           <span className="flex items-center gap-1">
             <Calendar className="w-3 h-3 text-zinc-400 shrink-0" />
-            <Text variant="label4" color="secondary">
+            <Text variant="caption" color="secondary">
               {format(new Date(event.date.start), "d. M. yyyy")} -{" "}
               {format(new Date(event.date.end), "d. M. yyyy")}
             </Text>
@@ -188,7 +192,7 @@ function EventCard({
           <span className="flex items-center gap-1">
             <MapPin className="w-3 h-3 text-zinc-400 shrink-0" />
             {event.location && (
-              <Text variant="label4" color="secondary">
+              <Text variant="caption" color="secondary">
                 {event.location.city &&
                   typeof event.location.city !== "string" &&
                   `${event.location.city.name}, `}
@@ -198,7 +202,7 @@ function EventCard({
           </span>
           <span className="flex items-center gap-1">
             <Users className="w-3 h-3 text-zinc-400 shrink-0" />
-            <Text variant="label4" color="secondary">
+            <Text variant="caption" color="secondary">
               Dosp.: {event.guests.adults}, Děti: {event.guests.children}, ZTP:{" "}
               {event.guests.ztp ? "ANO" : "NE"}, Mazlíčci:{" "}
               {event.guests.pets ? "ANO" : "NE"}

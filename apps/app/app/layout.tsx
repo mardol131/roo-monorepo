@@ -16,7 +16,7 @@ export default function RootLayout({
       <head>
         <link rel="manifest" href="/manifest.json" />
       </head>
-      <body className={`text-textDark`}>
+      <body className={`text-on-dark`}>
         <NextIntlClientProvider>
           <ReactQueryProvider>{children}</ReactQueryProvider>
         </NextIntlClientProvider>

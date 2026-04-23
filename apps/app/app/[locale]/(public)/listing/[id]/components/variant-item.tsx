@@ -86,7 +86,7 @@ export default function VariantItem({
           {/* Ideal for */}
           {variant.idealFor.length > 0 && (
             <div className="flex flex-col gap-3">
-              <Text variant="label1" color="dark" className="font-medium">
+              <Text variant="label-lg" color="textDark" className="font-medium">
                 Ideální pro
               </Text>
               <div className="grid grid-cols-[repeat(auto-fill,minmax(70px,1fr))] gap-2">
@@ -96,7 +96,7 @@ export default function VariantItem({
                     className="flex flex-col items-center gap-1 text-center"
                   >
                     <div className="flex items-center justify-center w-12 h-12 rounded-full bg-zinc-100 hover:bg-zinc-200 transition-colors"></div>
-                    <Text variant="label4" color="secondary">
+                    <Text variant="caption" color="secondary">
                       {category}
                     </Text>
                   </div>
@@ -109,10 +109,10 @@ export default function VariantItem({
           <div className="flex flex-col gap-10">
             {/* Header */}
             <div>
-              <Text variant="heading5" color="dark" className="mb-2">
+              <Text variant="h4" color="textDark" className="mb-2">
                 {variant.title}
               </Text>
-              <Text variant="body4" color="secondary">
+              <Text variant="body" color="secondary">
                 {variant.description}
               </Text>
             </div>
@@ -142,10 +142,10 @@ export default function VariantItem({
           <div>
             <div className="border border-zinc-300 rounded-2xl p-4 flex items-center justify-between gap-4">
               <div className="flex flex-col gap-0.5">
-                <Text variant="heading4" color="primary">
+                <Text variant="h3" color="primary">
                   {variant.price.toLocaleString("cs-CZ")} Kč
                 </Text>
-                <Text variant="label2" color="secondary">
+                <Text variant="label" color="secondary">
                   {variant.duration}
                 </Text>
               </div>

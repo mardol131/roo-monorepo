@@ -32,10 +32,10 @@ export default function RowContainer({
             {icon}
           </div>
           <div className="flex flex-col items-start">
-            <Text variant="label1" color="dark" className="font-semibold">
+            <Text variant="label-lg" color="textDark" className="font-semibold">
               {label}
             </Text>
-            <Text variant="label4" color="secondary">
+            <Text variant="caption" color="secondary">
               {subLabel}
             </Text>
           </div>
@@ -45,10 +45,10 @@ export default function RowContainer({
 
       {rowComponents.length === 0 ? (
         <div className="flex flex-col items-center justify-center text-center">
-          <Text variant="label1" color="secondary" className="mb-1">
+          <Text variant="label-lg" color="secondary" className="mb-1">
             {emptyHeading}
           </Text>
-          <Text variant="label4" color="secondary">
+          <Text variant="caption" color="secondary">
             {emptyText}
           </Text>
         </div>

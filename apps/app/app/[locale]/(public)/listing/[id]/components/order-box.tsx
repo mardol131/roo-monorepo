@@ -18,7 +18,7 @@ export default function OrderBox() {
   return (
     <div className="shadow-lg rounded-lg p-6 sticky top-30">
       <Text
-        variant="label4"
+        variant="caption"
         as="p"
         color="secondary"
         className="mt-4 bg-zinc-100 p-2 rounded-md text-center"
@@ -32,15 +32,15 @@ export default function OrderBox() {
         version="primary"
         className="w-full mt-4"
       />
-      <Text variant="body5" color="secondary" className="mt-4 text-center">
+      <Text variant="body-sm" color="secondary" className="mt-4 text-center">
         Zatím nebude nic účtováno
       </Text>
       <div className="border relative overflow-hidden border-zinc-300 rounded-lg min-h-10 flex items-center justify-between">
         <div className="flex flex-col p-4 w-full">
-          <Text variant="label1" color="secondary">
+          <Text variant="label-lg" color="secondary">
             Prémiový partner ROO
           </Text>
-          <Text variant="label4" color="secondary">
+          <Text variant="caption" color="secondary">
             Co to znamená?
           </Text>
         </div>

@@ -26,7 +26,7 @@ export default function VariantsSection({
 
   return (
     <section className="flex flex-col gap-6">
-      <Text variant="heading5" color="dark">
+      <Text variant="h4" color="textDark">
         {title}
       </Text>
 

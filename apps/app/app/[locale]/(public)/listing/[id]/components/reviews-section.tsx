@@ -29,7 +29,7 @@ export default function ReviewsSection({
 
   return (
     <section className="flex flex-col gap-6">
-      <Text variant="heading5" color="dark">
+      <Text variant="h4" color="textDark">
         Recenze ({reviews.length})
       </Text>
 
@@ -51,7 +51,7 @@ export default function ReviewsSection({
               </div>
               <div className="flex-1 flex flex-col justify-center items-start">
                 <div className="flex flex-col gap-1">
-                  <Text variant="label1" color="dark">
+                  <Text variant="label-lg" color="textDark">
                     {review.author}
                   </Text>
                 </div>
@@ -67,7 +67,7 @@ export default function ReviewsSection({
                 </div>
               </div>
             </div>
-            <Text variant="body5" color="dark" className="leading-relaxed">
+            <Text variant="body-sm" color="textDark" className="leading-relaxed">
               {review.text}
             </Text>
           </div>

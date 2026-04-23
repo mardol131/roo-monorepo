@@ -54,7 +54,7 @@ export default function CatalogTypeSelection({}: Props) {
       {/* Header with type selector */}
       <div className="relative">
         <div className="flex items-center gap-3">
-          <Text variant="heading1" color="dark" className="text-4xl">
+          <Text variant="h1" color="textDark" className="text-4xl">
             Hledám
           </Text>
           <div className="relative">
@@ -62,7 +62,7 @@ export default function CatalogTypeSelection({}: Props) {
               onClick={() => setIsDropdownOpen(!isDropdownOpen)}
               className="flex items-center gap-2 border-b-2 border-rose-500 hover:opacity-80 transition-opacity"
             >
-              <Text variant="heading1" color="primary" className="text-4xl">
+              <Text variant="h1" color="primary" className="text-4xl">
                 {currentLabel}
               </Text>
               <ChevronDown

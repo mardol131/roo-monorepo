@@ -9,6 +9,8 @@ export const collectionColors = {
   variantSurface: "variantSurface",
   inquiry: "inquiry",
   inquirySurface: "inquirySurface",
+  space: "space",
+  spaceSurface: "spaceSurface",
 };
 
 export const colors = {
@@ -19,6 +21,15 @@ export const colors = {
   onSecondary: "onSecondary",
   textDark: "textDark",
   textLight: "textLight",
+  calendar: "calendar",
+  calendarSurface: "calendarSurface",
+  white: "white",
+  danger: "danger",
+  dangerSurface: "dangerSurface",
+  warning: "warning",
+  warningSurface: "warningSurface",
+  success: "success",
+  successSurface: "successSurface",
   ...collectionColors,
 };
 

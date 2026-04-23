@@ -112,7 +112,7 @@ function HollowSpaceCard({
       className="w-full rounded-2xl border border-dashed border-zinc-300 bg-white hover:border-zinc-400 hover:bg-zinc-50 transition-all px-6 py-5 flex items-center justify-center gap-2 text-zinc-400 hover:text-zinc-500"
     >
       <Plus className="w-4 h-4" />
-      <Text variant="label2" as="span">
+      <Text variant="label" as="span">
         {label}
       </Text>
     </Link>
@@ -275,10 +275,10 @@ export default function SpacesPage() {
       {/* Typ prostorů */}
       <div className="mt-8 mb-6 p-6 bg-white rounded-2xl border border-zinc-200">
         <div className="mb-4">
-          <Text variant="label1" color="dark" className="font-semibold">
+          <Text variant="label-lg" color="textDark" className="font-semibold">
             Typ prostorů
           </Text>
-          <Text variant="label2" color="light" as="p" className="mt-0.5">
+          <Text variant="label" color="textLight" as="p" className="mt-0.5">
             Určuje základní strukturu prostorů vaší služby. Budovy mohou
             obsahovat místnosti, areály pak budovy.
           </Text>
@@ -309,14 +309,14 @@ export default function SpacesPage() {
                   </div>
                   <div>
                     <Text
-                      variant="label1"
+                      variant="label-lg"
                       className={`font-semibold ${isSelected ? "text-space" : isPending ? "text-warning" : ""}`}
                     >
                       {label}
                     </Text>
                     <Text
-                      variant="label2"
-                      color="light"
+                      variant="label"
+                      color="textLight"
                       as="p"
                       className="mt-0.5 leading-snug"
                     >
@@ -334,12 +334,12 @@ export default function SpacesPage() {
             <div className="flex items-start gap-2.5">
               <AlertTriangle className="w-4 h-4 text-warning mt-0.5 shrink-0" />
               <div>
-                <Text variant="label1" className="font-semibold text-warning">
+                <Text variant="label-lg" className="font-semibold text-warning">
                   Změna typu prostorů
                 </Text>
                 <Text
-                  variant="label2"
-                  color="light"
+                  variant="label"
+                  color="textLight"
                   as="p"
                   className="mt-0.5 text-warning"
                 >

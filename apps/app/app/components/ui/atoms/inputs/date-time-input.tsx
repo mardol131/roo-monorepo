@@ -183,7 +183,7 @@ export default function DateTimeInput({
   return (
     <div className="flex flex-col gap-2 w-full">
       <label>
-        <Text variant="label2" color="dark" className="font-semibold">
+        <Text variant="label" color="textDark" className="font-semibold">
           {label}
         </Text>
       </label>

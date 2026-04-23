@@ -49,10 +49,10 @@ export default function ListingCard({
       </div>
       <div className="flex items-center justify-between mt-2">
         <div className="p-3 flex flex-col gap-1">
-          <Text variant="label1" className="">
+          <Text variant="label-lg" className="">
             {title}
           </Text>
-          <Text variant="body5" color="light" className="font-semibold">
+          <Text variant="body-sm" color="textLight" className="font-semibold">
             Cena začíná od <span className="text-primary">{price} Kč</span>
           </Text>
         </div>

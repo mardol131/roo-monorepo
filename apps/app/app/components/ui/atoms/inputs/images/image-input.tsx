@@ -135,7 +135,7 @@ export default function ImageInput({
           } focus:border-transparent focus:outline-none focus:ring-2 focus:ring-zinc-900`}
         >
           <ImagePlus size={28} className="text-zinc-400" />
-          <Text variant="label3" color="light" className="text-center">
+          <Text variant="label" color="textLight" className="text-center">
             Přetáhněte obrázek nebo klikněte pro nahrání
           </Text>
         </div>

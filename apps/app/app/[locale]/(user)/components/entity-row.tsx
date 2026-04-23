@@ -44,7 +44,11 @@ export default function EntityRow({
 
       <div className="flex-1 flex flex-col min-w-0">
         <div className="flex gap-3">
-          <Text variant="label1" color="dark" className="font-medium truncate">
+          <Text
+            variant="label-lg"
+            color="textDark"
+            className="font-medium truncate"
+          >
             {label}
           </Text>
           {labelComponent}

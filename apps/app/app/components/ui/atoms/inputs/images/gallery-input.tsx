@@ -270,7 +270,11 @@ export default function GalleryInput({
               } focus:border-transparent focus:outline-none focus:ring-2 focus:ring-zinc-900`}
             >
               <ImagePlus size={24} className="text-zinc-400" />
-              <Text variant="label4" color="light" className="text-center px-1">
+              <Text
+                variant="caption"
+                color="textLight"
+                className="text-center px-1"
+              >
                 Nahrát
               </Text>
             </div>

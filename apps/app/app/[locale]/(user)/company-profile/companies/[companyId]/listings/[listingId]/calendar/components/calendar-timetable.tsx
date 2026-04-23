@@ -133,13 +133,13 @@ export default function CalendarTimetable() {
   return (
     <>
       <div className="mt-6 flex flex-col gap-3">
-        <Text variant="heading5" color="dark">
+        <Text variant="h4" color="textDark">
           Nadcházející události
         </Text>
 
         {groups.length === 0 ? (
           <div className="bg-white rounded-2xl border border-zinc-300 px-6 py-10 text-center">
-            <Text variant="label1" color="muted">
+            <Text variant="label-lg" color="textLight">
               Žádné nadcházející události
             </Text>
           </div>
@@ -152,10 +152,10 @@ export default function CalendarTimetable() {
               >
                 {/* Day header */}
                 <div className="flex items-center justify-between py-3 px-5 border-b border-zinc-300 bg-zinc-50">
-                  <Text variant="label1" color="dark">
+                  <Text variant="label-lg" color="textDark">
                     {formatDayHeading(day)}
                   </Text>
-                  <Text variant="label4" color="muted" as="span">
+                  <Text variant="caption" color="textLight" as="span">
                     {dayEvents.length === 1
                       ? "1 událost"
                       : `${dayEvents.length} události`}
@@ -218,7 +218,7 @@ function EventRow({ event, onEditClick }: EventRowProps) {
     <div className="flex items-center gap-4 px-5 py-3">
       {/* Time */}
       <div className="w-28 shrink-0">
-        <Text variant="label2" color="muted" as="span">
+        <Text variant="label" color="textLight" as="span">
           {formatTimeRange(event)}
         </Text>
       </div>
@@ -244,8 +244,8 @@ function EventRow({ event, onEditClick }: EventRowProps) {
       {/* Name */}
       <div className="flex-1 min-w-0">
         <Text
-          variant="label1"
-          color="dark"
+          variant="label-lg"
+          color="textDark"
           as="span"
           className={`truncate block ${event.status === "cancelled" ? "line-through opacity-50" : ""}`}
         >

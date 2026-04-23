@@ -13,10 +13,10 @@ export default function CancelButton() {
         <div className="flex items-start gap-3">
           <AlertTriangle className="w-5 h-5 text-red-500 shrink-0 mt-0.5" />
           <div>
-            <Text variant="label1" color="dark" className="font-semibold">
+            <Text variant="label-lg" color="textDark" className="font-semibold">
               Zrušit poptávku?
             </Text>
-            <Text variant="label4" color="secondary" className="mt-0.5">
+            <Text variant="caption" color="secondary" className="mt-0.5">
               Tato akce je nevratná. Dodavatel bude informován.
             </Text>
           </div>

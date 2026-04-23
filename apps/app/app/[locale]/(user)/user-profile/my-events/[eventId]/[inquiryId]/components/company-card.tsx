@@ -13,17 +13,17 @@ export default function CompanyCard({ company }: Props) {
       <SectionHeader icon={Building2} title="Informace o dodavateli" />
       <div className="p-5 flex flex-col gap-4">
         <div className="flex flex-col">
-          <Text variant="label1" color="dark" className="font-semibold">
+          <Text variant="label-lg" color="textDark" className="font-semibold">
             {company.name}
           </Text>
           {company.description && (
-            <Text variant="label3" color="secondary" className="mt-1">
+            <Text variant="label" color="secondary" className="mt-1">
               {company.description}
             </Text>
           )}
         </div>
         <div className="flex items-center gap-1.5">
-          <Text variant="label1" color="dark" className="font-semibold">
+          <Text variant="label-lg" color="textDark" className="font-semibold">
             IČO: {company.ico}
           </Text>
         </div>

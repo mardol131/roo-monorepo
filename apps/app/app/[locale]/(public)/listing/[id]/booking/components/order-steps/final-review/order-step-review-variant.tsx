@@ -77,7 +77,7 @@ export default function OrderStepReviewVariant() {
 
         {eventData?.name && (
           <div className="bg-zinc-50 border border-zinc-200 rounded-2xl p-5 flex flex-col gap-4">
-            <Text variant="label1" color="dark" className="font-semibold">
+            <Text variant="label-lg" color="textDark" className="font-semibold">
               Informace o eventu
             </Text>
             <div className="grid grid-cols-2 gap-3">
@@ -148,7 +148,7 @@ export default function OrderStepReviewVariant() {
           className="flex flex-col w-full gap-5"
         >
           <div className="flex flex-col gap-4 border border-zinc-200 rounded-2xl p-5">
-            <Text variant="label1" color="dark" className="font-semibold">
+            <Text variant="label-lg" color="textDark" className="font-semibold">
               Souhlas s podmínkami
             </Text>
             <div className="flex flex-col gap-3">
@@ -206,7 +206,7 @@ export default function OrderStepReviewVariant() {
           {/* What happens next */}
           <div className="rounded-2xl border border-zinc-200 overflow-hidden">
             <div className="px-5 py-4 border-b border-zinc-200">
-              <Text variant="heading5" color="dark">
+              <Text variant="h4" color="textDark">
                 Co se stane po odeslání?
               </Text>
             </div>
@@ -228,7 +228,7 @@ export default function OrderStepReviewVariant() {
               />
             </div>
             <div className="px-5 py-4 bg-zinc-50 border-t border-zinc-200 flex items-center justify-between gap-6">
-              <Text variant="label4" color="secondary">
+              <Text variant="caption" color="secondary">
                 Odesláním poptávky nevzniká závazek — dodavatel vás nejprve
                 kontaktuje s nabídkou.
               </Text>
@@ -261,10 +261,10 @@ function NextStep({
         <Icon className="w-4 h-4 text-zinc-500" />
       </div>
       <div className="flex flex-col gap-0.5">
-        <Text variant="label1" color="dark" className="font-semibold">
+        <Text variant="label-lg" color="textDark" className="font-semibold">
           {title}
         </Text>
-        <Text variant="label3" color="secondary">
+        <Text variant="label" color="secondary">
           {description}
         </Text>
       </div>
@@ -286,10 +286,10 @@ function EventInfoRow({
     <div className="flex items-start gap-2">
       <div className="mt-0.5 shrink-0">{icon}</div>
       <div className="flex flex-col">
-        <Text variant="label4" color="secondary">
+        <Text variant="caption" color="secondary">
           {label}
         </Text>
-        <Text variant="label2" color="dark" className="font-medium">
+        <Text variant="label" color="textDark" className="font-medium">
           {value}
         </Text>
       </div>

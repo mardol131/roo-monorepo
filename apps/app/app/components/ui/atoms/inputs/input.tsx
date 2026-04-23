@@ -24,7 +24,7 @@ export default function Input({
     <div className={`w-full ${disabled ? "opacity-50" : ""}`}>
       <InputLabel label={label} isRequired={isRequired} />
       {subLabel && (
-        <Text variant="label3" color="light">
+        <Text variant="label" color="textLight">
           {subLabel}
         </Text>
       )}

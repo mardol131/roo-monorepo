@@ -95,7 +95,7 @@ export default function ChatWindow({
             <Send className="w-4 h-4" />
           </button>
         </div>
-        <Text variant="label4" color="secondary" className="mt-1.5 px-1">
+        <Text variant="caption" color="secondary" className="mt-1.5 px-1">
           Enter pro odeslání · Shift+Enter pro nový řádek
         </Text>
       </div>
@@ -118,7 +118,7 @@ function ChatBubble({ message }: { message: ChatMessageProps }) {
       >
         {message.content}
       </div>
-      <Text variant="label4" color="secondary" className="px-1">
+      <Text variant="caption" color="secondary" className="px-1">
         {format(message.sentAt, "d. M. yyyy, H:mm")}
       </Text>
     </div>

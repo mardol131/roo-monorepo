@@ -1,13 +1,13 @@
 @theme {
   --color-primary: var(--color-rose-500);
   --color-primary-surface: var(--color-rose-50);
-  --color-onPrimary: var(--color-zinc-400);
+  --color-on-primary: var(--color-zinc-400);
 
   --color-secondary: var(--color-zinc-900);
-  --color-onSecondary: var(--color-white);
+  --color-on-secondary: var(--color-white);
 
-  --color-textDark: var(--color-zinc-800);
-  --color-textLight: var(--color-zinc-400);
+  --color-text-dark: var(--color-zinc-800);
+  --color-text-light: var(--color-zinc-400);
 
   --color-company: var(--color-primary);
   --color-company-surface: var(--color-primary-surface);
@@ -29,6 +29,9 @@
 
   --color-warning: var(--color-amber-600);
   --color-warning-surface: var(--color-amber-50);
+
+  --color-success: var(--color-green-600);
+  --color-success-surface: var(--color-green-100);
 
   --color-space: var(--color-blue-600);
   --color-space-surface: var(--color-blue-100);

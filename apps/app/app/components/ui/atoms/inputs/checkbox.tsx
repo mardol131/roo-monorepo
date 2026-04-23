@@ -36,7 +36,7 @@ function Checkbox({
 
   return (
     <div>
-      <label className="flex items-center gap-3 w-full rounded-md hover:bg-white transition-all duration-200 cursor-pointer">
+      <label className="flex items-start gap-3 w-full rounded-md hover:bg-white transition-all duration-200 cursor-pointer">
         <input
           id={id}
           type="checkbox"
@@ -55,10 +55,10 @@ function Checkbox({
             />
           )}
         </div>
-        <div className="flex gap-1">
+        <div className="flex gap-1 -mt-0.5">
           <Text
-            variant={size === "sm" ? "label3" : "body5"}
-            color={checked ? "dark" : "secondary"}
+            variant={size === "sm" ? "label" : "body-sm"}
+            color="textDark"
             className="transition-colors duration-200"
           >
             {label}

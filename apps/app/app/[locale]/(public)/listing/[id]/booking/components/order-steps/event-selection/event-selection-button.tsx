@@ -38,10 +38,10 @@ export default function EventSelectionButton({
         />
       </div>
       <div className="flex flex-col gap-1">
-        <Text variant="heading5" color="dark" className="font-semibold">
+        <Text variant="h4" color="textDark" className="font-semibold">
           {heading}
         </Text>
-        <Text variant="label3" color="secondary">
+        <Text variant="label" color="secondary">
           {text}
         </Text>
       </div>

@@ -24,7 +24,7 @@ import RowContainer from "../../../components/row-container";
 import { SummaryCard } from "../../components/summary-card";
 import { format } from "date-fns";
 import { cs } from "date-fns/locale";
-import DashboardHeader from "../../../company-profile/components/dashboard-header";
+import DashboardHeader from "../../../components/dashboard-header";
 import EntityRow from "../../../components/entity-row";
 import { getTranslations } from "next-intl/server";
 import { getInquiries, MOCK_EVENT } from "../../../../../_mock/mock";

@@ -91,7 +91,7 @@ function FilterLabel({
   return (
     <div className="flex items-center gap-4">
       <Icon className="w-10 h-10 text-rose-500" />
-      <Text variant="heading4" color="dark">
+      <Text variant="h3" color="textDark">
         {text}
       </Text>
     </div>

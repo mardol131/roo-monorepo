@@ -81,10 +81,10 @@ export default function InquiryList({ inquiries }: { inquiries: Inquiry[] }) {
 
       {filtered.length === 0 ? (
         <div className="bg-white rounded-2xl border border-zinc-200 flex flex-col items-center justify-center py-12 px-8 text-center">
-          <Text variant="label1" color="secondary" className="mb-1">
+          <Text variant="label-lg" color="secondary" className="mb-1">
             Žádné poptávky
           </Text>
-          <Text variant="label4" color="secondary">
+          <Text variant="caption" color="secondary">
             V této kategorii nemáte žádné poptávky.
           </Text>
         </div>

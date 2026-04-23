@@ -40,7 +40,7 @@ export default function ModalLayout({
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-zinc-200">
           {typeof header === "string" ? (
-            <Text variant="heading5" color="dark">
+            <Text variant="h4" color="textDark">
               {header}
             </Text>
           ) : (

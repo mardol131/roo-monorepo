@@ -9,10 +9,10 @@ export default function StepHeading({ title, description }: Props) {
   return (
     <div className="flex items-center justify-between">
       <div className="pb-6">
-        <Text variant="heading4" color="primary" className="font-bold">
+        <Text variant="h3" color="primary" className="font-bold">
           {title}
         </Text>
-        <Text variant="body3" color="secondary" className="mt-1">
+        <Text variant="body-lg" color="secondary" className="mt-1">
           {description}
         </Text>
       </div>

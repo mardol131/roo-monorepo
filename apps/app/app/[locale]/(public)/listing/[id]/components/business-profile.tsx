@@ -15,7 +15,7 @@ export default function BusinessProfile({
 }: BusinessProfileProps) {
   return (
     <div className="flex flex-col gap-6 rounded-lg">
-      <Text variant="heading5" color="dark">
+      <Text variant="h4" color="textDark">
         O pronajímateli
       </Text>
       <div className="flex items-center gap-4">
@@ -29,10 +29,10 @@ export default function BusinessProfile({
           />
         </div>
         <div className="flex flex-col gap-1">
-          <Text variant="label1" as="p" color="dark">
+          <Text variant="label-lg" as="p" color="textDark">
             {name}
           </Text>
-          <Text variant="label2" color="secondary">
+          <Text variant="label" color="secondary">
             {listingsCount} inzerátů
           </Text>
         </div>

@@ -108,14 +108,14 @@ export default function OrderVariantSummaryCard({ variant, index }: Props) {
       <div className="flex flex-col gap-3 p-4">
         <div>
           <Text
-            variant="label1"
-            color="dark"
+            variant="label-lg"
+            color="textDark"
             className="font-semibold truncate"
           >
             {variant.title}
           </Text>
           <Text
-            variant="label4"
+            variant="caption"
             color="secondary"
             className="mt-0.5 line-clamp-2"
           >
@@ -125,10 +125,10 @@ export default function OrderVariantSummaryCard({ variant, index }: Props) {
 
         {/* Price */}
         <div className="flex items-baseline gap-1.5">
-          <Text variant="heading5" color="primary" className="font-bold">
+          <Text variant="h4" color="primary" className="font-bold">
             {variant.price.toLocaleString("cs-CZ")} Kč
           </Text>
-          <Text variant="label4" color="secondary">
+          <Text variant="caption" color="secondary">
             {variant.duration}
           </Text>
         </div>

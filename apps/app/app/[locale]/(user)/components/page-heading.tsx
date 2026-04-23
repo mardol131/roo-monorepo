@@ -14,10 +14,10 @@ export default function PageHeading({ heading, description, button }: Props) {
       <Breadcrumbs />
       <div className="flex items-start gap-10 justify-between mb-8">
         <div className="max-w-user-profile-content">
-          <Text variant="heading4" color="dark" className="font-bold">
+          <Text variant="h3" color="textDark" className="font-bold">
             {heading}
           </Text>
-          <Text variant="label1" color="secondary" className="mt-3">
+          <Text variant="label-lg" color="secondary" className="mt-3">
             {description}
           </Text>
         </div>

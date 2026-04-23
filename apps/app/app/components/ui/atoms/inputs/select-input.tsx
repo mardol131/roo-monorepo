@@ -57,7 +57,7 @@ const SelectInput = React.forwardRef<HTMLSelectElement, Props>(
     return (
       <div ref={containerRef} className="relative">
         <label htmlFor={id} className="block mb-1.5">
-          <Text variant="label2" color="dark" className="font-semibold">
+          <Text variant="label" color="textDark" className="font-semibold">
             {label}
           </Text>
         </label>
@@ -112,8 +112,8 @@ const SelectInput = React.forwardRef<HTMLSelectElement, Props>(
                       }`}
                     >
                       <Text
-                        variant="label2"
-                        color={value === item.value ? "dark" : "secondary"}
+                        variant="label"
+                        color={value === item.value ? "textDark" : "secondary"}
                         className={value === item.value ? "font-semibold" : ""}
                       >
                         {item.label}
@@ -124,7 +124,7 @@ const SelectInput = React.forwardRef<HTMLSelectElement, Props>(
               </ul>
             ) : (
               <div className="px-3 py-2.5">
-                <Text variant="label2" color="secondary">
+                <Text variant="label" color="secondary">
                   Žádné položky
                 </Text>
               </div>
@@ -133,7 +133,7 @@ const SelectInput = React.forwardRef<HTMLSelectElement, Props>(
         )}
         {error && (
           <Text
-            variant="label4"
+            variant="caption"
             color="secondary"
             className="text-red-500 mt-1"
           >

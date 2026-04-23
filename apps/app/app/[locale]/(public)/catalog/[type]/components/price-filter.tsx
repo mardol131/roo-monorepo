@@ -60,7 +60,7 @@ export default function PriceFilter({
 
   return (
     <div className="flex flex-col gap-4">
-      <Text variant="label1" className="mb-3 block text-zinc-900 font-semibold">
+      <Text variant="label-lg" className="mb-3 block text-zinc-900 font-semibold">
         Cena
       </Text>
 

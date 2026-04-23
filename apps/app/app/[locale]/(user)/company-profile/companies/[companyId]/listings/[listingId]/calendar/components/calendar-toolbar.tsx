@@ -44,7 +44,12 @@ export default function CalendarToolbar({
         >
           <ChevronRight className="w-4 h-4" />
         </button>
-        <Text variant="label1" color="dark" as="span" className="ml-2 min-w-56">
+        <Text
+          variant="label-lg"
+          color="textDark"
+          as="span"
+          className="ml-2 min-w-56"
+        >
           {label}
         </Text>
         {!isCurrentWeek && (
@@ -76,7 +81,7 @@ function LegendItem({ color, label }: { color: string; label: string }) {
   return (
     <div className="flex items-center gap-1.5">
       <div className={`w-3 h-3 rounded-sm shrink-0 ${color}`} />
-      <Text variant="label4" color="muted" as="span">
+      <Text variant="caption" color="textLight" as="span">
         {label}
       </Text>
     </div>

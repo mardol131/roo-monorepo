@@ -57,10 +57,10 @@ export default function BubbleMasonrySection({}: Props) {
   return (
     <div className="w-full py-16">
       <div className="mb-12">
-        <Text variant="heading3" className="mb-3">
+        <Text variant="h2" className="mb-3">
           Kategorie zážitků
         </Text>
-        <Text variant="body1" className="text-zinc-600">
+        <Text variant="body-lg" className="text-zinc-600">
           Procházej akce podle svých zájmů
         </Text>
       </div>
@@ -117,7 +117,7 @@ function MasonryContent({ title, link }: { title: string; link: IntlLink }) {
     <>
       <div className="inset-0 bg-black/40 hover:bg-black/20 transition-all ease-in-out flex flex-col items-start justify-end w-full h-full gap-6 p-6">
         <Text
-          variant="heading3"
+          variant="h2"
           className="text-white text-center drop-shadow-lg"
         >
           {title}

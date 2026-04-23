@@ -22,7 +22,7 @@ export default function FAQItem({ question, answer }: FAQItemProps) {
         className="flex items-center justify-between py-4 cursor-pointer"
         onClick={toggleOpen}
       >
-        <Text variant="subheading2" className="font-semibold">
+        <Text variant="h3" className="font-semibold">
           {question}
         </Text>
         <ChevronDown
@@ -34,7 +34,7 @@ export default function FAQItem({ question, answer }: FAQItemProps) {
       </div>
 
       {isOpen && (
-        <Text variant="body5" color="dark" className="leading-relaxed">
+        <Text variant="body-sm" color="textDark" className="leading-relaxed">
           {answer}
         </Text>
       )}

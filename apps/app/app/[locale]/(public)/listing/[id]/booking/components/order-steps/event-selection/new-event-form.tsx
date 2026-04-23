@@ -233,7 +233,7 @@ function FormSection({
         <div className="flex items-center gap-1.5 text-primary">
           <Icon className="w-5 h-5" />
         </div>
-        <Text variant="heading5" color="dark">
+        <Text variant="h4" color="textDark">
           {title}
         </Text>
       </div>
@@ -249,7 +249,7 @@ function Divider() {
 function FieldError({ message }: { message?: string }) {
   if (!message) return null;
   return (
-    <Text variant="label4" color="secondary" className="text-red-500 mt-0.5">
+    <Text variant="caption" color="secondary" className="text-red-500 mt-0.5">
       {message}
     </Text>
   );

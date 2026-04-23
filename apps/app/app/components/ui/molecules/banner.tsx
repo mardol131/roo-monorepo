@@ -30,13 +30,13 @@ export default function Banner({
         <div className="p-6 sm:p-8 md:p-12 lg:p-16 flex flex-col items-start justify-center gap-6 order-2 md:order-1">
           <div className="flex flex-col gap-3 sm:gap-4">
             <Text
-              variant="heading3"
+              variant="h2"
               className="text-zinc-900 text-2xl sm:text-3xl lg:text-4xl"
             >
               {title}
             </Text>
             <Text
-              variant="subheading0"
+              variant="h2"
               className="text-zinc-600 text-base sm:text-lg"
             >
               {text}

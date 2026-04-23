@@ -21,7 +21,12 @@ type ButtonVersion =
   | "inquiry"
   | "inquiryFull"
   | "none"
-  | "white";
+  | "white"
+  | "dangerFull"
+  | "danger"
+  | "successFull"
+  | "success";
+
 type ButtonSize = "2xl" | "xl" | "lg" | "md" | "sm";
 type ButtonRounding = "none" | "sm" | "md" | "lg" | "xl" | "2xl" | "full";
 
@@ -85,6 +90,10 @@ const getVersionClass = (
     link: "bg-transparent text-rose-500 underline hover:opacity-80 active:opacity-60 transition-opacity p-0",
     white: "bg-white text-dark shadow hover:shadow-md",
     none: ownColor || "",
+    danger: "bg-transparent text-danger hover:bg-danger-surface",
+    dangerFull: "bg-danger text-white shadow hover:shadow-md",
+    successFull: "bg-success text-white shadow hover:shadow-md",
+    success: "bg-transparent text-success hover:bg-success-surface",
   };
   return versionClasses[version];
 };

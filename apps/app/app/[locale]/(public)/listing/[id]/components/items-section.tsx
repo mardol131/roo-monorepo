@@ -36,7 +36,7 @@ export default function ItemsSection({
 
   return (
     <section className="flex flex-col gap-6">
-      <Text variant="heading5" color="dark">
+      <Text variant="h4" color="textDark">
         {title}
       </Text>
 
@@ -44,7 +44,7 @@ export default function ItemsSection({
         {displayedItems.map((item) => (
           <div key={item.id} className="flex items-center gap-3">
             <div className="flex-shrink-0 text-primary mt-1">{item.icon}</div>
-            <Text variant="label1" color="dark">
+            <Text variant="label-lg" color="textDark">
               {item.label}
             </Text>
           </div>

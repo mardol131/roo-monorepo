@@ -13,7 +13,7 @@ interface FAQSectionProps {
 export default function FAQSection({ faqs }: FAQSectionProps) {
   return (
     <section className="flex flex-col gap-6">
-      <Text variant="heading5">Často kladené otázky</Text>
+      <Text variant="h4">Často kladené otázky</Text>
 
       <div className="flex flex-col gap-2">
         {faqs.map((faq, i) => (

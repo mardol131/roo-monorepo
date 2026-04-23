@@ -51,7 +51,7 @@ export default function HeroImageSection({}: Props) {
           iconRight="Image"
         />
       </div>
-      <Text variant="heading3" as="h1" className="mt-5">
+      <Text variant="h2" as="h1" className="mt-5">
         Tady je název inzerátu
       </Text>
     </div>

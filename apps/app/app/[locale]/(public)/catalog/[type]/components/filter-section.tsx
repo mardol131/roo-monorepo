@@ -31,7 +31,7 @@ export default function FilterSection({
 
   return (
     <div className=" ">
-      <Text variant="label1" className="mb-3 block text-zinc-900 font-semibold">
+      <Text variant="label-lg" className="mb-3 block text-zinc-900 font-semibold">
         {title}
       </Text>
 

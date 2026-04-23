@@ -41,14 +41,14 @@ export default function HeroSection({}: HeroSectionProps) {
   return (
     <div className="w-full h-full flex items-center justify-center bg-linear-0 from-white to-white/75 py-50 px-4 -mt-20">
       <div className="max-w-content w-full text-center">
-        <Text variant="title2" as="h1" className="mb-6">
+        <Text variant="display-2xl" as="h1" className="mb-6">
           Naplánujte celý event
         </Text>
-        <Text variant="title2" color="primary" className="mb-8">
+        <Text variant="display-2xl" color="primary" className="mb-8">
           Vše z jednoho místa
         </Text>
         <div className="max-w-200 mx-auto">
-          <Text variant="subheading0" color="dark">
+          <Text variant="h2" color="textDark">
             S námi dokážete naplánovat celý event během pár minut. Od výběru
             místa, přes catering až po zábavu. Zajišťujeme komunikaci s
             dodavateli a koordinaci jejich služeb, abyste nemuseli řešit detaily

@@ -6,7 +6,7 @@ import ChatWindow from "./components/chat-window";
 import CompanyCard from "./components/company-card";
 import InquirySettings from "./components/inquiry-settings";
 import InquiryTimeline from "./components/inquiry-timeline";
-import DashboardHeader from "@/app/[locale]/(user)/company-profile/components/dashboard-header";
+import DashboardHeader from "@/app/[locale]/(user)/components/dashboard-header";
 import EventDashboardVariantSection from "./components/event-dashboard-variant-section";
 import { aggregateInquiryStatus } from "@roo/common";
 import { getTranslations } from "next-intl/server";

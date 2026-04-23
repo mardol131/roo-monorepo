@@ -37,7 +37,7 @@ export default function DashboardHeader({
         </div>
         <div>
           <div className="flex items-center gap-3">
-            <Text variant="heading4" color="dark" className="font-bold">
+            <Text variant="h3" color="textDark" className="font-bold">
               {name}
             </Text>
             {nameSideComponent}

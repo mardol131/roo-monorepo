@@ -142,7 +142,7 @@ export default function GuestsInput({
   return (
     <div className="flex flex-col gap-2">
       <label className="block">
-        <Text variant="label2" color="dark" className="font-semibold">
+        <Text variant="label" color="textDark" className="font-semibold">
           {label}
         </Text>
       </label>
@@ -169,7 +169,7 @@ export default function GuestsInput({
       )}
 
       {error && (
-        <Text variant="label4" color="secondary" className="text-red-500 mt-1">
+        <Text variant="caption" color="secondary" className="text-red-500 mt-1">
           {error}
         </Text>
       )}

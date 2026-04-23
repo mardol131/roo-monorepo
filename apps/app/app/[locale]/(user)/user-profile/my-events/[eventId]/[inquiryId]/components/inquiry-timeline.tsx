@@ -52,7 +52,7 @@ export default function InquiryTimeline({
                   )}
                 </div>
                 <Text
-                  variant="label4"
+                  variant="caption"
                   color="secondary"
                   className={!step.done ? "text-red-500 font-semibold" : ""}
                 >
@@ -96,8 +96,8 @@ export default function InquiryTimeline({
                 )}
               </div>
               <Text
-                variant="label4"
-                color={active ? "dark" : "secondary"}
+                variant="caption"
+                color={active ? "textDark" : "secondary"}
                 className={active ? "font-semibold" : ""}
               >
                 {step.label}

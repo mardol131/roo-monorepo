@@ -12,7 +12,7 @@ import EntityRow from "../../../components/entity-row";
 import RowContainer from "../../../components/row-container";
 import ListingStatusTag from "../../../components/tags/listing-status-tag";
 import { SummaryCard } from "../../../user-profile/components/summary-card";
-import DashboardHeader from "../../components/dashboard-header";
+import DashboardHeader from "../../../components/dashboard-header";
 
 export default function page() {
   const { companyId } = useParams<{ companyId: string }>();

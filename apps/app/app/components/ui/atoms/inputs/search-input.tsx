@@ -118,7 +118,7 @@ const SearchInput = forwardRef<HTMLInputElement, SearchInputProps>(
       >
         {isLoading ? (
           <div className="p-4 text-center">
-            <Text variant="label3" color="secondary">
+            <Text variant="label" color="secondary">
               Hledání...
             </Text>
           </div>
@@ -137,13 +137,13 @@ const SearchInput = forwardRef<HTMLInputElement, SearchInputProps>(
           </div>
         ) : searchQuery.trim() ? (
           <div className="p-4 text-center">
-            <Text variant="label3" color="secondary">
+            <Text variant="label" color="secondary">
               Žádné výsledky
             </Text>
           </div>
         ) : (
           <div className="p-4 text-center">
-            <Text variant="label3" color="secondary">
+            <Text variant="label" color="secondary">
               Začněte psát pro vyhledávání
             </Text>
           </div>

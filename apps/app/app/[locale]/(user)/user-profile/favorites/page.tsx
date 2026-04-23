@@ -7,10 +7,10 @@ export default function page({}: Props) {
   return (
     <main className="flex-1">
       <div className="mb-8">
-        <Text variant="heading4" color="dark" className="font-bold">
+        <Text variant="h3" color="textDark" className="font-bold">
           Oblíení dodavatelé
         </Text>
-        <Text variant="label2" color="secondary" className="mt-1">
+        <Text variant="label" color="secondary" className="mt-1">
           Přehled vašich oblíbených dodavatelů.
         </Text>
       </div>

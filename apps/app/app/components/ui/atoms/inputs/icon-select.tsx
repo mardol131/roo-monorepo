@@ -28,8 +28,8 @@ export default function IconSelect({
   return (
     <div>
       <Text
-        variant="label2"
-        color="dark"
+        variant="label"
+        color="textDark"
         className="font-semibold mb-1.5 block"
       >
         {label}

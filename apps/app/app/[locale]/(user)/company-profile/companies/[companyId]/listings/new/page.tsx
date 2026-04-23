@@ -1,14 +1,12 @@
 "use client";
 
 import PageHeading from "@/app/[locale]/(user)/components/page-heading";
-import { useRouter } from "next/navigation";
-import NewListingForm, { FORM_GROUPS } from "./components/new-listing-form";
-import FormToc from "@/app/[locale]/(user)/components/form-toc";
-import { useState } from "react";
 import Button from "@/app/components/ui/atoms/button";
-import IconCard from "./components/icon-card";
 import { LucideIcons } from "@roo/common";
-import { ListingType } from "./components/new-listing-form";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import IconCard from "./components/icon-card";
+import NewListingForm, { ListingType } from "./components/new-listing-form";
 
 const LISTING_TYPES: {
   type: ListingType;
@@ -77,20 +75,11 @@ export default function NewListingPage() {
         text="Zpět na výběr typu služby"
         size="sm"
       />
-
-      <div className="flex gap-6">
-        <div className="flex-1 min-w-0">
-          <NewListingForm
-            type={selectedType}
-            onSubmit={(data) => console.log("submit", data)}
-            onCancel={() => router.back()}
-          />
-        </div>
-
-        <div className="w-52 shrink-0 hidden lg:block">
-          <FormToc groups={FORM_GROUPS[selectedType]} />
-        </div>
-      </div>
+      <NewListingForm
+        type={selectedType}
+        onSubmit={(data) => console.log("submit", data)}
+        onCancel={() => router.back()}
+      />
     </main>
   );
 }

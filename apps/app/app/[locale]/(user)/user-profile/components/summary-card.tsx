@@ -1,8 +1,6 @@
 import Text from "@/app/components/ui/atoms/text";
 import React from "react";
 
-type Props = {};
-
 export function SummaryCard({
   label,
   value,
@@ -20,25 +18,21 @@ export function SummaryCard({
 }) {
   const Icon = icon;
   return (
-    <div className="bg-white rounded-2xl border border-zinc-200 p-4 flex flex-col gap-3">
+    <div className="bg-white rounded-2xl border border-zinc-200 p-5 flex flex-col gap-4">
       <div
-        className={`w-9 h-9 rounded-xl flex items-center justify-center ${iconBg}`}
+        className={`w-10 h-10 rounded-xl flex items-center justify-center ${iconBg}`}
       >
-        <Icon className={`w-4 h-4 ${iconColor}`} />
+        <Icon className={`w-5 h-5 ${iconColor}`} />
       </div>
-      <div className="flex flex-col">
-        <Text variant="heading4" color="dark" className="font-bold">
+      <div className="flex flex-col gap-0.5">
+        <Text variant="h2" color="textDark">
           {value}
         </Text>
-        <Text variant="label4" color="secondary">
+        <Text variant="label" color="secondary">
           {label}
         </Text>
         {note && (
-          <Text
-            variant="label4"
-            color="secondary"
-            className="text-zinc-400 italic"
-          >
+          <Text variant="caption" color="textLight" className="mt-1">
             {note}
           </Text>
         )}

@@ -11,7 +11,13 @@ type Props = {
   selected?: boolean;
 };
 
-export default function IconCard({ label, description, icon, onClick, selected }: Props) {
+export default function IconCard({
+  label,
+  description,
+  icon,
+  onClick,
+  selected,
+}: Props) {
   const Icon = lucideIcons[icon] as unknown as React.FC<
     React.SVGProps<SVGSVGElement>
   >;
@@ -25,12 +31,16 @@ export default function IconCard({ label, description, icon, onClick, selected }
           : "border-zinc-200 bg-white hover:border-listing hover:bg-listing-surface"
       }`}
     >
-      <div className={`p-3 rounded-xl transition-colors ${selected ? "bg-listing/10" : "bg-zinc-100 group-hover:bg-listing/10"}`}>
-        <Icon className={`w-6 h-6 transition-colors ${selected ? "text-listing" : "text-zinc-500 group-hover:text-listing"}`} />
+      <div
+        className={`p-3 rounded-xl transition-colors ${selected ? "bg-listing/10" : "bg-zinc-100 group-hover:bg-listing/10"}`}
+      >
+        <Icon
+          className={`w-6 h-6 transition-colors ${selected ? "text-listing" : "text-zinc-500 group-hover:text-listing"}`}
+        />
       </div>
       <div className="flex flex-col gap-2">
-        <Text variant="subheading2">{label}</Text>
-        <Text variant="label2" color="light">
+        <Text variant="h3">{label}</Text>
+        <Text variant="label" color="textLight">
           {description}
         </Text>
       </div>

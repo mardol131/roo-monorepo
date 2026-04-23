@@ -85,10 +85,10 @@ export default function CardsSection({}: Props) {
       <div className="mb-8 flex items-center justify-between">
         <div className="flex gap-5 items-center">
           <div>
-            <Text variant="heading4" color="dark">
+            <Text variant="h3" color="textDark">
               Objevujte zážitky v Praze
             </Text>
-            <Text variant="body4" color="light">
+            <Text variant="body" color="textLight">
               Jedinečné akce a zážitky vybrané speciálně pro vás
             </Text>
           </div>

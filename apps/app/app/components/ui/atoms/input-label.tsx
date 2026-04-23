@@ -9,7 +9,7 @@ type Props = {
 export default function InputLabel({ label, isRequired }: Props) {
   return (
     <label className="mb-1.5 flex gap-1">
-      <Text variant="label2" color="dark" className="font-semibold">
+      <Text variant="label" color="textDark" className="font-semibold">
         {label}
       </Text>
       {isRequired && <span className="text-red-500 -mb-4">*</span>}

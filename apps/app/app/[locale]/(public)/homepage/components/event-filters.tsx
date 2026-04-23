@@ -59,10 +59,10 @@ export default function EventFilters({
       className={`bg-white border border-zinc-200 rounded-2xl shadow-xl p-8 w-fullmx-auto ${className}`.trim()}
     >
       <div className="text-center mb-8">
-        <Text variant="heading3" className="mb-2">
+        <Text variant="h2" className="mb-2">
           Najděte perfektní event
         </Text>
-        <Text variant="body2" color="secondary">
+        <Text variant="body-lg" color="secondary">
           Použijte filtry pro rychlé vyhledání eventů podle vašich potřeb
         </Text>
       </div>
@@ -72,7 +72,7 @@ export default function EventFilters({
         <div className="relative">
           <div className="flex items-center gap-2 mb-2">
             <Search className="h-4 w-4 text-zinc-500" />
-            <Text variant="label1" color="secondary">
+            <Text variant="label-lg" color="secondary">
               Typ eventu
             </Text>
           </div>
@@ -93,7 +93,7 @@ export default function EventFilters({
         <div className="relative">
           <div className="flex items-center gap-2 mb-2">
             <MapPin className="h-4 w-4 text-zinc-500" />
-            <Text variant="label1" color="secondary">
+            <Text variant="label-lg" color="secondary">
               Místo konání
             </Text>
           </div>
@@ -110,7 +110,7 @@ export default function EventFilters({
         <div className="relative">
           <div className="flex items-center gap-2 mb-2">
             <Calendar className="h-4 w-4 text-zinc-500" />
-            <Text variant="label1" color="secondary">
+            <Text variant="label-lg" color="secondary">
               Kdy se koná
             </Text>
           </div>
@@ -126,7 +126,7 @@ export default function EventFilters({
         <div className="relative">
           <div className="flex items-center gap-2 mb-2">
             <Users className="h-4 w-4 text-zinc-500" />
-            <Text variant="label1" color="secondary">
+            <Text variant="label-lg" color="secondary">
               Počet hostů
             </Text>
           </div>

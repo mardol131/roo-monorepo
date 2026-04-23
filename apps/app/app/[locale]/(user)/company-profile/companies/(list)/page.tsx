@@ -39,7 +39,7 @@ export default function page() {
               <EntityComponentTag
                 text={`IČO: ${company.ico}`}
                 bgColor="bg-zinc-100"
-                textColor="text-textDark"
+                textColor="text-on-dark"
               />
             }
           />

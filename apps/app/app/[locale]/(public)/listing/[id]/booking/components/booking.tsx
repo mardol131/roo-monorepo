@@ -16,7 +16,7 @@ export default function Booking({}: Props) {
       <div className="w-full max-w-listing-page">
         {/* Page Header */}
         <div className="mb-8">
-          <Text variant="heading1" color="dark" className="font-bold mb-2">
+          <Text variant="h1" color="textDark" className="font-bold mb-2">
             Poptávka dodavatele
           </Text>
         </div>

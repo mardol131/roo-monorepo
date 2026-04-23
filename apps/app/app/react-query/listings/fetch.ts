@@ -25,3 +25,8 @@ export async function updateListing(id: string, data: Partial<Listing>) {
   if (!res.ok) throw new Error("Failed to update listing");
   return res.json();
 }
+
+export async function deleteListing(id: string) {
+  const res = await fetch(`/api/listings/${id}`, { method: "DELETE" });
+  if (!res.ok) throw new Error("Failed to delete listing");
+}

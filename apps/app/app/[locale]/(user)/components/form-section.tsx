@@ -32,12 +32,12 @@ export function FormSection({
           <Icon className={`w-4 h-4 ${color}`} />
         </div>
         <div className="flex flex-col">
-          <Text variant="label1" color="dark" className="font-semibold">
+          <Text variant="label-lg" color="textDark" className="font-semibold">
             {title}
           </Text>
 
           {subtitle && (
-            <Text variant="label2" color="dark" className="font-medium">
+            <Text variant="label" color="textDark" className="font-medium">
               {subtitle}
             </Text>
           )}

@@ -51,8 +51,8 @@ export default function EntityCard({
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-3 mb-1.5">
           <Text
-            variant="label1"
-            color="dark"
+            variant="label-lg"
+            color="textDark"
             className="font-semibold truncate"
           >
             {label}

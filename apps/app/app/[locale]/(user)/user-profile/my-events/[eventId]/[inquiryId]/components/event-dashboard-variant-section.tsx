@@ -13,11 +13,11 @@ export default function EventDashboardVariantSection({ variant }: Props) {
       <SectionHeader icon={Check} title="Nabídka dodavatele" />
       <div className="p-5 flex flex-col gap-4">
         <div>
-          <Text variant="label1" color="dark" className="font-semibold">
+          <Text variant="label-lg" color="textDark" className="font-semibold">
             {variant.name}
           </Text>
           <Text
-            variant="label4"
+            variant="caption"
             color="secondary"
             className="mt-1 leading-relaxed"
           >
@@ -26,7 +26,7 @@ export default function EventDashboardVariantSection({ variant }: Props) {
         </div>
 
         <div className="flex items-baseline gap-1.5">
-          <Text variant="heading5" color="dark" className="font-bold">
+          <Text variant="h4" color="textDark" className="font-bold">
             {variant.price.generalPrice.toLocaleString("cs-CZ")} Kč
           </Text>
         </div>
@@ -35,7 +35,7 @@ export default function EventDashboardVariantSection({ variant }: Props) {
           {variant.includes && variant.includes.length > 0 && (
             <div className="flex flex-col gap-1.5">
               <Text
-                variant="label4"
+                variant="caption"
                 color="secondary"
                 className="font-medium uppercase tracking-wide"
               >
@@ -58,7 +58,7 @@ export default function EventDashboardVariantSection({ variant }: Props) {
           {variant.excludes && variant.excludes.length > 0 && (
             <div className="flex flex-col gap-1.5">
               <Text
-                variant="label4"
+                variant="caption"
                 color="secondary"
                 className="font-medium uppercase tracking-wide"
               >
