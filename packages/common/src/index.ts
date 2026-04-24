@@ -7,3 +7,4 @@ export * from "./functions/get-id-from-relationship-field";
 export * from "./functions/convert-image-to-webp";
 export * from "./functions/upload-file-to-cloud";
 export * from "./functions/slugify";
+export * from "./functions/wait";

@@ -1,5 +1,6 @@
 import { IntlLink, Link } from "@/app/i18n/navigation";
 import * as lucideIcons from "lucide-react";
+import { FaSpinner } from "react-icons/fa";
 
 type ButtonVersion =
   | "primary"
@@ -58,6 +59,7 @@ export interface ButtonProps {
   disabled?: boolean;
   htmlType?: HTMLButtonElement["type"];
   ownColor?: string;
+  loading?: boolean;
 }
 
 const getVersionClass = (
@@ -133,6 +135,7 @@ export default function Button({
   disabled,
   htmlType = "button",
   ownColor,
+  loading = false,
 }: ButtonProps) {
   const baseClasses = `${!disabled ? "cursor-pointer" : ""} inline-flex items-center ${getRoundingClass(rounding)} justify-center font-medium transition-all ease-in-out ${disabled ? "opacity-50" : "hover:scale-105"} gap-2`;
   const versionClass = getVersionClass(version, disabled, ownColor);
@@ -150,9 +153,15 @@ export default function Button({
 
   const buttonContent = (
     <>
-      {LeftIcon && <LeftIcon className={iconSize} />}
-      {text}
-      {RightIcon && <RightIcon className={iconSize} />}
+      {loading ? (
+        <lucideIcons.LoaderCircle className={`${iconSize} animate-spin`} />
+      ) : (
+        <>
+          {LeftIcon && <LeftIcon className={iconSize} />}
+          {text}
+          {RightIcon && <RightIcon className={iconSize} />}
+        </>
+      )}
     </>
   );
 

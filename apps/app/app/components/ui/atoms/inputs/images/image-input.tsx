@@ -28,7 +28,10 @@ export default function ImageInput({
   accept = "image/*",
 }: ImageInputProps) {
   const [isUploading, setIsUploading] = useState(false);
-  const [preview, setPreview] = useState<string | null>(value ?? null);
+  const [preview, setPreview] = useState<string | null>(() => {
+    if (!value) return null;
+    try { new URL(value); return value; } catch { return null; }
+  });
   const [uploadError, setUploadError] = useState<string | null>(null);
 
   const handleFile = useCallback(

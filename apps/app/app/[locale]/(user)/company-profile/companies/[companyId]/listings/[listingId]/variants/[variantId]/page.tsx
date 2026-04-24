@@ -1,19 +1,20 @@
 "use client";
 
-import DashboardHeader from "@/app/[locale]/(user)/components/dashboard-header";
 import Breadcrumbs from "@/app/[locale]/(user)/components/breadcrumbs";
+import DashboardHeader from "@/app/[locale]/(user)/components/dashboard-header";
+import { DashboardSection } from "@/app/[locale]/(user)/components/dashboard-section";
+import InfoSection from "@/app/[locale]/(user)/components/info-section";
+import { ItemListCard } from "@/app/[locale]/(user)/components/item-list-card";
+import Loader from "@/app/[locale]/(user)/components/loader";
 import Text from "@/app/components/ui/atoms/text";
 import { useRouter } from "@/app/i18n/navigation";
 import { useVariant } from "@/app/react-query/variants/hooks";
 import { Variant } from "@roo/common";
 import { Banknote, Check, Package, X } from "lucide-react";
 import { useParams } from "next/navigation";
-import { GastroDetails } from "./components/gastro-details";
-import Loader from "@/app/[locale]/(user)/components/loader";
-import { DashboardSection } from "@/app/[locale]/(user)/components/dashboard-section";
-import { ItemListCard } from "@/app/[locale]/(user)/components/item-list-card";
-import { VenueDetails } from "./components/venue-details";
 import { EntertainmentDetails } from "./components/entertainment-details";
+import { GastroDetails } from "./components/gastro-details";
+import { VenueDetails } from "./components/venue-details";
 
 const TYPE_LABELS: Record<Variant["type"], string> = {
   allYear: "Celoroční",
@@ -89,7 +90,6 @@ export default function Page() {
       />
 
       <div className="flex flex-col gap-4">
-        {/* Description */}
         {(variant.shortDescription || variant.description) && (
           <DashboardSection
             title="Popis varianty"
@@ -97,14 +97,10 @@ export default function Page() {
             iconBg="bg-variant-surface"
             iconColor="text-variant"
           >
-            <Text variant="body-sm" color="textDark">
-              {variant.shortDescription}
-            </Text>
-            {variant.description && (
-              <Text variant="body" color="textDark" className="mt-2">
-                {variant.description}
-              </Text>
-            )}
+            <InfoSection items={[
+              ...(variant.shortDescription ? [{ type: "text" as const, label: "Krátký popis", value: variant.shortDescription }] : []),
+              ...(variant.description ? [{ type: "text" as const, label: "Popis", value: variant.description }] : []),
+            ]} />
           </DashboardSection>
         )}
         {/* Includes / Excludes */}

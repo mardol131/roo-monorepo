@@ -2,9 +2,18 @@
 
 import { FormSection } from "@/app/[locale]/(user)/components/form-section";
 import FormToc, { TocGroup } from "@/app/[locale]/(user)/components/form-toc";
-import { MOCK_EVENT_TYPES } from "@/app/_mock/mock";
-import Button, { ButtonProps } from "@/app/components/ui/atoms/button";
+import {
+  MOCK_CUISINES,
+  MOCK_DIETARY_OPTIONS,
+  MOCK_DISH_TYPES,
+  MOCK_EVENT_TYPES,
+  MOCK_FOOD_SERVICE_STYLES,
+  MOCK_NECESSITIES,
+  MOCK_PERSONNEL,
+} from "@/app/_mock/mock";
+import Button from "@/app/components/ui/atoms/button";
 import InputLabel from "@/app/components/ui/atoms/input-label";
+import Checkbox from "@/app/components/ui/atoms/inputs/checkbox";
 import CheckboxGroup from "@/app/components/ui/atoms/inputs/checkbox-group";
 import ErrorText from "@/app/components/ui/atoms/inputs/error-text";
 import GalleryInput from "@/app/components/ui/atoms/inputs/images/gallery-input";
@@ -12,77 +21,65 @@ import ImageInput from "@/app/components/ui/atoms/inputs/images/image-input";
 import Input from "@/app/components/ui/atoms/inputs/input";
 import RepeaterField from "@/app/components/ui/atoms/inputs/repeater-field";
 import { Textarea } from "@/app/components/ui/atoms/inputs/textarea";
-import { useListing } from "@/app/react-query/listings/hooks";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { uploadFileToCloud } from "@roo/common";
 import {
   Banknote,
-  Building2,
   Calendar,
   CalendarRange,
+  ChefHat,
   Clock,
   Image,
   ListChecks,
+  Package,
   Tag,
+  UserCheck,
   Users,
 } from "lucide-react";
-import { useParams } from "next/navigation";
 import type { Resolver } from "react-hook-form";
 import { Controller, useFieldArray, useForm } from "react-hook-form";
 import { z } from "zod";
 
-// ── TOC sections ───────────────────────────────────────────────────────────────
+// ── Color scheme ───────────────────────────────────────────────────────────────
 
-const SECTION_BASIC = {
-  id: "section-basic",
-  title: "Základní informace",
-  icon: Building2,
-};
-const SECTION_PRICE = { id: "section-price", title: "Cena", icon: Banknote };
-const SECTION_IMAGES = { id: "section-images", title: "Obrázky", icon: Image };
-const SECTION_EVENT_TYPES = {
-  id: "section-event-types",
-  title: "Typy akcí",
-  icon: Tag,
-};
-const SECTION_AVAILABILITY = {
-  id: "section-availability",
-  title: "Dostupnost",
-  icon: Calendar,
-};
-const SECTION_CAPACITY = {
-  id: "section-capacity",
-  title: "Kapacita",
-  icon: Users,
-};
-const SECTION_INCLUDES = {
-  id: "section-includes",
-  title: "Zahrnuto / Nezahrnuto",
-  icon: ListChecks,
+const COLOR = { text: "text-variant", surface: "bg-variant-surface" };
+
+// ── TOC ────────────────────────────────────────────────────────────────────────
+
+const S = {
+  basic: { id: "section-basic", title: "Základní informace", icon: Package },
+  price: { id: "section-price", title: "Cena", icon: Banknote },
+  images: { id: "section-images", title: "Obrázky", icon: Image },
+  eventTypes: { id: "section-event-types", title: "Typy akcí", icon: Tag },
+  availability: {
+    id: "section-availability",
+    title: "Dostupnost",
+    icon: Calendar,
+  },
+  capacity: {
+    id: "section-capacity",
+    title: "Kapacita a objednávky",
+    icon: Users,
+  },
+  cuisine: { id: "section-cuisine", title: "Kuchyně a styl", icon: ChefHat },
+  extras: { id: "section-extras", title: "Doplňky", icon: Package },
+  personnel: {
+    id: "section-personnel",
+    title: "Personál a požadavky",
+    icon: UserCheck,
+  },
+  includes: {
+    id: "section-includes",
+    title: "Zahrnuto / Nezahrnuto",
+    icon: ListChecks,
+  },
 };
 
-export const VARIANT_FORM_GROUPS: readonly TocGroup[] = [
-  {
-    label: "Základní",
-    sections: [
-      SECTION_BASIC,
-      SECTION_PRICE,
-      SECTION_IMAGES,
-      SECTION_EVENT_TYPES,
-    ],
-  },
-  {
-    label: "Konfigurace",
-    sections: [SECTION_AVAILABILITY, SECTION_CAPACITY, SECTION_INCLUDES],
-  },
+const FORM_GROUPS: readonly TocGroup[] = [
+  { label: "Základní", sections: [S.basic, S.price, S.images, S.eventTypes] },
+  { label: "Konfigurace", sections: [S.availability, S.capacity, S.includes] },
+  { label: "Nabídka", sections: [S.cuisine, S.extras, S.personnel] },
 ];
-
-const COLOR_SCHEME = {
-  text: "text-variant",
-  surface: "bg-variant-surface",
-};
-
-const BUTTON_COLOR: ButtonProps["version"] = "variantFull";
 
 // ── Schema ─────────────────────────────────────────────────────────────────────
 
@@ -95,7 +92,13 @@ const optionalPositiveInt = z.preprocess(
     .optional(),
 );
 
+const optionalPositiveNumber = z.preprocess(
+  (val) => (val === "" || val === undefined || val === null ? undefined : val),
+  z.coerce.number().positive("Musí být kladné číslo").optional(),
+);
+
 const schema = z.object({
+  // ── Variant top-level ──
   name: z.string().min(1, "Název je povinný"),
   shortDescription: z
     .string()
@@ -134,6 +137,9 @@ const schema = z.object({
     gallery: z.array(z.string()).default([]),
   }),
   eventTypes: z.array(z.string()).default([]),
+  includes: z.array(z.object({ item: z.string() })).default([]),
+  excludes: z.array(z.object({ item: z.string() })).default([]),
+  // ── Gastro detail ──
   capacity: z.object({
     max: z.coerce
       .number({ message: "Zadejte číslo" })
@@ -141,16 +147,24 @@ const schema = z.object({
       .int("Zadejte celé číslo"),
     min: optionalPositiveInt,
   }),
-  includes: z.array(z.object({ item: z.string() })).default([]),
-  excludes: z.array(z.object({ item: z.string() })).default([]),
+  pricePerPerson: optionalPositiveNumber,
+  minimumOrderCount: optionalPositiveInt,
+  cuisines: z.array(z.string()).default([]),
+  dishTypes: z.array(z.string()).default([]),
+  dietaryOptions: z.array(z.string()).default([]),
+  foodServiceStyle: z.array(z.string()).default([]),
+  kidsMenu: z.boolean().default(false),
+  alcoholIncluded: z.boolean().default(false),
+  personnel: z.array(z.string()).default([]),
+  necessities: z.array(z.string()).default([]),
 });
 
-export type VariantFormInputs = z.infer<typeof schema>;
+export type GastroFormInputs = z.infer<typeof schema>;
 
 // ── Resolver ───────────────────────────────────────────────────────────────────
 
 type ResolverResult = {
-  values: Partial<VariantFormInputs>;
+  values: Partial<GastroFormInputs>;
   errors: Record<string, unknown>;
 };
 type ResolverFn = (
@@ -161,11 +175,9 @@ type ResolverFn = (
 
 function makeResolver(): ResolverFn {
   const zResolver = zodResolver(schema) as unknown as ResolverFn;
-
   return async (values, ctx, opts) => {
     const result = await zResolver(values, ctx, opts);
-    const v = values as VariantFormInputs;
-
+    const v = values as GastroFormInputs;
     if (v.availability === "selectedHours" && !v.selectedHours?.length) {
       result.errors = {
         ...result.errors,
@@ -174,7 +186,6 @@ function makeResolver(): ResolverFn {
         },
       };
     }
-
     return result;
   };
 }
@@ -182,25 +193,26 @@ function makeResolver(): ResolverFn {
 // ── Props ──────────────────────────────────────────────────────────────────────
 
 type Props = {
-  onSubmit: (data: VariantFormInputs) => void;
+  onSubmit: (data: GastroFormInputs) => void;
   onCancel: () => void;
+  defaultValues?: Partial<GastroFormInputs>;
 };
 
 // ── Component ──────────────────────────────────────────────────────────────────
 
-export default function NewVariantForm({ onSubmit, onCancel }: Props) {
-  const { listingId } = useParams<{ listingId: string }>();
-  const { data: listing } = useListing(listingId);
-  const listingType = listing?.details[0].blockType;
-
+export default function EditVariantFormGastro({
+  onSubmit,
+  onCancel,
+  defaultValues,
+}: Props) {
   const {
     control,
     register,
     handleSubmit,
     watch,
     formState: { errors },
-  } = useForm<VariantFormInputs>({
-    resolver: makeResolver() as unknown as Resolver<VariantFormInputs>,
+  } = useForm<GastroFormInputs>({
+    resolver: makeResolver() as unknown as Resolver<GastroFormInputs>,
     defaultValues: {
       type: "allYear",
       availability: "allDay",
@@ -209,6 +221,15 @@ export default function NewVariantForm({ onSubmit, onCancel }: Props) {
       eventTypes: [],
       includes: [],
       excludes: [],
+      cuisines: [],
+      dishTypes: [],
+      dietaryOptions: [],
+      foodServiceStyle: [],
+      personnel: [],
+      necessities: [],
+      kidsMenu: false,
+      alcoholIncluded: false,
+      ...defaultValues,
     },
   });
 
@@ -219,19 +240,16 @@ export default function NewVariantForm({ onSubmit, onCancel }: Props) {
     append: appendSeasonalPrice,
     remove: removeSeasonalPrice,
   } = useFieldArray({ control, name: "price.seasonalPrices" });
-
   const {
     fields: selectedHoursFields,
     append: appendSelectedHour,
     remove: removeSelectedHour,
   } = useFieldArray({ control, name: "selectedHours" });
-
   const {
     fields: includesFields,
     append: appendInclude,
     remove: removeInclude,
   } = useFieldArray({ control, name: "includes" });
-
   const {
     fields: excludesFields,
     append: appendExclude,
@@ -241,59 +259,52 @@ export default function NewVariantForm({ onSubmit, onCancel }: Props) {
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="flex gap-6">
       <div className="flex w-full flex-col gap-4">
-        {/* ── 1. Základní informace ──────────────────────────────────────────── */}
+        {/* Základní informace */}
         <FormSection
-          id={SECTION_BASIC.id}
-          icon={SECTION_BASIC.icon}
-          title={SECTION_BASIC.title}
-          surfaceColor={COLOR_SCHEME.surface}
-          color={COLOR_SCHEME.text}
+          id={S.basic.id}
+          icon={S.basic.icon}
+          title={S.basic.title}
+          surfaceColor={COLOR.surface}
+          color={COLOR.text}
           error={!!errors.name || !!errors.shortDescription}
         >
           <Input
             label="Název"
             inputProps={{
               ...register("name"),
-              placeholder:
-                listingType === "venue"
-                  ? "Základní balíček"
-                  : listingType === "gastro"
-                    ? "Raut pro 50 osob"
-                    : "Standardní vystoupení",
+              placeholder: "Raut pro 50 osob",
             }}
             error={errors.name?.message}
             isRequired
           />
-          <div className="relative">
-            <Input
-              label="Krátký popis"
-              inputProps={{
-                ...register("shortDescription"),
-                placeholder: "Stručný popis varianty (max. 50 znaků)",
-                maxLength: 50,
-              }}
-              error={errors.shortDescription?.message}
-              isRequired
-            />
-          </div>
+          <Input
+            label="Krátký popis"
+            inputProps={{
+              ...register("shortDescription"),
+              placeholder: "Stručný popis varianty (max. 50 znaků)",
+              maxLength: 50,
+            }}
+            error={errors.shortDescription?.message}
+            isRequired
+          />
           <Textarea
             label="Detailní popis"
             inputProps={{
               ...register("description"),
-              placeholder: "Podrobný popis varianty, co zákazník dostane...",
+              placeholder: "Podrobný popis varianty...",
               rows: 4,
             }}
             error={errors.description?.message}
           />
         </FormSection>
 
-        {/* ── 2. Cena ───────────────────────────────────────────────────────── */}
+        {/* Cena */}
         <FormSection
-          id={SECTION_PRICE.id}
-          icon={SECTION_PRICE.icon}
-          title={SECTION_PRICE.title}
-          surfaceColor={COLOR_SCHEME.surface}
-          color={COLOR_SCHEME.text}
+          id={S.price.id}
+          icon={S.price.icon}
+          title={S.price.title}
+          surfaceColor={COLOR.surface}
+          color={COLOR.text}
           error={!!errors.price?.generalPrice}
         >
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -303,13 +314,12 @@ export default function NewVariantForm({ onSubmit, onCancel }: Props) {
                 ...register("price.generalPrice"),
                 type: "number",
                 min: 0,
-                placeholder: "15000",
+                placeholder: "9900",
               }}
               error={errors.price?.generalPrice?.message}
               isRequired
             />
           </div>
-
           <RepeaterField
             label="Sezónní ceny"
             fields={seasonalPricesFields}
@@ -332,7 +342,6 @@ export default function NewVariantForm({ onSubmit, onCancel }: Props) {
                       ...register(`price.seasonalPrices.${index}.price`),
                       type: "number",
                       min: 0,
-                      placeholder: "18000",
                     }}
                     error={
                       errors.price?.seasonalPrices?.[index]?.price?.message
@@ -345,10 +354,6 @@ export default function NewVariantForm({ onSubmit, onCancel }: Props) {
                       ...register(`price.seasonalPrices.${index}.description`),
                       placeholder: "např. Letní sezóna",
                     }}
-                    error={
-                      errors.price?.seasonalPrices?.[index]?.description
-                        ?.message
-                    }
                   />
                 </div>
                 <div className="grid grid-cols-2 gap-3">
@@ -376,14 +381,14 @@ export default function NewVariantForm({ onSubmit, onCancel }: Props) {
           />
         </FormSection>
 
-        {/* ── 3. Obrázek ────────────────────────────────────────────────────── */}
+        {/* Obrázky */}
         <FormSection
-          id={SECTION_IMAGES.id}
-          icon={SECTION_IMAGES.icon}
-          title={SECTION_IMAGES.title}
+          id={S.images.id}
+          icon={S.images.icon}
+          title={S.images.title}
           subtitle="Podporované formáty: jpg, png, webp"
-          surfaceColor={COLOR_SCHEME.surface}
-          color={COLOR_SCHEME.text}
+          surfaceColor={COLOR.surface}
+          color={COLOR.text}
           error={!!errors.images?.mainImage}
         >
           <Controller
@@ -406,26 +411,22 @@ export default function NewVariantForm({ onSubmit, onCancel }: Props) {
             render={({ field }) => (
               <GalleryInput
                 label="Galerie"
-                value={field.value}
+                value={field.value ?? []}
                 onChange={field.onChange}
                 onUpload={uploadFileToCloud}
                 maxImages={20}
-                error={
-                  errors.images?.gallery?.root?.message ??
-                  errors.images?.gallery?.message
-                }
               />
             )}
           />
         </FormSection>
 
-        {/* ── 4. Typy akcí ──────────────────────────────────────────────────── */}
+        {/* Typy akcí */}
         <FormSection
-          id={SECTION_EVENT_TYPES.id}
-          icon={SECTION_EVENT_TYPES.icon}
-          title={SECTION_EVENT_TYPES.title}
-          surfaceColor={COLOR_SCHEME.surface}
-          color={COLOR_SCHEME.text}
+          id={S.eventTypes.id}
+          icon={S.eventTypes.icon}
+          title={S.eventTypes.title}
+          surfaceColor={COLOR.surface}
+          color={COLOR.text}
         >
           <Controller
             control={control}
@@ -433,28 +434,24 @@ export default function NewVariantForm({ onSubmit, onCancel }: Props) {
             render={({ field }) => (
               <CheckboxGroup
                 label="Pro jaké typy akcí je varianta vhodná?"
-                items={MOCK_EVENT_TYPES.map((et) => ({
-                  id: et.id,
-                  name: et.name,
-                }))}
-                value={field.value}
+                items={MOCK_EVENT_TYPES}
+                value={field.value ?? []}
                 onChange={field.onChange}
-                checkColor={COLOR_SCHEME.text}
+                checkColor={COLOR.text}
               />
             )}
           />
         </FormSection>
 
-        {/* ── 5. Dostupnost ─────────────────────────────────────────────────── */}
+        {/* Dostupnost */}
         <FormSection
-          id={SECTION_AVAILABILITY.id}
-          icon={SECTION_AVAILABILITY.icon}
-          title={SECTION_AVAILABILITY.title}
-          surfaceColor={COLOR_SCHEME.surface}
-          color={COLOR_SCHEME.text}
+          id={S.availability.id}
+          icon={S.availability.icon}
+          title={S.availability.title}
+          surfaceColor={COLOR.surface}
+          color={COLOR.text}
           error={!!(errors.type || errors.availability || errors.selectedHours)}
         >
-          {/* Typ sezónnosti */}
           <Controller
             control={control}
             name="type"
@@ -481,11 +478,7 @@ export default function NewVariantForm({ onSubmit, onCancel }: Props) {
                       key={option.value}
                       type="button"
                       onClick={() => field.onChange(option.value)}
-                      className={`flex-1 px-4 py-3 rounded-xl border-2 text-left transition-colors ${
-                        field.value === option.value
-                          ? "border-variant bg-variant-surface"
-                          : "border-zinc-200 bg-white hover:border-zinc-300"
-                      }`}
+                      className={`flex-1 px-4 py-3 rounded-xl border-2 text-left transition-colors ${field.value === option.value ? "border-variant bg-variant-surface" : "border-zinc-200 bg-white hover:border-zinc-300"}`}
                     >
                       <div className="flex items-center gap-2 mb-1">
                         <CalendarRange className="w-4 h-4 text-variant shrink-0" />
@@ -505,8 +498,6 @@ export default function NewVariantForm({ onSubmit, onCancel }: Props) {
               </div>
             )}
           />
-
-          {/* Typ dostupnosti v rámci dne */}
           <Controller
             control={control}
             name="availability"
@@ -533,11 +524,7 @@ export default function NewVariantForm({ onSubmit, onCancel }: Props) {
                       key={option.value}
                       type="button"
                       onClick={() => field.onChange(option.value)}
-                      className={`flex-1 px-4 py-3 rounded-xl border-2 text-left transition-colors ${
-                        field.value === option.value
-                          ? "border-variant bg-variant-surface"
-                          : "border-zinc-200 bg-white hover:border-zinc-300"
-                      }`}
+                      className={`flex-1 px-4 py-3 rounded-xl border-2 text-left transition-colors ${field.value === option.value ? "border-variant bg-variant-surface" : "border-zinc-200 bg-white hover:border-zinc-300"}`}
                     >
                       <div className="flex items-center gap-2 mb-1">
                         <Clock className="w-4 h-4 text-variant shrink-0" />
@@ -557,7 +544,6 @@ export default function NewVariantForm({ onSubmit, onCancel }: Props) {
               </div>
             )}
           />
-
           {availabilityValue === "selectedHours" && (
             <RepeaterField
               label="Časové sloty"
@@ -592,53 +578,67 @@ export default function NewVariantForm({ onSubmit, onCancel }: Props) {
           )}
         </FormSection>
 
-        {/* ── 6. Kapacita ───────────────────────────────────────────────────── */}
+        {/* Kapacita a objednávky */}
         <FormSection
-          id={SECTION_CAPACITY.id}
-          icon={SECTION_CAPACITY.icon}
-          title={SECTION_CAPACITY.title}
-          surfaceColor={COLOR_SCHEME.surface}
-          color={COLOR_SCHEME.text}
+          id={S.capacity.id}
+          icon={S.capacity.icon}
+          title={S.capacity.title}
+          surfaceColor={COLOR.surface}
+          color={COLOR.text}
           error={!!errors.capacity?.max}
         >
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Input
-              label={
-                listingType === "venue"
-                  ? "Kapacita (osob)"
-                  : "Maximální kapacita (osob)"
-              }
+              label="Maximální kapacita (osob)"
               inputProps={{
                 ...register("capacity.max"),
                 type: "number",
                 min: 1,
-                placeholder: listingType === "venue" ? "300" : "200",
+                placeholder: "200",
               }}
               error={errors.capacity?.max?.message}
               isRequired
             />
-            {listingType !== "venue" && (
-              <Input
-                label="Minimální kapacita (osob)"
-                inputProps={{
-                  ...register("capacity.min"),
-                  type: "number",
-                  min: 1,
-                  placeholder: "10",
-                }}
-                error={errors.capacity?.min?.message}
-              />
-            )}
+            <Input
+              label="Minimální kapacita (osob)"
+              inputProps={{
+                ...register("capacity.min"),
+                type: "number",
+                min: 1,
+                placeholder: "10",
+              }}
+              error={errors.capacity?.min?.message}
+            />
+            <Input
+              label="Cena na osobu (Kč)"
+              inputProps={{
+                ...register("pricePerPerson"),
+                type: "number",
+                min: 0,
+                placeholder: "350",
+              }}
+              error={errors.pricePerPerson?.message}
+            />
+            <Input
+              label="Minimální počet objednávek"
+              inputProps={{
+                ...register("minimumOrderCount"),
+                type: "number",
+                min: 1,
+                placeholder: "5",
+              }}
+              error={errors.minimumOrderCount?.message}
+            />
           </div>
         </FormSection>
 
-        {/* ── 7. Zahrnuto / Nezahrnuto ──────────────────────────────────────── */}
+        {/* Zahrnuto / Nezahrnuto */}
         <FormSection
-          id={SECTION_INCLUDES.id}
-          icon={SECTION_INCLUDES.icon}
-          title={SECTION_INCLUDES.title}
-          surfaceColor={COLOR_SCHEME.surface}
-          color={COLOR_SCHEME.text}
+          id={S.includes.id}
+          icon={S.includes.icon}
+          title={S.includes.title}
+          surfaceColor={COLOR.surface}
+          color={COLOR.text}
         >
           <RepeaterField
             label="Co je zahrnuto"
@@ -646,36 +646,173 @@ export default function NewVariantForm({ onSubmit, onCancel }: Props) {
             onAppend={() => appendInclude({ item: "" })}
             onRemove={removeInclude}
             addButtonLabel="Přidat položku"
-            renderItem={(_, index) => (
+            renderItem={(_, i) => (
               <Input
                 label="Položka"
                 inputProps={{
-                  ...register(`includes.${index}.item`),
-                  placeholder: "např. Ozvučení, Obsluha...",
+                  ...register(`includes.${i}.item`),
+                  placeholder: "např. Obsluha, Nádobí...",
                 }}
               />
             )}
           />
-
           <RepeaterField
             label="Co není zahrnuto"
             fields={excludesFields}
             onAppend={() => appendExclude({ item: "" })}
             onRemove={removeExclude}
             addButtonLabel="Přidat položku"
-            renderItem={(_, index) => (
+            renderItem={(_, i) => (
               <Input
                 label="Položka"
                 inputProps={{
-                  ...register(`excludes.${index}.item`),
-                  placeholder: "např. Catering, Parkování...",
+                  ...register(`excludes.${i}.item`),
+                  placeholder: "např. Alkohol, Doprava...",
                 }}
               />
             )}
           />
         </FormSection>
 
-        {/* ── Submit ────────────────────────────────────────────────────────── */}
+        {/* Kuchyně a styl */}
+        <FormSection
+          id={S.cuisine.id}
+          icon={S.cuisine.icon}
+          title={S.cuisine.title}
+          surfaceColor={COLOR.surface}
+          color={COLOR.text}
+        >
+          <Controller
+            control={control}
+            name="cuisines"
+            render={({ field }) => (
+              <CheckboxGroup
+                searchable
+                label="Kuchyně"
+                items={MOCK_CUISINES}
+                value={field.value ?? []}
+                onChange={field.onChange}
+                checkColor={COLOR.text}
+              />
+            )}
+          />
+          <Controller
+            control={control}
+            name="dishTypes"
+            render={({ field }) => (
+              <CheckboxGroup
+                searchable
+                label="Typy pokrmů"
+                items={MOCK_DISH_TYPES}
+                value={field.value ?? []}
+                onChange={field.onChange}
+                checkColor={COLOR.text}
+              />
+            )}
+          />
+          <Controller
+            control={control}
+            name="foodServiceStyle"
+            render={({ field }) => (
+              <CheckboxGroup
+                searchable
+                label="Styl servisu"
+                items={MOCK_FOOD_SERVICE_STYLES}
+                value={field.value ?? []}
+                onChange={field.onChange}
+                checkColor={COLOR.text}
+              />
+            )}
+          />
+          <Controller
+            control={control}
+            name="dietaryOptions"
+            render={({ field }) => (
+              <CheckboxGroup
+                searchable
+                label="Dietní možnosti"
+                items={MOCK_DIETARY_OPTIONS}
+                value={field.value ?? []}
+                onChange={field.onChange}
+                checkColor={COLOR.text}
+              />
+            )}
+          />
+        </FormSection>
+
+        {/* Doplňky */}
+        <FormSection
+          id={S.extras.id}
+          icon={S.extras.icon}
+          title={S.extras.title}
+          surfaceColor={COLOR.surface}
+          color={COLOR.text}
+        >
+          <Controller
+            control={control}
+            name="alcoholIncluded"
+            render={({ field }) => (
+              <Checkbox
+                checked={field.value ?? false}
+                onChange={field.onChange}
+                label="Alkohol v nabídce"
+                checkColor={COLOR.text}
+              />
+            )}
+          />
+          <Controller
+            control={control}
+            name="kidsMenu"
+            render={({ field }) => (
+              <Checkbox
+                checked={field.value ?? false}
+                onChange={field.onChange}
+                label="Dětské menu"
+                checkColor={COLOR.text}
+              />
+            )}
+          />
+        </FormSection>
+
+        {/* Personál a požadavky */}
+        <FormSection
+          id={S.personnel.id}
+          icon={S.personnel.icon}
+          title={S.personnel.title}
+          surfaceColor={COLOR.surface}
+          color={COLOR.text}
+        >
+          <Controller
+            control={control}
+            name="personnel"
+            render={({ field }) => (
+              <CheckboxGroup
+                searchable
+                label="Personál"
+                items={MOCK_PERSONNEL}
+                value={field.value ?? []}
+                onChange={field.onChange}
+                checkColor={COLOR.text}
+              />
+            )}
+          />
+          <Controller
+            control={control}
+            name="necessities"
+            render={({ field }) => (
+              <CheckboxGroup
+                searchable
+                label="Provozní požadavky"
+                items={MOCK_NECESSITIES}
+                value={field.value ?? []}
+                onChange={field.onChange}
+                checkColor={COLOR.text}
+              />
+            )}
+          />
+        </FormSection>
+
+        {/* Submit */}
         <div className="flex justify-end gap-3 pt-2">
           <Button
             htmlType="button"
@@ -684,20 +821,20 @@ export default function NewVariantForm({ onSubmit, onCancel }: Props) {
             version="plain"
           />
           <Button
-            text="Vytvořit variantu"
-            version={BUTTON_COLOR}
+            text="Uložit variantu"
+            version="variantFull"
             htmlType="submit"
           />
         </div>
       </div>
       <FormToc
-        textColor="text-variant"
-        dotColor="text-variant"
-        surfaceColor="bg-variant-surface"
-        groups={VARIANT_FORM_GROUPS}
-        sticky={true}
+        textColor={COLOR.text}
+        dotColor={COLOR.text}
+        surfaceColor={COLOR.surface}
+        groups={FORM_GROUPS}
+        sticky
         buttonVersion="variantFull"
-        buttonText="Uložení"
+        buttonText="Uložit variantu"
       />
     </form>
   );

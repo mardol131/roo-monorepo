@@ -1,8 +1,5 @@
 import { DashboardSection } from "@/app/[locale]/(user)/components/dashboard-section";
-import { DetailRow } from "@/app/[locale]/(user)/components/detail-row";
-import { BoolBadge } from "@/app/[locale]/(user)/components/bool-badge";
-import { Tag, TagList } from "@/app/[locale]/(user)/components/tag";
-import Text from "@/app/components/ui/atoms/text";
+import InfoSection from "@/app/[locale]/(user)/components/info-section";
 import { Listing } from "@roo/common";
 import { Clock, MapPin, Music, Users } from "lucide-react";
 
@@ -18,125 +15,74 @@ const AUDIENCE_LABELS: Record<string, string> = {
 };
 
 export function EntertainmentDetails({ block }: { block: EntertainmentBlock }) {
+  const locationItems = block.location
+    ? [
+        ...(block.location.region?.length ? [{ type: "tagList" as const, label: "Kraj", items: block.location.region }] : []),
+        ...(block.location.district?.length ? [{ type: "tagList" as const, label: "Okres", items: block.location.district }] : []),
+        ...(block.location.city?.length ? [{ type: "tagList" as const, label: "Město", items: block.location.city }] : []),
+        ...(block.location.address ? [{ type: "text" as const, label: "Adresa", value: block.location.address }] : []),
+      ]
+    : [];
+
+  const capacityItems = [
+    { type: "text" as const, label: "Maximální kapacita", value: `${block.capacity} osob` },
+    ...(block.minimumCapacity
+      ? [{ type: "text" as const, label: "Minimální kapacita", value: `${block.minimumCapacity} osob` }]
+      : []),
+  ];
+
+  const programItems = [
+    ...(block.entertainmentTypes?.length ? [{ type: "tagList" as const, label: "Typy programu", items: block.entertainmentTypes }] : []),
+    ...(block.audience?.length
+      ? [{ type: "tagList" as const, label: "Cílové publikum", items: block.audience.map((a) => AUDIENCE_LABELS[a] ?? a) }]
+      : []),
+  ];
+
+  const logisticsItems = block.setupAndTearDownRules
+    ? [
+        ...(block.setupAndTearDownRules.setupTime != null
+          ? [{ type: "text" as const, label: "Čas přípravy", value: `${block.setupAndTearDownRules.setupTime} min` }]
+          : []),
+        ...(block.setupAndTearDownRules.tearDownTime != null
+          ? [{ type: "text" as const, label: "Čas úklidu", value: `${block.setupAndTearDownRules.tearDownTime} min` }]
+          : []),
+      ]
+    : [];
+
+  const personnelItems = [
+    ...(block.personnel?.length ? [{ type: "tagList" as const, label: "Personál", items: block.personnel }] : []),
+    ...(block.necessities?.length ? [{ type: "tagList" as const, label: "Technické požadavky", items: block.necessities }] : []),
+  ];
+
   return (
     <>
-      {block.location && (
-        <DashboardSection
-          title="Místo působení"
-          icon={MapPin}
-          iconBg="bg-blue-50"
-          iconColor="text-blue-500"
-        >
-          {block.location.region?.length ? (
-            <DetailRow label="Kraj">
-              <TagList items={block.location.region} />
-            </DetailRow>
-          ) : null}
-          {block.location.district?.length ? (
-            <DetailRow label="Okres">
-              <TagList items={block.location.district} />
-            </DetailRow>
-          ) : null}
-          {block.location.city?.length ? (
-            <DetailRow label="Město">
-              <TagList items={block.location.city} />
-            </DetailRow>
-          ) : null}
-          {block.location.address ? (
-            <DetailRow label="Adresa">
-              <Text variant="body-sm" color="textDark">
-                {block.location.address}
-              </Text>
-            </DetailRow>
-          ) : null}
+      {locationItems.length > 0 && (
+        <DashboardSection title="Místo působení" icon={MapPin} iconBg="bg-blue-50" iconColor="text-blue-500">
+          <InfoSection items={locationItems} />
         </DashboardSection>
       )}
 
-      <DashboardSection
-        title="Kapacita"
-        icon={Users}
-        iconBg="bg-listing-surface"
-        iconColor="text-listing"
-      >
-        <DetailRow label="Maximální kapacita">
-          <Text variant="body-sm" color="textDark">
-            {block.capacity} osob
-          </Text>
-        </DetailRow>
-        {block.minimumCapacity ? (
-          <DetailRow label="Minimální kapacita">
-            <Text variant="body-sm" color="textDark">
-              {block.minimumCapacity} osob
-            </Text>
-          </DetailRow>
-        ) : null}
+      <DashboardSection title="Kapacita" icon={Users} iconBg="bg-listing-surface" iconColor="text-listing">
+        <InfoSection items={capacityItems} />
       </DashboardSection>
 
-      <DashboardSection
-        title="Typ programu"
-        icon={Music}
-        iconBg="bg-purple-50"
-        iconColor="text-purple-500"
-      >
-        {block.entertainmentTypes?.length ? (
-          <DetailRow label="Typy programu">
-            <TagList items={block.entertainmentTypes} />
-          </DetailRow>
-        ) : null}
-        {block.audience?.length ? (
-          <DetailRow label="Cílové publikum">
-            <div className="flex flex-wrap gap-1.5">
-              {block.audience.map((a) => (
-                <Tag key={a} label={AUDIENCE_LABELS[a] ?? a} />
-              ))}
-            </div>
-          </DetailRow>
-        ) : null}
-      </DashboardSection>
-
-      {block.setupAndTearDownRules && (
-        <DashboardSection
-          title="Logistika"
-          icon={Clock}
-          iconBg="bg-amber-50"
-          iconColor="text-amber-500"
-        >
-          {block.setupAndTearDownRules.setupTime != null ? (
-            <DetailRow label="Čas přípravy">
-              <Text variant="body-sm" color="textDark">
-                {block.setupAndTearDownRules.setupTime} min
-              </Text>
-            </DetailRow>
-          ) : null}
-          {block.setupAndTearDownRules.tearDownTime != null ? (
-            <DetailRow label="Čas úklidu">
-              <Text variant="body-sm" color="textDark">
-                {block.setupAndTearDownRules.tearDownTime} min
-              </Text>
-            </DetailRow>
-          ) : null}
+      {programItems.length > 0 && (
+        <DashboardSection title="Typ programu" icon={Music} iconBg="bg-purple-50" iconColor="text-purple-500">
+          <InfoSection items={programItems} />
         </DashboardSection>
       )}
 
-      {block.personnel?.length || block.necessities?.length ? (
-        <DashboardSection
-          title="Personál a požadavky"
-          icon={Users}
-          iconBg="bg-zinc-50"
-          iconColor="text-zinc-500"
-        >
-          {block.personnel?.length ? (
-            <DetailRow label="Personál">
-              <TagList items={block.personnel} />
-            </DetailRow>
-          ) : null}
-          {block.necessities?.length ? (
-            <DetailRow label="Technické požadavky">
-              <TagList items={block.necessities} />
-            </DetailRow>
-          ) : null}
+      {logisticsItems.length > 0 && (
+        <DashboardSection title="Logistika" icon={Clock} iconBg="bg-amber-50" iconColor="text-amber-500">
+          <InfoSection items={logisticsItems} />
         </DashboardSection>
-      ) : null}
+      )}
+
+      {personnelItems.length > 0 && (
+        <DashboardSection title="Personál a požadavky" icon={Users} iconBg="bg-zinc-50" iconColor="text-zinc-500">
+          <InfoSection items={personnelItems} />
+        </DashboardSection>
+      )}
     </>
   );
 }

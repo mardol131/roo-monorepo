@@ -2,8 +2,9 @@
 
 import React from "react";
 import Button from "@/app/components/ui/atoms/button";
-import { Trash2 } from "lucide-react";
+import ErrorText from "@/app/components/ui/atoms/inputs/error-text";
 import InputLabel from "@/app/components/ui/atoms/input-label";
+import { Trash2 } from "lucide-react";
 
 interface RepeaterFieldProps<T extends Record<string, unknown>> {
   label: string;
@@ -13,6 +14,7 @@ interface RepeaterFieldProps<T extends Record<string, unknown>> {
   renderItem: (item: T, index: number) => React.ReactNode;
   addButtonLabel?: string;
   maxItems?: number;
+  error?: string;
 }
 
 export default function RepeaterField<T extends Record<string, unknown>>({
@@ -23,6 +25,7 @@ export default function RepeaterField<T extends Record<string, unknown>>({
   renderItem,
   addButtonLabel = "Přidat",
   maxItems,
+  error,
 }: RepeaterFieldProps<T>) {
   const canAdd = maxItems === undefined || fields.length < maxItems;
 
@@ -60,6 +63,7 @@ export default function RepeaterField<T extends Record<string, unknown>>({
           />
         </div>
       )}
+      {error && <ErrorText error={error} />}
     </div>
   );
 }

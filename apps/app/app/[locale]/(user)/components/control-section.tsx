@@ -1,10 +1,13 @@
 import Button, { ButtonProps } from "@/app/components/ui/atoms/button";
 import Text from "@/app/components/ui/atoms/text";
+import { LucideIcons } from "@roo/common";
 import { Cog } from "lucide-react";
 import { ElementType } from "react";
+import * as lucideIcons from "lucide-react";
+import { DashboardSection } from "./dashboard-section";
 
 export type ControlRow = {
-  icon: ElementType;
+  icon: LucideIcons;
   iconColor: string;
   iconBgColor: string;
   title: string;
@@ -14,18 +17,15 @@ export type ControlRow = {
 
 export function ControlSection({ rows }: { rows: ControlRow[] }) {
   return (
-    <div className="bg-white rounded-2xl border border-zinc-200 p-5">
-      <div className="flex items-center gap-2 mb-4">
-        <div className="w-7 h-7 rounded-lg flex items-center justify-center bg-zinc-100">
-          <Cog className="w-3.5 h-3.5 text-zinc-500" />
-        </div>
-        <Text variant="h4" color="textDark">
-          Ovládání
-        </Text>
-      </div>
+    <DashboardSection
+      title="Ovládání"
+      icon={Cog}
+      iconBg="bg-zinc-100"
+      iconColor="text-zinc-500"
+    >
       <div className="flex flex-col divide-y divide-zinc-100">
         {rows.map((row, i) => {
-          const Icon = row.icon;
+          const Icon = lucideIcons[row.icon] as ElementType;
           return (
             <div
               key={i}
@@ -54,6 +54,6 @@ export function ControlSection({ rows }: { rows: ControlRow[] }) {
           );
         })}
       </div>
-    </div>
+    </DashboardSection>
   );
 }

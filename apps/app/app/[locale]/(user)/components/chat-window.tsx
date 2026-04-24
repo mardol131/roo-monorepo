@@ -1,36 +1,54 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
 import Text from "@/app/components/ui/atoms/text";
-import { MessageCircle, Send } from "lucide-react";
-import SectionHeader from "./section-header";
+import { ChatMessage } from "@roo/common";
 import { format } from "date-fns";
-import { ChatMessage, getIdFromRelationshipField } from "@roo/common";
+import { MessageCircle, Send } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import DashboardSectionHeader from "./dashboard-section-header";
 
-type ChatMessageProps = {
+type Message = {
   id: string;
-  senderType: "user" | "supplier";
+  inquiryId: string;
+  senderType: "user" | "company";
   content: string;
   sentAt: Date;
 };
 
 export default function ChatWindow({
-  supplierName,
   initialMessages,
+  senderRole,
+  inquiryId,
 }: {
-  supplierName: string;
   initialMessages: ChatMessage[];
+  senderRole: "user" | "company";
+  inquiryId: string;
 }) {
-  const [messages, setMessages] = useState<ChatMessageProps[]>(
-    initialMessages.map((m) => ({
-      id: m.id,
-      senderType: m.senderType === "user" ? "user" : "supplier",
-      content: m.content,
-      sentAt: new Date(m.sentAt),
+  const [messages, setMessages] = useState<Message[]>(
+    initialMessages.map((msg) => ({
+      id: msg.id,
+      inquiryId,
+      senderType: msg.senderType,
+      content: msg.content,
+      sentAt: new Date(msg.sentAt),
     })),
   );
   const [draft, setDraft] = useState("");
+  const [countdown, setCountdown] = useState(10);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCountdown((prev) => {
+        if (prev <= 1) {
+          // TODO: fetch new messages
+          return 10;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+    return () => clearInterval(interval);
+  }, []);
 
   const sendMessage = () => {
     const trimmed = draft.trim();
@@ -38,8 +56,9 @@ export default function ChatWindow({
     setMessages((prev) => [
       ...prev,
       {
+        inquiryId,
         id: `m${Date.now()}`,
-        senderType: "user",
+        senderType: senderRole,
         content: trimmed,
         sentAt: new Date(),
       },
@@ -58,7 +77,12 @@ export default function ChatWindow({
 
   return (
     <div className="lg:col-span-3 h-200 bg-white rounded-2xl border border-zinc-200 flex flex-col overflow-hidden">
-      <SectionHeader icon={MessageCircle} title="Konverzace" />
+      <DashboardSectionHeader
+        icon={MessageCircle}
+        heading="Konverzace"
+        iconBgColor="bg-zinc-100"
+        iconColor="text-zinc-500"
+      />
 
       {/* Messages */}
       <div
@@ -66,7 +90,7 @@ export default function ChatWindow({
         className="flex-1 h-full overflow-y-scroll px-5 py-4 flex flex-col gap-3"
       >
         {messages.map((msg) => (
-          <ChatBubble key={msg.id} message={msg} />
+          <ChatBubble key={msg.id} message={msg} senderRole={senderRole} />
         ))}
       </div>
 
@@ -95,16 +119,27 @@ export default function ChatWindow({
             <Send className="w-4 h-4" />
           </button>
         </div>
-        <Text variant="caption" color="secondary" className="mt-1.5 px-1">
-          Enter pro odeslání · Shift+Enter pro nový řádek
-        </Text>
+        <div className="flex items-center justify-between mt-1.5 px-1">
+          <Text variant="caption" color="secondary">
+            Enter pro odeslání · Shift+Enter pro nový řádek
+          </Text>
+          <Text variant="caption" color="secondary">
+            Načtení nových zpráv za {countdown}s
+          </Text>
+        </div>
       </div>
     </div>
   );
 }
 
-function ChatBubble({ message }: { message: ChatMessageProps }) {
-  const isUser = message.senderType === "user";
+function ChatBubble({
+  message,
+  senderRole,
+}: {
+  message: Message;
+  senderRole: "user" | "company";
+}) {
+  const isUser = message.senderType === senderRole;
   return (
     <div
       className={`flex flex-col gap-1 ${isUser ? "items-end" : "items-start"}`}
@@ -113,7 +148,7 @@ function ChatBubble({ message }: { message: ChatMessageProps }) {
         className={`max-w-[80%] px-4 py-2.5 rounded-2xl text-sm leading-relaxed ${
           isUser
             ? "bg-rose-500 text-white rounded-br-md"
-            : "bg-zinc-100 text-zinc-800 rounded-bl-md"
+            : "bg-zinc-800 text-white rounded-bl-md"
         }`}
       >
         {message.content}

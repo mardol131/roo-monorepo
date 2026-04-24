@@ -1,9 +1,10 @@
 import { LISTINGS } from "@/app/_mock/mock";
-import { Listing } from "@roo/common";
+import { Listing, wait } from "@roo/common";
 
 export async function fetchListingsByCompany(companyId: string) {
   const res = LISTINGS.filter((listing) => {
-    if (typeof listing.company === "string") return listing.company === companyId;
+    if (typeof listing.company === "string")
+      return listing.company === companyId;
     return listing.company.id === companyId;
   });
   if (!res) throw new Error("Failed to fetch listings");
@@ -28,5 +29,6 @@ export async function updateListing(id: string, data: Partial<Listing>) {
 
 export async function deleteListing(id: string) {
   const res = await fetch(`/api/listings/${id}`, { method: "DELETE" });
+
   if (!res.ok) throw new Error("Failed to delete listing");
 }

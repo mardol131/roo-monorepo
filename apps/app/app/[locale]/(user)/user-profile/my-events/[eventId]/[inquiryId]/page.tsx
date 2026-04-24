@@ -2,16 +2,16 @@ import { ArrowLeft, Package } from "lucide-react";
 
 import Link from "next/link";
 import { INQUIRY_STATUS } from "@/app/data/inquiry";
-import ChatWindow from "./components/chat-window";
 import CompanyCard from "./components/company-card";
 import InquirySettings from "./components/inquiry-settings";
-import InquiryTimeline from "./components/inquiry-timeline";
+import InquiryTimeline from "../../../../components/inquiry-timeline";
 import DashboardHeader from "@/app/[locale]/(user)/components/dashboard-header";
 import EventDashboardVariantSection from "./components/event-dashboard-variant-section";
 import { aggregateInquiryStatus } from "@roo/common";
 import { getTranslations } from "next-intl/server";
 import { format } from "date-fns";
 import { COMPANIES, getInquiry, getMessages } from "@/app/_mock/mock";
+import ChatWindow from "@/app/[locale]/(user)/components/chat-window";
 
 export default async function page({
   params,
@@ -77,7 +77,10 @@ export default async function page({
           }}
         />
         <div className="bg-white rounded-2xl border border-zinc-200 px-8 py-5">
-          <InquiryTimeline status={aggregateInquiryStatus(inquiry)} />
+          <InquiryTimeline
+            userStatus={inquiry.userStatus}
+            companyStatus={inquiry.companyStatus}
+          />
         </div>
         {typeof company !== "string" && <CompanyCard company={company} />}
         {typeof inquiry.variant?.value !== "string" &&
@@ -85,12 +88,9 @@ export default async function page({
             <EventDashboardVariantSection variant={inquiry.variant?.value} />
           )}
         <ChatWindow
-          supplierName={
-            typeof inquiry.listing.value !== "string"
-              ? inquiry.listing.value.name
-              : "Chat s dodavatelem"
-          }
           initialMessages={messages}
+          senderRole="user"
+          inquiryId={inquiry.id}
         />
         {aggregateInquiryStatus(inquiry) === "pending" && <InquirySettings />}
       </div>

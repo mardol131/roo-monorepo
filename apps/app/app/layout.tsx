@@ -3,6 +3,7 @@ import { ReactNode } from "react";
 import { NextIntlClientProvider } from "next-intl";
 import "./styles/global.css";
 import { ReactQueryProvider } from "./react-query/react-query-provider";
+import { ConfirmActionModal } from "./components/ui/molecules/modals/confirm-action-modal";
 
 export const metadata: Metadata = {};
 
@@ -18,7 +19,10 @@ export default function RootLayout({
       </head>
       <body className={`text-on-dark`}>
         <NextIntlClientProvider>
-          <ReactQueryProvider>{children}</ReactQueryProvider>
+          <ReactQueryProvider>
+            {children}
+            <ConfirmActionModal />
+          </ReactQueryProvider>
         </NextIntlClientProvider>
       </body>
     </html>

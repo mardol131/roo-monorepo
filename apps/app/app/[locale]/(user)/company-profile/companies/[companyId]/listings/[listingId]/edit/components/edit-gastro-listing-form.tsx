@@ -272,11 +272,8 @@ export default function EditGastroListingForm({
   const referencesFieldArray = useFieldArray({ control, name: "references" });
 
   return (
-    <div className="flex gap-6">
-      <form
-        onSubmit={handleSubmit(onSubmit)}
-        className="flex flex-col w-full gap-4"
-      >
+    <form onSubmit={handleSubmit(onSubmit)} className="flex gap-6">
+      <div className="flex flex-col w-full gap-4">
         {/* ── 1. Základní informace ─────────────────────────────────────────────── */}
         <FormSection
           id="section-basic"
@@ -873,7 +870,7 @@ export default function EditGastroListingForm({
             htmlType="submit"
           />
         </div>
-      </form>
+      </div>
       <FormToc
         textColor="text-listing"
         dotColor="text-listing"
@@ -883,6 +880,6 @@ export default function EditGastroListingForm({
         buttonVersion="listingFull"
         buttonText="Uložení"
       />
-    </div>
+    </form>
   );
 }

@@ -8,7 +8,7 @@ export function DetailRow({
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex flex-col gap-1.5 py-2.5 border-b border-zinc-100 last:border-0">
+    <div className="flex flex-col gap-1.5 pt-2.5 pb-2.5 first:pt-0 border-b border-zinc-100 last:border-0">
       <Text variant="label" color="secondary">
         {label}
       </Text>

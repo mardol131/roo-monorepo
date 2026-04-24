@@ -17,7 +17,7 @@ type TextVariant =
   | "caption"
   | "quote";
 
-interface TextProps {
+export interface TextProps {
   variant?: TextVariant;
   color?: Color;
   className?: string;
@@ -27,36 +27,36 @@ interface TextProps {
 
 const variantClasses: Record<TextVariant, string> = {
   "display-2xl": "text-6xl font-bold tracking-tight",
-  "display-xl":  "text-4xl font-bold tracking-tight",
-  "display-lg":  "text-3xl font-semibold tracking-tight",
-  h1:            "text-2xl font-bold",
-  h2:            "text-xl font-semibold",
-  h3:            "text-lg font-semibold",
-  h4:            "text-base font-semibold",
-  "body-lg":     "text-lg leading-relaxed",
-  body:          "text-base leading-relaxed",
-  "body-sm":     "text-sm leading-relaxed",
-  "label-lg":    "text-sm font-medium",
-  label:         "text-xs font-medium",
-  caption:       "text-xs font-normal",
-  quote:         "text-lg italic leading-relaxed",
+  "display-xl": "text-4xl font-bold tracking-tight",
+  "display-lg": "text-3xl font-semibold tracking-tight",
+  h1: "text-2xl font-bold",
+  h2: "text-xl font-semibold",
+  h3: "text-lg font-semibold",
+  h4: "text-base font-semibold",
+  "body-lg": "text-lg leading-relaxed",
+  body: "text-base leading-relaxed",
+  "body-sm": "text-sm leading-relaxed",
+  "label-lg": "text-sm font-medium",
+  label: "text-xs font-medium",
+  caption: "text-xs font-normal",
+  quote: "text-lg italic leading-relaxed",
 };
 
 const defaultElements: Record<TextVariant, keyof JSX.IntrinsicElements> = {
   "display-2xl": "h1",
-  "display-xl":  "h1",
-  "display-lg":  "h2",
-  h1:            "h1",
-  h2:            "h2",
-  h3:            "h3",
-  h4:            "h4",
-  "body-lg":     "p",
-  body:          "p",
-  "body-sm":     "p",
-  "label-lg":    "span",
-  label:         "span",
-  caption:       "span",
-  quote:         "blockquote",
+  "display-xl": "h1",
+  "display-lg": "h2",
+  h1: "h1",
+  h2: "h2",
+  h3: "h3",
+  h4: "h4",
+  "body-lg": "p",
+  body: "p",
+  "body-sm": "p",
+  "label-lg": "span",
+  label: "span",
+  caption: "span",
+  quote: "blockquote",
 };
 
 const getColorStyles = (color: Color): string => {
@@ -87,6 +87,8 @@ const getColorStyles = (color: Color): string => {
     inquirySurface: "text-inquiry-surface",
     space: "text-space",
     spaceSurface: "text-space-surface",
+    success: "text-success",
+    successSurface: "text-success-surface",
   };
   return colorClasses[color];
 };

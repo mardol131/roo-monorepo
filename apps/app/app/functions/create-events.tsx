@@ -1,6 +1,8 @@
-import EventEmitter from 'eventemitter3';
-import { useEffect, useRef, useState } from 'react';
-import { RequireAtLeastOne } from 'type-fest';
+"use client";
+
+import EventEmitter from "eventemitter3";
+import { useEffect, useRef, useState } from "react";
+import { RequireAtLeastOne } from "type-fest";
 
 type EmitHandler<T extends Record<string, any>> = <E extends keyof T>(
   event: E,

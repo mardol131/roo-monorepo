@@ -174,7 +174,7 @@ const optionalPositiveNumber = z.preprocess(
 // ── Sub-schemas (venue spaces) ─────────────────────────────────────────────────
 
 const roomSchema = z.object({
-  name: z.string().optional(),
+  name: z.string().min(1, "Název místnosti je povinný"),
   description: z.string().optional(),
   capacity: optionalPositiveNumber,
   area: optionalPositiveNumber,
@@ -346,16 +346,6 @@ function makeResolver(listingType: ListingType): ResolverFn {
           },
         };
       }
-    } else if (v.spaceType === "room") {
-      if (!v.rooms || v.rooms.length === 0) {
-        result.errors = {
-          ...result.errors,
-          rooms: {
-            type: "required",
-            message: "Přidejte alespoň jednu místnost",
-          },
-        };
-      }
     }
 
     return result;
@@ -390,6 +380,7 @@ export default function NewListingForm({
     defaultValues: {
       location: { districts: [], regions: [], cities: [] },
       images: { gallery: [] },
+      rooms: [{ name: "", description: "", capacity: undefined, area: undefined }],
       cuisines: [],
       dishTypes: [],
       dietaryOptions: [],
@@ -415,11 +406,8 @@ export default function NewListingForm({
   const citiesValue = watch("location.cities");
 
   return (
-    <div className="flex gap-6">
-      <form
-        onSubmit={handleSubmit(onSubmit)}
-        className="flex w-full flex-col gap-4"
-      >
+    <form onSubmit={handleSubmit(onSubmit)} className="flex gap-6">
+      <div className="flex w-full flex-col gap-4">
         {/* ── 1. Základní informace ──────────────────────────────────────────── */}
         <FormSection
           id={SECTION_BASIC.id}
@@ -701,7 +689,7 @@ export default function NewListingForm({
                   errors.areaName ||
                   errors.buildings ||
                   errors.buildingName ||
-                  errors.rooms
+                  errors.rooms?.[0]?.name
                 )
               }
             >
@@ -1096,7 +1084,7 @@ export default function NewListingForm({
             htmlType="submit"
           />
         </div>
-      </form>
+      </div>
       <FormToc
         textColor="text-listing"
         dotColor="text-listing"
@@ -1106,6 +1094,6 @@ export default function NewListingForm({
         buttonVersion="listingFull"
         buttonText="Uložení"
       />
-    </div>
+    </form>
   );
 }

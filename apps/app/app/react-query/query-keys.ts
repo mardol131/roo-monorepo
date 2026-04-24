@@ -31,3 +31,9 @@ export const calendarEventKeys = {
     ["calendarEvents", "listing", listingId] as const,
   byId: (id: string) => ["calendarEvents", id] as const,
 };
+
+export const chatMessageKeys = {
+  byInquiry: (inquiryId: string) =>
+    ["chatMessages", "inquiry", inquiryId] as const,
+  byId: (id: string) => ["chatMessages", id] as const,
+};

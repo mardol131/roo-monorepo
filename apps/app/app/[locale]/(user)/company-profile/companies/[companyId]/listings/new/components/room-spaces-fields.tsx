@@ -1,6 +1,5 @@
 "use client";
 
-import React, { useEffect } from "react";
 import {
   Control,
   FieldErrors,
@@ -9,7 +8,6 @@ import {
 } from "react-hook-form";
 import Input from "@/app/components/ui/atoms/inputs/input";
 import { Textarea } from "@/app/components/ui/atoms/inputs/textarea";
-import InputLabel from "@/app/components/ui/atoms/input-label";
 import Button from "@/app/components/ui/atoms/button";
 import { Trash2 } from "lucide-react";
 import type { FormInputs } from "./new-listing-form";
@@ -95,47 +93,30 @@ export default function RoomSpacesFields({
     name: "rooms",
   });
 
-  useEffect(() => {
-    if (roomFields.length === 0) {
-      appendRoom(EMPTY_ROOM);
-    }
-  }, [roomFields.length, appendRoom]);
-
   return (
     <div className="flex flex-col gap-6">
       {/* První místnost – vždy přítomná, bez karty */}
-      {roomFields.length > 0 && (
-        <RoomFields register={register} errors={errors} roomIndex={0} />
-      )}
+      <RoomFields register={register} errors={errors} roomIndex={0} />
 
-      {/* Další místnosti v repeateru */}
-      {roomFields.length > 1 && (
-        <div className="border-border flex flex-col gap-3">
-          <InputLabel label="Další místnosti" />
-          {roomFields.slice(1).map((field, sliceIndex) => {
-            const roomIndex = sliceIndex + 1;
-            return (
-              <div
-                key={field.id}
-                className="relative flex flex-col gap-3 rounded-lg border border-zinc-200 bg-zinc-50 p-4"
-              >
-                <button
-                  type="button"
-                  onClick={() => removeRoom(roomIndex)}
-                  className="absolute right-3 top-3 rounded-md p-1 text-zinc-400 transition-colors hover:bg-danger-surface hover:text-danger"
-                >
-                  <Trash2 size={16} />
-                </button>
-                <RoomFields
-                  register={register}
-                  errors={errors}
-                  roomIndex={roomIndex}
-                />
-              </div>
-            );
-          })}
-        </div>
-      )}
+      {/* Další místnosti */}
+      {roomFields.slice(1).map((field, sliceIndex) => {
+        const roomIndex = sliceIndex + 1;
+        return (
+          <div
+            key={field.id}
+            className="relative flex flex-col gap-3 rounded-lg border border-zinc-200 bg-zinc-50 p-4"
+          >
+            <button
+              type="button"
+              onClick={() => removeRoom(roomIndex)}
+              className="absolute right-3 top-3 rounded-md p-1 text-zinc-400 transition-colors hover:bg-danger-surface hover:text-danger"
+            >
+              <Trash2 size={16} />
+            </button>
+            <RoomFields register={register} errors={errors} roomIndex={roomIndex} />
+          </div>
+        );
+      })}
 
       <div>
         <Button

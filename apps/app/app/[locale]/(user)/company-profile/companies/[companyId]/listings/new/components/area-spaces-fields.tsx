@@ -15,7 +15,102 @@ import Checkbox from "@/app/components/ui/atoms/inputs/checkbox";
 import RepeaterField from "@/app/components/ui/atoms/inputs/repeater-field";
 import type { FormInputs } from "./new-listing-form";
 
-// ── Building rooms (nested field array) ─────────────────────────────────────
+// ── AreaFields ───────────────────────────────────────────────────────────────
+
+function AreaFields({
+  register,
+  errors,
+}: {
+  register: UseFormRegister<FormInputs>;
+  errors: FieldErrors<FormInputs>;
+}) {
+  return (
+    <div className="flex flex-col gap-3">
+      <Input
+        label="Název areálu"
+        inputProps={{ ...register("areaName"), placeholder: "Areál Výstaviště" }}
+        error={errors.areaName?.message}
+      />
+      <Textarea
+        label="Popis areálu"
+        inputProps={{ ...register("areaDescription"), placeholder: "Stručný popis areálu...", rows: 3 }}
+        error={errors.areaDescription?.message}
+      />
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <Input
+          label="Kapacita (osob)"
+          inputProps={{ ...register("areaCapacity"), type: "number", min: 1, placeholder: "500" }}
+          error={errors.areaCapacity?.message}
+        />
+        <Input
+          label="Plocha (m²)"
+          inputProps={{ ...register("areaArea"), type: "number", min: 1, placeholder: "2000" }}
+          error={errors.areaArea?.message}
+        />
+      </div>
+    </div>
+  );
+}
+
+// ── BuildingRoomFields ───────────────────────────────────────────────────────
+
+function BuildingRoomFields({
+  register,
+  errors,
+  buildingIndex,
+  roomIndex,
+}: {
+  register: UseFormRegister<FormInputs>;
+  errors: FieldErrors<FormInputs>;
+  buildingIndex: number;
+  roomIndex: number;
+}) {
+  return (
+    <div className="flex flex-col gap-3">
+      <Input
+        label="Název místnosti"
+        inputProps={{
+          ...register(`buildings.${buildingIndex}.rooms.${roomIndex}.name`),
+          placeholder: "Konferenční místnost 1",
+        }}
+        error={errors.buildings?.[buildingIndex]?.rooms?.[roomIndex]?.name?.message}
+      />
+      <Textarea
+        label="Popis místnosti"
+        inputProps={{
+          ...register(`buildings.${buildingIndex}.rooms.${roomIndex}.description`),
+          placeholder: "Stručný popis místnosti...",
+          rows: 2,
+        }}
+        error={errors.buildings?.[buildingIndex]?.rooms?.[roomIndex]?.description?.message}
+      />
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <Input
+          label="Kapacita (osob)"
+          inputProps={{
+            ...register(`buildings.${buildingIndex}.rooms.${roomIndex}.capacity`),
+            type: "number",
+            min: 1,
+            placeholder: "50",
+          }}
+          error={errors.buildings?.[buildingIndex]?.rooms?.[roomIndex]?.capacity?.message}
+        />
+        <Input
+          label="Plocha (m²)"
+          inputProps={{
+            ...register(`buildings.${buildingIndex}.rooms.${roomIndex}.area`),
+            type: "number",
+            min: 1,
+            placeholder: "80",
+          }}
+          error={errors.buildings?.[buildingIndex]?.rooms?.[roomIndex]?.area?.message}
+        />
+      </div>
+    </div>
+  );
+}
+
+// ── BuildingRoomsFields ──────────────────────────────────────────────────────
 
 interface BuildingRoomsFieldsProps {
   control: Control<FormInputs>;
@@ -47,40 +142,23 @@ function BuildingRoomsFields({
     <div className="flex flex-col gap-3">
       <Input
         label="Název budovy"
-        inputProps={{
-          ...register(`buildings.${buildingIndex}.name`),
-          placeholder: "Budova A",
-        }}
+        inputProps={{ ...register(`buildings.${buildingIndex}.name`), placeholder: "Budova A" }}
         error={errors.buildings?.[buildingIndex]?.name?.message}
       />
       <Textarea
         label="Popis budovy"
-        inputProps={{
-          ...register(`buildings.${buildingIndex}.description`),
-          placeholder: "Stručný popis budovy...",
-          rows: 2,
-        }}
+        inputProps={{ ...register(`buildings.${buildingIndex}.description`), placeholder: "Stručný popis budovy...", rows: 2 }}
         error={errors.buildings?.[buildingIndex]?.description?.message}
       />
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <Input
           label="Kapacita (osob)"
-          inputProps={{
-            ...register(`buildings.${buildingIndex}.capacity`),
-            type: "number",
-            min: 1,
-            placeholder: "200",
-          }}
+          inputProps={{ ...register(`buildings.${buildingIndex}.capacity`), type: "number", min: 1, placeholder: "200" }}
           error={errors.buildings?.[buildingIndex]?.capacity?.message}
         />
         <Input
           label="Plocha (m²)"
-          inputProps={{
-            ...register(`buildings.${buildingIndex}.area`),
-            type: "number",
-            min: 1,
-            placeholder: "500",
-          }}
+          inputProps={{ ...register(`buildings.${buildingIndex}.area`), type: "number", min: 1, placeholder: "500" }}
           error={errors.buildings?.[buildingIndex]?.area?.message}
         />
       </div>
@@ -103,78 +181,16 @@ function BuildingRoomsFields({
           <RepeaterField
             label="Místnosti"
             fields={roomFields as unknown as Record<string, unknown>[]}
-            onAppend={() =>
-              appendRoom({
-                name: "",
-                description: "",
-                capacity: undefined,
-                area: undefined,
-              })
-            }
+            onAppend={() => appendRoom({ name: "", description: "", capacity: undefined, area: undefined })}
             onRemove={removeRoom}
             addButtonLabel="Přidat místnost"
             renderItem={(_item, roomIndex) => (
-              <div className="flex flex-col gap-3">
-                <Input
-                  label="Název místnosti"
-                  inputProps={{
-                    ...register(
-                      `buildings.${buildingIndex}.rooms.${roomIndex}.name`,
-                    ),
-                    placeholder: "Konferenční místnost 1",
-                  }}
-                  error={
-                    errors.buildings?.[buildingIndex]?.rooms?.[roomIndex]?.name
-                      ?.message
-                  }
-                />
-                <Textarea
-                  label="Popis místnosti"
-                  inputProps={{
-                    ...register(
-                      `buildings.${buildingIndex}.rooms.${roomIndex}.description`,
-                    ),
-                    placeholder: "Stručný popis místnosti...",
-                    rows: 2,
-                  }}
-                  error={
-                    errors.buildings?.[buildingIndex]?.rooms?.[roomIndex]
-                      ?.description?.message
-                  }
-                />
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <Input
-                    label="Kapacita (osob)"
-                    inputProps={{
-                      ...register(
-                        `buildings.${buildingIndex}.rooms.${roomIndex}.capacity`,
-                      ),
-                      type: "number",
-                      min: 1,
-                      placeholder: "50",
-                    }}
-                    error={
-                      errors.buildings?.[buildingIndex]?.rooms?.[roomIndex]
-                        ?.capacity?.message
-                    }
-                  />
-                  <Input
-                    label="Plocha (m²)"
-                    inputProps={{
-                      ...register(
-                        `buildings.${buildingIndex}.rooms.${roomIndex}.area`,
-                      ),
-                      type: "number",
-                      min: 1,
-                      placeholder: "80",
-                    }}
-                    error={
-                      errors.buildings?.[buildingIndex]?.rooms?.[roomIndex]
-                        ?.area?.message
-                    }
-                  />
-                </div>
-              </div>
+              <BuildingRoomFields
+                register={register}
+                errors={errors}
+                buildingIndex={buildingIndex}
+                roomIndex={roomIndex}
+              />
             )}
           />
         </div>
@@ -183,7 +199,7 @@ function BuildingRoomsFields({
   );
 }
 
-// ── Area spaces fields ──────────────────────────────────────────────────────
+// ── AreaSpacesFields ─────────────────────────────────────────────────────────
 
 interface AreaSpacesFieldsProps {
   control: Control<FormInputs>;
@@ -191,7 +207,6 @@ interface AreaSpacesFieldsProps {
   errors: FieldErrors<FormInputs>;
   watch: UseFormWatch<FormInputs>;
 }
-
 
 export default function AreaSpacesFields({
   control,
@@ -212,45 +227,7 @@ export default function AreaSpacesFields({
 
   return (
     <div className="flex flex-col gap-6">
-      <Input
-        label="Název areálu"
-        inputProps={{
-          ...register("areaName"),
-          placeholder: "Areál Výstaviště",
-        }}
-        error={errors.areaName?.message}
-      />
-      <Textarea
-        label="Popis areálu"
-        inputProps={{
-          ...register("areaDescription"),
-          placeholder: "Stručný popis areálu...",
-          rows: 3,
-        }}
-        error={errors.areaDescription?.message}
-      />
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <Input
-          label="Kapacita (osob)"
-          inputProps={{
-            ...register("areaCapacity"),
-            type: "number",
-            min: 1,
-            placeholder: "500",
-          }}
-          error={errors.areaCapacity?.message}
-        />
-        <Input
-          label="Plocha (m²)"
-          inputProps={{
-            ...register("areaArea"),
-            type: "number",
-            min: 1,
-            placeholder: "2000",
-          }}
-          error={errors.areaArea?.message}
-        />
-      </div>
+      <AreaFields register={register} errors={errors} />
 
       <Controller
         control={control}

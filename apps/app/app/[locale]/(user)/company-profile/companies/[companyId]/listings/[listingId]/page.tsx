@@ -1,17 +1,15 @@
 "use client";
 
-import { BoolBadge } from "@/app/[locale]/(user)/components/bool-badge";
 import Breadcrumbs from "@/app/[locale]/(user)/components/breadcrumbs";
 import DashboardHeader from "@/app/[locale]/(user)/components/dashboard-header";
 import { DashboardSection } from "@/app/[locale]/(user)/components/dashboard-section";
-import { DetailRow } from "@/app/[locale]/(user)/components/detail-row";
 import EntityRow from "@/app/[locale]/(user)/components/entity-row";
+import InfoSection from "@/app/[locale]/(user)/components/info-section";
 import Loader from "@/app/[locale]/(user)/components/loader";
 import RowContainer from "@/app/[locale]/(user)/components/row-container";
-import { TagList } from "@/app/[locale]/(user)/components/tag";
 import ListingStatusTag from "@/app/[locale]/(user)/components/tags/listing-status-tag";
 import Text from "@/app/components/ui/atoms/text";
-import DeleteEntityModal from "@/app/components/ui/molecules/modals/delete-entity-modal";
+import { confirmActionModalEvents } from "@/app/components/ui/molecules/modals/confirm-action-modal";
 import { useRouter } from "@/app/i18n/navigation";
 import {
   useDeleteListing,
@@ -20,8 +18,6 @@ import {
 } from "@/app/react-query/listings/hooks";
 import { useVariantsByListing } from "@/app/react-query/variants/hooks";
 import {
-  CircleCheck,
-  CircleMinus,
   HelpCircle,
   Package,
   Shield,
@@ -32,7 +28,6 @@ import {
   Zap,
 } from "lucide-react";
 import { useParams } from "next/navigation";
-import { useState } from "react";
 import { ControlSection } from "../../../../../components/control-section";
 import { EntertainmentDetails } from "./components/entertainment-details";
 import { GastroDetails } from "./components/gastro-details";
@@ -56,8 +51,6 @@ const LISTING_TYPE_LABELS: Record<string, string> = {
 
 // ── Page ──────────────────────────────────────────────────────────────────────
 
-// ── Page ──────────────────────────────────────────────────────────────────────
-
 export default function Page() {
   const { companyId, listingId } = useParams<{
     companyId: string;
@@ -70,12 +63,10 @@ export default function Page() {
     listingId,
     companyId,
   );
-  const { mutate: deleteListing, isPending: isDeleting } = useDeleteListing(
+  const { mutate: deleteListing } = useDeleteListing(
     listingId,
     companyId,
   );
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
-
   if (isPending) return <Loader text="Načítám službu..." />;
   if (!listing) return router.back();
 
@@ -86,17 +77,15 @@ export default function Page() {
   };
 
   const handleDeleteConfirm = async () => {
-    deleteListing(undefined, {
-      onSuccess: () => {
-        setShowDeleteModal(false);
-        router.back();
-      },
+    await new Promise<void>((resolve, reject) => {
+      deleteListing(undefined, { onSuccess: () => resolve(), onError: reject });
     });
+    router.back();
   };
 
   const listingType = listing.details[0]?.blockType;
 
-  const infoItems = [
+  const headerInfoItems = [
     { icon: "Banknote", text: `od ${listing.price.startsAt} Kč` },
     ...(listingType
       ? [{ icon: "Tag", text: LISTING_TYPE_LABELS[listingType] ?? listingType }]
@@ -110,6 +99,42 @@ export default function Page() {
           : []),
   ];
 
+  const basicInfoItems = [
+    ...(listing.shortDescription
+      ? [
+          {
+            type: "text" as const,
+            label: "Krátký popis",
+            value: listing.shortDescription,
+          },
+        ]
+      : []),
+    ...(listing.description
+      ? [{ type: "text" as const, label: "Popis", value: listing.description }]
+      : []),
+    ...(listing.eventTypes?.length
+      ? [
+          {
+            type: "tagList" as const,
+            label: "Typy akcí",
+            items: listing.eventTypes,
+          },
+        ]
+      : []),
+    ...(listing.indoor != null
+      ? [{ type: "boolean" as const, label: "Interiér", value: listing.indoor }]
+      : []),
+    ...(listing.outdoor != null
+      ? [
+          {
+            type: "boolean" as const,
+            label: "Exteriér",
+            value: listing.outdoor,
+          },
+        ]
+      : []),
+  ];
+
   const activeFaq = listing.faq?.filter((f) => f.active) ?? [];
 
   return (
@@ -121,7 +146,7 @@ export default function Page() {
         iconColor="text-listing"
         name={listing.name}
         nameSideComponent={<ListingStatusTag status={listing.status} />}
-        infoItems={infoItems}
+        infoItems={headerInfoItems}
         button={{
           text: "Upravit",
           size: "sm",
@@ -139,7 +164,7 @@ export default function Page() {
         <ControlSection
           rows={[
             {
-              icon: isActive ? CircleMinus : CircleCheck,
+              icon: isActive ? "CircleMinus" : "CircleCheck",
               iconColor: isActive ? "text-amber-500" : "text-success",
               iconBgColor: isActive ? "bg-amber-50" : "bg-success-surface",
               title: isActive ? "Deaktivovat službu" : "Aktivovat službu",
@@ -156,7 +181,7 @@ export default function Page() {
               },
             },
             {
-              icon: Trash2,
+              icon: "Trash2",
               iconColor: "text-danger",
               iconBgColor: "bg-danger-surface",
               title: "Smazat službu",
@@ -166,24 +191,30 @@ export default function Page() {
                 version: "dangerFull",
                 iconLeft: "Trash2",
                 size: "sm",
-                onClick: () => setShowDeleteModal(true),
+                onClick: () =>
+                  confirmActionModalEvents.emit("open", {
+                    title: "Smazat službu",
+                    description:
+                      "Tato akce je nevratná a trvale odstraní tuto službu z platformy.",
+                    Icon: Trash2,
+                    buttonText: "Smazat službu",
+                    buttonVersion: "dangerFull",
+                    confirmPhrase: listing.name,
+                    whatIsGoingToHappenText: "Opravdu chcete smazat tuto službu?",
+                    whatIsGoingToHappenTextColor: "danger",
+                    whatIsGoingToHappenList: [
+                      "Služba zmizí z katalogu a nebude dohledatelná",
+                      "Veškerá data, fotografie a nastavení budou trvale odstraněna",
+                      "Platby za tuto službu se přestanou strhávat",
+                    ],
+                    bgColor: "bg-danger-surface",
+                    onConfirmClick: handleDeleteConfirm,
+                  }),
               },
             },
           ]}
         />
 
-        {/* Modal: potvrzení smazání */}
-        <DeleteEntityModal
-          isOpen={showDeleteModal}
-          onClose={() => setShowDeleteModal(false)}
-          onDeleteConfirmClick={handleDeleteConfirm}
-          isDeleting={isDeleting}
-          whatIsGoingToHappenList={[
-            "Služba zmizí z katalogu a nebude dohledatelná",
-            "Veškerá data, fotografie a nastavení budou trvale odstraněna",
-            "Platby za tuto službu se přestanou strhávat",
-          ]}
-        />
         <RowContainer
           icon={<Package className="w-4 h-4 text-violet-500" />}
           label="Varianty"
@@ -223,51 +254,18 @@ export default function Page() {
           emptyHeading="Žádné varianty"
           emptyText="Zatím nebyly přidány žádné varianty"
         />
-        {/* Základní informace */}
-        {(listing.shortDescription ||
-          listing.description ||
-          listing.eventTypes?.length ||
-          listing.indoor != null ||
-          listing.outdoor != null) && (
+
+        {basicInfoItems.length > 0 && (
           <DashboardSection
             title="Základní informace"
             icon={Package}
             iconBg="bg-listing-surface"
             iconColor="text-listing"
           >
-            {listing.shortDescription && (
-              <DetailRow label="Krátký popis">
-                <Text variant="body-sm" color="textLight">
-                  {listing.shortDescription}
-                </Text>
-              </DetailRow>
-            )}
-            {listing.description && (
-              <DetailRow label="Popis">
-                <Text variant="body-sm" color="textDark">
-                  {listing.description}
-                </Text>
-              </DetailRow>
-            )}
-            {listing.eventTypes?.length ? (
-              <DetailRow label="Typy akcí">
-                <TagList items={listing.eventTypes} />
-              </DetailRow>
-            ) : null}
-            {listing.indoor != null && (
-              <DetailRow label="Interiér">
-                <BoolBadge value={listing.indoor} />
-              </DetailRow>
-            )}
-            {listing.outdoor != null && (
-              <DetailRow label="Exteriér">
-                <BoolBadge value={listing.outdoor} />
-              </DetailRow>
-            )}
+            <InfoSection items={basicInfoItems} />
           </DashboardSection>
         )}
 
-        {/* Detail bloky (venue / gastro / entertainment) */}
         {listing.details.map((block, i) => {
           if (block.blockType === "venue")
             return <VenueDetails key={i} block={block} />;
@@ -278,7 +276,6 @@ export default function Page() {
           return null;
         })}
 
-        {/* Technologie (top-level) */}
         {listing.technologies?.length ? (
           <DashboardSection
             title="Technologie"
@@ -286,13 +283,18 @@ export default function Page() {
             iconBg="bg-cyan-50"
             iconColor="text-cyan-500"
           >
-            <DetailRow label="Vybavení">
-              <TagList items={listing.technologies} />
-            </DetailRow>
+            <InfoSection
+              items={[
+                {
+                  type: "tagList",
+                  label: "Vybavení",
+                  items: listing.technologies,
+                },
+              ]}
+            />
           </DashboardSection>
         ) : null}
 
-        {/* Pravidla (top-level) */}
         {listing.rules?.length ? (
           <DashboardSection
             title="Pravidla"
@@ -300,13 +302,14 @@ export default function Page() {
             iconBg="bg-red-50"
             iconColor="text-red-400"
           >
-            <DetailRow label="Pravidla">
-              <TagList items={listing.rules} />
-            </DetailRow>
+            <InfoSection
+              items={[
+                { type: "tagList", label: "Pravidla", items: listing.rules },
+              ]}
+            />
           </DashboardSection>
         ) : null}
 
-        {/* Zaměstnanci */}
         {listing.employees?.length ? (
           <RowContainer
             icon={<Users className="w-4 h-4 text-violet-500" />}
@@ -340,7 +343,6 @@ export default function Page() {
           />
         ) : null}
 
-        {/* Reference */}
         {listing.references?.length ? (
           <RowContainer
             icon={<Star className="w-4 h-4 text-violet-500" />}
@@ -378,7 +380,6 @@ export default function Page() {
           />
         ) : null}
 
-        {/* FAQ */}
         {activeFaq.length > 0 && (
           <DashboardSection
             title="Časté otázky"
@@ -410,8 +411,6 @@ export default function Page() {
             ))}
           </DashboardSection>
         )}
-
-        {/* Varianty */}
       </div>
     </main>
   );

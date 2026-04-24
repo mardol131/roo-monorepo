@@ -1,5 +1,7 @@
 import Text from "@/app/components/ui/atoms/text";
 import { ElementType } from "react";
+import DashboardSectionHeader from "./dashboard-section-header";
+import { DashboardSection } from "./dashboard-section";
 
 type Props = {
   heading: string;
@@ -17,17 +19,12 @@ export function ItemListCard({
   iconBgColor,
 }: Props) {
   return (
-    <div className="bg-white rounded-2xl border border-zinc-200 p-5">
-      <div className="flex items-center gap-2 mb-3">
-        <div
-          className={`w-7 h-7 rounded-lg flex items-center justify-center ${iconBgColor}`}
-        >
-          <Icon className={`w-3.5 h-3.5 ${iconColor}`} />
-        </div>
-        <Text variant="h4" color="textDark">
-          {heading}
-        </Text>
-      </div>
+    <DashboardSection
+      title={heading}
+      icon={Icon}
+      iconColor={iconColor}
+      iconBg={iconBgColor}
+    >
       <ul className="flex flex-col gap-1.5">
         {items.map((item, i) => (
           <li key={i} className="flex items-center gap-2">
@@ -38,6 +35,6 @@ export function ItemListCard({
           </li>
         ))}
       </ul>
-    </div>
+    </DashboardSection>
   );
 }

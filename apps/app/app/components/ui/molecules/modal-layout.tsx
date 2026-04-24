@@ -9,6 +9,7 @@ interface ModalLayoutProps extends PropsWithChildren {
   onClose: () => void;
   isOpen?: boolean;
   maxWidth?: string;
+  disableClose?: boolean;
 }
 
 export default function ModalLayout({
@@ -17,18 +18,24 @@ export default function ModalLayout({
   children,
   isOpen,
   maxWidth = "max-w-2xl",
+  disableClose = false,
 }: ModalLayoutProps) {
   if (!isOpen) return null;
+
+  const handleClose = () => {
+    if (!disableClose) onClose();
+  };
+
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
       {/* Backdrop */}
       <div
         className="absolute inset-0"
-        onClick={onClose}
+        onClick={handleClose}
         role="button"
         tabIndex={0}
         onKeyDown={(e) => {
-          if (e.key === "Escape") onClose();
+          if (e.key === "Escape") handleClose();
         }}
       />
 
@@ -47,8 +54,9 @@ export default function ModalLayout({
             header
           )}
           <button
-            onClick={onClose}
-            className="p-1 hover:bg-zinc-100 rounded-lg transition-colors"
+            onClick={handleClose}
+            disabled={disableClose}
+            className="p-1 hover:bg-zinc-100 rounded-lg transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
             aria-label="Zavřít modal"
           >
             <X className="w-5 h-5 text-zinc-600 hover:text-zinc-900" />

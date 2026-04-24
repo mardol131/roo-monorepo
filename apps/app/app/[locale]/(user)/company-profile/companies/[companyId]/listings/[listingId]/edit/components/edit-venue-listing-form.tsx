@@ -452,11 +452,8 @@ export default function EditVenueListingForm({
   console.log("form errors", errors);
 
   return (
-    <div className="flex gap-6">
-      <form
-        onSubmit={handleSubmit(onSubmit)}
-        className="flex w-full flex-col gap-4"
-      >
+    <form onSubmit={handleSubmit(onSubmit)} className="flex gap-6">
+      <div className="flex w-full flex-col gap-4">
         {/* ── 1. Základní informace ─────────────────────────────────────────────── */}
         <FormSection
           id="section-basic"
@@ -1540,7 +1537,7 @@ export default function EditVenueListingForm({
             htmlType="submit"
           />
         </div>
-      </form>
+      </div>
       <FormToc
         textColor="text-listing"
         dotColor="text-listing"
@@ -1550,6 +1547,6 @@ export default function EditVenueListingForm({
         buttonVersion="listingFull"
         buttonText="Uložení"
       />
-    </div>
+    </form>
   );
 }
