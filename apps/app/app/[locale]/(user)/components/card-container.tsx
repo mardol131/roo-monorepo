@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { EmptyState } from "./empty-state";
+import TabFilter from "./tab-filter";
 
 type Filter = { label: string; value: string };
 
@@ -34,22 +35,12 @@ export default function CardContainer({
   return (
     <>
       {filters && filters.length > 0 && (
-        <div className="flex items-center gap-1 p-1 bg-zinc-100 rounded-xl w-fit mb-6">
-          {filters.map((tab) => (
-            <button
-              key={tab.value}
-              type="button"
-              onClick={() => setActiveFilter(tab.value)}
-              className={`px-4 py-1.5 text-sm font-medium rounded-lg transition-colors ${
-                activeFilter === tab.value
-                  ? "bg-white text-zinc-900 shadow-sm"
-                  : "text-zinc-500 hover:text-zinc-700"
-              }`}
-            >
-              {tab.label}
-            </button>
-          ))}
-        </div>
+        <TabFilter
+          tabs={filters}
+          activeTab={activeFilter}
+          onChange={setActiveFilter}
+          className="mb-6"
+        />
       )}
 
       {filtered.length === 0 ? (

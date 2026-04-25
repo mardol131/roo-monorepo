@@ -1,13 +1,25 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Listing } from "@roo/common";
 import { companyKeys, inquiryKeys, listingKeys } from "../query-keys";
-import { fetchInquiriesByListing, fetchInquiry, updateInquiry } from "./fetch";
+import {
+  fetchInquiries,
+  fetchInquiriesByListing,
+  fetchInquiry,
+  updateInquiry,
+} from "./fetch";
 
 export function useInquiriesByListing(listingId: string) {
   return useQuery({
     queryKey: inquiryKeys.byListing(listingId),
     queryFn: () => fetchInquiriesByListing(listingId),
     enabled: !!listingId,
+  });
+}
+
+export function useInquiries() {
+  return useQuery({
+    queryKey: inquiryKeys.all(),
+    queryFn: () => fetchInquiries(),
   });
 }
 

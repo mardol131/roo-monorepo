@@ -11,7 +11,7 @@ import Breadcrumbs from "../../../components/breadcrumbs";
 import EntityRow from "../../../components/entity-row";
 import RowContainer from "../../../components/row-container";
 import ListingStatusTag from "../../../components/tags/listing-status-tag";
-import { SummaryCard } from "../../../user-profile/components/summary-card";
+import { SummaryCard } from "../../../components/summary-card";
 import DashboardHeader from "../../../components/dashboard-header";
 
 export default function page() {

@@ -1,4 +1,4 @@
-import { fetchMessagesByInquiry } from "@/app/react-query/chat-messages/fetch";
+import { fetchChatMessagesByInquiry } from "@/app/react-query/chat-messages/fetch";
 import { fetchInquiry } from "@/app/react-query/inquiries/fetch";
 import { useInquiry } from "@/app/react-query/inquiries/hooks";
 import { chatMessageKeys, inquiryKeys } from "@/app/react-query/query-keys";
@@ -32,7 +32,7 @@ export default async function layout({
 
   await queryClient.prefetchQuery({
     queryKey: chatMessageKeys.byInquiry(inquiryId),
-    queryFn: () => fetchMessagesByInquiry(inquiryId),
+    queryFn: () => fetchChatMessagesByInquiry(inquiryId),
   });
 
   return (

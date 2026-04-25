@@ -29,21 +29,21 @@ type Props = {
 export default function layout({ children }: Props) {
   const sidebarProps: SidebarProps = {
     mainMenuItems: [
-      { label: "Přehled", href: "/company-profile", icon: LayoutDashboard },
-      { label: "Firmy", href: "/company-profile/companies", icon: Building2 },
+      { label: "Přehled", href: "/company-profile", icon: "LayoutDashboard" },
+      { label: "Firmy", href: "/company-profile/companies", icon: "Building2" },
       {
         label: "Přidat firmu",
         href: "/company-profile/companies/new",
-        icon: Plus,
+        icon: "Plus",
       },
     ],
     subMenuItems: [
       {
         label: "Nastavení",
         href: "/company-profile/profile-settings",
-        icon: Settings,
+        icon: "Settings",
       },
-      { label: "Odhlásit se", href: "/homepage", icon: LogOut },
+      { label: "Odhlásit se", href: "/homepage", icon: "LogOut" },
     ],
   };
 
@@ -66,7 +66,7 @@ export default function layout({ children }: Props) {
           pathname: "/company-profile/companies/[companyId]",
           params: { companyId },
         },
-        icon: LayoutDashboard,
+        icon: "LayoutDashboard",
       },
 
       {
@@ -75,7 +75,7 @@ export default function layout({ children }: Props) {
           pathname: "/company-profile/companies/[companyId]/edit",
           params: { companyId },
         },
-        icon: Settings,
+        icon: "Settings",
       },
       {
         label: "Služby",
@@ -83,7 +83,7 @@ export default function layout({ children }: Props) {
           pathname: "/company-profile/companies/[companyId]/listings",
           params: { companyId },
         },
-        icon: Tag,
+        icon: "Tag",
       },
       {
         label: "Nová služba",
@@ -91,7 +91,7 @@ export default function layout({ children }: Props) {
           pathname: "/company-profile/companies/[companyId]/listings/new",
           params: { companyId },
         },
-        icon: Plus,
+        icon: "Plus",
       },
     ];
 
@@ -102,7 +102,7 @@ export default function layout({ children }: Props) {
           "/company-profile/companies/[companyId]/listings/[listingId]/spaces",
         params: { companyId, listingId: listingId! },
       },
-      icon: LandPlot,
+      icon: "LandPlot",
     };
 
     const subMenuItems: SubSidebarProps["subMenuItems"] = listingId
@@ -114,7 +114,7 @@ export default function layout({ children }: Props) {
                 "/company-profile/companies/[companyId]/listings/[listingId]",
               params: { companyId, listingId },
             },
-            icon: LayoutDashboard,
+            icon: "LayoutDashboard",
           },
           {
             label: "Detailní nastavení služby",
@@ -123,7 +123,7 @@ export default function layout({ children }: Props) {
                 "/company-profile/companies/[companyId]/listings/[listingId]/edit",
               params: { companyId, listingId },
             },
-            icon: Settings,
+            icon: "Settings",
           },
           {
             label: "Poptávky",
@@ -132,7 +132,7 @@ export default function layout({ children }: Props) {
                 "/company-profile/companies/[companyId]/listings/[listingId]/inquiries",
               params: { companyId, listingId },
             },
-            icon: MessageSquare,
+            icon: "MessageSquare",
           },
           {
             label: "Zprávy",
@@ -141,7 +141,7 @@ export default function layout({ children }: Props) {
                 "/company-profile/companies/[companyId]/listings/[listingId]/messages",
               params: { companyId, listingId },
             },
-            icon: MessageCircle,
+            icon: "MessageCircle",
           },
 
           {
@@ -151,7 +151,7 @@ export default function layout({ children }: Props) {
                 "/company-profile/companies/[companyId]/listings/[listingId]/calendar",
               params: { companyId, listingId },
             },
-            icon: Calendar,
+            icon: "Calendar",
           },
 
           ...(listing?.details[0]?.blockType === "venue"
@@ -164,7 +164,7 @@ export default function layout({ children }: Props) {
                 "/company-profile/companies/[companyId]/listings/[listingId]/variants",
               params: { companyId, listingId },
             },
-            icon: Layers,
+            icon: "Layers",
           },
           {
             label: "Nová varianta",
@@ -173,7 +173,7 @@ export default function layout({ children }: Props) {
                 "/company-profile/companies/[companyId]/listings/[listingId]/variants/new",
               params: { companyId, listingId },
             },
-            icon: Plus,
+            icon: "Plus",
           },
         ]
       : undefined;

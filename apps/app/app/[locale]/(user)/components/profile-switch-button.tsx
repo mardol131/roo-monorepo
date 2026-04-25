@@ -1,7 +1,6 @@
 "use client";
 
 import { usePathname } from "@/app/i18n/navigation";
-import { Building2, User } from "lucide-react";
 import { SidebarNavItem } from "./sidebar-item";
 
 export default function ProfileSwitchButton() {
@@ -12,13 +11,13 @@ export default function ProfileSwitchButton() {
       <SidebarNavItem
         label="Osobní"
         href="/user-profile"
-        icon={User}
+        icon="User"
         active={pathname.startsWith("/user-profile")}
       />
       <SidebarNavItem
         label="Firemní"
         href="/company-profile"
-        icon={Building2}
+        icon="Building2"
         active={pathname.startsWith("/company-profile")}
       />
     </div>

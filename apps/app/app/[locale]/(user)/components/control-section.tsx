@@ -13,6 +13,7 @@ export type ControlRow = {
   title: string;
   text: string;
   button: ButtonProps;
+  disabled?: boolean;
 };
 
 export function ControlSection({ rows }: { rows: ControlRow[] }) {
@@ -29,7 +30,7 @@ export function ControlSection({ rows }: { rows: ControlRow[] }) {
           return (
             <div
               key={i}
-              className="flex items-center justify-between py-3 first:pt-0 last:pb-0"
+              className={`flex items-center justify-between py-3 first:pt-0 last:pb-0 ${row.disabled ? "opacity-50 pointer-events-none" : ""}`}
             >
               <div className="flex items-start gap-3">
                 <div
@@ -49,6 +50,7 @@ export function ControlSection({ rows }: { rows: ControlRow[] }) {
               <Button
                 {...row.button}
                 className={`ml-4 shrink-0 ${row.button.className ?? ""}`}
+                disabled={row.disabled}
               />
             </div>
           );

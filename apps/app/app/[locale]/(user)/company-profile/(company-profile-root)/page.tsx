@@ -2,7 +2,7 @@ import Button from "@/app/components/ui/atoms/button";
 import { Tag, Building2 } from "lucide-react";
 import PageHeading from "../../components/page-heading";
 import RowContainer from "../../components/row-container";
-import { SummaryCard } from "../../user-profile/components/summary-card";
+import { SummaryCard } from "../../components/summary-card";
 import { COMPANIES, LISTINGS } from "../../../../_mock/mock";
 import EntityRow from "../../components/entity-row";
 import EntityComponentTag from "../../components/tags/entity-component-tag";

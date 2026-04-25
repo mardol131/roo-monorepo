@@ -25,7 +25,8 @@ export default function Sidebar({
   const pathname = usePathname();
 
   const isActive = useCallback(
-    (href: IntlPathname) => {
+    (href?: IntlPathname) => {
+      if (!href) return false;
       if (typeof href === "string") {
         return pathname === href;
       } else if ("params" in href) {
@@ -53,7 +54,7 @@ export default function Sidebar({
           <ul className="flex flex-col gap-1">
             {mainMenuItems.map((item) => (
               <SidebarNavItem
-                key={item.href.toString()}
+                key={item.href?.toString() || item.label}
                 {...item}
                 active={isActive(item.href)}
               />
@@ -67,7 +68,7 @@ export default function Sidebar({
               <ProfileSwitchButton />
               {subMenuItems.map((item) => (
                 <SidebarNavItem
-                  key={item.href.toString()}
+                  key={item.href?.toString() || item.label}
                   {...item}
                   active={isActive(item.href)}
                 />

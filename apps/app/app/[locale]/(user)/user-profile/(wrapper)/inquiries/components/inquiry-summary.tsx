@@ -1,7 +1,7 @@
 import React from "react";
 import Text from "@/app/components/ui/atoms/text";
 import { CheckCircle2, Clock, MessageSquare } from "lucide-react";
-import { SummaryCard } from "../../components/summary-card";
+import { SummaryCard } from "../../../../components/summary-card";
 
 type Props = {
   total: number;

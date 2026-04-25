@@ -12,9 +12,9 @@ import { useVariant } from "@/app/react-query/variants/hooks";
 import { Variant } from "@roo/common";
 import { Banknote, Check, Package, X } from "lucide-react";
 import { useParams } from "next/navigation";
-import { EntertainmentDetails } from "./components/entertainment-details";
-import { GastroDetails } from "./components/gastro-details";
-import { VenueDetails } from "./components/venue-details";
+import { EntertainmentDetails } from "../../../../../../../components/variant-entertainment-details";
+import { GastroDetails } from "../../../../../../../components/variant-gastro-details";
+import { VenueDetails } from "../../../../../../../components/variant-venue-details";
 
 const TYPE_LABELS: Record<Variant["type"], string> = {
   allYear: "Celoroční",
@@ -97,10 +97,28 @@ export default function Page() {
             iconBg="bg-variant-surface"
             iconColor="text-variant"
           >
-            <InfoSection items={[
-              ...(variant.shortDescription ? [{ type: "text" as const, label: "Krátký popis", value: variant.shortDescription }] : []),
-              ...(variant.description ? [{ type: "text" as const, label: "Popis", value: variant.description }] : []),
-            ]} />
+            <InfoSection
+              items={[
+                ...(variant.shortDescription
+                  ? [
+                      {
+                        type: "text" as const,
+                        label: "Krátký popis",
+                        value: variant.shortDescription,
+                      },
+                    ]
+                  : []),
+                ...(variant.description
+                  ? [
+                      {
+                        type: "text" as const,
+                        label: "Popis",
+                        value: variant.description,
+                      },
+                    ]
+                  : []),
+              ]}
+            />
           </DashboardSection>
         )}
         {/* Includes / Excludes */}

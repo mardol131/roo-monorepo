@@ -15,6 +15,7 @@ type ModalConfig = {
   whatIsGoingToHappenText: string;
   whatIsGoingToHappenTextColor?: TextProps["color"];
   bgColor?: string;
+  borderColor?: string;
   textColor?: string;
   buttonVersion: ButtonProps["version"];
   buttonText: string;
@@ -84,14 +85,17 @@ export function ConfirmActionModal() {
     title,
     description,
     Icon,
+    borderColor,
   } = config;
 
   return (
     <ModalLayout
       header={
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl flex items-center justify-center bg-red-100 shrink-0">
-            <Icon className="w-4.5 h-4.5 text-red-600" />
+          <div
+            className={`w-9 h-9 rounded-xl flex items-center justify-center ${bgColor} shrink-0`}
+          >
+            <Icon className={`w-4.5 h-4.5 ${textColor}`} />
           </div>
           <div>
             <Text variant="h4" color="textDark">
@@ -110,7 +114,7 @@ export function ConfirmActionModal() {
     >
       <div className="flex flex-col gap-4">
         <div
-          className={`${bgColor} border border-red-200 rounded-xl p-4 flex flex-col gap-1.5`}
+          className={`${bgColor} border ${borderColor || "border-zinc-200"} rounded-xl p-4 flex flex-col gap-1.5`}
         >
           <Text variant="label-lg" color={whatIsGoingToHappenTextColor}>
             {whatIsGoingToHappenText}
@@ -159,7 +163,7 @@ export function ConfirmActionModal() {
               : isProcessing
           }
           onClick={handleConfirm}
-          className="w-full bg-red-600 hover:bg-red-700 border-red-600"
+          className="w-full"
         />
       </div>
     </ModalLayout>

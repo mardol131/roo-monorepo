@@ -17,8 +17,6 @@ import { Check, Coins, Package, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useParams } from "next/navigation";
 
-import CustomerCard from "./components/customer-card";
-import InquiryDetails from "../../../../../../../components/inquiry-details";
 import { AlertSection } from "@/app/[locale]/(user)/components/alert-section";
 import { useChatMessagesByInquiry } from "@/app/react-query/chat-messages/hooks";
 import { useState } from "react";
@@ -26,6 +24,7 @@ import { PriceChangeModal } from "@/app/components/ui/molecules/modals/price-cha
 import { VariantVenueDetails } from "@/app/[locale]/(user)/components/variant-venue-details";
 import { VariantGastroDetails } from "@/app/[locale]/(user)/components/variant-gastro-details";
 import { VariantEntertainmentDetails } from "@/app/[locale]/(user)/components/variant-entertainment-details";
+import InquiryDetails from "@/app/[locale]/(user)/components/inquiry-details";
 
 export default function page() {
   const { companyId, listingId, inquiryId } = useParams<{
@@ -83,44 +82,27 @@ export default function page() {
           companyStatus={inquiry.companyStatus}
         />
       </div>
+      {inquiry.userStatus === "confirmed" &&
+        inquiry.companyStatus === "confirmed" && (
+          <AlertSection
+            icon={Check}
+            iconBg="bg-success-surface"
+            iconColor="text-success"
+            borderColor="border-success"
+            title="Firma potvrdila poptávku"
+            text="Firma potvrdila poptávku dle nastavených podmínek, které můžete vidět níže."
+            bgColor="bg-success-surface"
+          />
+        )}
       {inquiry.userStatus === "confirmed" && (
         <AlertSection
           icon={Check}
           iconBg="bg-success-surface"
           iconColor="text-success"
           borderColor="border-success"
-          title="Poptávající odsouhlasil poptávku"
-          text="Zákazník odsouhlasil poptávku. Teď je řada na vás. Potvrzení poptávky je finální krok. Pokud poptávku potvrdíte, zákazník obdrží oznámení a poptávka přejde do stavu 'Závazně potvrzeno'."
-          bgColor="bg-success-surface"
-          button={{
-            text: "Závazně potvrdit poptávku",
-            version: "successFull",
-            iconLeft: "Check",
-            size: "sm",
-            onClick: () =>
-              confirmActionModalEvents.emit("open", {
-                title: "Potvrdit poptávku",
-                description:
-                  "Zákazník bude informován, že jeho poptávka byla potvrzena.",
-                Icon: Check,
-                borderColor: "border-success",
-                buttonText: "Potvrdit poptávku",
-                buttonVersion: "successFull",
-                textColor: "text-success",
-                whatIsGoingToHappenText:
-                  "Opravdu chcete potvrdit tuto poptávku?",
-                whatIsGoingToHappenTextColor: "success",
-                whatIsGoingToHappenList: [
-                  "Zákazník obdrží oznámení o potvrzení",
-                  "Poptávka přejde do stavu 'Závazně potvrzeno'",
-                  "Tuto akci nelze vrátit zpět",
-                ],
-                bgColor: "bg-success-surface",
-                onConfirmClick: async () => {
-                  // TODO: reject inquiry mutation
-                },
-              }),
-          }}
+          title="Teď je řada na firmě"
+          text="Z vaší strany je vše připraveno. Teď je třeba ještě počkat na finální potvrzení od dodavatele."
+          bgColor="bg-linear-to-r from-success-surface to-white"
         />
       )}
       {inquiry.userStatus === "cancelled" && (
@@ -145,16 +127,15 @@ export default function page() {
         rows={[
           {
             disabled: inquiry.userStatus === "confirmed",
-            title: "Navrhnout novou cenu",
-            text: "Můžete přizpůsobit cenu poptávky a odeslat návrh zákazníkovi.",
-            icon: "Coins",
-            iconColor: "text-yellow-600",
-            iconBgColor: "bg-yellow-100",
+            title: "Potvrdit poptávku",
+            text: "Potvzením poptávky uzavíráte dohodu s firmou. Z vaší strany již budou podmínky neměnné",
+            icon: "Check",
+            iconColor: "text-success",
+            iconBgColor: "bg-success-surface",
             button: {
-              version: "none",
-              className: "bg-yellow-500 text-white",
-              text: "Změnit cenu",
-              iconLeft: "Coins",
+              version: "successFull",
+              text: "Potvrdit",
+              iconLeft: "Check",
               size: "sm",
               onClick: () => priceChangeModalStateHandler(),
             },
@@ -199,10 +180,9 @@ export default function page() {
       />
       <ChatWindow
         initialMessages={chatMessages || []}
-        senderRole="company"
+        senderRole="user"
         inquiryId={inquiry.id}
       />
-      <CustomerCard user={inquiry.user} />
       {typeof inquiry.variant?.value !== "string" && inquiry.variant?.value && (
         <>
           <VariantSection

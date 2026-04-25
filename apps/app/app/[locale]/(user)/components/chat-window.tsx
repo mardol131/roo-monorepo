@@ -35,7 +35,7 @@ export default function ChatWindow({
   );
   const [draft, setDraft] = useState("");
   const [countdown, setCountdown] = useState(10);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -67,12 +67,9 @@ export default function ChatWindow({
   };
 
   useEffect(() => {
-    if (messagesEndRef.current) {
-      messagesEndRef.current.scrollTo({
-        top: messagesEndRef.current.scrollHeight,
-        behavior: "smooth",
-      });
-    }
+    const el = scrollContainerRef.current;
+    if (!el) return;
+    el.scrollTop = el.scrollHeight;
   }, [messages]);
 
   return (
@@ -85,10 +82,7 @@ export default function ChatWindow({
       />
 
       {/* Messages */}
-      <div
-        ref={messagesEndRef}
-        className="flex-1 h-full overflow-y-scroll px-5 py-4 flex flex-col gap-3"
-      >
+      <div ref={scrollContainerRef} className="flex-1 min-h-0 overflow-y-auto px-5 py-4 flex flex-col gap-3">
         {messages.map((msg) => (
           <ChatBubble key={msg.id} message={msg} senderRole={senderRole} />
         ))}
@@ -139,16 +133,14 @@ function ChatBubble({
   message: Message;
   senderRole: "user" | "company";
 }) {
-  const isUser = message.senderType === senderRole;
+  const isMine = message.senderType === senderRole;
   return (
-    <div
-      className={`flex flex-col gap-1 ${isUser ? "items-end" : "items-start"}`}
-    >
+    <div className={`flex flex-col gap-1 ${isMine ? "items-end" : "items-start"}`}>
       <div
         className={`max-w-[80%] px-4 py-2.5 rounded-2xl text-sm leading-relaxed ${
-          isUser
+          isMine
             ? "bg-rose-500 text-white rounded-br-md"
-            : "bg-zinc-800 text-white rounded-bl-md"
+            : "bg-zinc-100 text-zinc-900 rounded-bl-md"
         }`}
       >
         {message.content}

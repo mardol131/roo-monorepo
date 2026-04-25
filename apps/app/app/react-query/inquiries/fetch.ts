@@ -12,6 +12,12 @@ export async function fetchInquiriesByListing(listingId: string) {
   return res;
 }
 
+export async function fetchInquiries() {
+  const res = getInquiries();
+  if (!res) throw new Error("Failed to fetch inquiries");
+  return res;
+}
+
 export async function fetchInquiry(id: string) {
   const res = getInquiries().find((inquiry) => inquiry.id === id);
   if (!res) throw new Error("Failed to fetch inquiry");

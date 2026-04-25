@@ -8,12 +8,12 @@ import {
 } from "@roo/common";
 import { format } from "date-fns";
 import { cs } from "date-fns/locale";
-import PageHeading from "../../components/page-heading";
-import RowContainer from "../../components/row-container";
-import EntityRow from "../../components/entity-row";
-import { EmptyState } from "../../components/empty-state";
-import EntityComponentTag from "../../components/tags/entity-component-tag";
-import { getInquiries } from "../../../../_mock/mock";
+import PageHeading from "../../../components/page-heading";
+import RowContainer from "../../../components/row-container";
+import EntityRow from "../../../components/entity-row";
+import { EmptyState } from "../../../components/empty-state";
+import EntityComponentTag from "../../../components/tags/entity-component-tag";
+import { getInquiries } from "../../../../../_mock/mock";
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
 

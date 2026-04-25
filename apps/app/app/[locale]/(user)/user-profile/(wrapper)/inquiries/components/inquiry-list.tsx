@@ -1,5 +1,6 @@
 "use client";
 
+import InquiryStatusTag from "@/app/[locale]/(user)/components/tags/inquiry-status-tag";
 import Text from "@/app/components/ui/atoms/text";
 import { Link } from "@/app/i18n/navigation";
 import {
@@ -8,10 +9,13 @@ import {
   getIdFromRelationshipField,
   Inquiry,
 } from "@roo/common";
+import { format } from "date-fns";
 import { MessageSquare } from "lucide-react";
 import { useState } from "react";
-import RowContainer from "../../../components/row-container";
-import EntityRow from "../../../components/entity-row";
+import EntityRow from "../../../../components/entity-row";
+import RowContainer from "../../../../components/row-container";
+import TabFilter from "../../../../components/tab-filter";
+import { EmptyState } from "@/app/[locale]/(user)/components/empty-state";
 
 // ── Config ─────────────────────────────────────────────────────────────────────
 
@@ -61,33 +65,18 @@ export default function InquiryList({ inquiries }: { inquiries: Inquiry[] }) {
 
   return (
     <div>
-      {/* Tabs */}
-      <div className="flex items-center gap-1 p-1 bg-zinc-100 rounded-xl w-fit mb-6">
-        {TABS.map((tab) => (
-          <button
-            key={tab.value}
-            type="button"
-            onClick={() => setActiveTab(tab.value)}
-            className={`px-4 py-1.5 text-sm font-medium rounded-lg transition-colors ${
-              activeTab === tab.value
-                ? "bg-white text-zinc-900 shadow-sm"
-                : "text-zinc-500 hover:text-zinc-700"
-            }`}
-          >
-            {tab.label}
-          </button>
-        ))}
-      </div>
+      <TabFilter
+        tabs={TABS}
+        activeTab={activeTab}
+        onChange={setActiveTab}
+        className="mb-6"
+      />
 
       {filtered.length === 0 ? (
-        <div className="bg-white rounded-2xl border border-zinc-200 flex flex-col items-center justify-center py-12 px-8 text-center">
-          <Text variant="label-lg" color="secondary" className="mb-1">
-            Žádné poptávky
-          </Text>
-          <Text variant="caption" color="secondary">
-            V této kategorii nemáte žádné poptávky.
-          </Text>
-        </div>
+        <EmptyState
+          text="Žádné poptávky"
+          subtext="Zatím jste neposlali žádné poptávky."
+        />
       ) : (
         <div className="flex flex-col gap-4">
           {grouped.map(({ event, inquiries: group }) => {
@@ -120,7 +109,31 @@ export default function InquiryList({ inquiries }: { inquiries: Inquiry[] }) {
                       icon="MessageSquare"
                       iconBackgroundColor="bg-inquiry-surface"
                       iconColor="text-inquiry"
-                      items={[]}
+                      items={[
+                        {
+                          icon: "Clock",
+                          content: format(
+                            new Date(inquiry.sentAt),
+                            "d. M. yyyy",
+                          ),
+                        },
+                        {
+                          icon: "Activity",
+                          content: {
+                            pending: "Čeká na odpověď",
+                            confirmed: "Potvrzeno",
+                            cancelled: "Zrušeno",
+                          }[inquiry.userStatus],
+                        },
+                        ...(inquiry.quotedPrice
+                          ? [
+                              {
+                                icon: "Wallet" as const,
+                                content: `${inquiry.quotedPrice.toLocaleString("cs-CZ")} Kč`,
+                              },
+                            ]
+                          : []),
+                      ]}
                       link={{
                         pathname:
                           "/user-profile/my-events/[eventId]/[inquiryId]",
@@ -129,6 +142,12 @@ export default function InquiryList({ inquiries }: { inquiries: Inquiry[] }) {
                           inquiryId: inquiry.id,
                         },
                       }}
+                      rightComponent={
+                        <InquiryStatusTag
+                          userStatus={inquiry.userStatus}
+                          companyStatus={inquiry.companyStatus}
+                        />
+                      }
                     />
                   ))}
                 headerRightComponent={
