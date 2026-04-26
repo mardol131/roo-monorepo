@@ -3,10 +3,18 @@ import { Listing } from "@roo/common";
 import { companyKeys, listingKeys } from "../query-keys";
 import {
   deleteListing,
+  fetchAllListings,
   fetchListing,
   fetchListingsByCompany,
   updateListing,
 } from "./fetch";
+
+export function useListings() {
+  return useQuery({
+    queryKey: listingKeys.catalog(),
+    queryFn: fetchAllListings,
+  });
+}
 
 export function useListingsByCompany(companyId: string) {
   return useQuery({

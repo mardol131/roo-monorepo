@@ -44,8 +44,17 @@ export const Events: CollectionConfig = {
       type: 'array',
       fields: [
         {
-          name: 'item',
+          name: 'label',
           type: 'text',
+          required: true,
+        },
+        {
+          name: 'description',
+          type: 'text',
+        },
+        {
+          name: 'dueDate',
+          type: 'date',
         },
         {
           name: 'completed',
@@ -76,26 +85,60 @@ export const Events: CollectionConfig = {
     },
     {
       name: 'location',
-      type: 'group',
-      fields: [
+      type: 'blocks',
+      maxRows: 1,
+      blocks: [
         {
-          name: 'city',
-          type: 'relationship',
-          relationTo: 'cities',
+          slug: 'venue',
+          fields: [
+            {
+              name: 'venue',
+              type: 'relationship',
+              relationTo: 'listings',
+              admin: {
+                description: 'Vyberte venue z katalogu služeb.',
+              },
+            },
+          ],
         },
         {
-          name: 'address',
-          type: 'text',
-        },
-        {
-          name: 'useVenueAsLocation',
-          type: 'checkbox',
-          defaultValue: false,
-        },
-        {
-          name: 'venue',
-          type: 'relationship',
-          relationTo: 'listings',
+          slug: 'custom',
+          fields: [
+            {
+              name: 'city',
+              type: 'relationship',
+              relationTo: 'cities',
+            },
+            {
+              name: 'address',
+              type: 'text',
+              admin: {
+                placeholder: 'Ulice a číslo popisné',
+              },
+            },
+            {
+              name: 'buildingType',
+              type: 'select',
+              options: [
+                { label: 'Hotel', value: 'hotel' },
+                { label: 'Restaurace', value: 'restaurant' },
+                { label: 'Konferenční centrum', value: 'conference_center' },
+                { label: 'Venkovní prostory', value: 'outdoor' },
+                { label: 'Soukromé prostory', value: 'private' },
+                { label: 'Jiné', value: 'other' },
+              ],
+              admin: {
+                description: 'Nepovinné.',
+              },
+            },
+            {
+              name: 'description',
+              type: 'text',
+              admin: {
+                description: 'Nepovinný popis místa (např. „Zahrada u rodinného domu").',
+              },
+            },
+          ],
         },
       ],
     },

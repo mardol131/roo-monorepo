@@ -10,12 +10,13 @@ export const routing = defineRouting({
     "/homepage": { cs: "/" },
     "/catalog": { cs: "/katalog" },
     "/catalog/[type]": { cs: "/katalog/[type]" },
-    "/listing/[id]": { cs: "/inzerat/[id]" },
-    "/listing/[id]/booking": { cs: "/inzerat/[id]/poptavka" },
+    "/listing/[listingId]": { cs: "/inzerat/[listingId]" },
+    "/listing/[listingId]/booking": { cs: "/inzerat/[listingId]/poptavka" },
 
     // authorization
     "/login": { cs: "/prihlaseni" },
     "/register": { cs: "/registrace" },
+    "/register-company": { cs: "/registrace-firemniho-uctu" },
     "/password-reset": { cs: "/obnoveni-hesla" },
 
     // user profile

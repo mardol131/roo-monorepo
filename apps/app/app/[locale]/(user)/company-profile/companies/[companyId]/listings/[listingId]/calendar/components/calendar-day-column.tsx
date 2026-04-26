@@ -131,7 +131,7 @@ export default function CalendarDayColumn({
   return (
     <div
       ref={colRef}
-      className="flex-1 min-w-20 border-l border-zinc-100 relative select-none"
+      className="flex-1 border-l border-zinc-100 relative select-none"
       style={{ touchAction: "none" }}
       onPointerDown={handlePointerDown}
       onPointerMove={handlePointerMove}

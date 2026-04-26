@@ -82,7 +82,8 @@
 - Přidat services do listings, variants a obecně umožnit registraci službám
 - U každé poptávky pro přihlášeného uživatele zobrazit, jestli už jej má v nějakém eventu
 - Možnost specifikovat vlastní místo přímo na eventu - včetně zásuvek, necessities apod.
-- Možnost sdílet venu nebo vlastní místo s dodavatelem
+- Možnost sdílet venu nebo vlastní místo s dodavatelem¨
+- Do chatu přidat možnost odesílat strukturované formuláře - firma nebo uživatel vyplní otázku, do chatu se druhé straně zobrazí input pro odpověď a odpověď se ukládá do nějakého summary.
 
 # Blog
 

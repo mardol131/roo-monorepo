@@ -1,4 +1,5 @@
 import type { CollectionConfig } from 'payload'
+import { getPhoneField } from './common-fields/phone'
 
 export const Companies: CollectionConfig = {
   slug: 'companies',
@@ -28,11 +29,7 @@ export const Companies: CollectionConfig = {
       type: 'email',
       required: true,
     },
-    {
-      name: 'phone',
-      type: 'text',
-      required: true,
-    },
+    getPhoneField(true),
     {
       name: 'website',
       type: 'text',

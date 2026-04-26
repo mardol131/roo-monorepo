@@ -1,106 +1,98 @@
 "use client";
 
-import React, { useState } from "react";
-import Image from "next/image";
-import { Menu, X } from "lucide-react";
-import logo from "@/public/logo.png";
-import Button from "../../ui/atoms/button";
+import { loginModalEvents } from "@/app/components/ui/molecules/modals/login-modal/login-modal";
 import { IntlLink, Link } from "@/app/i18n/navigation";
+import { Gamepad2, MapPin, Menu, UtensilsCrossed, X } from "lucide-react";
+import Image from "next/image";
+import logo from "@/public/logo.png";
+import { useState } from "react";
 
-const navigationItems: { label: string; href: IntlLink }[] = [
-  {
-    label: "Místa",
-    href: {
-      pathname: "/catalog/[type]",
-      params: { type: "misto" },
+const NAV_ITEMS: { label: string; href: IntlLink; icon: React.ElementType }[] =
+  [
+    {
+      label: "Místa",
+      icon: MapPin,
+      href: { pathname: "/catalog/[type]", params: { type: "misto" } },
     },
-  },
-  {
-    label: "Gastro",
-    href: {
-      pathname: "/catalog/[type]",
-      params: { type: "gastro" },
+    {
+      label: "Gastro",
+      icon: UtensilsCrossed,
+      href: { pathname: "/catalog/[type]", params: { type: "gastro" } },
     },
-  },
-  {
-    label: "Zábava",
-    href: {
-      pathname: "/catalog/[type]",
-      params: { type: "zabava" },
+    {
+      label: "Zábava",
+      icon: Gamepad2,
+      href: { pathname: "/catalog/[type]", params: { type: "zabava" } },
     },
-  },
-  {
-    label: "Plánovač akcí",
-    href: {
-      pathname: "/user-profile/new",
-    },
-  },
-];
+  ];
 
 export default function Header() {
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
-    <header className="sticky top-0 z-50 w-full bg-white/95 backdrop-blur-sm border-b border-zinc-200">
-      <div className="max-w-content mx-auto px-8 flex items-center justify-between h-20">
+    <header className="sticky top-0 z-50 w-full bg-white/95 backdrop-blur-sm border-b border-zinc-100">
+      <div className="max-w-content mx-auto px-6 flex items-center justify-between h-16">
+
         {/* Logo + nav */}
-        <div className="flex items-center gap-10">
-          <Link href="/homepage" className="flex items-center gap-2.5 shrink-0">
-            <Image src={logo} alt="Roo" width={34} height={34} priority />
-            <span className="text-lg font-bold text-zinc-900 tracking-tight">
-              Roo
+        <div className="flex items-center gap-8">
+          <Link href="/homepage" className="flex items-center gap-2 shrink-0">
+            <Image src={logo} alt="Roo" width={28} height={28} priority />
+            <span className="text-base font-bold text-zinc-900 tracking-tight">
+              roo
             </span>
           </Link>
 
           <nav className="hidden md:flex items-center gap-0.5">
-            {navigationItems.map((item) => (
-              <Button
-                key={item.href.toString()}
-                link={item.href}
-                version="plain"
-                text={item.label}
-                size="sm"
-              />
+            {NAV_ITEMS.map(({ label, href, icon: Icon }) => (
+              <Link
+                key={label}
+                href={href}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium text-zinc-500 hover:text-zinc-900 hover:bg-zinc-50 transition-colors"
+              >
+                <Icon className="w-3.5 h-3.5" />
+                {label}
+              </Link>
             ))}
           </nav>
         </div>
 
         {/* Right side */}
-        <div className="flex items-center gap-3">
-          <Button
-            link="/register"
-            version="plain"
-            text="Staňte se dodavatelem"
-            size="sm"
-          />
+        <div className="flex items-center gap-2">
+          {/* Supplier CTA */}
+          <Link
+            href="/register-company"
+            className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium text-zinc-500 hover:text-zinc-900 hover:bg-zinc-50 transition-colors"
+          >
+            Staňte se dodavatelem
+          </Link>
 
-          <div className="hidden md:flex items-center gap-2">
-            <Button
-              link="/login"
-              version="plain"
-              text="Přihlásit se"
-              size="sm"
-            />
-            <Button
-              link="/register"
-              version="primary"
-              text="Registrovat se"
-              size="sm"
-            />
+          <div className="hidden md:block w-px h-4 bg-zinc-200 mx-1" />
+
+          {/* Auth */}
+          <div className="hidden md:flex items-center gap-1.5">
+            <button
+              type="button"
+              onClick={() => loginModalEvents.emit("open", undefined)}
+              className="px-3 py-1.5 rounded-lg text-sm font-medium text-zinc-600 hover:text-zinc-900 hover:bg-zinc-50 transition-colors"
+            >
+              Přihlásit se
+            </button>
+            <Link
+              href="/register"
+              className="px-3 py-1.5 rounded-lg text-sm font-semibold bg-zinc-900 text-white hover:bg-zinc-700 transition-colors"
+            >
+              Registrovat se
+            </Link>
           </div>
 
           {/* Mobile toggle */}
           <button
             type="button"
-            onClick={() => setIsMobileMenuOpen((p) => !p)}
+            onClick={() => setMobileOpen((p) => !p)}
             aria-label="Toggle menu"
-            className="md:hidden flex items-center justify-center w-9 h-9 rounded-xl text-zinc-700 hover:bg-zinc-100 transition-colors"
+            className="md:hidden flex items-center justify-center w-8 h-8 rounded-lg text-zinc-600 hover:bg-zinc-100 transition-colors"
           >
-            {isMobileMenuOpen ? (
-              <X className="w-5 h-5" />
-            ) : (
-              <Menu className="w-5 h-5" />
-            )}
+            {mobileOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
           </button>
         </div>
       </div>
@@ -108,34 +100,46 @@ export default function Header() {
       {/* Mobile menu */}
       <div
         className={`md:hidden overflow-hidden transition-all duration-200 ${
-          isMobileMenuOpen ? "max-h-64 border-t border-zinc-100" : "max-h-0"
+          mobileOpen ? "max-h-80 border-t border-zinc-100" : "max-h-0"
         }`}
       >
-        <nav className="flex flex-col px-4 py-3 gap-1">
-          {navigationItems.map((item) => (
+        <nav className="flex flex-col px-4 py-3 gap-0.5">
+          {NAV_ITEMS.map(({ label, href, icon: Icon }) => (
             <Link
-              key={item.href.toString()}
-              href={item.href}
-              onClick={() => setIsMobileMenuOpen(false)}
-              className="px-3 py-2.5 text-sm font-medium text-zinc-700 hover:bg-zinc-50 rounded-lg transition-colors"
+              key={label}
+              href={href}
+              onClick={() => setMobileOpen(false)}
+              className="flex items-center gap-2 px-3 py-2.5 text-sm font-medium text-zinc-700 hover:bg-zinc-50 rounded-lg transition-colors"
             >
-              {item.label}
+              <Icon className="w-4 h-4 text-zinc-400" />
+              {label}
             </Link>
           ))}
-          <div className="border-t border-zinc-100 mt-2 pt-2 flex flex-col gap-1">
-            <Link
-              href="/login"
-              onClick={() => setIsMobileMenuOpen(false)}
-              className="px-3 py-2.5 text-sm font-medium text-zinc-700 hover:bg-zinc-50 rounded-lg transition-colors"
+          <Link
+            href="/register-company"
+            onClick={() => setMobileOpen(false)}
+            className="flex items-center gap-2 px-3 py-2.5 text-sm font-medium text-zinc-700 hover:bg-zinc-50 rounded-lg transition-colors"
+          >
+            Staňte se dodavatelem
+          </Link>
+
+          <div className="border-t border-zinc-100 mt-1.5 pt-1.5 flex flex-col gap-0.5">
+            <button
+              type="button"
+              onClick={() => {
+                setMobileOpen(false);
+                loginModalEvents.emit("open", undefined);
+              }}
+              className="text-left px-3 py-2.5 text-sm font-medium text-zinc-700 hover:bg-zinc-50 rounded-lg transition-colors"
             >
               Přihlásit se
-            </Link>
+            </button>
             <Link
               href="/register"
-              onClick={() => setIsMobileMenuOpen(false)}
-              className="px-3 py-2.5 text-sm font-medium text-zinc-900 bg-zinc-100 hover:bg-zinc-200 rounded-lg transition-colors"
+              onClick={() => setMobileOpen(false)}
+              className="px-3 py-2.5 text-sm font-semibold text-zinc-900 bg-zinc-100 hover:bg-zinc-200 rounded-lg transition-colors"
             >
-              Registrovat
+              Registrovat se
             </Link>
           </div>
         </nav>

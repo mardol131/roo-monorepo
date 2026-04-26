@@ -75,18 +75,18 @@ export default function CalendarWeekView({
         className="overflow-y-auto overflow-x-auto"
         style={{ maxHeight: 480 }}
       >
-        <div style={{ minWidth: TIME_COL_W + DAYS * 80 }}>
+        <div>
           {/* ── Sticky header (day labels + all-day strip) ─────────────────── */}
           <div className="sticky top-0 z-10 bg-white border-b border-zinc-200">
             {/* Day header row */}
             <div className="flex">
-              <div style={{ width: TIME_COL_W, minWidth: TIME_COL_W }} />
+              <div className="shrink-0" style={{ width: TIME_COL_W }} />
               {days.map((day) => {
                 const today = isToday(day);
                 return (
                   <div
                     key={day.toISOString()}
-                    className="flex-1 min-w-20 py-2.5 border-l border-zinc-100 flex flex-col items-center"
+                    className="flex-1 py-2.5 border-l border-zinc-100 flex flex-col items-center"
                   >
                     <span className="text-[11px] font-medium text-zinc-400 uppercase tracking-wider">
                       {format(day, "EEE", { locale: cs })}
@@ -107,8 +107,8 @@ export default function CalendarWeekView({
             {hasAllDay && (
               <div className="flex border-t border-zinc-200">
                 <div
-                  style={{ width: TIME_COL_W, minWidth: TIME_COL_W }}
-                  className="flex items-start justify-end pr-2 pt-1.5"
+                  style={{ width: TIME_COL_W }}
+                  className="shrink-0 flex items-start justify-end pr-2 pt-1.5"
                 >
                   <span className="text-[10px] font-medium text-zinc-400 uppercase tracking-wide leading-none">
                     celý
@@ -128,14 +128,15 @@ export default function CalendarWeekView({
                   return (
                     <div
                       key={day.toISOString()}
-                      className="flex-1 min-w-20 border-l border-zinc-100 py-1 px-0.5 flex flex-col gap-0.5 min-h-7"
+                      className="flex-1 border-l border-zinc-100 py-1 px-0.5 flex flex-col gap-0.5 min-h-7"
                     >
                       {items.map((e) => (
                         <div
                           key={e.id}
                           title={e.name}
                           className={`text-[11px] font-medium rounded px-1.5 py-0.5 truncate leading-tight ${
-                            ALL_DAY_STYLES[e.status] ?? "bg-zinc-200 text-zinc-700"
+                            ALL_DAY_STYLES[e.status] ??
+                            "bg-zinc-200 text-zinc-700"
                           }`}
                         >
                           {e.name}
@@ -149,13 +150,10 @@ export default function CalendarWeekView({
           </div>
 
           {/* ── Time grid ──────────────────────────────────────────────────── */}
-          <div
-            className="flex relative"
-            style={{ height: TOTAL_HEIGHT }}
-          >
+          <div className="flex relative" style={{ height: TOTAL_HEIGHT }}>
             {/* Time gutter */}
             <div
-              style={{ width: TIME_COL_W, minWidth: TIME_COL_W }}
+              style={{ width: TIME_COL_W }}
               className="relative shrink-0"
             >
               {HOURS.map((h) => (

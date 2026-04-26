@@ -50,8 +50,8 @@ export default function Footer({}: Props) {
   const isInUserProfile = pathname.startsWith("/user-profile");
 
   return (
-    <footer className="bg-zinc-900 text-white pt-10 pb-6">
-      <div className={`${isInUserProfile ? "" : "max-w-content"} w-full px-4`}>
+    <footer className="bg-zinc-900 text-white pt-10 pb-6 flex justify-center">
+      <div className={`max-w-content w-full px-4`}>
         {/* Main Footer Content */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
           {/* Brand Section */}

@@ -17,7 +17,7 @@ import { Check, Coins, Package, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useParams } from "next/navigation";
 
-import { AlertSection } from "@/app/[locale]/(user)/components/alert-section";
+import { AlertSection } from "@/app/components/ui/molecules/alert-section";
 import { useChatMessagesByInquiry } from "@/app/react-query/chat-messages/hooks";
 import { useState } from "react";
 import { PriceChangeModal } from "@/app/components/ui/molecules/modals/price-change-modal";
@@ -102,7 +102,7 @@ export default function page() {
           borderColor="border-success"
           title="Teď je řada na firmě"
           text="Z vaší strany je vše připraveno. Teď je třeba ještě počkat na finální potvrzení od dodavatele."
-          bgColor="bg-linear-to-r from-success-surface to-white"
+          bgColor="bg-success-surface/40"
         />
       )}
       {inquiry.userStatus === "cancelled" && (
@@ -117,12 +117,7 @@ export default function page() {
         />
       )}
       <InquiryDetails inquiry={inquiry} />
-      <PriceChangeModal
-        isOpen={priceChangeModalOpen}
-        onClose={priceChangeModalStateHandler}
-        inquiryId={inquiry.id}
-        currentPrice={inquiry.quotedPrice || undefined}
-      />
+
       <ControlSection
         rows={[
           {
@@ -137,34 +132,55 @@ export default function page() {
               text: "Potvrdit",
               iconLeft: "Check",
               size: "sm",
-              onClick: () => priceChangeModalStateHandler(),
+              onClick: () =>
+                confirmActionModalEvents.emit("open", {
+                  title: "Potvrdit poptávku",
+                  description:
+                    "Dodavatel bude informován o vašem rozhodnutí a poptávka přejde do stavu 'Potvrzeno'. Následně bude řada na dodavateli, aby objednávku finálně odsouhlasil.",
+                  Icon: Check,
+                  buttonText: "Potvrdit poptávku",
+                  buttonVersion: "successFull",
+                  textColor: "text-success",
+                  whatIsGoingToHappenText: "Jakmile tuto poptávku potvrdíte:",
+                  whatIsGoingToHappenTextColor: "success",
+                  whatIsGoingToHappenList: [
+                    "Dodavatel bude informován o vašem rozhodnutí",
+                    "Poptávka přejde do stavu 'Potvrzeno'",
+                    "Tuto akci nelze vrátit zpět",
+                  ],
+                  borderColor: "border-success",
+                  bgColor: "bg-success-surface",
+                  onConfirmClick: async () => {
+                    // TODO: reject inquiry mutation
+                  },
+                }),
             },
           },
           {
-            title: "Odmítnout poptávku",
-            text: "Odmítnutím poptávky informujete zákazníka, že nemůžete nabídnout své služby pro jeho požadavek.",
+            title: "Zrušit poptávku",
+            text: "Zrušením poptávky informujete zákazníka, že nemůžete nabídnout své služby pro jeho požadavek.",
             icon: "X",
             iconColor: "text-danger",
             iconBgColor: "bg-danger-surface",
             button: {
               version: "dangerFull",
-              text: "Odmítnout",
+              text: "Zrušit",
               iconLeft: "X",
               size: "sm",
               onClick: () =>
                 confirmActionModalEvents.emit("open", {
-                  title: "Odmítnout poptávku",
+                  title: "Zrušit poptávku",
                   description:
-                    "Zákazník bude informován, že jeho poptávka byla odmítnuta.",
+                    "Dodavatel bude informován o vašem rozhodnutí a poptávka přejde do stavu 'Odmítnuto'. Tuto akci nelze vrátit zpět.",
                   Icon: X,
-                  buttonText: "Odmítnout poptávku",
+                  buttonText: "Zrušit poptávku",
                   buttonVersion: "dangerFull",
                   textColor: "text-danger",
                   whatIsGoingToHappenText:
-                    "Opravdu chcete odmítnout tuto poptávku?",
+                    "Opravdu chcete zrušit tuto poptávku?",
                   whatIsGoingToHappenTextColor: "danger",
                   whatIsGoingToHappenList: [
-                    "Zákazník obdrží oznámení o odmítnutí",
+                    "Dodavatel bude informován o vašem rozhodnutí",
                     "Poptávka přejde do stavu 'Odmítnuto'",
                     "Tuto akci nelze vrátit zpět",
                   ],

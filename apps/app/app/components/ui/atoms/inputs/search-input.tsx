@@ -50,6 +50,7 @@ const SearchInput = forwardRef<HTMLInputElement, SearchInputProps>(
     ref,
   ) {
     const [isOpen, setIsOpen] = useState(false);
+    const [openUpward, setOpenUpward] = useState(false);
     const [searchQuery, setSearchQuery] = useState("");
     const [selected, setSelected] = useState<SearchOption | undefined>(value);
     const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -194,7 +195,13 @@ const SearchInput = forwardRef<HTMLInputElement, SearchInputProps>(
         ) : (
           <div className="relative" ref={containerRef}>
             <div
-              onClick={() => setIsOpen(!isOpen)}
+              onClick={() => {
+                if (!isOpen && containerRef.current) {
+                  const rect = containerRef.current.getBoundingClientRect();
+                  setOpenUpward(rect.bottom + 280 > window.innerHeight);
+                }
+                setIsOpen(!isOpen);
+              }}
               className={`w-full px-3 py-2.5 border ${error ? "border-rose-500" : "border-zinc-200"} rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-rose-500 bg-white text-left flex items-center justify-between`}
             >
               <span className="text-zinc-900 text-sm">
@@ -217,7 +224,7 @@ const SearchInput = forwardRef<HTMLInputElement, SearchInputProps>(
             </div>
 
             {isOpen && (
-              <div className="absolute top-full left-0 mt-2 w-full bg-white border border-zinc-200 rounded-lg shadow-lg z-10">
+              <div className={`absolute left-0 w-full bg-white border border-zinc-200 rounded-lg shadow-lg z-10 ${openUpward ? "bottom-full mb-2" : "top-full mt-2"}`}>
                 <div className="p-3 border-b border-zinc-100">
                   <div className="relative flex items-center">
                     <Search className="absolute left-3 w-4 h-4 text-zinc-400" />

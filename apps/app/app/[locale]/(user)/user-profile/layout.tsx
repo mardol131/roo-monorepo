@@ -1,5 +1,6 @@
 import React from "react";
 import Sidebar, { SidebarProps } from "../components/sidebar";
+import ContentWrapper from "./content-wrapper";
 
 type Props = {
   children: React.ReactNode;
@@ -43,14 +44,11 @@ export default function layout({ children }: Props) {
       },
     ],
   };
+
   return (
     <>
       <Sidebar {...sidebar} />
-      <div className="flex-1 flex justify-center">
-        <div className="max-w-user-profile-content w-full flex flex-col px-8 py-20">
-          {children}
-        </div>
-      </div>
+      <ContentWrapper>{children}</ContentWrapper>
     </>
   );
 }

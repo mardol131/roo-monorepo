@@ -55,6 +55,7 @@ export default function DateTimeInput({
   error,
 }: DateTimeInputProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const [openUpward, setOpenUpward] = useState(false);
   const [currentMonth, setCurrentMonth] = useState<Date>(value ?? new Date());
   const [selectedDateState, setSelectedDateState] = useState<Date | null>(
     value,
@@ -191,7 +192,13 @@ export default function DateTimeInput({
       <div className="relative" ref={ref}>
         <button
           type="button"
-          onClick={() => setIsOpen((prev) => !prev)}
+          onClick={() => {
+            if (!isOpen && ref.current) {
+              const rect = ref.current.getBoundingClientRect();
+              setOpenUpward(rect.bottom + 320 > window.innerHeight);
+            }
+            setIsOpen((prev) => !prev);
+          }}
           className="w-full px-3 py-2.5 border border-zinc-200 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-rose-500 bg-white text-left flex items-center justify-between"
         >
           <span className="text-zinc-900">{displayText}</span>
@@ -199,7 +206,7 @@ export default function DateTimeInput({
         </button>
 
         {isOpen && (
-          <div className="absolute top-full left-0 mt-2 bg-white border border-zinc-200 rounded-lg shadow-lg z-10 w-fit">
+          <div className={`absolute left-0 bg-white border border-zinc-200 rounded-lg shadow-lg z-10 w-fit ${openUpward ? "bottom-full mb-2" : "top-full mt-2"}`}>
             <div className="p-4">
               <div className="flex items-center justify-between mb-4">
                 <button

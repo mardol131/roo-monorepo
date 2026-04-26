@@ -27,7 +27,7 @@ export default function CalendarToolbar({
       : `${format(weekStart, "d. MMM", { locale: cs })} – ${format(weekEnd, "d. MMM yyyy", { locale: cs })}`;
 
   return (
-    <div className="flex items-center justify-between mb-4">
+    <div className="flex flex-wrap items-center gap-y-2 justify-between mb-4">
       {/* Navigation */}
       <div className="flex items-center gap-1">
         <button
@@ -48,7 +48,7 @@ export default function CalendarToolbar({
           variant="label-lg"
           color="textDark"
           as="span"
-          className="ml-2 min-w-56"
+          className="ml-2"
         >
           {label}
         </Text>
@@ -63,7 +63,7 @@ export default function CalendarToolbar({
       </div>
 
       {/* Legend */}
-      <div className="flex items-center gap-3">
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
         <LegendItem color="bg-primary" label="Potvrzená poptávka" />
         <div className="w-px h-3 bg-zinc-200" />
         <LegendItem color="bg-calendar" label="Vlastní událost" />

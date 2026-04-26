@@ -1,6 +1,10 @@
 import { LISTINGS } from "@/app/_mock/mock";
 import { Listing, wait } from "@roo/common";
 
+export async function fetchAllListings() {
+  return LISTINGS;
+}
+
 export async function fetchListingsByCompany(companyId: string) {
   const res = LISTINGS.filter((listing) => {
     if (typeof listing.company === "string")

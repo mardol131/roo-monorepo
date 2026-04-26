@@ -4,14 +4,29 @@ import { NextIntlClientProvider } from "next-intl";
 import "./styles/global.css";
 import { ReactQueryProvider } from "./react-query/react-query-provider";
 import { ConfirmActionModal } from "./components/ui/molecules/modals/confirm-action-modal";
+import {
+  dehydrate,
+  HydrationBoundary,
+  QueryClient,
+} from "@tanstack/react-query";
+import { favouriteListingKeys } from "./react-query/query-keys";
+import { fetchFavouriteListings } from "./react-query/favourite-listings/fetch";
+import LoginModal from "./components/ui/molecules/modals/login-modal/login-modal";
 
 export const metadata: Metadata = {};
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: ReactNode;
 }>) {
+  const queryClient = new QueryClient();
+
+  await queryClient.prefetchQuery({
+    queryKey: favouriteListingKeys.all(),
+    queryFn: () => fetchFavouriteListings(),
+  });
+
   return (
     <html lang="cs">
       <head>
@@ -20,8 +35,11 @@ export default function RootLayout({
       <body className={`text-on-dark`}>
         <NextIntlClientProvider>
           <ReactQueryProvider>
-            {children}
-            <ConfirmActionModal />
+            <HydrationBoundary state={dehydrate(queryClient)}>
+              {children}
+              <ConfirmActionModal />
+              <LoginModal />
+            </HydrationBoundary>
           </ReactQueryProvider>
         </NextIntlClientProvider>
       </body>

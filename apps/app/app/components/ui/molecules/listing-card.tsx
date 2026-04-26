@@ -5,6 +5,7 @@ import Image from "next/image";
 import Text from "../atoms/text";
 import { Heart, Star } from "lucide-react";
 import { FaHeart, FaStar } from "react-icons/fa";
+import { Link } from "@/app/i18n/navigation";
 
 type Props = {
   imageUrl: string;
@@ -26,25 +27,35 @@ export default function ListingCard({
   const clickOnLikedHandler = useCallback(
     (e: React.MouseEvent<SVGAElement | SVGElement, MouseEvent>) => {
       e.stopPropagation();
+      e.preventDefault();
       setIsLiked((prev) => !prev);
     },
     [isLiked],
   );
 
   return (
-    <div className="group rounded-xl transition ease-in-out">
+    <Link
+      href={{
+        pathname: "/listing/[listingId]",
+        params: { listingId: "123" },
+      }}
+      target="_blank"
+      className="group rounded-xl transition ease-in-out"
+    >
       <div className="relative min-w-60 w-full rounded-xl aspect-square bg-zinc-100 overflow-hidden">
-        <Image
-          src={imageUrl}
-          alt={imageAlt || title}
-          className="object-cover w-full h-full object-center transition-transform duration-300 group-hover:scale-105"
-          width={1000}
-          height={1000}
-        />
+        {imageUrl && imageUrl.startsWith("http") && (
+          <Image
+            src={imageUrl}
+            alt={imageAlt || title}
+            className="object-cover w-full h-full object-center transition-transform duration-300 group-hover:scale-105"
+            width={1000}
+            height={1000}
+          />
+        )}
         <FaHeart
           onClick={clickOnLikedHandler}
           size={24}
-          className={`absolute top-3 right-3 text-primary cursor-pointer ${isLiked ? "text-rose-500" : "text-secondary/80"} transition-colors duration-200 hover:text-rose-500`}
+          className={`absolute hover:scale-110 top-3 right-3 text-primary cursor-pointer ${isLiked ? "text-rose-500" : "text-secondary/80"} smooth`}
         />
       </div>
       <div className="flex items-center justify-between mt-2">
@@ -61,6 +72,6 @@ export default function ListingCard({
           <FaStar size={16} className="text-rose-500" />
         </div>
       </div>
-    </div>
+    </Link>
   );
 }

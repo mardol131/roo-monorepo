@@ -4,7 +4,7 @@ import { IntlPathname, Link, usePathname } from "@/app/i18n/navigation";
 import { SidebarItem } from "./sidebar-item";
 import { LucideIcons } from "@roo/common";
 import * as lucideIcons from "lucide-react";
-import { useCallback } from "react";
+import React, { useCallback } from "react";
 
 type ColorVariant = "company" | "listing";
 
@@ -50,7 +50,8 @@ export function SubSidebar({
   const pathname = usePathname();
 
   const isActive = useCallback(
-    (href: IntlPathname) => {
+    (href?: IntlPathname) => {
+      if (!href) return false;
       if (typeof href === "string") {
         return pathname === href;
       } else if ("params" in href) {
@@ -141,9 +142,7 @@ function SectionLabel({
       className={`px-4 pt-4 pb-1 text-[12px] font-semibold ${v.label} flex items-center gap-2`}
     >
       <div className={`p-2 ${iconBgColor || v.activeBg} rounded-md`}>
-        <IconComponent
-          className={`w-5 h-5 ${iconColor || v.activeIcon} ${iconBgColor || v.activeBg}`}
-        />
+        <IconComponent className={`w-5 h-5 ${iconColor || v.activeIcon}`} />
       </div>
       {label}
     </div>
@@ -153,28 +152,52 @@ function SectionLabel({
 function SubSidebarNavItem({
   label,
   href,
-  icon: Icon,
+  icon,
   onClick,
   active,
   variant,
 }: SidebarItem & { active: boolean; variant: ColorVariant }) {
   const v = variants[variant];
+
+  const IconComponent = lucideIcons[icon] as unknown as React.FC<
+    React.SVGProps<SVGSVGElement>
+  >;
   return (
     <li>
-      <Link
-        href={href}
-        onClick={onClick}
-        className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all ${
-          active
-            ? `${v.activeBg} ${v.activeText}`
-            : "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900"
-        }`}
-      >
-        <Icon
-          className={`w-4 h-4 shrink-0 ${active ? v.activeIcon : "text-zinc-400"}`}
-        />
-        <span className="text-[11px] font-semibold leading-tight">{label}</span>
-      </Link>
+      {href ? (
+        <Link
+          href={href}
+          onClick={onClick}
+          className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all ${
+            active
+              ? `${v.activeBg} ${v.activeText}`
+              : "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900"
+          }`}
+        >
+          <IconComponent
+            className={`w-4 h-4 ${active ? v.activeIcon : "text-zinc-400"}`}
+          />
+          <span className="text-[11px] font-semibold leading-tight">
+            {label}
+          </span>
+        </Link>
+      ) : (
+        <button
+          onClick={onClick}
+          className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all ${
+            active
+              ? `${v.activeBg} ${v.activeText}`
+              : "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900"
+          }`}
+        >
+          <IconComponent
+            className={`w-4 h-4 ${active ? v.activeIcon : "text-zinc-400"}`}
+          />
+          <span className="text-[11px] font-semibold leading-tight">
+            {label}
+          </span>
+        </button>
+      )}
     </li>
   );
 }

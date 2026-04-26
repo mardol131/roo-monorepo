@@ -215,16 +215,12 @@ function EventRow({ event, onEditClick }: EventRowProps) {
   }>();
 
   return (
-    <div className="flex items-center gap-4 px-5 py-3">
-      {/* Time */}
-      <div className="w-28 shrink-0">
+    <div className="flex flex-wrap items-center gap-x-4 gap-y-1 px-5 py-3">
+      {/* Time + source */}
+      <div className="flex items-center gap-2 shrink-0">
         <Text variant="label" color="textLight" as="span">
           {formatTimeRange(event)}
         </Text>
-      </div>
-
-      {/* Source indicator */}
-      <div className="shrink-0">
         {isInquiry ? (
           <span className="inline-flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded-full bg-inquiry/10 text-inquiry">
             <MessageSquare className="w-3 h-3" />
@@ -255,7 +251,6 @@ function EventRow({ event, onEditClick }: EventRowProps) {
 
       {/* Status badge + edit button */}
       <div className="shrink-0 flex items-center gap-2">
-        {" "}
         {event.source === "manual" && (
           <button
             onClick={(e) => {

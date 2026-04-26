@@ -1,5 +1,6 @@
 export const listingKeys = {
   all: (companyId: string) => ["listings", companyId] as const,
+  catalog: () => ["listings", "catalog"] as const,
   byId: (id: string) => ["listings", id] as const,
   byCompany: (companyId: string) => ["listings", "company", companyId] as const,
 };
@@ -41,4 +42,8 @@ export const chatMessageKeys = {
 export const eventKeys = {
   all: () => ["events"] as const,
   byId: (id: string) => ["events", id] as const,
+};
+
+export const favouriteListingKeys = {
+  all: () => ["favouriteListings"] as const,
 };

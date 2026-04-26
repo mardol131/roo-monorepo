@@ -2,7 +2,14 @@
 
 import React from "react";
 import Text from "@/app/components/ui/atoms/text";
-import { Check, Clock, HandshakeIcon, Send, UserCheck, XCircle } from "lucide-react";
+import {
+  Check,
+  Clock,
+  HandshakeIcon,
+  Send,
+  UserCheck,
+  XCircle,
+} from "lucide-react";
 import { Inquiry } from "@roo/common";
 
 type StepState = "done" | "active" | "dimmed" | "cancelled";
@@ -46,11 +53,7 @@ export default function InquiryTimeline({
       label: "Přijato zákazníkem",
       icon: UserCheck,
       state:
-        userStatus === "confirmed"
-          ? "done"
-          : isCancelled
-            ? "dimmed"
-            : "active",
+        userStatus === "confirmed" ? "done" : isCancelled ? "dimmed" : "active",
     },
     {
       label: "Přijato firmou",
@@ -128,9 +131,15 @@ export default function InquiryTimeline({
               </Text>
             </div>
             {i < steps.length - 1 && (
-              <div
-                className={`h-0.5 flex-1 mt-4.5 transition-colors ${getConnectorColor(i)}`}
-              />
+              <>
+                {i === steps.length - 2 ? (
+                  <div className={`h-0.5 flex-1 mt-4.5 bg-transparent`} />
+                ) : (
+                  <div
+                    className={`h-0.5 flex-1 mt-4.5 transition-colors ${getConnectorColor(i)}`}
+                  />
+                )}
+              </>
             )}
           </React.Fragment>
         );

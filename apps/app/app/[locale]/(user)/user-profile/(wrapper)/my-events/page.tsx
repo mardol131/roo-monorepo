@@ -1,7 +1,7 @@
 "use client";
 
 import { useEvents } from "@/app/react-query/events/hooks";
-import { Event } from "@roo/common";
+import { Event, formatEventAddress } from "@roo/common";
 import CardContainer from "../../../components/card-container";
 import EntityCard from "../../../components/entity-card";
 import PageHeading from "../../../components/page-heading";
@@ -51,7 +51,7 @@ export default function page() {
               iconColor="text-event"
               iconBackgroundColor="bg-event-surface"
               items={[
-                { icon: "MapPin", content: event.location?.address },
+                { icon: "MapPin", content: formatEventAddress(event) },
                 {
                   icon: "Clock",
                   content: `Od ${format(

@@ -97,37 +97,27 @@ const SelectInput = React.forwardRef<HTMLSelectElement, Props>(
 
         {/* Dropdown menu */}
         {isOpen && (
-          <div className="absolute z-50 w-full mt-1 bg-white border border-zinc-300 rounded-lg shadow-lg">
+          <div className="absolute z-50 w-full mt-1 bg-white border border-zinc-200 rounded-lg shadow-md p-1">
             {items.length > 0 ? (
-              <ul className="max-h-60 overflow-y-auto">
+              <ul className="max-h-60 overflow-y-auto flex flex-col gap-0.5">
                 {items.map((item) => (
                   <li key={item.value}>
                     <button
                       type="button"
                       onClick={() => handleSelect(item.value)}
-                      className={`w-full px-3 py-2.5 text-left hover:bg-zinc-100 transition-colors ${
+                      className={`w-full px-3 py-2 rounded-md text-left text-sm transition-colors ${
                         value === item.value
-                          ? "bg-zinc-50 border-l-2 border-zinc-900"
-                          : ""
+                          ? "bg-zinc-100 text-zinc-900 font-medium"
+                          : "text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900"
                       }`}
                     >
-                      <Text
-                        variant="label"
-                        color={value === item.value ? "textDark" : "secondary"}
-                        className={value === item.value ? "font-semibold" : ""}
-                      >
-                        {item.label}
-                      </Text>
+                      {item.label}
                     </button>
                   </li>
                 ))}
               </ul>
             ) : (
-              <div className="px-3 py-2.5">
-                <Text variant="label" color="secondary">
-                  Žádné položky
-                </Text>
-              </div>
+              <p className="px-3 py-2 text-xs text-zinc-400">Žádné položky</p>
             )}
           </div>
         )}

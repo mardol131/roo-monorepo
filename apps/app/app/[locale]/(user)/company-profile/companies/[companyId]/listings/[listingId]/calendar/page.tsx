@@ -8,7 +8,13 @@ import {
   useUpdateCalendarEvent,
 } from "@/app/react-query/calendar-events/hooks";
 import { CalendarEvent } from "@roo/common";
-import { addWeeks, areIntervalsOverlapping, parseISO, startOfWeek, subWeeks } from "date-fns";
+import {
+  addWeeks,
+  areIntervalsOverlapping,
+  parseISO,
+  startOfWeek,
+  subWeeks,
+} from "date-fns";
 import { useParams } from "next/navigation";
 import { useState } from "react";
 import CalendarCreatePopover from "./components/calendar-create-popover";
@@ -43,14 +49,19 @@ function hasOverlap(
 export default function CalendarPage() {
   const { listingId } = useParams<{ listingId: string }>();
   const { data: events = [] } = useCalendarEventsByListing(listingId);
-  const { mutate: createEvent, isPending: isCreating } = useCreateCalendarEvent(listingId);
-  const { mutate: updateEvent, isPending: isUpdating } = useUpdateCalendarEvent(listingId);
-  const { mutate: deleteEvent, isPending: isDeleting } = useDeleteCalendarEvent(listingId);
+  const { mutate: createEvent, isPending: isCreating } =
+    useCreateCalendarEvent(listingId);
+  const { mutate: updateEvent, isPending: isUpdating } =
+    useUpdateCalendarEvent(listingId);
+  const { mutate: deleteEvent, isPending: isDeleting } =
+    useDeleteCalendarEvent(listingId);
 
   const [weekStart, setWeekStart] = useState(() =>
     startOfWeek(new Date(), { weekStartsOn: 1 }),
   );
-  const [pendingCreate, setPendingCreate] = useState<CreateRequest | null>(null);
+  const [pendingCreate, setPendingCreate] = useState<CreateRequest | null>(
+    null,
+  );
   const [pendingEdit, setPendingEdit] = useState<PendingEdit | null>(null);
   const [createError, setCreateError] = useState<string | undefined>();
   const [editError, setEditError] = useState<string | undefined>();
@@ -67,26 +78,55 @@ export default function CalendarPage() {
       return;
     }
     createEvent(
-      { listingId, name, startsAt: pendingCreate.startsAt, endsAt: pendingCreate.endsAt, allDay: false, status },
-      { onSuccess: () => { setPendingCreate(null); setCreateError(undefined); } },
+      {
+        listingId,
+        name,
+        startsAt: pendingCreate.startsAt,
+        endsAt: pendingCreate.endsAt,
+        allDay: false,
+        status,
+      },
+      {
+        onSuccess: () => {
+          setPendingCreate(null);
+          setCreateError(undefined);
+        },
+      },
     );
   }
 
   function handleEditSave(name: string, status: CalendarEvent["status"]) {
     if (!pendingEdit) return;
-    if (hasOverlap(parseISO(pendingEdit.event.startsAt), parseISO(pendingEdit.event.endsAt), events, pendingEdit.event.id)) {
+    if (
+      hasOverlap(
+        parseISO(pendingEdit.event.startsAt),
+        parseISO(pendingEdit.event.endsAt),
+        events,
+        pendingEdit.event.id,
+      )
+    ) {
       setEditError("Tento termín se překrývá s jinou událostí.");
       return;
     }
     updateEvent(
       { id: pendingEdit.event.id, name, status },
-      { onSuccess: () => { setPendingEdit(null); setEditError(undefined); } },
+      {
+        onSuccess: () => {
+          setPendingEdit(null);
+          setEditError(undefined);
+        },
+      },
     );
   }
 
   function handleEditDelete() {
     if (!pendingEdit) return;
-    deleteEvent(pendingEdit.event.id, { onSuccess: () => { setPendingEdit(null); setEditError(undefined); } });
+    deleteEvent(pendingEdit.event.id, {
+      onSuccess: () => {
+        setPendingEdit(null);
+        setEditError(undefined);
+      },
+    });
   }
 
   return (
@@ -101,12 +141,17 @@ export default function CalendarPage() {
           weekStart={weekStart}
           onPrev={() => setWeekStart((w) => subWeeks(w, 1))}
           onNext={() => setWeekStart((w) => addWeeks(w, 1))}
-          onToday={() => setWeekStart(startOfWeek(new Date(), { weekStartsOn: 1 }))}
+          onToday={() =>
+            setWeekStart(startOfWeek(new Date(), { weekStartsOn: 1 }))
+          }
         />
         <CalendarWeekView
           weekStart={weekStart}
           onCreateRequest={handleCreateRequest}
-          onEditRequest={(event, x, y) => { setEditError(undefined); setPendingEdit({ event, x, y }); }}
+          onEditRequest={(event, x, y) => {
+            setEditError(undefined);
+            setPendingEdit({ event, x, y });
+          }}
           isCreating={pendingCreate !== null}
         />
         <CalendarTimetable />
@@ -118,7 +163,10 @@ export default function CalendarPage() {
           endsAt={pendingCreate.endsAt}
           position={{ x: pendingCreate.x, y: pendingCreate.y }}
           onSubmit={handleCreateSubmit}
-          onClose={() => { setPendingCreate(null); setCreateError(undefined); }}
+          onClose={() => {
+            setPendingCreate(null);
+            setCreateError(undefined);
+          }}
           isPending={isCreating}
           error={createError}
         />
@@ -130,7 +178,10 @@ export default function CalendarPage() {
           position={{ x: pendingEdit.x, y: pendingEdit.y }}
           onSave={handleEditSave}
           onDelete={handleEditDelete}
-          onClose={() => { setPendingEdit(null); setEditError(undefined); }}
+          onClose={() => {
+            setPendingEdit(null);
+            setEditError(undefined);
+          }}
           isPending={isUpdating || isDeleting}
           error={editError}
         />

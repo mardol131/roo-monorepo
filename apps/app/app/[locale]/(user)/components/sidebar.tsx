@@ -28,13 +28,14 @@ export default function Sidebar({
     (href?: IntlPathname) => {
       if (!href) return false;
       if (typeof href === "string") {
-        return pathname === href;
+        if (href === "/company-profile" || href === "/user-profile")
+          return pathname === href;
+        return pathname.startsWith(href);
       } else if ("params" in href) {
         const { pathname: hrefPathname } = href;
+        console.log("Comparing", pathname, "with", hrefPathname);
         return pathname === hrefPathname;
-      } else {
-        return pathname.startsWith(href.pathname);
-      }
+      } else return false;
     },
     [pathname],
   );

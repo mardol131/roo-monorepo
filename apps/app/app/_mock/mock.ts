@@ -26,6 +26,7 @@ import {
   ChatMessage,
   City,
   CalendarEvent,
+  FavouriteListing,
 } from "@roo/common";
 
 import { Calendar, Heart, MessageSquare, TrendingUp } from "lucide-react";
@@ -37,6 +38,7 @@ export const USER: User = {
   firstName: "Jan",
   lastName: "Novák",
   email: "jan.novak@email.cz",
+  type: "company",
 };
 
 export const MOCK_EVENT_TYPES: EventType[] = [
@@ -892,7 +894,10 @@ export const COMPANIES: Company[] = [
     description:
       "Kompletní zajištění cateringu a eventových prostor pro soukromé i firemní akce.",
     email: "info@novakevents.cz",
-    phone: "+420 731 123 456",
+    phone: {
+      countryCode: "420",
+      number: "123 456 789",
+    },
     website: "https://novakevents.cz",
     owner: USER,
     updatedAt: "2025-01-01T00:00:00.000Z",
@@ -904,7 +909,10 @@ export const COMPANIES: Company[] = [
     ico: "87654321",
     description: "Profesionální DJ služby na svatby, večírky a firemní akce.",
     email: "booking@djstudiopraha.cz",
-    phone: "+420 602 987 654",
+    phone: {
+      countryCode: "420",
+      number: "987 654 321",
+    },
     website: "https://djstudiopraha.cz",
     owner: USER,
     updatedAt: "2025-01-01T00:00:00.000Z",
@@ -917,7 +925,10 @@ export const COMPANIES: Company[] = [
     description:
       "Fotografické a videografické služby pro svatby a firemní portrétní focení.",
     email: "martin@fotovideanovak.cz",
-    phone: "+420 776 456 789",
+    phone: {
+      countryCode: "420",
+      number: "555 666 777",
+    },
     owner: USER,
     updatedAt: "2025-01-01T00:00:00.000Z",
     createdAt: "2025-01-01T00:00:00.000Z",
@@ -1417,8 +1428,18 @@ export const MOCK_EVENT: Event = {
     start: "2025-03-15T18:00:00.000Z",
     end: "2025-03-15T23:00:00.000Z",
   },
-  location: { city: MOCK_CITIES[0] },
+  location: [{ blockType: "custom", city: MOCK_CITIES[0] }],
   guests: { adults: 80, children: 0 },
+  notes: [
+    { id: "n-1", note: "Rezervovat parkoviště pro hosty" },
+    { id: "n-2", note: "Catering potvrdil vegetariánské menu" },
+  ],
+  checklist: [
+    { id: "cl-1", label: "Zajistit catering", completed: true },
+    { id: "cl-2", label: "Objednat dekorace", description: "Zlatá a černá barva", completed: false, dueDate: "2025-03-01T12:00:00.000Z" },
+    { id: "cl-3", label: "Rozeslat pozvánky", completed: false, dueDate: "2025-02-15T10:00:00.000Z" },
+    { id: "cl-4", label: "Potvrdit DJ", completed: false },
+  ],
   owner: USER,
   updatedAt: "2025-02-01T00:00:00.000Z",
   createdAt: "2025-02-01T00:00:00.000Z",
@@ -1435,8 +1456,18 @@ export const MOCK_EVENTS: Event[] = [
       start: "2025-03-15T18:00:00.000Z",
       end: "2025-03-15T23:00:00.000Z",
     },
-    location: { city: MOCK_CITIES[0] },
+    location: [{ blockType: "custom", city: MOCK_CITIES[0] }],
     guests: { adults: 80, children: 0 },
+    notes: [
+      { id: "n-1", note: "Rezervovat parkoviště pro hosty" },
+      { id: "n-2", note: "Catering potvrdil vegetariánské menu" },
+    ],
+    checklist: [
+      { id: "cl-1", label: "Zajistit catering", completed: true },
+      { id: "cl-2", label: "Objednat dekorace", description: "Zlatá a černá barva", completed: false, dueDate: "2025-03-01T12:00:00.000Z" },
+      { id: "cl-3", label: "Rozeslat pozvánky", completed: false, dueDate: "2025-02-15T10:00:00.000Z" },
+      { id: "cl-4", label: "Potvrdit DJ", completed: false },
+    ],
     owner: USER,
     updatedAt: "2025-02-01T00:00:00.000Z",
     createdAt: "2025-02-01T00:00:00.000Z",
@@ -1451,8 +1482,16 @@ export const MOCK_EVENTS: Event[] = [
       start: "2025-05-02T16:00:00.000Z",
       end: "2025-05-02T22:00:00.000Z",
     },
-    location: { city: MOCK_CITIES[1] },
+    location: [{ blockType: "custom", city: MOCK_CITIES[1] }],
     guests: { adults: 28, children: 2 },
+    notes: [
+      { id: "n-3", note: "Dort objednat u cukrárny Sladká chvíle" },
+    ],
+    checklist: [
+      { id: "cl-5", label: "Rezervovat restauraci", completed: true },
+      { id: "cl-6", label: "Objednat dort", completed: false, dueDate: "2025-04-20T10:00:00.000Z" },
+      { id: "cl-7", label: "Připravit playlist", completed: false },
+    ],
     owner: USER,
     updatedAt: "2025-03-01T00:00:00.000Z",
     createdAt: "2025-03-01T00:00:00.000Z",
@@ -1467,8 +1506,18 @@ export const MOCK_EVENTS: Event[] = [
       start: "2025-06-20T09:00:00.000Z",
       end: "2025-06-21T17:00:00.000Z",
     },
-    location: { city: MOCK_CITIES[2] },
+    location: [{ blockType: "custom", city: MOCK_CITIES[2] }],
     guests: { adults: 50, children: 0 },
+    notes: [
+      { id: "n-4", note: "Potvrdit ubytování pro overnight skupinu" },
+      { id: "n-5", note: "HR chce aktivity zaměřené na komunikaci" },
+    ],
+    checklist: [
+      { id: "cl-8", label: "Vybrat lokaci", completed: true },
+      { id: "cl-9", label: "Zajistit dopravu", description: "Autobus pro 50 osob", completed: false, dueDate: "2025-06-01T09:00:00.000Z" },
+      { id: "cl-10", label: "Připravit program", completed: false },
+      { id: "cl-11", label: "Objednat catering na dva dny", completed: false },
+    ],
     owner: USER,
     updatedAt: "2025-04-01T00:00:00.000Z",
     createdAt: "2025-04-01T00:00:00.000Z",
@@ -1483,13 +1532,50 @@ export const MOCK_EVENTS: Event[] = [
       start: "2025-01-10T14:00:00.000Z",
       end: "2025-01-10T20:00:00.000Z",
     },
-    location: { city: MOCK_CITIES[0] },
+    location: [{ blockType: "custom", city: MOCK_CITIES[0] }],
     guests: { adults: 25, children: 0 },
+    notes: [
+      { id: "n-6", note: "Jana chce překvapení — nikomu neříkat o dortu" },
+    ],
+    checklist: [
+      { id: "cl-12", label: "Rezervovat soukromý sál", completed: true },
+      { id: "cl-13", label: "Objednat dort s motivem", completed: true },
+      { id: "cl-14", label: "Zajistit fotografa", completed: true },
+    ],
     owner: USER,
     updatedAt: "2025-01-10T00:00:00.000Z",
     createdAt: "2025-01-10T00:00:00.000Z",
   },
 ];
+
+export function MOCK_FAVOURITE_LISTINGS(): FavouriteListing[] {
+  return [
+    {
+      id: "fav-1",
+      user: USER.id,
+      listing: LISTINGS[0].id,
+      addedAt: "2025-03-10T09:00:00.000Z",
+      updatedAt: "2025-03-10T09:00:00.000Z",
+      createdAt: "2025-03-10T09:00:00.000Z",
+    },
+    {
+      id: "fav-2",
+      user: USER.id,
+      listing: LISTINGS[1].id,
+      addedAt: "2025-03-15T14:30:00.000Z",
+      updatedAt: "2025-03-15T14:30:00.000Z",
+      createdAt: "2025-03-15T14:30:00.000Z",
+    },
+    {
+      id: "fav-3",
+      user: USER.id,
+      listing: LISTINGS[2].id,
+      addedAt: "2025-04-01T11:00:00.000Z",
+      updatedAt: "2025-04-01T11:00:00.000Z",
+      createdAt: "2025-04-01T11:00:00.000Z",
+    },
+  ];
+}
 
 // ── Inquiries ──────────────────────────────────────────────────────────────────
 

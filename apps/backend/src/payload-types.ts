@@ -97,6 +97,7 @@ export interface Config {
     'chat-messages': ChatMessage;
     inquiries: Inquiry;
     'calendar-events': CalendarEvent;
+    'favourite-listings': FavouriteListing;
     'payload-kv': PayloadKv;
     'payload-jobs': PayloadJob;
     'payload-locked-documents': PayloadLockedDocument;
@@ -134,6 +135,7 @@ export interface Config {
     'chat-messages': ChatMessagesSelect<false> | ChatMessagesSelect<true>;
     inquiries: InquiriesSelect<false> | InquiriesSelect<true>;
     'calendar-events': CalendarEventsSelect<false> | CalendarEventsSelect<true>;
+    'favourite-listings': FavouriteListingsSelect<false> | FavouriteListingsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-jobs': PayloadJobsSelect<false> | PayloadJobsSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -287,6 +289,11 @@ export interface User {
   id: string;
   firstName: string;
   lastName: string;
+  phone?: {
+    countryCode?: '420' | null;
+    number?: string | null;
+  };
+  type: 'user' | 'company';
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -682,7 +689,10 @@ export interface Company {
   ico: string;
   description?: string | null;
   email: string;
-  phone: string;
+  phone: {
+    countryCode: '420';
+    number: string;
+  };
   website?: string | null;
   owner: string | User;
   updatedAt: string;
@@ -873,7 +883,9 @@ export interface Event {
     | null;
   checklist?:
     | {
-        item?: string | null;
+        label: string;
+        description?: string | null;
+        dueDate?: string | null;
         completed?: boolean | null;
         id?: string | null;
       }[]
@@ -883,12 +895,34 @@ export interface Event {
     start: string;
     end: string;
   };
-  location?: {
-    city?: (string | null) | City;
-    address?: string | null;
-    useVenueAsLocation?: boolean | null;
-    venue?: (string | null) | Listing;
-  };
+  location?:
+    | (
+        | {
+            /**
+             * Vyberte venue z katalogu služeb.
+             */
+            venue?: (string | null) | Listing;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'venue';
+          }
+        | {
+            city?: (string | null) | City;
+            address?: string | null;
+            /**
+             * Nepovinné.
+             */
+            buildingType?: ('hotel' | 'restaurant' | 'conference_center' | 'outdoor' | 'private' | 'other') | null;
+            /**
+             * Nepovinný popis místa (např. „Zahrada u rodinného domu").
+             */
+            description?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'custom';
+          }
+      )[]
+    | null;
   guests: {
     adults: number;
     children: number;
@@ -961,6 +995,18 @@ export interface CalendarEvent {
   status: 'confirmed' | 'tentative' | 'cancelled';
   name: string;
   description?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "favourite-listings".
+ */
+export interface FavouriteListing {
+  id: string;
+  user: string | User;
+  listing: string | Listing;
+  addedAt: string;
   updatedAt: string;
   createdAt: string;
 }
@@ -1195,6 +1241,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'calendar-events';
         value: string | CalendarEvent;
+      } | null)
+    | ({
+        relationTo: 'favourite-listings';
+        value: string | FavouriteListing;
       } | null);
   globalSlug?: string | null;
   user:
@@ -1325,6 +1375,13 @@ export interface DishTypesSelect<T extends boolean = true> {
 export interface UsersSelect<T extends boolean = true> {
   firstName?: T;
   lastName?: T;
+  phone?:
+    | T
+    | {
+        countryCode?: T;
+        number?: T;
+      };
+  type?: T;
   updatedAt?: T;
   createdAt?: T;
   email?: T;
@@ -1811,7 +1868,12 @@ export interface CompaniesSelect<T extends boolean = true> {
   ico?: T;
   description?: T;
   email?: T;
-  phone?: T;
+  phone?:
+    | T
+    | {
+        countryCode?: T;
+        number?: T;
+      };
   website?: T;
   owner?: T;
   updatedAt?: T;
@@ -1905,7 +1967,9 @@ export interface EventsSelect<T extends boolean = true> {
   checklist?:
     | T
     | {
-        item?: T;
+        label?: T;
+        description?: T;
+        dueDate?: T;
         completed?: T;
         id?: T;
       };
@@ -1919,10 +1983,23 @@ export interface EventsSelect<T extends boolean = true> {
   location?:
     | T
     | {
-        city?: T;
-        address?: T;
-        useVenueAsLocation?: T;
-        venue?: T;
+        venue?:
+          | T
+          | {
+              venue?: T;
+              id?: T;
+              blockName?: T;
+            };
+        custom?:
+          | T
+          | {
+              city?: T;
+              address?: T;
+              buildingType?: T;
+              description?: T;
+              id?: T;
+              blockName?: T;
+            };
       };
   guests?:
     | T
@@ -1989,6 +2066,17 @@ export interface CalendarEventsSelect<T extends boolean = true> {
   status?: T;
   name?: T;
   description?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "favourite-listings_select".
+ */
+export interface FavouriteListingsSelect<T extends boolean = true> {
+  user?: T;
+  listing?: T;
+  addedAt?: T;
   updatedAt?: T;
   createdAt?: T;
 }

@@ -19,7 +19,7 @@ import { useParams } from "next/navigation";
 
 import CustomerCard from "./components/customer-card";
 import InquiryDetails from "../../../../../../../components/inquiry-details";
-import { AlertSection } from "@/app/[locale]/(user)/components/alert-section";
+import { AlertSection } from "@/app/components/ui/molecules/alert-section";
 import { useChatMessagesByInquiry } from "@/app/react-query/chat-messages/hooks";
 import { useState } from "react";
 import { PriceChangeModal } from "@/app/components/ui/molecules/modals/price-change-modal";

@@ -10,6 +10,7 @@ type Props = {
   defaultIcon?: LucideIcons;
   onSelect: (icon: LucideIcons) => void;
   error?: string;
+  activeIconBgColor?: string;
 };
 
 export type LucideIcons = keyof typeof lucideIcons;
@@ -20,6 +21,7 @@ export default function IconSelect({
   defaultIcon,
   onSelect,
   error,
+  activeIconBgColor,
 }: Props) {
   const [selectedIcon, setSelectedIcon] = React.useState<
     LucideIcons | undefined
@@ -53,7 +55,7 @@ export default function IconSelect({
               }}
               className={`w-11 h-11 rounded-xl flex items-center justify-center transition-all ease-in-out ${
                 isSelected
-                  ? "bg-primary shadow-sm"
+                  ? activeIconBgColor || "bg-primary shadow-sm"
                   : "bg-zinc-100 hover:bg-zinc-200"
               }`}
             >
