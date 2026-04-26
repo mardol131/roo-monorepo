@@ -39,7 +39,8 @@ export default function layout({ children }: Props) {
         icon: "Settings",
       },
       {
-        label: "Odhlásit",
+        label: "Odejít",
+        href: "/homepage",
         icon: "LogOut",
       },
     ],

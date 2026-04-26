@@ -11,6 +11,7 @@ import { CheckCircle, Building2 } from "lucide-react";
 import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { User } from "@roo/common";
+import { registerUser } from "@/app/functions/api/users";
 
 type CountryCode = NonNullable<NonNullable<User["phone"]>["countryCode"]>;
 type AccountType = User["type"];
@@ -64,27 +65,10 @@ export default function RegisterForm({
   async function onSubmit(data: RegisterFormValues) {
     setServerError(undefined);
     try {
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_PAYLOAD_URL}/api/users`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            firstName: data.firstName,
-            lastName: data.lastName,
-            email: data.email,
-            password: data.password,
-            type: accountType,
-            phone: data.phone.number
-              ? {
-                  countryCode: data.phone.countryCode,
-                  number: data.phone.number,
-                }
-              : undefined,
-          }),
-        },
-      );
-
+      const res = await registerUser({
+        ...data,
+        type: "user",
+      });
       if (!res.ok) {
         const body = await res.json().catch(() => null);
         setServerError(

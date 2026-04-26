@@ -47,6 +47,7 @@ export default function HeroSection({}: HeroSectionProps) {
         <Text variant="display-2xl" color="primary" className="mb-8">
           Vše z jednoho místa
         </Text>
+
         <div className="max-w-200 mx-auto">
           <Text variant="h2" color="textDark">
             S námi dokážete naplánovat celý event během pár minut. Od výběru

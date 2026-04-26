@@ -7,22 +7,9 @@ export const Users: CollectionConfig = {
   admin: {
     useAsTitle: 'email',
   },
-  auth: {
-    useSessions: true,
-  },
+  auth: true,
   access: {
-    create: async ({ req }) => {
-      return adminOrApiKeyAuth(req)
-    },
-    read: async ({ req }) => {
-      return adminOrApiKeyAuth(req)
-    },
-    update: async ({ req }) => {
-      return adminOrApiKeyAuth(req)
-    },
-    delete: async ({ req }) => {
-      return adminOrApiKeyAuth(req)
-    },
+    create: () => true,
   },
   fields: [
     {

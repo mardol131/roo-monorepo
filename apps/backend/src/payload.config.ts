@@ -105,10 +105,5 @@ export default buildConfig({
     url: process.env.DATABASE_URL || '',
   }),
   plugins: [],
-  cors: [
-    'http://localhost:3000/',
-    'http://localhost:3000',
-    process.env.NEXT_PUBLIC_WEBSITE_URL || 'https://osvc365.cz',
-    'https://www.osvc365.cz',
-  ],
+  cors: ['http://localhost:3000', process.env.NEXT_PUBLIC_WEBSITE_URL || ''],
 })

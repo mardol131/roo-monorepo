@@ -8,6 +8,7 @@ import logo from "../../../../public/logo.png";
 import ProfileSwitchButton from "./profile-switch-button";
 import { SidebarItem, SidebarNavItem } from "./sidebar-item";
 import { useCallback } from "react";
+import { useAuth } from "@/app/context/auth/auth-context";
 
 export type SidebarProps = {
   button?: ButtonProps;
@@ -23,6 +24,8 @@ export default function Sidebar({
   headerComponent,
 }: SidebarProps) {
   const pathname = usePathname();
+
+  const auth = useAuth();
 
   const isActive = useCallback(
     (href?: IntlPathname) => {
@@ -66,7 +69,7 @@ export default function Sidebar({
         {subMenuItems && subMenuItems.length > 0 && (
           <div className="px-2 pb-3 border-t border-zinc-100">
             <ul className="flex flex-col gap-1">
-              <ProfileSwitchButton />
+              {auth.user?.type == "company" && <ProfileSwitchButton />}
               {subMenuItems.map((item) => (
                 <SidebarNavItem
                   key={item.href?.toString() || item.label}

@@ -12,6 +12,7 @@ import {
 import { favouriteListingKeys } from "./react-query/query-keys";
 import { fetchFavouriteListings } from "./react-query/favourite-listings/fetch";
 import LoginModal from "./components/ui/molecules/modals/login-modal/login-modal";
+import { AuthProvider } from "./context/auth/auth-context";
 
 export const metadata: Metadata = {};
 
@@ -35,11 +36,13 @@ export default async function RootLayout({
       <body className={`text-on-dark`}>
         <NextIntlClientProvider>
           <ReactQueryProvider>
-            <HydrationBoundary state={dehydrate(queryClient)}>
-              {children}
-              <ConfirmActionModal />
-              <LoginModal />
-            </HydrationBoundary>
+            <AuthProvider>
+              <HydrationBoundary state={dehydrate(queryClient)}>
+                {children}
+                <ConfirmActionModal />
+                <LoginModal />
+              </HydrationBoundary>
+            </AuthProvider>
           </ReactQueryProvider>
         </NextIntlClientProvider>
       </body>

@@ -19,7 +19,7 @@ export default function page({}: Props) {
           backgroundSize: "cover",
           objectFit: "cover",
         }}
-        className="-mt-20 -mb-30"
+        className="-mb-30"
       >
         <HeroSection />
       </div>

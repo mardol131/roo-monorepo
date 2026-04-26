@@ -3,6 +3,8 @@
 import Button from "@/app/components/ui/atoms/button";
 import Input from "@/app/components/ui/atoms/inputs/input";
 import Text from "@/app/components/ui/atoms/text";
+import { useAuth } from "@/app/context/auth/auth-context";
+import { login } from "@/app/functions/api/users";
 import { Link } from "@/app/i18n/navigation";
 import { useForm } from "react-hook-form";
 
@@ -14,7 +16,13 @@ type Props = {
   onClose: () => void;
 };
 
-export default function LoginScreen({ onSuccess, onForgotPassword, onClose }: Props) {
+export default function LoginScreen({
+  onSuccess,
+  onForgotPassword,
+  onClose,
+}: Props) {
+  const auth = useAuth();
+
   const {
     register,
     handleSubmit,
@@ -24,21 +32,12 @@ export default function LoginScreen({ onSuccess, onForgotPassword, onClose }: Pr
 
   async function onSubmit(data: LoginFormValues) {
     try {
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_PAYLOAD_URL}/api/users/login`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          credentials: "include",
-          body: JSON.stringify({ email: data.email, password: data.password }),
-        },
-      );
-      if (!res.ok) {
-        const body = await res.json().catch(() => null);
+      const res = await auth.login(data.email, data.password);
+      console.log(res);
+      if (res.error) {
         setError("root", {
           message:
-            body?.errors?.[0]?.message ??
-            "Nesprávný e-mail nebo heslo. Zkuste to znovu.",
+            res?.error ?? "Nesprávný e-mail nebo heslo. Zkuste to znovu.",
         });
         return;
       }
@@ -112,7 +111,9 @@ export default function LoginScreen({ onSuccess, onForgotPassword, onClose }: Pr
 
       <div className="flex items-center gap-2">
         <div className="flex-1 h-px bg-zinc-100" />
-        <Text variant="caption" color="textLight">nebo</Text>
+        <Text variant="caption" color="textLight">
+          nebo
+        </Text>
         <div className="flex-1 h-px bg-zinc-100" />
       </div>
 
