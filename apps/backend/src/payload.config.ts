@@ -17,8 +17,7 @@ import { Spaces } from './collections/spaces'
 import { Personnel } from './collections/filters/personnel'
 import { Companies } from './collections/companies'
 import { Cities } from './collections/locality/cities'
-import { Users } from './collections/users'
-import { Media } from './collections/media'
+
 import { PlaceTypes } from './collections/filters/place-types'
 import { Rules } from './collections/specific/rules'
 import { Technologies } from './collections/filters/technologies'
@@ -38,6 +37,8 @@ import { DietaryOptions } from './collections/filters/dietary-options'
 import { FoodServiceStyle } from './collections/filters/food-service-style'
 import { CalendarEvents } from './collections/calendar-events'
 import { FavouriteListings } from './collections/favourite-listings'
+import { Users } from './collections/Users'
+import { Media } from './collections/Media'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)

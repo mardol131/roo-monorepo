@@ -7,6 +7,7 @@ import logo from "@/public/logo.png";
 import { useState } from "react";
 import HeaderAuthWidget from "./header-auth-widget";
 import { useAuth } from "@/app/context/auth/auth-context";
+import Text from "../../ui/atoms/text";
 
 const NAV_ITEMS: { label: string; href: IntlLink; icon: React.ElementType }[] =
   [
@@ -30,6 +31,9 @@ const NAV_ITEMS: { label: string; href: IntlLink; icon: React.ElementType }[] =
 export default function Header() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const auth = useAuth();
+
+  const userIsNotLoggedInOrDoesNotHaveCompany =
+    !auth.user || auth.user.type === "user";
   return (
     <header className="sticky top-0 z-50 w-full bg-white/95 backdrop-blur-sm border-b border-zinc-100">
       <div className="max-w-content mx-auto px-6 flex items-center justify-between h-16">
@@ -59,18 +63,17 @@ export default function Header() {
         {/* Right side */}
         <div className="flex items-center gap-2">
           {/* Supplier CTA */}
-          {!auth.user ||
-            (auth.user && auth.user.type === "user" && (
-              <>
-                <Link
-                  href="/register-company"
-                  className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium text-zinc-500 hover:text-zinc-900 hover:bg-zinc-50 transition-colors"
-                >
-                  Staňte se dodavatelem
-                </Link>{" "}
-                <div className="hidden md:block w-px h-4 bg-zinc-200 mx-1" />
-              </>
-            ))}
+          {userIsNotLoggedInOrDoesNotHaveCompany && (
+            <>
+              <Link
+                href="/register-company"
+                className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium text-zinc-500 hover:text-zinc-900 hover:bg-zinc-50 transition-colors"
+              >
+                <Text variant="label-lg">Staňte se dodavatelem</Text>
+              </Link>
+              <div className="hidden md:block w-px h-4 bg-zinc-200 mx-1" />
+            </>
+          )}
 
           {/* Auth */}
           <div className="hidden md:flex items-center gap-1.5">

@@ -8,3 +8,6 @@ export * from "./functions/convert-image-to-webp";
 export * from "./functions/upload-file-to-cloud";
 export * from "./functions/slugify";
 export * from "./functions/wait";
+export * from "./functions/get-initials";
+
+export * from "./data/country-codes";

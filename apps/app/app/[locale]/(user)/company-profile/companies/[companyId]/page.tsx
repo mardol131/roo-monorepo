@@ -45,7 +45,14 @@ export default function page() {
         }
         infoItems={[
           { icon: "Mail", text: company.email },
-          ...(company.phone ? [{ icon: "Phone", text: company.phone }] : []),
+          ...(company.phone
+            ? [
+                {
+                  icon: "Phone",
+                  text: `${company.phone.countryCode} ${company.phone.number}`,
+                },
+              ]
+            : []),
           ...(company.website
             ? [{ icon: "Globe", text: company.website.replace("https://", "") }]
             : []),

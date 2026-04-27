@@ -32,6 +32,14 @@ export default function EditCompanyPage({
           email: company.email,
           phone: company.phone,
           website: company.website ?? undefined,
+          billingAddress: {
+            street: company.billingAddress.street,
+            city: company.billingAddress.city,
+            postalCode: company.billingAddress.postalCode,
+            country: company.billingAddress.country,
+          },
+          vatId: company.vatId ?? undefined,
+          logo: company.logo ?? undefined,
         }}
       />
     </main>

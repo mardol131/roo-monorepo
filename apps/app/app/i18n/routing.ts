@@ -11,7 +11,7 @@ export const routing = defineRouting({
     "/catalog": { cs: "/katalog" },
     "/catalog/[type]": { cs: "/katalog/[type]" },
     "/listing/[listingId]": { cs: "/inzerat/[listingId]" },
-    "/listing/[listingId]/booking": { cs: "/inzerat/[listingId]/poptavka" },
+    "/listing/[listingId]/inquiry": { cs: "/inzerat/[listingId]/poptavka" },
 
     // authorization
     "/login": { cs: "/prihlaseni" },
@@ -21,17 +21,17 @@ export const routing = defineRouting({
 
     // user profile
     "/user-profile": { cs: "/ucet" },
-    "/user-profile/my-events/new": { cs: "/ucet/moje-udalosti/nova-udalost" },
-    "/user-profile/my-events": { cs: "/ucet/moje-udalosti" },
-    "/user-profile/my-events/[eventId]": {
+    "/user-profile/events/new": { cs: "/ucet/moje-udalosti/nova-udalost" },
+    "/user-profile/events": { cs: "/ucet/moje-udalosti" },
+    "/user-profile/events/[eventId]": {
       cs: "/ucet/moje-udalosti/[eventId]",
     },
-    "/user-profile/my-events/[eventId]/[inquiryId]": {
+    "/user-profile/events/[eventId]/[inquiryId]": {
       cs: "/ucet/moje-udalosti/[eventId]/[inquiryId]",
     },
     "/user-profile/inquiries": { cs: "/ucet/poptavky" },
     "/user-profile/messages": { cs: "/ucet/zpravy" },
-    "/user-profile/favorites": { cs: "/ucet/oblibene" },
+    "/user-profile/favourites": { cs: "/ucet/oblibene" },
     "/user-profile/profile-settings": { cs: "/ucet/nastaveni" },
 
     // company profile

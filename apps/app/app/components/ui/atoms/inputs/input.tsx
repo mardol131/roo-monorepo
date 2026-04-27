@@ -14,7 +14,7 @@ export default function Input({
   disabled,
   filterRegex,
 }: {
-  label: string;
+  label?: string;
   subLabel?: string;
   inputProps?: React.InputHTMLAttributes<HTMLInputElement>;
   error?: string;
@@ -38,7 +38,7 @@ export default function Input({
 
   return (
     <div className={`w-full ${disabled ? "opacity-50" : ""}`}>
-      <InputLabel label={label} isRequired={isRequired} />
+      {label && <InputLabel label={label} isRequired={isRequired} />}
       {subLabel && (
         <Text variant="label" color="textLight">
           {subLabel}

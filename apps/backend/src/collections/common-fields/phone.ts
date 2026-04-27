@@ -1,4 +1,5 @@
 import { Field } from 'payload'
+import { COUNTRY_CODES } from '@roo/common'
 
 export function getPhoneField(required = false): Field {
   return {
@@ -9,7 +10,7 @@ export function getPhoneField(required = false): Field {
       {
         name: 'countryCode',
         type: 'select',
-        options: ['420'],
+        options: COUNTRY_CODES,
         required,
       },
 

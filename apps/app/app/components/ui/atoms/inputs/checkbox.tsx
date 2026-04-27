@@ -58,7 +58,7 @@ function Checkbox({
         <div className="flex gap-1 -mt-0.5">
           <Text
             variant={size === "sm" ? "label" : "body-sm"}
-            color="textDark"
+            color={error ? "danger" : "textDark"}
             className="transition-colors duration-200"
           >
             {label}

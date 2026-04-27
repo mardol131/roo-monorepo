@@ -1,6 +1,8 @@
 "use client";
 
+import { login, logout, refreshUser } from "@/app/functions/api/users";
 import type { User } from "@roo/common";
+import { ca } from "date-fns/locale";
 import {
   createContext,
   useCallback,
@@ -30,9 +32,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const refresh = useCallback(async () => {
     try {
-      const res = await fetch(`${BASE_URL}/api/users/me`, {
-        credentials: "include",
-      });
+      const res = await refreshUser();
       if (res.ok) {
         const data = await res.json();
         setUser(data.user ?? null);
@@ -48,14 +48,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     refresh().finally(() => setIsLoading(false));
   }, [refresh]);
 
-  const login = useCallback(
+  const loginHandler = useCallback(
     async (email: string, password: string): Promise<{ error?: string }> => {
-      const res = await fetch(`${BASE_URL}/api/users/login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ email, password }),
-      });
+      const res = await login(email, password);
 
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
@@ -69,11 +64,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     [],
   );
 
-  const logout = useCallback(async () => {
-    await fetch(`${BASE_URL}/api/users/logout`, {
-      method: "POST",
-      credentials: "include",
-    });
+  const logoutHandler = useCallback(async () => {
+    await logout();
     setUser(null);
   }, []);
 
@@ -83,8 +75,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         user,
         isLoading,
         isAuthenticated: !!user,
-        login,
-        logout,
+        login: loginHandler,
+        logout: logoutHandler,
         refresh,
       }}
     >

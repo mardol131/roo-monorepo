@@ -294,6 +294,9 @@ export interface User {
     number?: string | null;
   };
   type: 'user' | 'company';
+  gdprConsent: boolean;
+  termsOfUseConsent: boolean;
+  marketingConsent?: boolean | null;
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -685,6 +688,7 @@ export interface Company {
   name: string;
   ico: string;
   description?: string | null;
+  logo?: string | null;
   email: string;
   phone: {
     countryCode: '420';
@@ -692,6 +696,13 @@ export interface Company {
   };
   website?: string | null;
   owner: string | User;
+  billingAddress: {
+    street: string;
+    city: string;
+    postalCode: string;
+    country: string;
+  };
+  vatId?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1379,6 +1390,9 @@ export interface UsersSelect<T extends boolean = true> {
         number?: T;
       };
   type?: T;
+  gdprConsent?: T;
+  termsOfUseConsent?: T;
+  marketingConsent?: T;
   updatedAt?: T;
   createdAt?: T;
   email?: T;
@@ -1861,6 +1875,7 @@ export interface CompaniesSelect<T extends boolean = true> {
   name?: T;
   ico?: T;
   description?: T;
+  logo?: T;
   email?: T;
   phone?:
     | T
@@ -1870,6 +1885,15 @@ export interface CompaniesSelect<T extends boolean = true> {
       };
   website?: T;
   owner?: T;
+  billingAddress?:
+    | T
+    | {
+        street?: T;
+        city?: T;
+        postalCode?: T;
+        country?: T;
+      };
+  vatId?: T;
   updatedAt?: T;
   createdAt?: T;
 }

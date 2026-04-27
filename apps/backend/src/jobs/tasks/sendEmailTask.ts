@@ -1,5 +1,3 @@
-import { sendEmail } from '@test/email-builder'
-
 import { Field, TaskConfig } from 'payload'
 
 const sendEmailInputSchema: Field[] = [

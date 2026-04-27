@@ -10,27 +10,18 @@ import { AlertSection } from "@/app/components/ui/molecules/alert-section";
 import { CheckCircle, Building2 } from "lucide-react";
 import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
-import { User } from "@roo/common";
+import { COUNTRY_CODES, User } from "@roo/common";
 import { registerUser } from "@/app/functions/api/users";
+import Checkbox from "../ui/atoms/inputs/checkbox";
+import { zodResolver } from "@hookform/resolvers/zod";
+import zod from "zod";
+import { phoneSchema } from "@/app/validation/schema/phone";
+import { useTranslations } from "next-intl";
 
 type CountryCode = NonNullable<NonNullable<User["phone"]>["countryCode"]>;
 type AccountType = User["type"];
 
-const COUNTRY_CODES: { value: CountryCode; label: string }[] = [
-  { value: "420", label: "+420" },
-];
-
-type RegisterFormValues = {
-  firstName: string;
-  lastName: string;
-  email: string;
-  phone: {
-    countryCode: CountryCode;
-    number: string;
-  };
-  password: string;
-  passwordConfirm: string;
-};
+type RegisterFormValues = zod.infer<typeof formSchema>;
 
 type Props = {
   accountType: AccountType;
@@ -39,6 +30,23 @@ type Props = {
   buttonText?: string;
   buttonIconLeft?: ButtonProps["iconLeft"];
 };
+
+const formSchema = zod
+  .object({
+    firstName: zod.string().min(1, "Jméno je povinné"),
+    lastName: zod.string().min(1, "Příjmení je povinné"),
+    email: zod.string().min(1, "E-mail je povinný"),
+    phone: phoneSchema,
+    password: zod.string().min(8, "Heslo musí mít alespoň 8 znaků"),
+    passwordConfirm: zod.string().min(8, "Heslo musí mít alespoň 8 znaků"),
+    legal: zod
+      .boolean()
+      .refine((v) => v === true, { message: "Musíte souhlasit s podmínkami" }),
+    marketing: zod.boolean(),
+  })
+  .refine((data) => data.password === data.passwordConfirm, {
+    message: "Hesla se neshodují",
+  });
 
 export default function RegisterForm({
   accountType,
@@ -49,6 +57,7 @@ export default function RegisterForm({
 }: Props) {
   const [submitted, setSubmitted] = useState(false);
   const [serverError, setServerError] = useState<string | undefined>();
+  const t = useTranslations();
 
   const {
     register,
@@ -57,8 +66,11 @@ export default function RegisterForm({
     control,
     formState: { errors, isSubmitting },
   } = useForm<RegisterFormValues>({
+    resolver: zodResolver(formSchema),
     defaultValues: {
       phone: { countryCode: "420", number: "" },
+      legal: false,
+      marketing: false,
     },
   });
 
@@ -67,13 +79,25 @@ export default function RegisterForm({
     try {
       const res = await registerUser({
         ...data,
-        type: "user",
+        type: accountType,
+        marketingConsent: data.marketing,
+        gdprConsent: data.legal,
+        termsOfUseConsent: data.legal,
       });
+
       if (!res.ok) {
         const body = await res.json().catch(() => null);
+        console.log("Registration error:", body);
+        const errorMessage = body?.errors?.[0]?.data?.errors?.[0];
+        if (
+          errorMessage.path === "gdprConsent" ||
+          errorMessage.path === "termsOfUseConsent"
+        ) {
+          setServerError("Musíte souhlasit s podmínkami.");
+          return;
+        }
         setServerError(
-          body?.errors?.[0]?.message ??
-            "Registrace se nezdařila. Zkuste to prosím znovu.",
+          errorMessage ?? "Registrace se nezdařila. Zkuste to prosím znovu.",
         );
         return;
       }
@@ -117,7 +141,6 @@ export default function RegisterForm({
           text="Po registraci budete moci vytvořit firemní profil a spravovat nabídky služeb pro vaše klienty."
         />
       )}
-
       <div className="flex flex-col gap-3 sm:flex-row">
         <Input
           label="Jméno"
@@ -140,7 +163,6 @@ export default function RegisterForm({
           }}
         />
       </div>
-
       <Input
         label="E-mail"
         isRequired
@@ -158,7 +180,6 @@ export default function RegisterForm({
           autoComplete: "email",
         }}
       />
-
       {/* Phone */}
       <div className="w-full">
         <InputLabel label="Telefon" />
@@ -170,7 +191,10 @@ export default function RegisterForm({
               render={({ field }) => (
                 <SelectInput
                   label=""
-                  items={COUNTRY_CODES}
+                  items={COUNTRY_CODES.map((code) => ({
+                    value: code,
+                    label: t(`phone.countryCodes.${code}` as const) || code,
+                  }))}
                   value={field.value}
                   onChange={(e) => field.onChange(e.target.value)}
                   error={errors.phone?.countryCode?.message}
@@ -193,53 +217,75 @@ export default function RegisterForm({
             />
           </div>
         </div>
-        {errors.phone?.number && (
-          <ErrorText error={errors.phone.number.message} />
-        )}
       </div>
+      <div className="flex flex-col gap-3 sm:flex-row">
+        <Input
+          label="Heslo"
+          isRequired
+          error={errors.password?.message}
+          inputProps={{
+            ...register("password", {
+              required: "Heslo je povinné",
+              minLength: {
+                value: 8,
+                message: "Heslo musí mít alespoň 8 znaků",
+              },
+            }),
+            type: "password",
+            placeholder: "Alespoň 8 znaků",
+            autoComplete: "new-password",
+          }}
+        />
 
-      <Input
-        label="Heslo"
-        isRequired
-        error={errors.password?.message}
-        inputProps={{
-          ...register("password", {
-            required: "Heslo je povinné",
-            minLength: { value: 8, message: "Heslo musí mít alespoň 8 znaků" },
-          }),
-          type: "password",
-          placeholder: "Alespoň 8 znaků",
-          autoComplete: "new-password",
-        }}
+        <Input
+          label="Heslo znovu"
+          isRequired
+          error={errors.passwordConfirm?.message}
+          inputProps={{
+            ...register("passwordConfirm", {
+              required: "Potvrzení hesla je povinné",
+              validate: (v) => v === watch("password") || "Hesla se neshodují",
+            }),
+            type: "password",
+            placeholder: "Zopakujte heslo",
+            autoComplete: "new-password",
+          }}
+        />
+      </div>
+      <Controller
+        name="legal"
+        control={control}
+        render={({ field }) => (
+          <Checkbox
+            checked={field.value}
+            onChange={field.onChange}
+            isRequired
+            error={errors.legal?.message}
+            label="Souhlasím s obchodními podmínkami a podmínkami ochrany osobních údajů"
+          />
+        )}
       />
-
-      <Input
-        label="Heslo znovu"
-        isRequired
-        error={errors.passwordConfirm?.message}
-        inputProps={{
-          ...register("passwordConfirm", {
-            required: "Potvrzení hesla je povinné",
-            validate: (v) => v === watch("password") || "Hesla se neshodují",
-          }),
-          type: "password",
-          placeholder: "Zopakujte heslo",
-          autoComplete: "new-password",
-        }}
+      <Controller
+        name="marketing"
+        control={control}
+        render={({ field }) => (
+          <Checkbox
+            checked={field.value}
+            onChange={field.onChange}
+            label="Chci dostávat marketingové e-maily s novinkami a speciálními nabídkami"
+          />
+        )}
       />
-
       {serverError && (
         <Text variant="caption" color="primary">
           {serverError}
         </Text>
       )}
-
       <Button
         text={buttonText}
         htmlType="submit"
         version={buttonVersion}
         size="md"
-        rounding="lg"
         loading={isSubmitting}
         iconLeft={buttonIconLeft}
         className="w-full mt-1"

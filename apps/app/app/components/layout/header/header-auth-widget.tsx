@@ -3,13 +3,18 @@
 import { useAuth } from "@/app/context/auth/auth-context";
 import { Link } from "@/app/i18n/navigation";
 import Text from "@/app/components/ui/atoms/text";
-import { Building2, Calendar, ChevronDown, LogOut, Settings, Star } from "lucide-react";
+import {
+  Building2,
+  Calendar,
+  ChevronDown,
+  LogOut,
+  Settings,
+  Star,
+} from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { loginModalEvents } from "@/app/components/ui/molecules/modals/login-modal/login-modal";
-
-function getInitials(firstName?: string, lastName?: string) {
-  return `${firstName?.[0] ?? ""}${lastName?.[0] ?? ""}`.toUpperCase() || "?";
-}
+import Button from "../../ui/atoms/button";
+import { getInitials } from "@roo/common";
 
 export default function HeaderAuthWidget({
   onNavigate,
@@ -36,27 +41,25 @@ export default function HeaderAuthWidget({
   if (!isAuthenticated || !user) {
     return (
       <>
-        <button
-          type="button"
+        <Button
+          text="Přihlásit se"
           onClick={() => {
             onNavigate?.();
             loginModalEvents.emit("open", undefined);
           }}
-          className="px-3 py-1.5 rounded-lg hover:text-zinc-900 hover:bg-zinc-50 transition-colors"
-        >
-          <Text variant="label-lg" color="secondary">
-            Přihlásit se
-          </Text>
-        </button>
-        <Link
-          href="/register"
+          size="sm"
+          version="plain"
+        />
+        <Button
+          text="Registrovat se"
           onClick={onNavigate}
-          className="px-3 py-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-700 transition-colors"
-        >
-          <Text variant="label-lg" color="white" className="font-semibold">
-            Registrovat se
-          </Text>
-        </Link>
+          link={{
+            pathname: "/register",
+          }}
+          size="md"
+          rounding="2xl"
+          version="secondary"
+        />
       </>
     );
   }
@@ -66,7 +69,7 @@ export default function HeaderAuthWidget({
       <button
         type="button"
         onClick={() => setOpen((p) => !p)}
-        className="flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-zinc-50 transition-colors"
+        className="flex items-center gap-2 p-2 rounded-full bg-zinc-100 hover:bg-zinc-200 transition-colors"
       >
         <div className="w-7 h-7 rounded-full bg-zinc-900 text-white flex items-center justify-center text-xs font-semibold shrink-0">
           {getInitials(user.firstName, user.lastName)}
@@ -146,19 +149,29 @@ export default function HeaderAuthWidget({
                 </Text>
                 <Link
                   href={{ pathname: "/company-profile/companies" }}
-                  onClick={() => { setOpen(false); onNavigate?.(); }}
+                  onClick={() => {
+                    setOpen(false);
+                    onNavigate?.();
+                  }}
                   className="flex items-center gap-2.5 px-3 py-2 hover:bg-zinc-50 transition-colors"
                 >
                   <Building2 className="w-4 h-4 text-zinc-400 shrink-0" />
-                  <Text variant="label-lg" color="textDark">Moje firmy</Text>
+                  <Text variant="label-lg" color="textDark">
+                    Moje firmy
+                  </Text>
                 </Link>
                 <Link
                   href={{ pathname: "/company-profile" }}
-                  onClick={() => { setOpen(false); onNavigate?.(); }}
+                  onClick={() => {
+                    setOpen(false);
+                    onNavigate?.();
+                  }}
                   className="flex items-center gap-2.5 px-3 py-2 hover:bg-zinc-50 transition-colors"
                 >
                   <Settings className="w-4 h-4 text-zinc-400 shrink-0" />
-                  <Text variant="label-lg" color="textDark">Nastavení firmy</Text>
+                  <Text variant="label-lg" color="textDark">
+                    Nastavení firmy
+                  </Text>
                 </Link>
               </div>
             </>

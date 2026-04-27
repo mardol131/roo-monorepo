@@ -33,5 +33,10 @@
     "words": {
       "all": "Vše"
     }
+  },
+  "phone": {
+    "countryCodes": {
+      "420": "+420"
+    }
   }
 }

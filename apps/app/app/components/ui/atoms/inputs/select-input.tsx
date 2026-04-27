@@ -3,6 +3,7 @@
 import React, { useRef, useState, useEffect } from "react";
 import Text from "./../text";
 import { ChevronDown } from "lucide-react";
+import InputLabel from "../input-label";
 
 export type SelectOption = {
   value: string | number;
@@ -10,7 +11,7 @@ export type SelectOption = {
 };
 
 type Props = React.InputHTMLAttributes<HTMLSelectElement> & {
-  label: string;
+  label?: string;
   items: SelectOption[];
   placeholder?: string;
   error?: string;
@@ -56,11 +57,7 @@ const SelectInput = React.forwardRef<HTMLSelectElement, Props>(
 
     return (
       <div ref={containerRef} className="relative">
-        <label htmlFor={id} className="block mb-1.5">
-          <Text variant="label" color="textDark" className="font-semibold">
-            {label}
-          </Text>
-        </label>
+        {label && <InputLabel label={label} />}
 
         {/* Hidden select for form integration */}
         <select

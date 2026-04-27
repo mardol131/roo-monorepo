@@ -20,22 +20,25 @@ export async function registerUser({
   lastName,
   phone,
   type,
-}: {
-  email: string;
-  password: string;
-  firstName: string;
-  lastName: string;
-  phone: {
-    countryCode: string;
-    number: string;
-  };
-  type: User["type"];
-}) {
+  gdprConsent,
+  termsOfUseConsent,
+  marketingConsent,
+}: Omit<User, "id" | "updatedAt" | "createdAt">) {
   const response = await fetch(`${apiUrl}/api/users`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     credentials: "include",
-    body: JSON.stringify({ email, password, firstName, lastName, type, phone }),
+    body: JSON.stringify({
+      email,
+      password,
+      firstName,
+      lastName,
+      type,
+      phone,
+      gdprConsent,
+      termsOfUseConsent,
+      marketingConsent,
+    }),
   });
 
   return response;
@@ -48,5 +51,24 @@ export async function switchAccountTypeToCompany() {
     credentials: "include",
     body: JSON.stringify({ type: "company" }),
   });
+  return response;
+}
+
+export async function logout() {
+  const response = await fetch(`${apiUrl}/api/users/logout`, {
+    method: "GET",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+  });
+
+  return response;
+}
+export async function refreshUser() {
+  const response = await fetch(`${apiUrl}/api/users/me`, {
+    method: "GET",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+  });
+
   return response;
 }

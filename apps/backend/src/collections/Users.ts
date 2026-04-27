@@ -30,5 +30,31 @@ export const Users: CollectionConfig = {
       defaultValue: 'user',
       required: true,
     },
+    {
+      name: 'gdprConsent',
+      type: 'checkbox',
+      required: true,
+      validate: (value) => {
+        if (!value) {
+          return 'required'
+        }
+        return true
+      },
+    },
+    {
+      name: 'termsOfUseConsent',
+      type: 'checkbox',
+      required: true,
+      validate: (value) => {
+        if (!value) {
+          return 'required'
+        }
+        return true
+      },
+    },
+    {
+      name: 'marketingConsent',
+      type: 'checkbox',
+    },
   ],
 }

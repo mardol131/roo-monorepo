@@ -31,7 +31,8 @@
     "react-dom": "19.2.1",
     "@roo/email-builder": "workspace:*",
     "sharp": "0.34.2",
-    "@payloadcms/db-mongodb": "3.69.0"
+    "@payloadcms/db-mongodb": "3.69.0",
+    "@roo/common": "workspace:*"
   },
   "devDependencies": {
     "@playwright/test": "1.56.1",

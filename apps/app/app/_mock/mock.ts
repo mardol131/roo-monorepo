@@ -39,6 +39,8 @@ export const USER: User = {
   lastName: "Novák",
   email: "jan.novak@email.cz",
   type: "company",
+  gdprConsent: true,
+  termsOfUseConsent: true,
 };
 
 export const MOCK_EVENT_TYPES: EventType[] = [
@@ -902,6 +904,12 @@ export const COMPANIES: Company[] = [
     owner: USER,
     updatedAt: "2025-01-01T00:00:00.000Z",
     createdAt: "2025-01-01T00:00:00.000Z",
+    billingAddress: {
+      street: "Náměstí Míru 5",
+      city: "Praha",
+      postalCode: "120 00",
+      country: "Česká republika",
+    },
   },
   {
     id: "2",
@@ -917,6 +925,12 @@ export const COMPANIES: Company[] = [
     owner: USER,
     updatedAt: "2025-01-01T00:00:00.000Z",
     createdAt: "2025-01-01T00:00:00.000Z",
+    billingAddress: {
+      street: "Náměstí Míru 5",
+      city: "Praha",
+      postalCode: "120 00",
+      country: "Česká republika",
+    },
   },
   {
     id: "3",
@@ -932,6 +946,12 @@ export const COMPANIES: Company[] = [
     owner: USER,
     updatedAt: "2025-01-01T00:00:00.000Z",
     createdAt: "2025-01-01T00:00:00.000Z",
+    billingAddress: {
+      street: "Náměstí Míru 5",
+      city: "Praha",
+      postalCode: "120 00",
+      country: "Česká republika",
+    },
   },
 ];
 
@@ -1436,8 +1456,19 @@ export const MOCK_EVENT: Event = {
   ],
   checklist: [
     { id: "cl-1", label: "Zajistit catering", completed: true },
-    { id: "cl-2", label: "Objednat dekorace", description: "Zlatá a černá barva", completed: false, dueDate: "2025-03-01T12:00:00.000Z" },
-    { id: "cl-3", label: "Rozeslat pozvánky", completed: false, dueDate: "2025-02-15T10:00:00.000Z" },
+    {
+      id: "cl-2",
+      label: "Objednat dekorace",
+      description: "Zlatá a černá barva",
+      completed: false,
+      dueDate: "2025-03-01T12:00:00.000Z",
+    },
+    {
+      id: "cl-3",
+      label: "Rozeslat pozvánky",
+      completed: false,
+      dueDate: "2025-02-15T10:00:00.000Z",
+    },
     { id: "cl-4", label: "Potvrdit DJ", completed: false },
   ],
   owner: USER,
@@ -1464,8 +1495,19 @@ export const MOCK_EVENTS: Event[] = [
     ],
     checklist: [
       { id: "cl-1", label: "Zajistit catering", completed: true },
-      { id: "cl-2", label: "Objednat dekorace", description: "Zlatá a černá barva", completed: false, dueDate: "2025-03-01T12:00:00.000Z" },
-      { id: "cl-3", label: "Rozeslat pozvánky", completed: false, dueDate: "2025-02-15T10:00:00.000Z" },
+      {
+        id: "cl-2",
+        label: "Objednat dekorace",
+        description: "Zlatá a černá barva",
+        completed: false,
+        dueDate: "2025-03-01T12:00:00.000Z",
+      },
+      {
+        id: "cl-3",
+        label: "Rozeslat pozvánky",
+        completed: false,
+        dueDate: "2025-02-15T10:00:00.000Z",
+      },
       { id: "cl-4", label: "Potvrdit DJ", completed: false },
     ],
     owner: USER,
@@ -1484,12 +1526,15 @@ export const MOCK_EVENTS: Event[] = [
     },
     location: [{ blockType: "custom", city: MOCK_CITIES[1] }],
     guests: { adults: 28, children: 2 },
-    notes: [
-      { id: "n-3", note: "Dort objednat u cukrárny Sladká chvíle" },
-    ],
+    notes: [{ id: "n-3", note: "Dort objednat u cukrárny Sladká chvíle" }],
     checklist: [
       { id: "cl-5", label: "Rezervovat restauraci", completed: true },
-      { id: "cl-6", label: "Objednat dort", completed: false, dueDate: "2025-04-20T10:00:00.000Z" },
+      {
+        id: "cl-6",
+        label: "Objednat dort",
+        completed: false,
+        dueDate: "2025-04-20T10:00:00.000Z",
+      },
       { id: "cl-7", label: "Připravit playlist", completed: false },
     ],
     owner: USER,
@@ -1514,7 +1559,13 @@ export const MOCK_EVENTS: Event[] = [
     ],
     checklist: [
       { id: "cl-8", label: "Vybrat lokaci", completed: true },
-      { id: "cl-9", label: "Zajistit dopravu", description: "Autobus pro 50 osob", completed: false, dueDate: "2025-06-01T09:00:00.000Z" },
+      {
+        id: "cl-9",
+        label: "Zajistit dopravu",
+        description: "Autobus pro 50 osob",
+        completed: false,
+        dueDate: "2025-06-01T09:00:00.000Z",
+      },
       { id: "cl-10", label: "Připravit program", completed: false },
       { id: "cl-11", label: "Objednat catering na dva dny", completed: false },
     ],

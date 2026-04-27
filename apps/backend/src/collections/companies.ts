@@ -22,6 +22,10 @@ export const Companies: CollectionConfig = {
       name: 'description',
       type: 'textarea',
     },
+    {
+      name: 'logo',
+      type: 'text',
+    },
 
     // Kontaktní údaje
     {
@@ -41,6 +45,42 @@ export const Companies: CollectionConfig = {
       type: 'relationship',
       relationTo: 'users',
       required: true,
+    },
+
+    //Fakturační údaje
+    {
+      name: 'billingAddress',
+      type: 'group',
+      required: true,
+      fields: [
+        {
+          name: 'street',
+          type: 'text',
+          required: true,
+        },
+        {
+          name: 'city',
+          type: 'text',
+          required: true,
+        },
+        {
+          name: 'postalCode',
+          type: 'text',
+          required: true,
+        },
+        {
+          name: 'country',
+          type: 'text',
+          required: true,
+        },
+      ],
+    },
+
+    // Daně a účetnictví
+
+    {
+      name: 'vatId',
+      type: 'text',
     },
   ],
 }

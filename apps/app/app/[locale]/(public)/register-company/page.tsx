@@ -58,7 +58,7 @@ export default function RegisterCompanyPage() {
   const isCompany = user?.type === "company" || switched;
 
   return (
-    <main className="flex min-h-[calc(100vh-4rem)]">
+    <main className="flex min-h-[80vh]">
       {/* ── Left ─────────────────────────────────────────────────── */}
       <div className="flex flex-1 flex-col justify-center items-center px-6 py-10 bg-white">
         <div className="w-full max-w-md flex flex-col">

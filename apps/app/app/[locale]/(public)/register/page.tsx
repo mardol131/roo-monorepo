@@ -23,7 +23,7 @@ const PERKS = [
 
 export default function RegisterPage() {
   return (
-    <main className="flex">
+    <main className="flex min-h-[80vh]">
       {/* ── Left — form ─────────────────────────────────────────── */}
       <div className="flex flex-1 flex-col justify-center items-center px-6 py-10 bg-white">
         <div className="w-full max-w-md flex flex-col">
@@ -38,7 +38,7 @@ export default function RegisterPage() {
             </Text>
           </div>
 
-          <RegisterForm accountType="user" />
+          <RegisterForm accountType="user" buttonVersion="primary" />
 
           <div className="mt-6 flex items-start gap-2">
             <div className="flex-1 h-px bg-zinc-100" />
@@ -59,20 +59,6 @@ export default function RegisterPage() {
               Přihlaste se
             </Link>
           </div>
-
-          <div className="mt-10">
-            <Text variant="caption" color="textLight">
-              Registrací souhlasíte s{" "}
-              <Link href="/homepage" className="underline hover:text-zinc-700">
-                podmínkami použití
-              </Link>{" "}
-              a{" "}
-              <Link href="/homepage" className="underline hover:text-zinc-700">
-                zásadami ochrany osobních údajů
-              </Link>
-              .
-            </Text>
-          </div>
         </div>
       </div>
 
@@ -86,7 +72,7 @@ export default function RegisterPage() {
         }}
       >
         {/* Dark gradient overlay */}
-        <div className="absolute inset-0 bg-linear-to-br from-event  via-zinc-900/85 to-zinc-800/60" />
+        <div className="absolute inset-0 bg-linear-to-br from-secondary  via-zinc-900/85 to-zinc-800/60" />
 
         <div className="w-full items-center justify-center flex">
           <div className="max-w-sm relative z-10">

@@ -3,28 +3,35 @@
 import { FormSection } from "@/app/[locale]/(user)/components/form-section";
 import Button from "@/app/components/ui/atoms/button";
 import Input from "@/app/components/ui/atoms/inputs/input";
+import ImageInput from "@/app/components/ui/atoms/inputs/images/image-input";
+import { phoneSchema } from "@/app/validation/schema/phone";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Building2, Phone } from "lucide-react";
-import { useForm } from "react-hook-form";
+import { Company, COUNTRY_CODES, uploadFileToCloud } from "@roo/common";
+import { Building2, MapPin, Phone, Receipt } from "lucide-react";
+import { useForm, Controller } from "react-hook-form";
 import { z } from "zod";
+import SelectInput from "@/app/components/ui/atoms/inputs/select-input";
+import { useTranslations } from "next-intl";
+import PhoneInput from "@/app/components/ui/atoms/inputs/phone-input";
 
 const schema = z.object({
   name: z.string().min(1, "Název firmy je povinný"),
-  ico: z.string().regex(/^\d{8}$/, "IČO musí mít přesně 8 číslic"),
-  description: z.string().optional(),
+  ico: z.string().min(1, "IČO je povinné"),
+  description: z.string().optional().nullable(),
+  logo: z.string().optional().nullable(),
   email: z.string().min(1, "E-mail je povinný"),
-  phone: z.string().min(1, "Telefon je povinný"),
-  website: z.string().optional(),
+  phone: phoneSchema,
+  website: z.string().optional().nullable(),
+  billingAddress: z.object({
+    street: z.string().min(1, "Ulice je povinná"),
+    city: z.string().min(1, "Město je povinné"),
+    postalCode: z.string().min(1, "PSČ je povinné"),
+    country: z.string().min(1, "Země je povinná"),
+  }),
+  vatId: z.string().optional().nullable(),
 });
 
-type FormInputs = {
-  name: string;
-  ico: string;
-  description?: string;
-  email: string;
-  phone: string;
-  website?: string;
-};
+type FormInputs = Omit<Company, "id" | "createdAt" | "updatedAt" | "owner">;
 
 type Props = {
   defaultValues?: Partial<FormInputs>;
@@ -44,11 +51,14 @@ export default function CompanyForm({
   const {
     register,
     handleSubmit,
+    control,
     formState: { errors },
   } = useForm<FormInputs>({
     resolver: zodResolver(schema),
     defaultValues,
   });
+
+  const t = useTranslations();
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
@@ -81,6 +91,19 @@ export default function CompanyForm({
           inputProps={{ ...register("description") }}
           error={errors.description?.message}
         />
+        <Controller
+          name="logo"
+          control={control}
+          render={({ field }) => (
+            <ImageInput
+              label="Logo"
+              value={field.value}
+              onChange={(f) => field.onChange(f ?? null)}
+              onUpload={uploadFileToCloud}
+              error={errors.logo?.message}
+            />
+          )}
+        />
       </FormSection>
 
       {/* Section 2 — Kontaktní údaje */}
@@ -94,11 +117,15 @@ export default function CompanyForm({
             label="E-mail"
             inputProps={{ ...register("email"), type: "email" }}
             error={errors.email?.message}
+            isRequired
           />
-          <Input
-            label="Telefon"
-            inputProps={{ ...register("phone"), type: "tel" }}
-            error={errors.phone?.message}
+          <PhoneInput
+            control={control}
+            label="Telefonní číslo"
+            countryCodeName="phone.countryCode"
+            isRequired
+            countryCodeError={errors.phone?.countryCode?.message}
+            numberError={errors.phone?.number?.message}
           />
         </div>
         <Input
@@ -108,6 +135,61 @@ export default function CompanyForm({
             placeholder: "https://...",
           }}
           error={errors.website?.message}
+        />
+      </FormSection>
+
+      {/* Section 3 — Fakturační adresa */}
+      <FormSection
+        icon={MapPin}
+        title="Fakturační adresa"
+        error={Boolean(errors.billingAddress)}
+      >
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <Input
+            isRequired
+            label="Ulice"
+            inputProps={{ ...register("billingAddress.street") }}
+            error={errors.billingAddress?.street?.message}
+          />
+          <Input
+            isRequired
+            label="Město"
+            inputProps={{ ...register("billingAddress.city") }}
+            error={errors.billingAddress?.city?.message}
+          />
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <Input
+            isRequired
+            label="PSČ"
+            inputProps={{
+              ...register("billingAddress.postalCode"),
+              inputMode: "numeric",
+            }}
+            error={errors.billingAddress?.postalCode?.message}
+          />
+          <Input
+            isRequired
+            label="Země"
+            inputProps={{ ...register("billingAddress.country") }}
+            error={errors.billingAddress?.country?.message}
+          />
+        </div>
+      </FormSection>
+
+      {/* Section 4 — Daňové údaje */}
+      <FormSection
+        icon={Receipt}
+        title="Daňové údaje"
+        error={Boolean(errors.vatId)}
+      >
+        <Input
+          label="DIČ (plátce DPH)"
+          inputProps={{
+            ...register("vatId"),
+            placeholder: "CZ12345678",
+          }}
+          error={errors.vatId?.message}
         />
       </FormSection>
 
