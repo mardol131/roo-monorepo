@@ -1,7 +1,18 @@
 import { Company } from "@roo/common";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  useMutation,
+  UseMutationOptions,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 import { companyKeys } from "../query-keys";
-import { fetchCompanies, fetchCompany, updateCompany } from "./fetch";
+import {
+  createCompany,
+  CreateCompanyPayload,
+  fetchCompanies,
+  fetchCompany,
+  updateCompany,
+} from "./fetch";
 
 export function useCompanies() {
   return useQuery({
@@ -28,5 +39,20 @@ export function useUpdateCompany(id: string) {
       queryClient.invalidateQueries({ queryKey: companyKeys.byId(id) });
       queryClient.invalidateQueries({ queryKey: companyKeys.all() });
     },
+  });
+}
+
+export function useCreateCompany(
+  options?: UseMutationOptions<Company, Error, CreateCompanyPayload>,
+) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (data: CreateCompanyPayload) => createCompany(data),
+    onSuccess: (...args) => {
+      queryClient.invalidateQueries({ queryKey: companyKeys.all() });
+      options?.onSuccess?.(...args);
+    },
+    onError: options?.onError,
   });
 }

@@ -6,6 +6,16 @@ export const Companies: CollectionConfig = {
   admin: {
     useAsTitle: 'name',
   },
+  access: {
+    create: ({ req }) => {
+      console.log('THIS IS IT')
+      console.log('Create company access check, user:', req.user)
+      return !!req.user
+    },
+    read: ({ req }) => !!req.user,
+    update: ({ req }) => !!req.user,
+    delete: ({ req }) => req.user?.collection === 'admins',
+  },
   fields: [
     // Základní informace
     {
@@ -45,6 +55,7 @@ export const Companies: CollectionConfig = {
       type: 'relationship',
       relationTo: 'users',
       required: true,
+      defaultValue: ({ user }) => user?.id,
     },
 
     //Fakturační údaje

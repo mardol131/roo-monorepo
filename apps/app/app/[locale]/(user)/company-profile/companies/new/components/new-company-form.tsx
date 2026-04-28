@@ -13,6 +13,7 @@ import { z } from "zod";
 import SelectInput from "@/app/components/ui/atoms/inputs/select-input";
 import { useTranslations } from "next-intl";
 import PhoneInput from "@/app/components/ui/atoms/inputs/phone-input";
+import { CreateCompanyPayload } from "@/app/react-query/companies/fetch";
 
 const schema = z.object({
   name: z.string().min(1, "Název firmy je povinný"),
@@ -31,7 +32,7 @@ const schema = z.object({
   vatId: z.string().optional().nullable(),
 });
 
-type FormInputs = Omit<Company, "id" | "createdAt" | "updatedAt" | "owner">;
+type FormInputs = CreateCompanyPayload;
 
 type Props = {
   defaultValues?: Partial<FormInputs>;
@@ -55,8 +56,16 @@ export default function CompanyForm({
     formState: { errors },
   } = useForm<FormInputs>({
     resolver: zodResolver(schema),
-    defaultValues,
+    defaultValues: {
+      ...defaultValues,
+      phone: {
+        countryCode: defaultValues?.phone?.countryCode || COUNTRY_CODES[0],
+        number: defaultValues?.phone?.number,
+      },
+    },
   });
+
+  console.log("Form errors:", errors);
 
   const t = useTranslations();
 
@@ -126,6 +135,7 @@ export default function CompanyForm({
             isRequired
             countryCodeError={errors.phone?.countryCode?.message}
             numberError={errors.phone?.number?.message}
+            phoneNumberProps={{ ...register("phone.number") }}
           />
         </div>
         <Input

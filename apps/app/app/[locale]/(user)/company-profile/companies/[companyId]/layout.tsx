@@ -6,7 +6,7 @@ import {
   QueryClient,
 } from "@tanstack/react-query";
 import { PropsWithChildren } from "react";
-import ContentWrapper from "./content-wrapper";
+import ContentWrapper from "../../content-wrapper";
 import { fetchListingsByCompany } from "@/app/react-query/listings/fetch";
 
 type Props = {
@@ -33,7 +33,7 @@ export default async function layout({
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
-      <ContentWrapper>{children}</ContentWrapper>
+      {children}
     </HydrationBoundary>
   );
 }

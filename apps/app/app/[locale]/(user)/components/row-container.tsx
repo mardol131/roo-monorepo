@@ -1,5 +1,7 @@
 import Text from "@/app/components/ui/atoms/text";
 import React from "react";
+import { EmptyState, EmptyStateProps } from "./empty-state";
+import { ButtonProps } from "@/app/components/ui/atoms/button";
 
 type Props = {
   icon: React.ReactElement;
@@ -7,21 +9,24 @@ type Props = {
   subLabel?: string;
   headerRightComponent?: React.ReactElement;
   rowComponents: (React.ReactElement | null)[];
-  emptyHeading?: string;
-  emptyText?: string;
+
   className?: string;
+  emptyState: EmptyStateProps;
 };
 
 export default function RowContainer({
   icon,
   label,
   headerRightComponent,
-  emptyHeading,
-  emptyText,
   rowComponents,
   className,
   subLabel,
+  emptyState,
 }: Props) {
+  if (rowComponents.length === 0) {
+    return <EmptyState {...emptyState} />;
+  }
+
   return (
     <div
       className={`bg-white rounded-2xl border border-zinc-200 overflow-hidden ${className}`}
@@ -42,23 +47,11 @@ export default function RowContainer({
         </div>
         {headerRightComponent && headerRightComponent}
       </div>
-
-      {rowComponents.length === 0 ? (
-        <div className="flex flex-col items-center justify-center text-center">
-          <Text variant="label-lg" color="secondary" className="mb-1">
-            {emptyHeading}
-          </Text>
-          <Text variant="caption" color="secondary">
-            {emptyText}
-          </Text>
-        </div>
-      ) : (
-        <div className="divide-y divide-zinc-50 flex flex-col">
-          {rowComponents.map((component, index) => (
-            <React.Fragment key={index}>{component}</React.Fragment>
-          ))}
-        </div>
-      )}
+      <div className="divide-y divide-zinc-50 flex flex-col">
+        {rowComponents.map((component, index) => (
+          <React.Fragment key={index}>{component}</React.Fragment>
+        ))}
+      </div>
     </div>
   );
 }

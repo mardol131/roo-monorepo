@@ -1,12 +1,23 @@
 "use client";
 
-import React from "react";
+import React, { useCallback } from "react";
 import { useRouter } from "next/navigation";
 import PageHeading from "../../../components/page-heading";
 import CompanyForm from "./components/new-company-form";
+import { useCreateCompany } from "@/app/react-query/companies/hooks";
+import { Company } from "@roo/common";
+import { CreateCompanyPayload } from "@/app/react-query/companies/fetch";
 
-export default function NewCompanyPage() {
+export default function page() {
   const router = useRouter();
+
+  const { mutate: createCompany, error } = useCreateCompany({
+    onSuccess: (company: Company) => {
+      router.push(`/company-profile/companies`);
+    },
+  });
+
+  console.log("Create company error:", error);
 
   return (
     <main className="w-full flex flex-col">
@@ -17,9 +28,10 @@ export default function NewCompanyPage() {
       <CompanyForm
         submitLabel="Vytvořit firmu"
         cancelLabel="Zrušit"
-        onSubmit={() => router.push("/company-profile/companies")}
+        onSubmit={createCompany}
         onBackClick={() => router.back()}
       />
+      {error && <p className="text-red-500">{error.message}</p>}
     </main>
   );
 }

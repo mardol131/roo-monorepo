@@ -6,15 +6,15 @@ import { DashboardSection } from "@/app/[locale]/(user)/components/dashboard-sec
 import InfoSection from "@/app/[locale]/(user)/components/info-section";
 import { ItemListCard } from "@/app/[locale]/(user)/components/item-list-card";
 import Loader from "@/app/[locale]/(user)/components/loader";
+import { VariantEntertainmentDetails } from "@/app/[locale]/(user)/components/variant-entertainment-details";
+import { VariantGastroDetails } from "@/app/[locale]/(user)/components/variant-gastro-details";
+import { VariantVenueDetails } from "@/app/[locale]/(user)/components/variant-venue-details";
 import Text from "@/app/components/ui/atoms/text";
 import { useRouter } from "@/app/i18n/navigation";
 import { useVariant } from "@/app/react-query/variants/hooks";
 import { Variant } from "@roo/common";
 import { Banknote, Check, Package, X } from "lucide-react";
 import { useParams } from "next/navigation";
-import { EntertainmentDetails } from "../../../../../../../components/variant-entertainment-details";
-import { GastroDetails } from "../../../../../../../components/variant-gastro-details";
-import { VenueDetails } from "../../../../../../../components/variant-venue-details";
 
 const TYPE_LABELS: Record<Variant["type"], string> = {
   allYear: "Celoroční",
@@ -180,11 +180,11 @@ export default function Page() {
         <div className="flex flex-col gap-4">
           {variant.details.map((block, i) => {
             if (block.blockType === "venue")
-              return <VenueDetails key={i} block={block} />;
+              return <VariantVenueDetails key={i} block={block} />;
             if (block.blockType === "gastro")
-              return <GastroDetails key={i} block={block} />;
+              return <VariantGastroDetails key={i} block={block} />;
             if (block.blockType === "entertainment")
-              return <EntertainmentDetails key={i} block={block} />;
+              return <VariantEntertainmentDetails key={i} block={block} />;
             return null;
           })}
         </div>

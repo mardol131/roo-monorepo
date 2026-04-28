@@ -68,7 +68,7 @@ export default function NewListingPage() {
       />
 
       <Button
-        version="plain"
+        version="listing"
         onClick={() => setSelectedType(null)}
         iconLeft="ArrowLeft"
         className="mb-4"

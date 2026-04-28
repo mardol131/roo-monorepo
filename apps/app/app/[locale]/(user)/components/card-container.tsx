@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { EmptyState } from "./empty-state";
+import { EmptyState, EmptyStateProps } from "./empty-state";
 import TabFilter from "./tab-filter";
 
 type Filter = { label: string; value: string };
@@ -12,7 +12,7 @@ type Props = {
   items: unknown[];
   filterFn?: (item: unknown, activeFilter: string) => boolean;
   renderItem: (item: unknown) => React.ReactNode;
-  emptyState?: { text: string; subtext?: string };
+  emptyState: EmptyStateProps;
 };
 
 export default function CardContainer({
@@ -44,10 +44,7 @@ export default function CardContainer({
       )}
 
       {filtered.length === 0 ? (
-        <EmptyState
-          text={emptyState?.text ?? "Žádné položky"}
-          subtext={emptyState?.subtext ?? ""}
-        />
+        <EmptyState {...emptyState} />
       ) : (
         <div className="flex flex-col gap-3">
           {filtered.map((item, i) => (

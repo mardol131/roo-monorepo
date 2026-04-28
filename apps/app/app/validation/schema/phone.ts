@@ -1,7 +1,8 @@
+import { COUNTRY_CODES } from "@roo/common";
 import zod from "zod";
 
 export const phoneSchema = zod.object({
-  countryCode: zod.enum(["420"] as const, {
+  countryCode: zod.enum(COUNTRY_CODES, {
     error: "Vyberte kód země",
   }),
   number: zod

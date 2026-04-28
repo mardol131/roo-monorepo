@@ -21,12 +21,33 @@ import { useParams } from "next/dist/client/components/navigation";
 import { SubSidebar, SubSidebarProps } from "../components/sub-sidebar";
 import { useListing } from "@/app/react-query/listings/hooks";
 import { SidebarItem } from "../components/sidebar-item";
+import {
+  dehydrate,
+  HydrationBoundary,
+  QueryClient,
+} from "@tanstack/react-query";
+import { companyKeys } from "@/app/react-query/query-keys";
+import { fetchCompanies } from "@/app/react-query/companies/fetch";
+import { fetchAllListings } from "@/app/react-query/listings/fetch";
+import ContentWrapper from "./content-wrapper";
 
 type Props = {
   children: React.ReactNode;
 };
 
 export default function layout({ children }: Props) {
+  const queryClient = new QueryClient();
+
+  queryClient.prefetchQuery({
+    queryKey: companyKeys.all(),
+    queryFn: () => fetchCompanies(),
+  });
+
+  queryClient.prefetchQuery({
+    queryKey: companyKeys.all(),
+    queryFn: () => fetchAllListings(),
+  });
+
   const sidebarProps: SidebarProps = {
     mainMenuItems: [
       { label: "Přehled", href: "/company-profile", icon: "LayoutDashboard" },
@@ -187,11 +208,12 @@ export default function layout({ children }: Props) {
 
     return subSidebar;
   }, [company, listing]);
+
   return (
-    <>
+    <HydrationBoundary state={dehydrate(queryClient)}>
       <Sidebar {...sidebarProps} />
       {company && subSidebarData && <SubSidebar {...subSidebarData} />}
-      {children}
-    </>
+      <ContentWrapper> {children}</ContentWrapper>
+    </HydrationBoundary>
   );
 }

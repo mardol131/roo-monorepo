@@ -4,7 +4,7 @@ import Button from "@/app/components/ui/atoms/button";
 import { useRouter } from "@/app/i18n/navigation";
 import { useCompany } from "@/app/react-query/companies/hooks";
 import { useListingsByCompany } from "@/app/react-query/listings/hooks";
-import { Tag, Building2 } from "lucide-react";
+import { Tag, Building2, MessageCircle } from "lucide-react";
 import { useEffect } from "react";
 import { useParams } from "next/navigation";
 import Breadcrumbs from "../../../components/breadcrumbs";
@@ -13,6 +13,9 @@ import RowContainer from "../../../components/row-container";
 import ListingStatusTag from "../../../components/tags/listing-status-tag";
 import { SummaryCard } from "../../../components/summary-card";
 import DashboardHeader from "../../../components/dashboard-header";
+import InfoSection from "../../../components/info-section";
+import { DashboardSection } from "../../../components/dashboard-section";
+import { formatCompanyBillingAddress, formatPhoneNumber } from "@roo/common";
 
 export default function page() {
   const { companyId } = useParams<{ companyId: string }>();
@@ -49,7 +52,10 @@ export default function page() {
             ? [
                 {
                   icon: "Phone",
-                  text: `${company.phone.countryCode} ${company.phone.number}`,
+                  text: formatPhoneNumber(
+                    company.phone.number,
+                    company.phone.countryCode,
+                  ),
                 },
               ]
             : []),
@@ -68,22 +74,25 @@ export default function page() {
         }}
       />
 
-      {/* Summary cards */}
-      <div className="grid grid-cols-3 gap-4 mb-6">
-        <SummaryCard
-          label="Aktivní služby"
-          value={String(listings?.length || 0)}
-          icon={Tag}
-          iconBg="bg-listing-surface"
-          iconColor="text-listing"
-        />
-        {/* <SummaryCard
-          label="Celkem poptávek"
-          value={String(totalInquiries)}
-          icon={MessageSquare}
-          iconBg="bg-inquiry-surface"
-          iconColor="text-inquiry"
-        />
+      <div className="flex flex-col gap-5">
+        {" "}
+        {/* Summary cards */}
+        <div className="grid grid-cols-3 gap-4">
+          <SummaryCard
+            label="Aktivní služby"
+            value={String(listings?.length || 0)}
+            icon={Tag}
+            iconBg="bg-listing-surface"
+            iconColor="text-listing"
+          />
+          <SummaryCard
+            label="Nepřečtených zpráv"
+            value={"3"} // TODO: get real number of unread messages
+            icon={MessageCircle}
+            iconBg="bg-inquiry-surface"
+            iconColor="text-inquiry"
+          />
+          {/* 
         <SummaryCard
           label="Průměrné hodnocení"
           value={avgRating}
@@ -92,10 +101,8 @@ export default function page() {
           iconColor="text-amber-500"
           note="ze všech služeb"
         /> */}
-      </div>
-
-      {/* Listings */}
-      {listings && listings.length > 0 && (
+        </div>
+        {/* Listings */}
         <RowContainer
           icon={
             <div className="w-8 h-8 rounded-xl bg-listing-surface flex items-center justify-center shrink-0">
@@ -115,27 +122,99 @@ export default function page() {
               }}
             />
           }
-          rowComponents={listings?.map((listing) => (
-            <EntityRow
-              key={listing.id}
-              icon="Tag"
-              iconColor="text-listing"
-              iconBackgroundColor="bg-listing-surface"
-              label={listing.name}
-              items={[
-                { icon: "Banknote", content: `${listing.price.startsAt} Kč` },
-              ]}
-              link={{
-                pathname: `/company-profile/companies/[companyId]/listings/[listingId]`,
-                params: { companyId, listingId: listing.id },
-              }}
-              rightComponent={<ListingStatusTag status={listing.status} />}
-            />
-          ))}
-          emptyHeading="Zatím žádné služby"
-          emptyText="Přidejte první službu a začněte přijímat poptávky."
+          rowComponents={
+            !listings?.length
+              ? []
+              : listings?.map((listing) => (
+                  <EntityRow
+                    key={listing.id}
+                    icon="Tag"
+                    iconColor="text-listing"
+                    iconBackgroundColor="bg-listing-surface"
+                    label={listing.name}
+                    items={[
+                      {
+                        icon: "Banknote",
+                        content: `${listing.price.startsAt} Kč`,
+                      },
+                    ]}
+                    link={{
+                      pathname: `/company-profile/companies/[companyId]/listings/[listingId]`,
+                      params: { companyId, listingId: listing.id },
+                    }}
+                    rightComponent={
+                      <ListingStatusTag status={listing.status} />
+                    }
+                  />
+                ))
+          }
+          emptyState={{
+            text: "Zatím nemáte žádné služby",
+            subtext:
+              "V tuto chvíli vaše firma neposkytuje žádné služby. Klikněte na tlačítko níže a přidejte svou první službu.",
+            button: {
+              text: "Přidat službu",
+              version: "listingFull",
+              size: "sm",
+              link: {
+                pathname: "/company-profile/companies/[companyId]/listings/new",
+                params: { companyId },
+              },
+            },
+            icon: "Tag",
+          }}
         />
-      )}
+        <DashboardSection
+          title="Informace o firmě"
+          icon={Building2}
+          iconBg="bg-company-surface"
+          iconColor="text-company"
+        >
+          <InfoSection
+            items={[
+              {
+                type: "text",
+                label: "IČO",
+                value: company.ico,
+              },
+              ...(company.vatId
+                ? [
+                    {
+                      type: "text",
+                      label: "DIČ",
+                      value: company.vatId,
+                    } as const,
+                  ]
+                : []),
+              {
+                type: "text",
+                label: "Datum vytvoření",
+                value: company.createdAt
+                  ? new Date(company.createdAt).toLocaleDateString()
+                  : "Neznámé",
+              },
+              {
+                type: "text",
+                label: "Adresa",
+                value: formatCompanyBillingAddress(company.billingAddress),
+              },
+              {
+                type: "text",
+                label: "Kontaktní email",
+                value: company.email,
+              },
+              {
+                type: "text",
+                label: "Kontaktní telefon",
+                value: formatPhoneNumber(
+                  company.phone.number,
+                  company.phone.countryCode,
+                ),
+              },
+            ]}
+          />
+        </DashboardSection>
+      </div>
     </main>
   );
 }
