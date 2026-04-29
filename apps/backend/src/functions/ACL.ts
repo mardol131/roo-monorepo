@@ -8,7 +8,7 @@ export function apiKeyAuth(authHeader: string): boolean {
 }
 
 export function adminOrApiKeyAuth(req: PayloadRequest): boolean {
-  if (req.user && req.user.collection === 'users' && req.user?.role.includes('admin')) return true
+  if (req.user && req.user.collection === 'admins' && req.user?.role.includes('admin')) return true
   const apiKey = req.headers.get('authorization')
   if (!apiKey) return false
   return apiKeyAuth(apiKey)

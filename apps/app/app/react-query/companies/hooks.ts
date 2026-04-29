@@ -29,16 +29,20 @@ export function useCompany(id: string | undefined) {
   });
 }
 
-export function useUpdateCompany(id: string) {
+export function useUpdateCompany(
+  id: string,
+  options?: UseMutationOptions<Company, Error, CreateCompanyPayload>,
+) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (data: Partial<Company>) => updateCompany(id, data),
-    onSuccess: () => {
-      // Invaliduje detail listingu i seznam na dashboardu
+    mutationFn: (data: CreateCompanyPayload) => updateCompany(id, data),
+    onSuccess: (...args) => {
       queryClient.invalidateQueries({ queryKey: companyKeys.byId(id) });
       queryClient.invalidateQueries({ queryKey: companyKeys.all() });
+      options?.onSuccess?.(...args);
     },
+    onError: options?.onError,
   });
 }
 

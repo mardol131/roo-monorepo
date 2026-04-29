@@ -54,6 +54,7 @@ export const listingsCommonFields: Field[] = [
     type: 'select',
     options: ['draft', 'active', 'archived'],
     required: true,
+    defaultValue: 'draft',
   },
   {
     name: 'company',

@@ -16,19 +16,19 @@ import DashboardHeader from "../../../components/dashboard-header";
 import InfoSection from "../../../components/info-section";
 import { DashboardSection } from "../../../components/dashboard-section";
 import { formatCompanyBillingAddress, formatPhoneNumber } from "@roo/common";
+import Loader from "../../../components/loader";
 
 export default function page() {
   const { companyId } = useParams<{ companyId: string }>();
   const router = useRouter();
 
-  const { data: company, isLoading } = useCompany(companyId);
-  const { data: listings } = useListingsByCompany(companyId);
+  const { data: company, isLoading: isCompanyLoading } = useCompany(companyId);
+  const { data: listings, isLoading: isListingsLoading } =
+    useListingsByCompany(companyId);
 
-  useEffect(() => {
-    if (!isLoading && !company) {
-      router.push("/company-profile/companies");
-    }
-  }, [isLoading, company, router]);
+  if (isCompanyLoading || isListingsLoading) {
+    return <Loader text="Stránka se načítá..." />;
+  }
 
   if (!company) {
     return null;
@@ -177,21 +177,21 @@ export default function page() {
                 label: "IČO",
                 value: company.ico,
               },
-              ...(company.vatId
-                ? [
-                    {
-                      type: "text",
-                      label: "DIČ",
-                      value: company.vatId,
-                    } as const,
-                  ]
-                : []),
               {
                 type: "text",
-                label: "Datum vytvoření",
-                value: company.createdAt
-                  ? new Date(company.createdAt).toLocaleDateString()
-                  : "Neznámé",
+                label: "Webová stránka",
+                value: company.website,
+              },
+
+              {
+                type: "text",
+                label: "DIČ",
+                value: company.vatId,
+              },
+              {
+                type: "text",
+                label: "Popisek",
+                value: company.description,
               },
               {
                 type: "text",

@@ -1,5 +1,6 @@
 import type { CollectionConfig, Field } from 'payload'
 import { listingsCommonFields } from './common-fields/common-fields'
+import { slugify } from '@roo/common'
 
 export const venueListingDetails: Field[] = [
   {
@@ -434,6 +435,16 @@ export const Listings: CollectionConfig = {
   admin: {
     useAsTitle: 'name',
   },
+  access: {
+    create: ({ req }) => {
+      console.log('THIS IS IT')
+      console.log('Create company access check, user:', req.user)
+      return !!req.user
+    },
+    read: ({ req }) => !!req.user,
+    update: ({ req }) => !!req.user,
+    delete: ({ req }) => req.user?.collection === 'admins',
+  },
   fields: [
     ...listingsCommonFields,
     {
@@ -457,4 +468,15 @@ export const Listings: CollectionConfig = {
       ],
     },
   ],
+  hooks: {
+    beforeValidate: [
+      ({ data }) => {
+        if (!data) return
+
+        if (!data.slug) {
+          data.slug = slugify(data.name)
+        }
+      },
+    ],
+  },
 }

@@ -1,7 +1,14 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Listing } from "@roo/common";
-import { companyKeys, listingKeys } from "../query-keys";
 import {
+  useQuery,
+  useMutation,
+  useQueryClient,
+  UseMutationOptions,
+} from "@tanstack/react-query";
+import { Listing } from "@roo/common";
+import { listingKeys } from "../query-keys";
+import {
+  createListing,
+  CreateListingPayload,
   deleteListing,
   fetchAllListings,
   fetchListing,
@@ -11,7 +18,7 @@ import {
 
 export function useListings() {
   return useQuery({
-    queryKey: listingKeys.catalog(),
+    queryKey: listingKeys.all(),
     queryFn: fetchAllListings,
   });
 }
@@ -55,6 +62,23 @@ export function useDeleteListing(id: string, companyId: string) {
       queryClient.invalidateQueries({
         queryKey: listingKeys.byCompany(companyId),
       });
+    },
+  });
+}
+
+export function useCreateListing(
+  options?: UseMutationOptions<Listing, Error, CreateListingPayload>,
+) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (data: CreateListingPayload) => createListing(data),
+    onSuccess: (...args) => {
+      queryClient.invalidateQueries({ queryKey: listingKeys.all() });
+      options?.onSuccess?.(...args);
+    },
+    onError: (...args) => {
+      options?.onError?.(...args);
     },
   });
 }

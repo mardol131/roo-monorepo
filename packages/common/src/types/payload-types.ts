@@ -267,6 +267,7 @@ export interface Region {
   id: string;
   name: string;
   slug: string;
+  code: number;
   updatedAt: string;
   createdAt: string;
 }
@@ -1363,6 +1364,7 @@ export interface FoodServiceStylesSelect<T extends boolean = true> {
 export interface RegionsSelect<T extends boolean = true> {
   name?: T;
   slug?: T;
+  code?: T;
   updatedAt?: T;
   createdAt?: T;
 }

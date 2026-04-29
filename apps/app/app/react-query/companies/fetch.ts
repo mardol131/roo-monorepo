@@ -21,11 +21,12 @@ export async function fetchCompany(id: string): Promise<Company> {
   return data;
 }
 
-export async function updateCompany(id: string, data: Partial<Company>) {
-  const res = await fetch(`/api/companies/${id}`, {
+export async function updateCompany(id: string, data: CreateCompanyPayload) {
+  const res = await fetch(`${baseUrl}/${id}`, {
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),
+    credentials: "include",
   });
   if (!res.ok) throw new Error("Failed to update company");
   return res.json();

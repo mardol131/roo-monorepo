@@ -8,11 +8,16 @@ import { useParams } from "next/navigation";
 import { useListingsByCompany } from "@/app/react-query/listings/hooks";
 import CardContainer from "@/app/[locale]/(user)/components/card-container";
 import { Listing } from "@roo/common";
+import Loader from "@/app/[locale]/(user)/components/loader";
 
 export default function page() {
   const { companyId } = useParams<{ companyId: string }>();
 
-  const { data: listings } = useListingsByCompany(companyId);
+  const { data: listings, isLoading } = useListingsByCompany(companyId);
+
+  if (isLoading) {
+    return <Loader text="Seznam se načítá..." />;
+  }
 
   return (
     <main className="w-full">

@@ -1,3 +1,4 @@
+import { slugify } from '@roo/common'
 import type { CollectionConfig } from 'payload'
 
 export const Districts: CollectionConfig = {
@@ -16,5 +17,26 @@ export const Districts: CollectionConfig = {
       type: 'text',
       required: true,
     },
+    {
+      name: 'code',
+      type: 'text',
+      required: true,
+    },
+    {
+      name: 'region',
+      type: 'relationship',
+      relationTo: 'regions',
+      required: true,
+    },
   ],
+  hooks: {
+    beforeValidate: [
+      async ({ data }) => {
+        if (!data) return
+        if (data.name) {
+          data.slug = slugify(data.name)
+        }
+      },
+    ],
+  },
 }

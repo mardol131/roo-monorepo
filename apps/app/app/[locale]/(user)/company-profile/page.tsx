@@ -38,14 +38,6 @@ export default function page() {
           iconBg="bg-listing-surface"
           iconColor="text-listing"
         />
-        <SummaryCard
-          label="Celkem poptávek"
-          value={String(56)}
-          icon={Tag}
-          iconBg="bg-inquiry-surface"
-          iconColor="text-inquiry"
-          note={`${30} celkem`}
-        />
       </div>
 
       {/* Companies */}

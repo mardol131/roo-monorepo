@@ -250,12 +250,12 @@ const baseSchema = z.object({
   tearDownTime: optionalPositiveNumber,
 });
 
-export type FormInputs = z.infer<typeof baseSchema>;
+export type NewListingFormInputs = z.infer<typeof baseSchema>;
 
 // ── Resolver ───────────────────────────────────────────────────────────────────
 
 type ResolverResult = {
-  values: Partial<FormInputs>;
+  values: Partial<NewListingFormInputs>;
   errors: Record<string, unknown>;
 };
 type ResolverFn = (
@@ -269,7 +269,7 @@ function makeResolver(listingType: ListingType): ResolverFn {
 
   return async (values, ctx, opts) => {
     const result = await zResolver(values, ctx, opts);
-    const v = values as FormInputs;
+    const v = values as NewListingFormInputs;
 
     const locErrors = (result.errors.location as Record<string, unknown>) ?? {};
 
@@ -356,9 +356,9 @@ function makeResolver(listingType: ListingType): ResolverFn {
 
 type Props = {
   type: ListingType;
-  onSubmit: (data: FormInputs) => void;
+  onSubmit: (data: NewListingFormInputs) => void;
   onCancel: () => void;
-  onFormChange?: (values: FormInputs) => void;
+  onFormChange?: (values: NewListingFormInputs) => void;
 };
 
 // ── Component ──────────────────────────────────────────────────────────────────
@@ -375,12 +375,14 @@ export default function NewListingForm({
     handleSubmit,
     watch,
     formState: { errors },
-  } = useForm<FormInputs>({
-    resolver: makeResolver(type) as unknown as Resolver<FormInputs>,
+  } = useForm<NewListingFormInputs>({
+    resolver: makeResolver(type) as unknown as Resolver<NewListingFormInputs>,
     defaultValues: {
       location: { districts: [], regions: [], cities: [] },
       images: { gallery: [] },
-      rooms: [{ name: "", description: "", capacity: undefined, area: undefined }],
+      rooms: [
+        { name: "", description: "", capacity: undefined, area: undefined },
+      ],
       cuisines: [],
       dishTypes: [],
       dietaryOptions: [],
@@ -395,7 +397,7 @@ export default function NewListingForm({
 
   useEffect(() => {
     const subscription = watch((values) => {
-      onFormChange?.(values as FormInputs);
+      onFormChange?.(values as NewListingFormInputs);
     });
     return () => subscription.unsubscribe();
   }, [watch, onFormChange]);

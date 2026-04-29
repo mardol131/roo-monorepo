@@ -2,11 +2,16 @@
 
 import PageHeading from "@/app/[locale]/(user)/components/page-heading";
 import Button from "@/app/components/ui/atoms/button";
-import { LucideIcons } from "@roo/common";
-import { useRouter } from "next/navigation";
+import { Listing, LucideIcons } from "@roo/common";
+import { useParams, useRouter } from "next/navigation";
 import { useState } from "react";
 import IconCard from "./components/icon-card";
-import NewListingForm, { ListingType } from "./components/new-listing-form";
+import NewListingForm, {
+  ListingType,
+  NewListingFormInputs,
+} from "./components/new-listing-form";
+import { CreateListingPayload } from "@/app/react-query/listings/fetch";
+import { useCreateListing } from "@/app/react-query/listings/hooks";
 
 const LISTING_TYPES: {
   type: ListingType;
@@ -37,6 +42,77 @@ const LISTING_TYPES: {
 export default function NewListingPage() {
   const router = useRouter();
   const [selectedType, setSelectedType] = useState<ListingType | null>(null);
+  const { companyId } = useParams<{ companyId: string }>();
+  const { mutate } = useCreateListing();
+
+  function handleSubmit(data: NewListingFormInputs) {
+    const locationBase = {
+      address: data.location.address,
+      region: data.location.regions,
+      district: data.location.districts,
+      city: data.location.cities,
+    };
+
+    const details: CreateListingPayload["details"] =
+      selectedType === "venue"
+        ? [
+            {
+              location: {
+                address: data.location.address ?? "",
+                city: data.location.city ?? "",
+              },
+              spacesType: data.spaceType ?? "room",
+              capacity: data.capacity,
+              area: data.area ?? 0,
+              blockType: "venue",
+            },
+          ]
+        : selectedType === "gastro"
+          ? [
+              {
+                location: locationBase,
+                capacity: data.capacity,
+                minimumCapacity: data.minimumCapacity,
+                cuisines: data.cuisines,
+                dishTypes: data.dishTypes,
+                dietaryOptions: data.dietaryOptions,
+                foodServiceStyles: data.foodServiceStyles,
+                hasAlcoholLicense: data.hasAlcoholLicense,
+                kidsMenu: data.kidsMenu,
+                necessities: data.necessities,
+                blockType: "gastro",
+              },
+            ]
+          : [
+              {
+                location: locationBase,
+                capacity: data.capacity,
+                minimumCapacity: data.minimumCapacity,
+                entertainmentTypes: data.entertainmentTypes,
+                audience: data.audience,
+                setupAndTearDownRules: {
+                  setupTime: data.setupTime,
+                  tearDownTime: data.tearDownTime,
+                },
+                necessities: data.necessities,
+                blockType: "entertainment",
+              },
+            ];
+
+    const payload: CreateListingPayload = {
+      company: companyId,
+      name: data.name,
+      images: {
+        coverImage: data.images.coverImage,
+        logo: data.images.logo,
+        gallery: data.images.gallery.map((url) => ({ url })),
+      },
+      price: { startsAt: data.price.startsAt },
+      details,
+    };
+
+    mutate(payload);
+  }
 
   if (!selectedType) {
     return (
@@ -77,7 +153,7 @@ export default function NewListingPage() {
       />
       <NewListingForm
         type={selectedType}
-        onSubmit={(data) => console.log("submit", data)}
+        onSubmit={handleSubmit}
         onCancel={() => router.back()}
       />
     </main>

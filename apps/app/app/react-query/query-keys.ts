@@ -1,6 +1,5 @@
 export const listingKeys = {
-  all: (companyId: string) => ["listings", companyId] as const,
-  catalog: () => ["listings", "catalog"] as const,
+  all: () => ["listings"] as const,
   byId: (id: string) => ["listings", id] as const,
   byCompany: (companyId: string) => ["listings", "company", companyId] as const,
 };
