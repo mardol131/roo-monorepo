@@ -212,6 +212,22 @@ export interface District {
   id: string;
   name: string;
   slug: string;
+  code: string;
+  region: string | Region;
+  country: 'cz';
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "regions".
+ */
+export interface Region {
+  id: string;
+  name: string;
+  slug: string;
+  code: string;
+  country: 'cz';
   updatedAt: string;
   createdAt: string;
 }
@@ -256,18 +272,6 @@ export interface FoodServiceStyle {
   id: string;
   name: string;
   slug: string;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "regions".
- */
-export interface Region {
-  id: string;
-  name: string;
-  slug: string;
-  code: number;
   updatedAt: string;
   createdAt: string;
 }
@@ -748,6 +752,9 @@ export interface City {
   id: string;
   name: string;
   slug: string;
+  code: string;
+  district: string | District;
+  country: 'cz';
   updatedAt: string;
   createdAt: string;
 }
@@ -1314,6 +1321,9 @@ export interface PayloadMigration {
 export interface DistrictsSelect<T extends boolean = true> {
   name?: T;
   slug?: T;
+  code?: T;
+  region?: T;
+  country?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1365,6 +1375,7 @@ export interface RegionsSelect<T extends boolean = true> {
   name?: T;
   slug?: T;
   code?: T;
+  country?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1906,6 +1917,9 @@ export interface CompaniesSelect<T extends boolean = true> {
 export interface CitiesSelect<T extends boolean = true> {
   name?: T;
   slug?: T;
+  code?: T;
+  district?: T;
+  country?: T;
   updatedAt?: T;
   createdAt?: T;
 }

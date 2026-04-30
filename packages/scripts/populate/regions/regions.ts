@@ -1,102 +1,91 @@
+import { Region } from "@roo/common";
 import fs from "fs";
 import path from "path";
+import { config } from "../config";
 
-import { Region } from "@roo/common";
-
-const BACKEND_URL = process.env.BACKEND_URL ?? "http://localhost:3001";
-const EMAIL = process.env.SEED_EMAIL ?? "dolezalmartin131@gmail.com";
-const PASSWORD = process.env.SEED_PASSWORD ?? "stefka131";
 const CSV_PATH = path.join(import.meta.dirname, "kraje.csv");
 
-function slugify(name: string): string {
-  return name
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[̀-ͯ]/g, "")
-    .replace(/\s+/g, "-")
-    .replace(/[^a-z0-9-]/g, "");
-}
-
-function parseDate(raw: string): string | null {
-  const trimmed = raw.trim();
-  if (!trimmed) return null;
-  const [day, month, yearTime] = trimmed.split(".");
-  const year = yearTime.trim().split(" ")[0];
-  return new Date(`${year}-${month}-${day}`).toISOString();
-}
-
 function parseCSV(content: string) {
-  const lines = content.trim().split("\n").slice(1); // skip header
-  return lines
+  return content
+    .trim()
+    .split("\n")
+    .slice(1)
     .filter((l) => l.trim())
     .map((line) => {
-      const [kod, nazev, regsoudrKod, nutsCode, platiOd, platiDo, datumVzniku] =
-        line.split(";");
-      return {
-        kod: Number(kod.trim()),
-        name: nazev.trim(),
-        regsoudrKod: Number(regsoudrKod.trim()),
-        nutsCode: nutsCode.trim(),
-        platiOd: parseDate(platiOd),
-        platiDo: parseDate(platiDo),
-        datumVzniku: parseDate(datumVzniku),
-      };
+      const [kod, nazev] = line.split(";");
+      return { kod: kod.trim(), name: nazev.trim() };
     });
 }
 
 async function login(): Promise<string> {
-  console.log(`Logging in as ${EMAIL}... with password ${PASSWORD}`);
-  const res = await fetch(`${BACKEND_URL}/api/users/login`, {
+  const res = await fetch(`${config.backendUrl}/api/admins/login`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email: EMAIL, password: PASSWORD }),
+    body: JSON.stringify({ email: config.email, password: config.password }),
   });
   if (!res.ok)
     throw new Error(`Login failed: ${res.status} ${await res.text()}`);
-  const data = (await res.json()) as { token: string };
-  return data.token;
+  return ((await res.json()) as { token: string }).token;
 }
 
-type RegionPayload = Omit<Region, "id" | "createdAt" | "updatedAt">;
+type RegionPayload = Omit<Region, "id" | "createdAt" | "updatedAt" | "slug">;
 
-async function createRegion(token: string, region: RegionPayload) {
-  const res = await fetch(`${BACKEND_URL}/api/regions`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `JWT ${token}`,
-    },
-    body: JSON.stringify(region),
+async function upsertRegion(token: string, region: RegionPayload): Promise<"created" | "updated"> {
+  const headers = { "Content-Type": "application/json", Authorization: `JWT ${token}` };
+
+  const existing = (await fetch(
+    `${config.backendUrl}/api/regions?where[code][equals]=${region.code}&limit=1`,
+    { headers },
+  ).then((r) => r.json())) as { docs: { id: string }[] };
+
+  if (existing.docs.length > 0) {
+    const res = await fetch(`${config.backendUrl}/api/regions/${existing.docs[0].id}`, {
+      method: "PATCH", headers, body: JSON.stringify(region),
+    });
+    if (!res.ok) throw new Error(`${res.status} ${await res.text()}`);
+    return "updated";
+  }
+
+  const res = await fetch(`${config.backendUrl}/api/regions`, {
+    method: "POST", headers, body: JSON.stringify(region),
   });
-  if (!res.ok)
-    throw new Error(
-      `Failed to create "${region.name}": ${res.status} ${await res.text()}`,
-    );
-  return res.json();
+  if (!res.ok) throw new Error(`${res.status} ${await res.text()}`);
+  return "created";
 }
 
 async function main() {
-  const csv = fs.readFileSync(CSV_PATH, "utf-8");
-  const rows = parseCSV(csv);
+  const rows = parseCSV(fs.readFileSync(CSV_PATH, "utf-8"));
 
-  console.log(`Logging in as ${EMAIL}...`);
+  console.log(`Logging in as ${config.email}...`);
   const token = await login();
+  console.log(`Upserting ${rows.length} regions...\n`);
 
-  console.log(`Creating ${rows.length} regions...`);
+  let created = 0, updated = 0;
+  const failures: { name: string; error: string }[] = [];
+
   for (const row of rows) {
-    const region: RegionPayload = {
-      name: row.name,
-      slug: slugify(row.name),
-      code: row.kod,
-    };
-    await createRegion(token, region);
-    console.log(`  ✓ ${region.name} (${region.code})`);
+    const region: RegionPayload = { name: row.name, code: row.kod, country: "cz" };
+    try {
+      const action = await upsertRegion(token, region);
+      action === "created" ? created++ : updated++;
+      console.log(`  ${action === "created" ? "✓" : "↺"} ${region.name} [${action}]`);
+    } catch (err) {
+      failures.push({ name: row.name, error: String(err) });
+      console.log(`  ✗ ${region.name} [failed]`);
+    }
   }
 
-  console.log("Done.");
+  console.log(`\n─────────────────────────────────────`);
+  console.log(`  ✓ created : ${created}`);
+  console.log(`  ↺ updated : ${updated}`);
+  console.log(`  ✗ failed  : ${failures.length}`);
+  if (failures.length > 0) {
+    console.log(`\nFailed records:`);
+    failures.forEach((f) => console.log(`  • ${f.name}: ${f.error}`));
+  }
+  console.log(`─────────────────────────────────────`);
+
+  if (failures.length > 0) process.exit(1);
 }
 
-main().catch((err) => {
-  console.error(err);
-  process.exit(1);
-});
+main().catch((err) => { console.error(err); process.exit(1); });

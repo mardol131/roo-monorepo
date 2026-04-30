@@ -214,6 +214,7 @@ export interface District {
   slug: string;
   code: string;
   region: string | Region;
+  country: 'cz';
   updatedAt: string;
   createdAt: string;
 }
@@ -225,7 +226,8 @@ export interface Region {
   id: string;
   name: string;
   slug: string;
-  code: number;
+  code: string;
+  country: 'cz';
   updatedAt: string;
   createdAt: string;
 }
@@ -752,6 +754,7 @@ export interface City {
   slug: string;
   code: string;
   district: string | District;
+  country: 'cz';
   updatedAt: string;
   createdAt: string;
 }
@@ -1320,6 +1323,7 @@ export interface DistrictsSelect<T extends boolean = true> {
   slug?: T;
   code?: T;
   region?: T;
+  country?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1371,6 +1375,7 @@ export interface RegionsSelect<T extends boolean = true> {
   name?: T;
   slug?: T;
   code?: T;
+  country?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1914,6 +1919,7 @@ export interface CitiesSelect<T extends boolean = true> {
   slug?: T;
   code?: T;
   district?: T;
+  country?: T;
   updatedAt?: T;
   createdAt?: T;
 }

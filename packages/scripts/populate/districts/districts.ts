@@ -1,105 +1,115 @@
+import { District, PayloadResponse, Region } from "@roo/common";
 import fs from "fs";
 import path from "path";
+import { config } from "../config";
 
-const BACKEND_URL = process.env.BACKEND_URL ?? "http://localhost:3001";
-const EMAIL = process.env.SEED_EMAIL ?? "dolezalmartin131@gmail.com";
-const PASSWORD = process.env.SEED_PASSWORD ?? "stefka131";
 const CSV_PATH = path.join(import.meta.dirname, "okresy.csv");
 
 function parseCSV(content: string) {
-  const lines = content.trim().split("\n").slice(1);
-  return lines
+  return content
+    .trim()
+    .split("\n")
+    .slice(1)
     .filter((l) => l.trim())
     .map((line) => {
-      const [kod, nazev, vuscKod, nutsCode, , platiDo] = line.split(";");
-      return {
-        kod: Number(kod.trim()),
-        name: nazev.trim(),
-        vuscKod: Number(vuscKod.trim()),
-        nutsCode: nutsCode.trim(),
-        platiDo: platiDo.trim(),
-      };
+      const [kod, nazev, vuscKod, , , platiDo] = line.split(";");
+      return { kod: kod.trim(), name: nazev.trim(), vuscKod: vuscKod.trim(), platiDo: platiDo.trim() };
     })
-    .filter((row) => !row.platiDo); // skip expired records
+    .filter((row) => !row.platiDo);
 }
 
 async function login(): Promise<string> {
-  const res = await fetch(`${BACKEND_URL}/api/users/login`, {
+  const res = await fetch(`${config.backendUrl}/api/admins/login`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email: EMAIL, password: PASSWORD }),
+    body: JSON.stringify({ email: config.email, password: config.password }),
   });
   if (!res.ok)
     throw new Error(`Login failed: ${res.status} ${await res.text()}`);
-  const data = (await res.json()) as { token: string };
-  return data.token;
+  return ((await res.json()) as { token: string }).token;
 }
 
-async function fetchRegions(token: string): Promise<Map<number, string>> {
-  const res = await fetch(`${BACKEND_URL}/api/regions?limit=100`, {
-    headers: { Authorization: `JWT ${token}` },
+async function fetchRegions(token: string): Promise<PayloadResponse<Region>> {
+  const res = await fetch(`${config.backendUrl}/api/regions?limit=100`, {
+    headers: { Authorization: `JWT ${token}`, "Content-Type": "application/json" },
   });
   if (!res.ok)
     throw new Error(`Failed to fetch regions: ${res.status} ${await res.text()}`);
-  const data = (await res.json()) as { docs: { id: string; code: number }[] };
-  return new Map(data.docs.map((r) => [r.code, r.id]));
-}
-
-type DistrictPayload = {
-  name: string;
-  slug: string;
-  code: string;
-  region: string;
-};
-
-async function createDistrict(token: string, district: DistrictPayload) {
-  const res = await fetch(`${BACKEND_URL}/api/districts`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `JWT ${token}`,
-    },
-    body: JSON.stringify(district),
-  });
-  if (!res.ok)
-    throw new Error(
-      `Failed to create "${district.name}": ${res.status} ${await res.text()}`,
-    );
   return res.json();
 }
 
-async function main() {
-  const csv = fs.readFileSync(CSV_PATH, "utf-8");
-  const rows = parseCSV(csv);
+type DistrictPayload = Omit<District, "id" | "createdAt" | "updatedAt" | "slug">;
 
-  console.log(`Logging in as ${EMAIL}...`);
+async function upsertDistrict(
+  token: string,
+  district: DistrictPayload & { code: string },
+): Promise<"created" | "updated"> {
+  const headers = { "Content-Type": "application/json", Authorization: `JWT ${token}` };
+
+  const existing = (await fetch(
+    `${config.backendUrl}/api/districts?where[code][equals]=${district.code}&limit=1`,
+    { headers },
+  ).then((r) => r.json())) as { docs: { id: string }[] };
+
+  if (existing.docs.length > 0) {
+    const res = await fetch(`${config.backendUrl}/api/districts/${existing.docs[0].id}`, {
+      method: "PATCH", headers, body: JSON.stringify(district),
+    });
+    if (!res.ok) throw new Error(`${res.status} ${await res.text()}`);
+    return "updated";
+  }
+
+  const res = await fetch(`${config.backendUrl}/api/districts`, {
+    method: "POST", headers, body: JSON.stringify(district),
+  });
+  if (!res.ok) throw new Error(`${res.status} ${await res.text()}`);
+  return "created";
+}
+
+async function main() {
+  const rows = parseCSV(fs.readFileSync(CSV_PATH, "utf-8"));
+
+  console.log(`Logging in as ${config.email}...`);
   const token = await login();
 
   console.log("Fetching regions...");
-  const regionMap = await fetchRegions(token);
-  console.log(`Found ${regionMap.size} regions.`);
+  const regionResponse = await fetchRegions(token);
+  console.log(`Found ${regionResponse.docs.length} regions.\n`);
+  console.log(`Upserting ${rows.length} districts...\n`);
 
-  console.log(`Creating ${rows.length} districts...`);
+  let created = 0, updated = 0, skipped = 0;
+  const failures: { name: string; error: string }[] = [];
+
   for (const row of rows) {
-    const regionId = regionMap.get(row.vuscKod);
+    const regionId = regionResponse.docs.find((r) => r.code === row.vuscKod)?.id;
     if (!regionId) {
-      console.warn(`  ⚠ No region found for VUSC_KOD=${row.vuscKod}, skipping "${row.name}"`);
+      console.log(`  ⚠ ${row.name} — no region for VUSC_KOD=${row.vuscKod} [skipped]`);
+      skipped++;
       continue;
     }
-    const district: DistrictPayload = {
-      name: row.name,
-      slug: row.nutsCode.toLowerCase(),
-      code: row.nutsCode,
-      region: regionId,
-    };
-    await createDistrict(token, district);
-    console.log(`  ✓ ${district.name} (${district.code})`);
+    const district: DistrictPayload = { name: row.name, code: row.kod, region: regionId, country: "cz" };
+    try {
+      const action = await upsertDistrict(token, district);
+      action === "created" ? created++ : updated++;
+      console.log(`  ${action === "created" ? "✓" : "↺"} ${district.name} [${action}]`);
+    } catch (err) {
+      failures.push({ name: row.name, error: String(err) });
+      console.log(`  ✗ ${row.name} [failed]`);
+    }
   }
 
-  console.log("Done.");
+  console.log(`\n─────────────────────────────────────`);
+  console.log(`  ✓ created : ${created}`);
+  console.log(`  ↺ updated : ${updated}`);
+  console.log(`  ⚠ skipped : ${skipped}`);
+  console.log(`  ✗ failed  : ${failures.length}`);
+  if (failures.length > 0) {
+    console.log(`\nFailed records:`);
+    failures.forEach((f) => console.log(`  • ${f.name}: ${f.error}`));
+  }
+  console.log(`─────────────────────────────────────`);
+
+  if (failures.length > 0) process.exit(1);
 }
 
-main().catch((err) => {
-  console.error(err);
-  process.exit(1);
-});
+main().catch((err) => { console.error(err); process.exit(1); });

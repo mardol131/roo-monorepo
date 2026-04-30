@@ -75,6 +75,9 @@ export function useCreateListing(
     mutationFn: (data: CreateListingPayload) => createListing(data),
     onSuccess: (...args) => {
       queryClient.invalidateQueries({ queryKey: listingKeys.all() });
+      queryClient.invalidateQueries({
+        queryKey: listingKeys.byCompany(args[0].companyId),
+      });
       options?.onSuccess?.(...args);
     },
     onError: (...args) => {

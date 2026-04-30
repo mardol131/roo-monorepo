@@ -52,10 +52,10 @@ export default function page() {
             },
           },
         }}
-        items={listings ?? []}
+        items={listings?.docs ?? []}
         renderItem={(item) => {
           const listing = item as Listing;
-          listings && listings.length > 0;
+          listings && listings.docs.length > 0;
           return (
             <EntityCard
               key={listing.id}

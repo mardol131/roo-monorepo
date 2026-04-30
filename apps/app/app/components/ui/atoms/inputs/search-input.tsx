@@ -8,7 +8,7 @@ import ErrorText from "./error-text";
 
 interface SearchOption {
   id: string;
-  label: string;
+  name: string;
 }
 
 interface SearchInputProps {
@@ -20,7 +20,7 @@ interface SearchInputProps {
   idInputProps?: React.InputHTMLAttributes<HTMLInputElement>;
   value?: {
     id: string;
-    label: string;
+    name: string;
   };
   onSelect?: (option: SearchOption) => void;
   onClear?: () => void;
@@ -93,7 +93,8 @@ const SearchInput = forwardRef<HTMLInputElement, SearchInputProps>(
       };
 
       document.addEventListener("mousedown", handleClickOutside);
-      return () => document.removeEventListener("mousedown", handleClickOutside);
+      return () =>
+        document.removeEventListener("mousedown", handleClickOutside);
     }, []);
 
     const handleSelect = (option: SearchOption) => {
@@ -110,7 +111,7 @@ const SearchInput = forwardRef<HTMLInputElement, SearchInputProps>(
     };
 
     const filteredOptions = options.filter((option) =>
-      option.label.toLowerCase().includes(searchQuery.toLowerCase()),
+      option.name.toLowerCase().includes(searchQuery.toLowerCase()),
     );
 
     const optionsList = (
@@ -132,7 +133,7 @@ const SearchInput = forwardRef<HTMLInputElement, SearchInputProps>(
                 onClick={() => handleSelect(option)}
                 className="w-full px-3 py-2.5 text-left hover:bg-zinc-50 text-sm text-zinc-900 transition-colors"
               >
-                {option.label}
+                {option.name}
               </button>
             ))}
           </div>
@@ -154,7 +155,20 @@ const SearchInput = forwardRef<HTMLInputElement, SearchInputProps>(
 
     return (
       <div className="flex flex-col">
-        <input ref={ref} type="text" aria-hidden tabIndex={-1} style={{ position: 'absolute', opacity: 0, pointerEvents: 'none', height: 0, width: 0 }} readOnly />
+        <input
+          ref={ref}
+          type="text"
+          aria-hidden
+          tabIndex={-1}
+          style={{
+            position: "absolute",
+            opacity: 0,
+            pointerEvents: "none",
+            height: 0,
+            width: 0,
+          }}
+          readOnly
+        />
         <InputLabel label={label} isRequired={isRequired} />
 
         {type === "fixed" ? (
@@ -180,7 +194,7 @@ const SearchInput = forwardRef<HTMLInputElement, SearchInputProps>(
             </div>
             {selected && !searchQuery && (
               <div className="flex items-center gap-2 px-3 py-2 bg-zinc-50 border border-zinc-200 rounded-lg text-sm text-zinc-900">
-                <span className="flex-1">{selected.label}</span>
+                <span className="flex-1">{selected.name}</span>
                 <button
                   type="button"
                   onClick={handleClear}
@@ -205,7 +219,7 @@ const SearchInput = forwardRef<HTMLInputElement, SearchInputProps>(
               className={`w-full px-3 py-2.5 border ${error ? "border-rose-500" : "border-zinc-200"} rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-rose-500 bg-white text-left flex items-center justify-between`}
             >
               <span className="text-zinc-900 text-sm">
-                {selected ? selected.label : placeholder}
+                {selected ? selected.name : placeholder}
               </span>
               {selected ? (
                 <button
@@ -224,7 +238,9 @@ const SearchInput = forwardRef<HTMLInputElement, SearchInputProps>(
             </div>
 
             {isOpen && (
-              <div className={`absolute left-0 w-full bg-white border border-zinc-200 rounded-lg shadow-lg z-10 ${openUpward ? "bottom-full mb-2" : "top-full mt-2"}`}>
+              <div
+                className={`absolute left-0 w-full bg-white border border-zinc-200 rounded-lg shadow-lg z-10 ${openUpward ? "bottom-full mb-2" : "top-full mt-2"}`}
+              >
                 <div className="p-3 border-b border-zinc-100">
                   <div className="relative flex items-center">
                     <Search className="absolute left-3 w-4 h-4 text-zinc-400" />
@@ -246,7 +262,7 @@ const SearchInput = forwardRef<HTMLInputElement, SearchInputProps>(
 
         <input
           type="hidden"
-          value={selected?.label || ""}
+          value={selected?.name || ""}
           {...nameInputProps}
           onChange={() => {}}
           ref={(el) => {

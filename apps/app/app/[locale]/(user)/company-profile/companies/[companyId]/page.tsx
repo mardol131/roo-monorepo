@@ -80,7 +80,7 @@ export default function page() {
         <div className="grid grid-cols-3 gap-4">
           <SummaryCard
             label="Aktivní služby"
-            value={String(listings?.length || 0)}
+            value={String(listings?.docs.length || 0)}
             icon={Tag}
             iconBg="bg-listing-surface"
             iconColor="text-listing"
@@ -123,9 +123,9 @@ export default function page() {
             />
           }
           rowComponents={
-            !listings?.length
+            !listings?.docs.length
               ? []
-              : listings?.map((listing) => (
+              : listings?.docs.map((listing) => (
                   <EntityRow
                     key={listing.id}
                     icon="Tag"

@@ -3,16 +3,16 @@
 import { FormSection } from "@/app/[locale]/(user)/components/form-section";
 import FormToc, { TocGroup } from "@/app/[locale]/(user)/components/form-toc";
 import {
-  MOCK_CITIES,
   MOCK_CUISINES,
   MOCK_DIETARY_OPTIONS,
   MOCK_DISH_TYPES,
-  MOCK_DISTRICTS,
   MOCK_ENTERTAINMENT_TYPES,
   MOCK_FOOD_SERVICE_STYLES,
   MOCK_NECESSITIES,
-  MOCK_REGIONS,
 } from "@/app/_mock/mock";
+import { useCities } from "@/app/react-query/cities/hooks";
+import { useDistricts } from "@/app/react-query/districts/hooks";
+import { useRegions } from "@/app/react-query/regions/hooks";
 import Button, { ButtonProps } from "@/app/components/ui/atoms/button";
 import InputLabel from "@/app/components/ui/atoms/input-label";
 import Checkbox from "@/app/components/ui/atoms/inputs/checkbox";
@@ -37,7 +37,7 @@ import {
   Users,
   UtensilsCrossed,
 } from "lucide-react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import type { Resolver } from "react-hook-form";
 import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
@@ -380,9 +380,7 @@ export default function NewListingForm({
     defaultValues: {
       location: { districts: [], regions: [], cities: [] },
       images: { gallery: [] },
-      rooms: [
-        { name: "", description: "", capacity: undefined, area: undefined },
-      ],
+      rooms: [],
       cuisines: [],
       dishTypes: [],
       dietaryOptions: [],
@@ -395,6 +393,8 @@ export default function NewListingForm({
     },
   });
 
+  console.log("Form errors:", errors);
+
   useEffect(() => {
     const subscription = watch((values) => {
       onFormChange?.(values as NewListingFormInputs);
@@ -406,6 +406,39 @@ export default function NewListingForm({
   const regionsValue = watch("location.regions");
   const districtsValue = watch("location.districts");
   const citiesValue = watch("location.cities");
+
+  const [districtSearch, setDistrictSearch] = useState("");
+  const [citySearch, setCitySearch] = useState("");
+  const [venueCitySearch, setVenueCitySearch] = useState("");
+
+  const { data: regionsData } = useRegions(undefined, 20);
+
+  const { data: districtsData } = useDistricts(
+    regionsValue?.length || districtSearch
+      ? {
+          ...(regionsValue?.length ? { region: { in: regionsValue } } : {}),
+          ...(districtSearch ? { name: { contains: districtSearch } } : {}),
+        }
+      : undefined,
+    20,
+  );
+
+  const { data: citiesData } = useCities(
+    districtsValue?.length || citySearch
+      ? {
+          ...(districtsValue?.length
+            ? { district: { in: districtsValue } }
+            : {}),
+          ...(citySearch ? { name: { contains: citySearch } } : {}),
+        }
+      : undefined,
+    20,
+  );
+
+  const { data: venueCitiesData } = useCities(
+    venueCitySearch ? { name: { contains: venueCitySearch } } : undefined,
+    20,
+  );
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="flex gap-6">
@@ -552,18 +585,17 @@ export default function NewListingForm({
                   <SearchInput
                     label="Město *"
                     placeholder="Vyberte město..."
-                    options={MOCK_CITIES.map((c) => ({
-                      id: c.id,
-                      label: c.name,
-                    }))}
+                    onSearchQueryChange={setVenueCitySearch}
+                    options={venueCitiesData?.docs ?? []}
                     type="dropdown"
                     value={
                       field.value
                         ? {
                             id: field.value,
-                            label:
-                              MOCK_CITIES.find((c) => c.id === field.value)
-                                ?.name ?? "",
+                            name:
+                              venueCitiesData?.docs.find(
+                                (c) => c.id === field.value,
+                              )?.name ?? "",
                           }
                         : undefined
                     }
@@ -585,7 +617,7 @@ export default function NewListingForm({
                 render={({ field }) => (
                   <CheckboxGroup
                     label="Kraj"
-                    items={MOCK_REGIONS}
+                    items={regionsData?.docs ?? []}
                     value={field.value}
                     onChange={field.onChange}
                     checkColor={COLOR_SCHEME.text}
@@ -599,14 +631,14 @@ export default function NewListingForm({
                 render={({ field }) => (
                   <CheckboxGroup
                     label="Okres"
-                    items={MOCK_DISTRICTS}
+                    items={districtsData?.docs ?? []}
                     value={field.value}
                     onChange={field.onChange}
                     checkColor={COLOR_SCHEME.text}
                     searchable
+                    onSearchChange={setDistrictSearch}
                     closed={!regionsValue?.length}
-                    closedMessage="Nejprve vyplňte předchozí pole
-"
+                    closedMessage="Nejprve vyplňte předchozí pole"
                   />
                 )}
               />
@@ -616,11 +648,12 @@ export default function NewListingForm({
                 render={({ field }) => (
                   <CheckboxGroup
                     label="Město"
-                    items={MOCK_CITIES}
+                    items={citiesData?.docs ?? []}
                     value={field.value}
                     onChange={field.onChange}
                     checkColor={COLOR_SCHEME.text}
                     searchable
+                    onSearchChange={setCitySearch}
                     closed={!districtsValue?.length}
                     closedMessage="Nejprve vyplňte předchozí pole"
                   />

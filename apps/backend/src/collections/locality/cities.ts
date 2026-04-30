@@ -1,10 +1,17 @@
-import { slugify } from '@roo/common'
+import { adminOrApiKeyAuth } from '@/functions/ACL'
+import { COUNTRIES, slugify } from '@roo/common'
 import type { CollectionConfig } from 'payload'
 
 export const Cities: CollectionConfig = {
   slug: 'cities',
   admin: {
     useAsTitle: 'name',
+  },
+  access: {
+    read: () => true,
+    update: ({ req }) => adminOrApiKeyAuth(req),
+    create: ({ req }) => adminOrApiKeyAuth(req),
+    delete: ({ req }) => adminOrApiKeyAuth(req),
   },
   fields: [
     {
@@ -26,6 +33,12 @@ export const Cities: CollectionConfig = {
       name: 'district',
       type: 'relationship',
       relationTo: 'districts',
+      required: true,
+    },
+    {
+      name: 'country',
+      type: 'select',
+      options: COUNTRIES,
       required: true,
     },
   ],

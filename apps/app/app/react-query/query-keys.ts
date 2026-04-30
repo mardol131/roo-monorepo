@@ -1,3 +1,5 @@
+import { Where } from "@roo/common";
+
 export const listingKeys = {
   all: () => ["listings"] as const,
   byId: (id: string) => ["listings", id] as const,
@@ -45,4 +47,16 @@ export const eventKeys = {
 
 export const favouriteListingKeys = {
   all: () => ["favouriteListings"] as const,
+};
+
+export const regionsKeys = {
+  all: (query?: Where, limit?: number) => ["regions", query, limit] as const,
+};
+
+export const districtsKeys = {
+  all: (query?: Where, limit?: number) => ["districts", query, limit] as const,
+};
+
+export const citiesKeys = {
+  all: (query?: Where, limit?: number) => ["cities", query, limit] as const,
 };

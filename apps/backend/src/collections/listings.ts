@@ -437,12 +437,14 @@ export const Listings: CollectionConfig = {
   },
   access: {
     create: ({ req }) => {
-      console.log('THIS IS IT')
-      console.log('Create company access check, user:', req.user)
       return !!req.user
     },
-    read: ({ req }) => !!req.user,
-    update: ({ req }) => !!req.user,
+    read: () => true,
+    update: ({ req }) => {
+      if (!req.user) return false
+      if (req.user.collection === 'admins') return true
+      return { 'company.owner': { equals: req.user.id } }
+    },
     delete: ({ req }) => req.user?.collection === 'admins',
   },
   fields: [

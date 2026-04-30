@@ -5,7 +5,9 @@
   "type": "module",
   "scripts": {
     "populate:regions": "tsx populate/regions/regions.ts",
-    "populate:districts": "tsx populate/districts/districts.ts"
+    "populate:districts": "tsx populate/districts/districts.ts",
+    "populate:cities": "tsx populate/cities/cities.ts",
+    "populate:all": "pnpm run populate:regions && pnpm run populate:districts && pnpm run populate:cities"
   },
   "dependencies": {
     "@roo/common": "workspace:*"
