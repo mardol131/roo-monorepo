@@ -13,6 +13,15 @@
       "gastro": "Gastro",
       "entertainment": "Zábava",
       "venue": "Prostory"
+    },
+    "faq": {
+      "groupedBy": {
+        "general": "Obecné",
+        "booking": "Rezervace",
+        "cancellation": "Zrušení",
+        "payment": "Platba",
+        "other": "Ostatní"
+      }
     }
   },
   "inquiries": {
@@ -38,5 +47,14 @@
     "countryCodes": {
       "420": "+420"
     }
+  },
+  "breadcrumbs": {
+    "company-profile": "Firemní účet",
+    "listings": "Služby",
+    "inquiries": "Poptávky",
+    "events": "Události",
+    "variants": "Varianty",
+    "edit": "Upravit",
+    "create": "Vytvořit"
   }
 }

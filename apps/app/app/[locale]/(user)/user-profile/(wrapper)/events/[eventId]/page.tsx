@@ -74,7 +74,7 @@ export default function page() {
     <main className="w-full">
       {/* Back + header */}
       <Link
-        href="/user-profile/my-events"
+        href="/user-profile/events"
         className="inline-flex items-center gap-1.5 text-sm text-zinc-500 hover:text-zinc-800 transition-colors mb-6"
       >
         <ArrowLeft className="w-4 h-4" />
@@ -177,7 +177,7 @@ export default function page() {
                       />
                     }
                     link={{
-                      pathname: "/user-profile/my-events/[eventId]/[inquiryId]",
+                      pathname: "/user-profile/events/[eventId]/[inquiryId]",
                       params: {
                         eventId: getIdFromRelationshipField(inquiry.event),
                         inquiryId: inquiry.id,

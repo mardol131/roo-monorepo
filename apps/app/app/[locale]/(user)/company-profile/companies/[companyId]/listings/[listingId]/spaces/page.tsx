@@ -18,6 +18,8 @@ import {
 } from "lucide-react";
 import { useParams } from "next/navigation";
 import { useState } from "react";
+import Button from "@/app/components/ui/atoms/button";
+import Input from "@/app/components/ui/atoms/inputs/input";
 
 const TYPE_ICON: Record<Space["type"], keyof typeof icons> = {
   building: "Building2",
@@ -200,6 +202,8 @@ function SpaceTree({
   );
 }
 
+const CONFIRMATION_TEXT = "souhlasím";
+
 export default function SpacesPage() {
   const { listingId, companyId } = useParams<{
     companyId: string;
@@ -208,7 +212,10 @@ export default function SpacesPage() {
 
   const { data: spaces = [] } = useSpacesByListing(listingId);
   const { data: listing } = useListing(listingId);
-  const { mutate: updateListing } = useUpdateListing(listingId, companyId);
+  const { mutate: updateListing, error } = useUpdateListing(
+    listingId,
+    companyId,
+  );
 
   const venueDetails =
     listing?.details[0].blockType === "venue" ? listing.details[0] : undefined;
@@ -228,12 +235,11 @@ export default function SpacesPage() {
   }
 
   function handleConfirm() {
-    if (!venueDetails || !pendingType || confirmValue !== "ano") return;
+    if (!venueDetails || !pendingType || confirmValue !== CONFIRMATION_TEXT)
+      return;
     updateListing(
       {
-        details: [
-          { ...venueDetails, spacesType: pendingType },
-        ] as Listing["details"],
+        details: [{ ...venueDetails, spacesType: pendingType }],
       },
       {
         onSuccess: () => {
@@ -296,21 +302,21 @@ export default function SpacesPage() {
                     isSelected
                       ? "border-space bg-space-surface"
                       : isPending
-                        ? "border-warning bg-warning-surface"
+                        ? "border-danger bg-danger-surface"
                         : "border-zinc-200 bg-white hover:border-zinc-300 hover:bg-zinc-50"
                   }`}
                 >
                   <div
-                    className={`p-2 rounded-lg ${isSelected ? "bg-space/10" : isPending ? "bg-warning/10" : "bg-zinc-100"}`}
+                    className={`p-2 rounded-lg ${isSelected ? "bg-space/10" : isPending ? "bg-danger/10" : "bg-zinc-100"}`}
                   >
                     <Icon
-                      className={`w-4 h-4 ${isSelected ? "text-space" : isPending ? "text-warning" : "text-zinc-500"}`}
+                      className={`w-4 h-4 ${isSelected ? "text-space" : isPending ? "text-danger" : "text-zinc-500"}`}
                     />
                   </div>
                   <div>
                     <Text
                       variant="label-lg"
-                      className={`font-semibold ${isSelected ? "text-space" : isPending ? "text-warning" : ""}`}
+                      className={`font-semibold ${isSelected ? "text-space" : isPending ? "text-danger" : ""}`}
                     >
                       {label}
                     </Text>
@@ -330,47 +336,51 @@ export default function SpacesPage() {
         </div>
 
         {pendingType && (
-          <div className="mt-4 p-4 rounded-xl border border-warning bg-warning-surface flex flex-col gap-3">
+          <div className="mt-4 p-4 rounded-xl border border-danger bg-danger-surface flex flex-col gap-3">
             <div className="flex items-start gap-2.5">
-              <AlertTriangle className="w-4 h-4 text-warning mt-0.5 shrink-0" />
+              <AlertTriangle className="w-4 h-4 text-danger mt-0.5 shrink-0" />
               <div>
-                <Text variant="label-lg" className="font-semibold text-warning">
+                <Text variant="label-lg" className="font-semibold text-danger">
                   Změna typu prostorů
                 </Text>
                 <Text
                   variant="label"
                   color="textLight"
                   as="p"
-                  className="mt-0.5 text-warning"
+                  className="mt-0.5 text-danger"
                 >
                   Změna typu změní strukturu prostorů. Bude nutné znovu nastavit
                   prostory v jednotlivých variantách. Pokud chcete i přesto
-                  pokračovat, napište do pole <strong>souhlasím</strong> a
-                  klikněte na potvrdit.
+                  pokračovat, napište do pole{" "}
+                  <strong>{CONFIRMATION_TEXT}</strong> a klikněte na potvrdit.
                 </Text>
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <input
-                type="text"
-                value={confirmValue}
-                onChange={(e) => setConfirmValue(e.target.value)}
-                placeholder="souhlasím"
-                className="w-32 px-3 py-1.5 text-sm border border-warning rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-warning focus:border-transparent placeholder:text-zinc-300"
-              />
-              <button
+              <div>
+                <Input
+                  inputProps={{
+                    value: confirmValue,
+                    onChange: (e) => setConfirmValue(e.target.value),
+                    placeholder: CONFIRMATION_TEXT,
+                  }}
+                />
+              </div>
+
+              <Button
+                text="Potvrdit změnu"
                 onClick={handleConfirm}
-                disabled={confirmValue !== "souhlasím"}
-                className="px-4 py-1.5 text-sm font-semibold rounded-lg bg-warning/80 text-white hover:bg-warning transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-              >
-                Potvrdit změnu
-              </button>
-              <button
+                disabled={confirmValue !== CONFIRMATION_TEXT}
+                size="sm"
+                rounding="md"
+              />
+
+              <Button
+                text="Zrušit"
+                version="plain"
                 onClick={handleCancel}
-                className="px-4 py-1.5 text-sm font-semibold rounded-lg text-zinc-500 hover:text-zinc-800 transition-colors"
-              >
-                Zrušit
-              </button>
+                size="sm"
+              />
             </div>
           </div>
         )}

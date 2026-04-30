@@ -62,11 +62,9 @@ export default function UserProfilePage() {
 
       {/* Recent events */}
       <RowContainer
-        icon={
-          <div className="w-8 h-8 rounded-xl bg-event-surface flex items-center justify-center shrink-0">
-            <Calendar className="w-4 h-4 text-event" />
-          </div>
-        }
+        icon="Calendar"
+        iconColor="text-event"
+        iconBgColor="bg-event-surface"
         label="Nedávné události"
         rowComponents={
           !events
@@ -101,26 +99,34 @@ export default function UserProfilePage() {
                       : []),
                   ]}
                   link={{
-                    pathname: "/user-profile/my-events/[eventId]",
+                    pathname: "/user-profile/events/[eventId]",
                     params: { eventId: event.id },
                   }}
                   rightComponent={<EventStatusTag eventStatus={event.status} />}
                 />
               ))
         }
-        emptyHeading="Zatím žádné události"
-        emptyText="Vytvořte první událost a začněte plánovat svou akci."
+        emptyState={{
+          text: "Zatím nemáte naplánované žádné události",
+          subtext: "Vytvořte první událost kliknutím na tlačítko níže",
+          button: {
+            text: "Vytvořit událost",
+            version: "eventFull",
+            size: "sm",
+            link: {
+              pathname: "/user-profile/events/new",
+            },
+          },
+        }}
         className="mb-10"
       />
 
       {/* Recent inquiries */}
 
       <RowContainer
-        icon={
-          <div className="w-8 h-8 rounded-xl bg-inquiry-surface flex items-center justify-center shrink-0">
-            <MessageSquare className="w-4 h-4 text-inquiry" />
-          </div>
-        }
+        icon="MessageSquare"
+        iconBgColor="bg-inquiry-surface"
+        iconColor="text-inquiry"
         label="Nedávné poptávky"
         rowComponents={
           !inquiries
@@ -164,7 +170,7 @@ export default function UserProfilePage() {
                         : []),
                     ]}
                     link={{
-                      pathname: "/user-profile/my-events/[eventId]/[inquiryId]",
+                      pathname: "/user-profile/events/[eventId]/[inquiryId]",
                       params: {
                         eventId: inquiry.event.id,
                         inquiryId: inquiry.id,
@@ -180,8 +186,10 @@ export default function UserProfilePage() {
                 ) : null,
               )
         }
-        emptyHeading="Zatím žádné poptávky"
-        emptyText="Přejděte do katalogu a oslovte dodavatele pro svou akci."
+        emptyState={{
+          text: "Zatím žádné poptávky",
+          subtext: "Přejděte do katalogu a oslovte dodavatele pro svou akci.",
+        }}
       />
     </main>
   );

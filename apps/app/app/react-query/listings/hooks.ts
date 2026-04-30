@@ -31,19 +31,21 @@ export function useListingsByCompany(companyId: string) {
   });
 }
 
-export function useListing(id: string | undefined) {
+export function useListing(id: string) {
   return useQuery({
-    queryKey: listingKeys.byId(id ?? ""),
-    queryFn: () => fetchListing(id!),
+    queryKey: listingKeys.byId(id),
+    queryFn: () => fetchListing(id),
     enabled: !!id,
   });
 }
+
+export type UpdateListingData = Partial<Listing>;
 
 export function useUpdateListing(id: string, companyId: string) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (data: Partial<Listing>) => updateListing(id, data),
+    mutationFn: (data: UpdateListingData) => updateListing(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: listingKeys.byId(id) });
       queryClient.invalidateQueries({

@@ -12,7 +12,7 @@ export default function CustomerCard({ user }: Props) {
   return (
     <div className="bg-white rounded-2xl border border-zinc-200 overflow-hidden">
       <DashboardSectionHeader
-        icon={UserCircle}
+        icon={"UserCircle"}
         heading="Informace o zákazníkovi"
         iconBgColor="bg-zinc-100"
         iconColor="text-zinc-500"

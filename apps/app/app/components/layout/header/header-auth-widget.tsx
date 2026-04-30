@@ -115,7 +115,7 @@ export default function HeaderAuthWidget({
             </Text>
           </Link>
           <Link
-            href={{ pathname: "/user-profile/my-events" }}
+            href={{ pathname: "/user-profile/events" }}
             onClick={() => {
               setOpen(false);
               onNavigate?.();

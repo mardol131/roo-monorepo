@@ -93,7 +93,7 @@ export function VariantGastroDetails({ block }: { block: GastroBlock }) {
   return (
     <DashboardSection
       title="Gastronomie"
-      icon={Utensils}
+      icon={"Utensils"}
       iconBg="bg-orange-50"
       iconColor="text-orange-500"
     >

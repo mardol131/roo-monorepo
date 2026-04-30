@@ -25,7 +25,7 @@ export default function InquiryDetails({ inquiry }: Props) {
   return (
     <DashboardSection
       title="Detail poptávky"
-      icon={FileText}
+      icon={"FileText"}
       iconBg="bg-zinc-100"
       iconColor="text-zinc-500"
     >

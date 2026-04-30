@@ -31,7 +31,7 @@ export default function page() {
           text: "Vytvořit událost",
           version: "eventFull",
           iconRight: "Plus",
-          link: "/user-profile/my-events/new",
+          link: "/user-profile/events/new",
           size: "sm",
         }}
       />
@@ -61,7 +61,7 @@ export default function page() {
                 },
               ]}
               link={{
-                pathname: "/user-profile/my-events/[eventId]",
+                pathname: "/user-profile/events/[eventId]",
                 params: { eventId: event.id },
               }}
               rightComponent={<EventStatusTag eventStatus={event.status} />}

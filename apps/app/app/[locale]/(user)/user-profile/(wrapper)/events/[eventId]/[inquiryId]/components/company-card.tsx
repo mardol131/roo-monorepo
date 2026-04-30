@@ -11,7 +11,7 @@ export default function CompanyCard({ company }: Props) {
   return (
     <div className="bg-white rounded-2xl border border-zinc-200 flex flex-col">
       <DashboardSectionHeader
-        icon={Building2}
+        icon={"Building2"}
         heading="Informace o dodavateli"
         iconBgColor="bg-zinc-100"
         iconColor="text-zinc-700"

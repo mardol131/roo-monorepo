@@ -1,12 +1,14 @@
 import { MOCK_VARIANTS } from "@/app/_mock/mock";
+import { PayloadResponse, Variant } from "@roo/common";
 
-export async function fetchVariantsByListing(listingId: string) {
-  const res = MOCK_VARIANTS.filter((variant) => {
-    if (typeof variant.listing === "string") {
-      return variant.listing === listingId;
-    }
-    return variant.listing.id === listingId;
-  });
+const baseUrl = `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/variants`;
+
+export async function fetchVariantsByListing(
+  listingId: string,
+): Promise<PayloadResponse<Variant>> {
+  const res = await fetch(`${baseUrl}?listingId=${listingId}`).then((res) =>
+    res.json(),
+  );
   if (!res) throw new Error("Failed to fetch variants");
   return res;
 }

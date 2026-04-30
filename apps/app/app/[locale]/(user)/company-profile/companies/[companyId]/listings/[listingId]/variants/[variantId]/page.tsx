@@ -93,7 +93,7 @@ export default function Page() {
         {(variant.shortDescription || variant.description) && (
           <DashboardSection
             title="Popis varianty"
-            icon={Package}
+            icon={"Package"}
             iconBg="bg-variant-surface"
             iconColor="text-variant"
           >
@@ -128,7 +128,7 @@ export default function Page() {
               <ItemListCard
                 heading="V ceně zahrnuto"
                 items={variant.includes.flatMap((inc) => inc.item ?? [])}
-                icon={Check}
+                icon={"Check"}
                 iconColor="text-emerald-500"
                 iconBgColor="bg-emerald-50"
               />
@@ -137,7 +137,7 @@ export default function Page() {
               <ItemListCard
                 heading="Není zahrnuto"
                 items={variant.excludes.flatMap((exc) => exc.item ?? [])}
-                icon={X}
+                icon={"X"}
                 iconColor="text-red-400"
                 iconBgColor="bg-red-50"
               />
@@ -148,7 +148,7 @@ export default function Page() {
         {variant.price.seasonalPrices?.length ? (
           <DashboardSection
             title="Sezónní ceny"
-            icon={Banknote}
+            icon={"Banknote"}
             iconBg="bg-amber-100"
             iconColor="text-amber-500"
           >

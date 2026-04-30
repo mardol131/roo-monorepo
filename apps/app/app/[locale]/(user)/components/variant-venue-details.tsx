@@ -118,7 +118,7 @@ export function VariantVenueDetails({ block }: { block: VenueBlock }) {
   return (
     <DashboardSection
       title="Prostory a vybavení"
-      icon={Package}
+      icon={"Package"}
       iconBg="bg-variant-surface"
       iconColor="text-variant"
     >

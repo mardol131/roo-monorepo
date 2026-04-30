@@ -20,7 +20,7 @@ export function ControlSection({ rows }: { rows: ControlRow[] }) {
   return (
     <DashboardSection
       title="Ovládání"
-      icon={Cog}
+      icon={"Cog"}
       iconBg="bg-zinc-100"
       iconColor="text-zinc-500"
     >

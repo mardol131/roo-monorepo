@@ -1,8 +1,10 @@
 "use client";
 
+import CardContainer from "@/app/[locale]/(user)/components/card-container";
 import EntityCard from "@/app/[locale]/(user)/components/entity-card";
 import PageHeading from "@/app/[locale]/(user)/components/page-heading";
 import { useVariantsByListing } from "@/app/react-query/variants/hooks";
+import { Variant } from "@roo/common";
 import { useParams } from "next/navigation";
 
 export default function page() {
@@ -33,33 +35,57 @@ export default function page() {
           },
         }}
       />
-      <div className="flex flex-col gap-3 mt-6">
-        {variants?.map((variant) => (
-          <EntityCard
-            key={variant.id}
-            link={{
+      <CardContainer
+        items={variants?.docs || []}
+        emptyState={{
+          text: "Zatím nemáte žádné varianty",
+          subtext:
+            "Abyste mohli nabízet různé možnosti vaší služby, musíte nejprve vytvořit variantu. Začněte kliknutím na tlačítko níže.",
+          button: {
+            text: "Přidat variantu",
+            version: "variantFull",
+            size: "sm",
+            iconLeft: "Plus",
+            link: {
               pathname:
-                "/company-profile/companies/[companyId]/listings/[listingId]/variants/[variantId]",
+                "/company-profile/companies/[companyId]/listings/[listingId]/variants/new",
               params: {
                 companyId: companyId,
                 listingId: listingId,
-                variantId: variant.id,
               },
-            }}
-            icon="Package"
-            iconColor="text-variant"
-            iconBackgroundColor="bg-variant-surface"
-            label={variant.name}
-            items={[
-              {
-                icon: "DollarSign",
-                content: `${variant.price.generalPrice} Kč`,
-              },
-              { icon: "CheckCheck", content: variant.availability },
-            ]}
-          />
-        ))}
-      </div>
+            },
+          },
+          icon: "Building2",
+        }}
+        renderItem={(item) => {
+          const variant = item as Variant;
+          return (
+            <EntityCard
+              key={variant.id}
+              link={{
+                pathname:
+                  "/company-profile/companies/[companyId]/listings/[listingId]/variants/[variantId]",
+                params: {
+                  companyId: companyId,
+                  listingId: listingId,
+                  variantId: variant.id,
+                },
+              }}
+              icon="Package"
+              iconColor="text-variant"
+              iconBackgroundColor="bg-variant-surface"
+              label={variant.name}
+              items={[
+                {
+                  icon: "DollarSign",
+                  content: `${variant.price.generalPrice} Kč`,
+                },
+                { icon: "CheckCheck", content: variant.availability },
+              ]}
+            />
+          );
+        }}
+      />
     </main>
   );
 }

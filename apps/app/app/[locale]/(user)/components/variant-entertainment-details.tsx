@@ -115,7 +115,7 @@ export function VariantEntertainmentDetails({
   return (
     <DashboardSection
       title="Zábavní program"
-      icon={Music}
+      icon={"Music"}
       iconBg="bg-purple-50"
       iconColor="text-purple-500"
     >

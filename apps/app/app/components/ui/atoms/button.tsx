@@ -26,9 +26,11 @@ type ButtonVersion =
   | "dangerFull"
   | "danger"
   | "successFull"
-  | "success";
+  | "success"
+  | "warning"
+  | "warningFull";
 
-type ButtonSize = "2xl" | "xl" | "lg" | "md" | "sm";
+type ButtonSize = "2xl" | "xl" | "lg" | "md" | "sm" | "xs";
 type ButtonRounding = "none" | "sm" | "md" | "lg" | "xl" | "2xl" | "full";
 
 type LucideIcons = keyof typeof lucideIcons;
@@ -96,6 +98,8 @@ const getVersionClass = (
     dangerFull: "bg-danger text-white shadow hover:shadow-md",
     successFull: "bg-success text-white shadow hover:shadow-md",
     success: "bg-transparent text-success hover:bg-success-surface",
+    warning: "bg-transparent text-warning hover:bg-warning-surface",
+    warningFull: "bg-warning text-white shadow hover:shadow-md",
   };
   return versionClasses[version];
 };
@@ -107,6 +111,7 @@ const getSizeClass = (size: ButtonSize): string => {
     lg: "px-6 py-3 text-lg",
     md: "px-4 py-2 text-base",
     sm: "px-3 py-1.5 text-sm",
+    xs: "px-2 py-1 text-xs",
   };
   return sizeClasses[size];
 };
@@ -118,6 +123,7 @@ const getIconSize = (size: ButtonSize): string => {
     lg: "w-5 h-5",
     md: "w-4 h-4",
     sm: "w-3.5 h-3.5",
+    xs: "w-3 h-3",
   };
   return iconSizes[size];
 };

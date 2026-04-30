@@ -1,8 +1,9 @@
 "use client";
 
 import { login, logout, refreshUser } from "@/app/functions/api/users";
+import { usePathname } from "@/app/i18n/navigation";
 import type { User } from "@roo/common";
-import { ca } from "date-fns/locale";
+import path from "path";
 import {
   createContext,
   useCallback,
@@ -10,8 +11,6 @@ import {
   useEffect,
   useState,
 } from "react";
-
-const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL ?? "";
 
 interface AuthContextValue {
   user: User | null;
@@ -27,6 +26,7 @@ const AuthContext = createContext<AuthContextValue | null>(null);
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const pathname = usePathname();
 
   console.log("AuthProvider render", { user, isLoading });
 

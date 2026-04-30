@@ -6,7 +6,7 @@ export default function InquirySettings() {
   return (
     <div className="bg-white rounded-2xl border border-zinc-200 overflow-hidden">
       <DashboardSectionHeader
-        icon={Settings}
+        icon={"Settings"}
         heading="Nastavení poptávky"
         iconBgColor="bg-zinc-100"
         iconColor="text-zinc-700"

@@ -77,7 +77,7 @@ export default function MessagesPage() {
                 headerRightComponent={
                   <Link
                     href={{
-                      pathname: "/user-profile/my-events/[eventId]",
+                      pathname: "/user-profile/events/[eventId]",
                       params: { eventId: event.id },
                     }}
                     className="text-xs text-rose-500 hover:text-rose-600 font-medium transition-colors"
@@ -109,8 +109,7 @@ export default function MessagesPage() {
                         },
                       ]}
                       link={{
-                        pathname:
-                          "/user-profile/my-events/[eventId]/[inquiryId]",
+                        pathname: "/user-profile/events/[eventId]/[inquiryId]",
                         params: {
                           eventId: getIdFromRelationshipField(inquiry.event),
                           inquiryId: inquiry.id,

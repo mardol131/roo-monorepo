@@ -5,7 +5,6 @@ import FormToc, { TocGroup } from "@/app/[locale]/(user)/components/form-toc";
 import {
   MOCK_ACTIVITIES,
   MOCK_AMENITIES,
-  MOCK_CITIES,
   MOCK_EVENT_TYPES,
   MOCK_PERSONNEL,
   MOCK_PLACE_TYPES,
@@ -50,9 +49,14 @@ import {
   Warehouse,
 } from "lucide-react";
 import { useParams } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Controller, useFieldArray, useForm } from "react-hook-form";
+import { useCities } from "@/app/react-query/cities/hooks";
 import { z } from "zod";
+import { useRouter } from "@/app/i18n/navigation";
+import { useUpdateListing } from "@/app/react-query/listings/hooks";
+import { Listing } from "@roo/common";
+import { de } from "date-fns/locale";
 
 // ── TOC groups (exported for page sidebar) ────────────────────────────────────
 
@@ -118,7 +122,6 @@ export const VENUE_FORM_GROUPS: readonly TocGroup[] = [
 
 const schema = z.object({
   name: z.string().min(1, "Název je povinný"),
-  slug: z.string().min(1, "Slug je povinný"),
   shortDescription: z.string().optional(),
   description: z.string().optional(),
   indoor: z.boolean().default(false),
@@ -234,12 +237,21 @@ const schema = z.object({
     .array(
       z.object({
         image: z.string().optional(),
-        eventName: z.string().optional(),
+        eventName: z.string().min(1, "Název akce je povinný"),
         clientName: z.string().optional(),
         eventType: z.string().optional(),
+        description: z.string().optional(),
       }),
     )
     .default([]),
+}).superRefine((data, ctx) => {
+  if (data.hasAccommodation && !data.accommodationCapacity) {
+    ctx.addIssue({
+      code: "custom",
+      message: "Ubytovací kapacita je povinná",
+      path: ["accommodationCapacity"],
+    });
+  }
 });
 
 // ── Types ──────────────────────────────────────────────────────────────────────
@@ -249,7 +261,6 @@ export type FormInputs = z.infer<typeof schema>;
 // ── Props ──────────────────────────────────────────────────────────────────────
 
 type Props = {
-  onSubmit: (data: FormInputs) => void;
   onCancel: () => void;
   onFormChange?: (values: FormInputs) => void;
 };
@@ -260,12 +271,87 @@ function toggleArrayItem(arr: string[], id: string, checked: boolean) {
 // ── Component ──────────────────────────────────────────────────────────────────
 
 export default function EditVenueListingForm({
-  onSubmit,
   onCancel,
   onFormChange,
 }: Props) {
-  const { listingId } = useParams<{ listingId: string }>();
+  const { listingId, companyId } = useParams<{
+    listingId: string;
+    companyId: string;
+  }>();
   const { data: listing } = useListing(listingId);
+  const { mutate } = useUpdateListing(listingId, companyId);
+  const router = useRouter();
+
+  const [citySearch, setCitySearch] = useState("");
+  const { data: citiesData } = useCities({
+    query: citySearch ? { name: { contains: citySearch } } : undefined,
+  });
+
+  function onSubmit(data: FormInputs) {
+    const venueDetail = listing?.details[0];
+
+    if (venueDetail?.blockType !== "venue") return;
+    mutate(
+      {
+        name: data.name,
+        shortDescription: data.shortDescription,
+        description: data.description,
+        indoor: data.indoor,
+        outdoor: data.outdoor,
+        eventTypes: data.eventTypes,
+        rules: data.rules,
+        employees: data.employees,
+        faq: data.faq,
+        references: data.references,
+        images: {
+          ...data.images,
+          gallery: data.images.gallery.map((url) => ({ url })),
+        },
+        price: data.price,
+        details: [
+          {
+            blockType: "venue",
+            spacesType: venueDetail?.spacesType ?? "area",
+            location: {
+              address: data.location.address,
+              city: data.location.city.id,
+            },
+            capacity: data.capacity,
+            area: data.area,
+            canBeBookedAsWhole: data.canBeBookedAsWhole,
+            hasAccommodation: data.hasAccommodation,
+            accommodationCapacity: data.accommodationCapacity,
+            activities: data.activities,
+            activityAddons: data.activityAddons,
+            services: data.services,
+            personnel: data.personnel,
+            amenities: data.amenities,
+            technology: data.technology,
+            placeTypes: data.placeTypes,
+            foodAndDrinkRules: data.foodAndDrinkRules,
+            venueRules: data.venueRules,
+            storage: data.storage,
+            access: data.access
+              ? {
+                  ...data.access,
+                  vehicleTypes: data.access.vehicleTypes as (
+                    | "car"
+                    | "truck"
+                    | "van"
+                    | "bus"
+                  )[],
+                }
+              : undefined,
+            parking: data.parking,
+            breakfast: data.breakfast,
+          },
+        ],
+      },
+      {
+        onSuccess: () => router.back(),
+      },
+    );
+  }
 
   const {
     control,
@@ -335,7 +421,6 @@ export default function EditVenueListingForm({
 
     reset({
       name: listing.name,
-      slug: listing.slug,
       shortDescription: listing.shortDescription ?? undefined,
       description: listing.description ?? undefined,
       indoor: listing.indoor ?? false,
@@ -426,6 +511,7 @@ export default function EditVenueListingForm({
         listing.references?.map((r) => ({
           image: r.image ? id(r.image as string | { id: string }) : undefined,
           eventName: r.eventName ?? undefined,
+          description: r.description ?? undefined,
           clientName: r.clientName ?? undefined,
           eventType: r.eventType
             ? id(r.eventType as string | { id: string })
@@ -462,24 +548,14 @@ export default function EditVenueListingForm({
           color="text-listing"
           surfaceColor="bg-listing-surface"
         >
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <Input
-              label="Název"
-              inputProps={{
-                ...register("name"),
-                placeholder: "Kongresové centrum Praha",
-              }}
-              error={errors.name?.message}
-            />
-            <Input
-              label="Slug"
-              inputProps={{
-                ...register("slug"),
-                placeholder: "kongresove-centrum-praha",
-              }}
-              error={errors.slug?.message}
-            />
-          </div>
+          <Input
+            label="Název"
+            inputProps={{
+              ...register("name"),
+              placeholder: "Kongresové centrum Praha",
+            }}
+            error={errors.name?.message}
+          />
           <Input
             label="Krátký popis"
             inputProps={{
@@ -626,17 +702,15 @@ export default function EditVenueListingForm({
                   ref={field.ref}
                   label="Město"
                   placeholder="Vyberte město..."
-                  options={MOCK_CITIES.map((c) => ({
-                    id: c.id,
-                    label: c.name,
-                  }))}
+                  options={citiesData?.docs ?? []}
+                  onSearchQueryChange={setCitySearch}
                   value={
                     field.value?.id
-                      ? { id: field.value.id, label: field.value.name }
+                      ? { id: field.value.id, name: field.value.name }
                       : undefined
                   }
                   onSelect={(option) =>
-                    field.onChange({ id: option.id, name: option.label })
+                    field.onChange({ id: option.id, name: option.name })
                   }
                   onClear={() => field.onChange({ id: "", name: "" })}
                   error={errors.location?.city?.id?.message}
@@ -819,11 +893,11 @@ export default function EditVenueListingForm({
                         placeholder="Vyberte aktivitu..."
                         options={MOCK_ACTIVITIES.map((a) => ({
                           id: a.id,
-                          label: a.name,
+                          name: a.name,
                         }))}
                         value={{
                           id: field.value ?? "",
-                          label:
+                          name:
                             MOCK_ACTIVITIES.find((a) => a.id === field.value)
                               ?.name ?? "",
                         }}
@@ -1321,35 +1395,37 @@ export default function EditVenueListingForm({
             addButtonLabel="Přidat zaměstnance"
             renderItem={(_item, index) => (
               <div className="flex flex-col gap-3">
-                <Controller
-                  control={control}
-                  name={`employees.${index}.image`}
-                  render={({ field }) => (
-                    <ImageInput
-                      label="Fotografie"
-                      value={field.value}
-                      onChange={(filename) => field.onChange(filename ?? "")}
-                      onUpload={uploadFileToCloud}
+                <div className="grid grid-cols-2 gap-3">
+                  <Controller
+                    control={control}
+                    name={`employees.${index}.image`}
+                    render={({ field }) => (
+                      <ImageInput
+                        label="Fotografie"
+                        value={field.value}
+                        onChange={(filename) => field.onChange(filename ?? "")}
+                        onUpload={uploadFileToCloud}
+                      />
+                    )}
+                  />
+                  <div className="flex flex-col gap-3">
+                    <Input
+                      label="Jméno"
+                      inputProps={{
+                        ...register(`employees.${index}.name`),
+                        placeholder: "Jan Novák",
+                      }}
+                      error={errors.employees?.[index]?.name?.message}
                     />
-                  )}
-                />
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <Input
-                    label="Jméno"
-                    inputProps={{
-                      ...register(`employees.${index}.name`),
-                      placeholder: "Jan Novák",
-                    }}
-                    error={errors.employees?.[index]?.name?.message}
-                  />
-                  <Input
-                    label="Role"
-                    inputProps={{
-                      ...register(`employees.${index}.role`),
-                      placeholder: "Manažer",
-                    }}
-                    error={errors.employees?.[index]?.role?.message}
-                  />
+                    <Input
+                      label="Role"
+                      inputProps={{
+                        ...register(`employees.${index}.role`),
+                        placeholder: "DJ",
+                      }}
+                      error={errors.employees?.[index]?.role?.message}
+                    />
+                  </div>
                 </div>
                 <Textarea
                   label="Popis"
@@ -1459,6 +1535,7 @@ export default function EditVenueListingForm({
               referencesFieldArray.append({
                 image: "",
                 eventName: "",
+                description: "",
                 clientName: "",
                 eventType: "",
               })
@@ -1497,6 +1574,14 @@ export default function EditVenueListingForm({
                     error={errors.references?.[index]?.clientName?.message}
                   />
                 </div>
+                <Input
+                  label="Popis"
+                  inputProps={{
+                    ...register(`references.${index}.description`),
+                    placeholder: "Krátký popis akce nebo spolupráce...",
+                  }}
+                  error={errors.references?.[index]?.description?.message}
+                />
                 <Controller
                   control={control}
                   name={`references.${index}.eventType`}
@@ -1506,11 +1591,11 @@ export default function EditVenueListingForm({
                       placeholder="Vyberte typ akce..."
                       options={MOCK_EVENT_TYPES.map((et) => ({
                         id: et.id,
-                        label: et.name,
+                        name: et.name,
                       }))}
                       value={{
                         id: field.value ?? "",
-                        label:
+                        name:
                           MOCK_EVENT_TYPES.find((et) => et.id === field.value)
                             ?.name ?? "",
                       }}

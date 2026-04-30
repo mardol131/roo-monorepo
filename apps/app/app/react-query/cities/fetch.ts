@@ -3,9 +3,18 @@ import { stringify } from "qs-esm";
 
 const baseUrl = `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/cities`;
 
-export async function fetchCities(query?: Where, limit = 10): Promise<PayloadResponse<City>> {
+export type FetchCitiesOptions = {
+  query?: Where;
+  limit?: number;
+  sortBy?: string;
+};
+
+export async function fetchCities(
+  options?: FetchCitiesOptions,
+): Promise<PayloadResponse<City>> {
+  const { query, limit = 10, sortBy = "name" } = options || {};
   const res = await fetch(
-    `${baseUrl}?${stringify({ where: query, limit }, { encodeValuesOnly: true })}`,
+    `${baseUrl}?${sortBy ? `sort=${sortBy}&` : ""}${stringify({ where: query, limit }, { encodeValuesOnly: true })}`,
     {
       headers: {
         Authorization: `Bearer ${process.env.NEXT_PUBLIC_BACKEND_TOKEN}`,

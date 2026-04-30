@@ -22,6 +22,7 @@ import {
   Package,
   Shield,
   Star,
+  TableOfContents,
   TagIcon,
   Trash2,
   Users,
@@ -32,22 +33,14 @@ import { ControlSection } from "../../../../../components/control-section";
 import { EntertainmentDetails } from "./components/entertainment-details";
 import { GastroDetails } from "./components/gastro-details";
 import { VenueDetails } from "./components/venue-details";
+import { EmptyState } from "@/app/[locale]/(user)/components/empty-state";
+import { ListingCompletion } from "./components/listing-completion";
+import { useTranslations } from "next-intl";
+import EntityCard from "@/app/[locale]/(user)/components/entity-card";
+import EntityComponentTag from "@/app/[locale]/(user)/components/tags/entity-component-tag";
+import Button from "@/app/components/ui/atoms/button";
 
 // ── Constants ─────────────────────────────────────────────────────────────────
-
-const FAQ_GROUP_LABELS: Record<string, string> = {
-  general: "Obecné",
-  booking: "Rezervace",
-  cancellation: "Storno",
-  payment: "Platba",
-  other: "Ostatní",
-};
-
-const LISTING_TYPE_LABELS: Record<string, string> = {
-  venue: "Venue",
-  gastro: "Gastronomie",
-  entertainment: "Zábavní program",
-};
 
 // ── Page ──────────────────────────────────────────────────────────────────────
 
@@ -56,6 +49,7 @@ export default function Page() {
     companyId: string;
     listingId: string;
   }>();
+  const t = useTranslations();
   const router = useRouter();
   const { data: listing, isPending } = useListing(listingId);
   const { data: variants } = useVariantsByListing(listingId);
@@ -63,17 +57,14 @@ export default function Page() {
     listingId,
     companyId,
   );
-  const { mutate: deleteListing } = useDeleteListing(
-    listingId,
-    companyId,
-  );
+  const { mutate: deleteListing } = useDeleteListing(listingId, companyId);
   if (isPending) return <Loader text="Načítám službu..." />;
   if (!listing) return router.back();
 
   const isActive = listing.status === "active";
 
   const handleToggleStatus = () => {
-    updateListing({ status: isActive ? "archived" : "active" });
+    updateListing({ status: isActive ? "draft" : "active" });
   };
 
   const handleDeleteConfirm = async () => {
@@ -88,7 +79,7 @@ export default function Page() {
   const headerInfoItems = [
     { icon: "Banknote", text: `od ${listing.price.startsAt} Kč` },
     ...(listingType
-      ? [{ icon: "Tag", text: LISTING_TYPE_LABELS[listingType] ?? listingType }]
+      ? [{ icon: "Tag", text: t(`listings.type.${listingType}`) }]
       : []),
     ...(listing.indoor && listing.outdoor
       ? [{ icon: "Sun", text: "Interiér i exteriér" }]
@@ -110,7 +101,13 @@ export default function Page() {
         ]
       : []),
     ...(listing.description
-      ? [{ type: "text" as const, label: "Popis", value: listing.description }]
+      ? [
+          {
+            type: "text" as const,
+            label: "Popis",
+            value: listing.description,
+          },
+        ]
       : []),
     ...(listing.eventTypes?.length
       ? [
@@ -122,7 +119,13 @@ export default function Page() {
         ]
       : []),
     ...(listing.indoor != null
-      ? [{ type: "boolean" as const, label: "Interiér", value: listing.indoor }]
+      ? [
+          {
+            type: "boolean" as const,
+            label: "Interiér",
+            value: listing.indoor,
+          },
+        ]
       : []),
     ...(listing.outdoor != null
       ? [
@@ -134,8 +137,6 @@ export default function Page() {
         ]
       : []),
   ];
-
-  const activeFaq = listing.faq?.filter((f) => f.active) ?? [];
 
   return (
     <main className="w-full">
@@ -161,6 +162,11 @@ export default function Page() {
       />
 
       <div className="flex flex-col gap-4">
+        <ListingCompletion
+          listing={listing}
+          companyId={companyId}
+          listingId={listingId}
+        />
         <ControlSection
           rows={[
             {
@@ -173,7 +179,7 @@ export default function Page() {
                 : "Po aktivaci budete přesměrováni do platební brány. Služba se zobrazí v katalogu po úspěšné platbě.",
               button: {
                 text: isActive ? "Deaktivovat" : "Aktivovat",
-                version: isActive ? "outlined" : "successFull",
+                version: isActive ? "warningFull" : "successFull",
                 iconLeft: isActive ? "CircleMinus" : "CircleCheck",
                 size: "sm",
                 disabled: isUpdating,
@@ -200,7 +206,8 @@ export default function Page() {
                     buttonText: "Smazat službu",
                     buttonVersion: "dangerFull",
                     confirmPhrase: listing.name,
-                    whatIsGoingToHappenText: "Opravdu chcete smazat tuto službu?",
+                    whatIsGoingToHappenText:
+                      "Opravdu chcete smazat tuto službu?",
                     whatIsGoingToHappenTextColor: "danger",
                     whatIsGoingToHappenList: [
                       "Služba zmizí z katalogu a nebude dohledatelná",
@@ -216,12 +223,16 @@ export default function Page() {
         />
 
         <RowContainer
-          icon={<Package className="w-4 h-4 text-violet-500" />}
+          icon="Package"
+          iconColor="text-violet-500"
+          iconBgColor="bg-violet-50"
           label="Varianty"
           subLabel={
-            variants?.length ? `${variants.length} variant` : "Žádné varianty"
+            variants?.docs?.length
+              ? `${variants.docs?.length} variant`
+              : "Žádné varianty"
           }
-          rowComponents={(variants ?? []).map((variant) => {
+          rowComponents={(variants?.docs ?? []).map((variant) => {
             const firstBlock = variant.details[0];
             const capacityItem = firstBlock
               ? {
@@ -251,14 +262,29 @@ export default function Page() {
               />
             );
           })}
-          emptyHeading="Žádné varianty"
-          emptyText="Zatím nebyly přidány žádné varianty"
+          emptyState={{
+            text: "Tato služba nemá žádné varianty",
+            subtext:
+              "Varianty umožňují nabízet různé konfigurace služby s odlišnou cenou, kapacitou nebo vybavením. Pro přidání varianty klikněte na tlačítko Přidat variantu.",
+            icon: "Package",
+            button: {
+              text: "Přidat variantu",
+              version: "variantFull",
+              size: "sm",
+              iconLeft: "Plus",
+              link: {
+                pathname:
+                  "/company-profile/companies/[companyId]/listings/[listingId]/variants/new",
+                params: { companyId, listingId },
+              },
+            },
+          }}
         />
 
         {basicInfoItems.length > 0 && (
           <DashboardSection
             title="Základní informace"
-            icon={Package}
+            icon={"Package"}
             iconBg="bg-listing-surface"
             iconColor="text-listing"
           >
@@ -275,142 +301,249 @@ export default function Page() {
             return <EntertainmentDetails key={i} block={block} />;
           return null;
         })}
-
-        {listing.technologies?.length ? (
+        {listing.technologies?.length && (
           <DashboardSection
             title="Technologie"
-            icon={Zap}
+            icon={"Zap"}
             iconBg="bg-cyan-50"
             iconColor="text-cyan-500"
+          >
+            {listing.technologies?.length && (
+              <InfoSection
+                items={[
+                  {
+                    type: "tagList",
+                    label: "Vybavení",
+                    items: listing.technologies,
+                  },
+                ]}
+              />
+            )}
+          </DashboardSection>
+        )}
+
+        {listing.rules?.length ? (
+          <DashboardSection
+            title="Pravidla"
+            icon={"Shield"}
+            iconBg="bg-red-50"
+            iconColor="text-red-400"
           >
             <InfoSection
               items={[
                 {
                   type: "tagList",
-                  label: "Vybavení",
-                  items: listing.technologies,
+                  label: "Pravidla",
+                  items: listing.rules,
                 },
               ]}
             />
           </DashboardSection>
         ) : null}
 
-        {listing.rules?.length ? (
-          <DashboardSection
-            title="Pravidla"
-            icon={Shield}
-            iconBg="bg-red-50"
-            iconColor="text-red-400"
-          >
-            <InfoSection
-              items={[
-                { type: "tagList", label: "Pravidla", items: listing.rules },
-              ]}
+        <RowContainer
+          icon="User"
+          iconColor="text-violet-500"
+          iconBgColor="bg-violet-50"
+          label="Zaměstnanci"
+          subLabel={`${listing.employees?.length} osob`}
+          headerRightComponent={
+            <Button
+              text="Upravit"
+              version="plain"
+              size="xs"
+              link={{
+                pathname:
+                  "/company-profile/companies/[companyId]/listings/[listingId]/edit",
+                params: {
+                  companyId,
+                  listingId,
+                },
+                query: { section: "section-employees" },
+              }}
             />
-          </DashboardSection>
-        ) : null}
+          }
+          rowComponents={
+            listing.employees?.length
+              ? listing.employees?.map((emp, i) => (
+                  <EntityRow
+                    items={[]}
+                    key={i}
+                    label={emp.name}
+                    icon="User"
+                    iconBackgroundColor="bg-violet-50"
+                    iconColor="text-violet-500"
+                  />
+                ))
+              : []
+          }
+          emptyState={{
+            button: {
+              text: "Přidat zaměstnance",
+              version: "listingFull",
+              size: "sm",
+              iconLeft: "Plus",
+              link: {
+                pathname:
+                  "/company-profile/companies/[companyId]/listings/[listingId]/edit",
+                params: { companyId, listingId },
+                query: { section: "section-employees" },
+              },
+            },
+            text: "Nemáte vytvořené žádné zaměstnance",
+            subtext:
+              "Zaměstnanci jsou osoby, které pracují ve vaší firmě a mohou být přiřazeni k rezervacím. Pro přidání zaměstnance klikněte na tlačítko Přidat zaměstnance.",
+          }}
+        />
 
-        {listing.employees?.length ? (
-          <RowContainer
-            icon={<Users className="w-4 h-4 text-violet-500" />}
-            label="Zaměstnanci"
-            subLabel={`${listing.employees.length} osob`}
-            rowComponents={listing.employees.map((emp, i) => (
-              <div key={i} className="flex items-start gap-4 px-6 py-4">
-                <div className="w-8 h-8 rounded-lg bg-violet-50 flex items-center justify-center shrink-0">
-                  <Users className="w-4 h-4 text-violet-500" />
-                </div>
-                <div className="flex flex-col min-w-0">
-                  <Text
-                    variant="label-lg"
-                    color="textDark"
-                    className="font-medium"
-                  >
-                    {emp.name}
-                  </Text>
-                  <Text variant="caption" color="secondary">
-                    {emp.role}
-                  </Text>
-                  {emp.description && (
-                    <Text variant="caption" color="secondary">
-                      {emp.description}
-                    </Text>
-                  )}
-                </div>
-              </div>
-            ))}
-            emptyHeading="Žádní zaměstnanci"
-          />
-        ) : null}
-
-        {listing.references?.length ? (
-          <RowContainer
-            icon={<Star className="w-4 h-4 text-violet-500" />}
-            label="Reference"
-            subLabel={`${listing.references.length} referencí`}
-            rowComponents={listing.references.map((ref, i) => (
-              <div key={i} className="flex items-start gap-4 px-6 py-4">
-                <div className="w-8 h-8 rounded-lg bg-violet-50 flex items-center justify-center shrink-0">
-                  <Star className="w-4 h-4 text-violet-500" />
-                </div>
-                <div className="flex flex-col min-w-0">
-                  <Text
-                    variant="label-lg"
-                    color="textDark"
-                    className="font-medium"
-                  >
-                    {ref.eventName ?? "—"}
-                  </Text>
-                  {ref.clientName && (
-                    <Text variant="caption" color="secondary">
-                      {ref.clientName}
-                    </Text>
-                  )}
-                  {ref.eventType &&
-                    typeof ref.eventType !== "string" &&
-                    ref.eventType && (
-                      <Text variant="caption" color="secondary">
-                        {(ref.eventType as { name: string }).name}
-                      </Text>
-                    )}
-                </div>
-              </div>
-            ))}
-            emptyHeading="Žádné reference"
-          />
-        ) : null}
-
-        {activeFaq.length > 0 && (
-          <DashboardSection
-            title="Časté otázky"
-            icon={HelpCircle}
-            iconBg="bg-amber-50"
-            iconColor="text-amber-500"
-          >
-            {activeFaq.map((item, i) => (
-              <div
-                key={i}
-                className="py-2.5 border-b border-zinc-100 last:border-0"
-              >
-                {item.groupedBy && (
-                  <span className="inline-block text-xs font-medium px-2 py-0.5 rounded-full bg-amber-50 text-amber-600 mb-1">
-                    {FAQ_GROUP_LABELS[item.groupedBy] ?? item.groupedBy}
-                  </span>
-                )}
-                <Text
-                  variant="label-lg"
-                  color="textDark"
-                  className="font-medium block mb-0.5"
-                >
-                  {item.question}
-                </Text>
-                <Text variant="body-sm" color="secondary">
-                  {item.answer}
-                </Text>
-              </div>
-            ))}
-          </DashboardSection>
-        )}
+        <RowContainer
+          icon="Star"
+          iconColor="text-yellow-500"
+          iconBgColor="bg-yellow-50"
+          label="Reference"
+          headerRightComponent={
+            <Button
+              text="Upravit"
+              version="plain"
+              size="xs"
+              link={{
+                pathname:
+                  "/company-profile/companies/[companyId]/listings/[listingId]/edit",
+                params: {
+                  companyId,
+                  listingId,
+                },
+                query: { section: "section-references" },
+              }}
+            />
+          }
+          subLabel={`${listing?.references?.length} referencí`}
+          rowComponents={
+            listing.references?.length
+              ? listing.references?.map((ref, i) => (
+                  <EntityRow
+                    items={[
+                      ...(ref.eventName
+                        ? [
+                            {
+                              icon: "Star" as const,
+                              content: ref.eventName,
+                            } as const,
+                          ]
+                        : []),
+                      ...(ref.clientName
+                        ? [
+                            {
+                              icon: "User" as const,
+                              content: ref.clientName,
+                            } as const,
+                          ]
+                        : []),
+                      ...(ref.description
+                        ? [
+                            {
+                              icon: "Tag" as const,
+                              content: ref.description,
+                            } as const,
+                          ]
+                        : []),
+                    ]}
+                    label={ref.eventName}
+                    icon="Star"
+                    iconBackgroundColor="bg-yellow-50"
+                    iconColor="text-yellow-500"
+                  />
+                ))
+              : []
+          }
+          emptyState={{
+            text: "Nemáte žádné reference",
+            button: {
+              text: "Přidat referenci",
+              version: "listingFull",
+              size: "sm",
+              iconLeft: "Plus",
+              link: {
+                pathname:
+                  "/company-profile/companies/[companyId]/listings/[listingId]/edit",
+                params: { companyId, listingId },
+                query: { section: "section-references" },
+              },
+            },
+            subtext:
+              "Reference jsou záznamy o vašich předchozích zakázkách, které mohou obsahovat informace o klientovi, typu akce, počtu hostů a další. Pro přidání reference klikněte na tlačítko Přidat referenci.",
+          }}
+        />
+        <RowContainer
+          icon="TableOfContents"
+          iconColor="text-violet-500"
+          iconBgColor="bg-violet-50"
+          label="FAQ"
+          subLabel={`Počet otázek:${listing?.faq?.length}`}
+          headerRightComponent={
+            <Button
+              text="Upravit"
+              version="plain"
+              size="xs"
+              link={{
+                pathname:
+                  "/company-profile/companies/[companyId]/listings/[listingId]/edit",
+                params: {
+                  companyId,
+                  listingId,
+                },
+                query: { section: "section-faq" },
+              }}
+            />
+          }
+          rowComponents={
+            listing.faq?.length
+              ? listing.faq?.map((item, i) => (
+                  <EntityRow
+                    items={[
+                      {
+                        icon: "TableOfContents",
+                        content: item.answer,
+                      },
+                    ]}
+                    rightComponent={
+                      <EntityComponentTag
+                        text={item.active ? "Aktivní" : "Neaktivní"}
+                        bgColor={
+                          item.active ? "bg-success-surface" : "bg-gray-200"
+                        }
+                        textColor={
+                          item.active ? "text-success" : "text-gray-500"
+                        }
+                      />
+                    }
+                    key={i}
+                    label={item.question}
+                    icon="TableOfContents"
+                    iconBackgroundColor="bg-violet-50"
+                    iconColor="text-violet-500"
+                  />
+                ))
+              : []
+          }
+          emptyState={{
+            button: {
+              text: "Přidat otázku do FAQ",
+              version: "listingFull",
+              size: "sm",
+              iconLeft: "Plus",
+              link: {
+                pathname:
+                  "/company-profile/companies/[companyId]/listings/[listingId]/edit",
+                params: { companyId, listingId },
+                query: { section: "section-faq" },
+              },
+            },
+            text: "Nemáte žádné otázky do FAQ",
+            subtext:
+              "FAQ jsou často kladené otázky, které mohou obsahovat informace o vašich službách, produktech nebo procesech. Pro přidání otázky klikněte na tlačítko Přidat otázku.",
+          }}
+        />
       </div>
     </main>
   );

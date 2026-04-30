@@ -17,12 +17,13 @@ export async function fetchListingsByCompany(
   return res.json();
 }
 
-export async function fetchListing(
-  id: string,
-): Promise<PayloadResponse<Listing>> {
+export async function fetchListing(id: string): Promise<Listing> {
   const res = await fetch(`${baseUrl}/${id}`, { credentials: "include" });
+  console.log("fetching listing with id:", id);
   if (!res.ok) throw new Error("Failed to fetch listing");
-  return res.json();
+  const data = await res.json();
+  console.log("fetched listing data:", data);
+  return data;
 }
 
 export async function updateListing(id: string, data: Partial<Listing>) {

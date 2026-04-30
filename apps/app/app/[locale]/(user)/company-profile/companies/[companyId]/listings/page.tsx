@@ -9,9 +9,11 @@ import { useListingsByCompany } from "@/app/react-query/listings/hooks";
 import CardContainer from "@/app/[locale]/(user)/components/card-container";
 import { Listing } from "@roo/common";
 import Loader from "@/app/[locale]/(user)/components/loader";
+import { useTranslations } from "next-intl";
 
 export default function page() {
   const { companyId } = useParams<{ companyId: string }>();
+  const t = useTranslations();
 
   const { data: listings, isLoading } = useListingsByCompany(companyId);
 
@@ -66,12 +68,20 @@ export default function page() {
               items={[
                 {
                   icon: "MapPin",
-                  content: listing?.details[0]?.location?.address,
+                  content: t(`listings.type.${listing.details[0].blockType}`),
                 },
                 {
                   icon: "Banknote",
                   content: `${listing.price.startsAt} Kč`,
                 },
+                ...(listing.details[0]?.location?.address
+                  ? [
+                      {
+                        icon: "MapPin",
+                        content: listing.details[0].location.address,
+                      } as const,
+                    ]
+                  : []),
               ]}
               link={{
                 pathname: `/company-profile/companies/[companyId]/listings/[listingId]`,

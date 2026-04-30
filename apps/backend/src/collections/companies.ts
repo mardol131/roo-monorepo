@@ -93,5 +93,57 @@ export const Companies: CollectionConfig = {
       name: 'vatId',
       type: 'text',
     },
+
+    // Collaboration fields
+    {
+      name: 'collaborators',
+      type: 'array',
+      fields: [
+        {
+          name: 'user',
+          type: 'relationship',
+          relationTo: 'users',
+          required: true,
+        },
+        {
+          name: 'permissions',
+          type: 'group',
+          required: true,
+          fields: [
+            {
+              name: 'companies',
+              type: 'select',
+              hasMany: true,
+              options: [
+                { label: 'Vytvářet', value: 'create' },
+                { label: 'Upravovat', value: 'edit' },
+                { label: 'Mazat', value: 'delete' },
+              ],
+            },
+            {
+              name: 'listings',
+              type: 'select',
+              hasMany: true,
+              options: [
+                { label: 'Vytvářet', value: 'create' },
+                { label: 'Upravovat', value: 'edit' },
+                { label: 'Mazat', value: 'delete' },
+                { label: 'Aktivovat katalog', value: 'activateCatalog' },
+                { label: 'Deaktivovat katalog', value: 'deactivateCatalog' },
+              ],
+            },
+            {
+              name: 'inquiries',
+              type: 'select',
+              hasMany: true,
+              options: [
+                { label: 'Označit jako přijaté', value: 'accept' },
+                { label: 'Mazat', value: 'delete' },
+              ],
+            },
+          ],
+        },
+      ],
+    },
   ],
 }

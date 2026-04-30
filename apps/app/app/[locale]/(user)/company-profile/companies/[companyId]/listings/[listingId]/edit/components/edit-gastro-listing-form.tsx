@@ -34,6 +34,7 @@ import {
   ChefHat,
   CircleHelp,
   Image,
+  MapPin,
   Package,
   ScrollText,
   Star,
@@ -41,10 +42,16 @@ import {
   Users,
   Utensils,
 } from "lucide-react";
+import { useRegions } from "@/app/react-query/regions/hooks";
+import { useDistricts } from "@/app/react-query/districts/hooks";
+import { useCities } from "@/app/react-query/cities/hooks";
 import { useParams } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Controller, useFieldArray, useForm } from "react-hook-form";
 import { z } from "zod";
+import { useRouter } from "@/app/i18n/navigation";
+import { useUpdateListing } from "@/app/react-query/listings/hooks";
+import { Listing } from "@roo/common";
 
 // ── TOC groups ────────────────────────────────────────────────────────────────
 
@@ -55,6 +62,12 @@ export const GASTRO_FORM_GROUPS: readonly TocGroup[] = [
       { id: "section-basic", title: "Základní informace", icon: Building2 },
       { id: "section-price", title: "Cena", icon: Banknote },
       { id: "section-images", title: "Obrázky", icon: Image },
+    ],
+  },
+  {
+    label: "Místo působení",
+    sections: [
+      { id: "section-location", title: "Místo působení", icon: MapPin },
     ],
   },
   {
@@ -89,7 +102,6 @@ export const GASTRO_FORM_GROUPS: readonly TocGroup[] = [
 
 const schema = z.object({
   name: z.string().min(1, "Název je povinný"),
-  slug: z.string().min(1, "Slug je povinný"),
   shortDescription: z.string().optional(),
   description: z.string().optional(),
   eventTypes: z.array(z.string()).default([]),
@@ -102,6 +114,12 @@ const schema = z.object({
     startsAt: z.coerce
       .number({ message: "Zadejte číslo" })
       .positive("Cena musí být kladná"),
+  }),
+  location: z.object({
+    regions: z.array(z.string()).min(1, "Vyberte alespoň jeden kraj"),
+    districts: z.array(z.string()).default([]),
+    cities: z.array(z.string()).default([]),
+    address: z.string().optional(),
   }),
   capacity: z.coerce
     .number({ message: "Zadejte číslo" })
@@ -144,7 +162,8 @@ const schema = z.object({
     .array(
       z.object({
         image: z.string().optional(),
-        eventName: z.string().optional(),
+        eventName: z.string().min(1, "Název akce je povinný"),
+        description: z.string().optional(),
         clientName: z.string().optional(),
         eventType: z.string().optional(),
       }),
@@ -159,7 +178,6 @@ export type GastroFormInputs = z.infer<typeof schema>;
 // ── Props ─────────────────────────────────────────────────────────────────────
 
 type Props = {
-  onSubmit: (data: GastroFormInputs) => void;
   onCancel: () => void;
   onFormChange?: (values: GastroFormInputs) => void;
 };
@@ -167,12 +185,66 @@ type Props = {
 // ── Component ─────────────────────────────────────────────────────────────────
 
 export default function EditGastroListingForm({
-  onSubmit,
   onCancel,
   onFormChange,
 }: Props) {
-  const { listingId } = useParams<{ listingId: string }>();
+  const { listingId, companyId } = useParams<{
+    listingId: string;
+    companyId: string;
+  }>();
   const { data: listing } = useListing(listingId);
+  const { mutate } = useUpdateListing(listingId, companyId);
+  const router = useRouter();
+
+  function onSubmit(data: GastroFormInputs) {
+    const existingDetail = listing?.details.find(
+      (d): d is Extract<Listing["details"][number], { blockType: "gastro" }> =>
+        d.blockType === "gastro",
+    );
+    mutate(
+      {
+        name: data.name,
+        shortDescription: data.shortDescription,
+        description: data.description,
+        eventTypes: data.eventTypes,
+        images: {
+          ...data.images,
+          gallery: data.images.gallery.map((url) => ({ url })),
+        },
+        price: data.price,
+        rules: data.rules,
+        employees: data.employees,
+        faq: data.faq,
+        references: data.references,
+        details: [
+          {
+            ...existingDetail,
+            blockType: "gastro",
+            location: {
+              region: data.location.regions,
+              district: data.location.districts,
+              city: data.location.cities,
+              address: data.location.address,
+            },
+            capacity: data.capacity,
+            minimumCapacity: data.minimumCapacity,
+            cuisines: data.cuisines,
+            dishTypes: data.dishTypes,
+            dietaryOptions: data.dietaryOptions,
+            foodServiceStyles: data.foodServiceStyles,
+            kidsMenu: data.kidsMenu,
+            hasAlcoholLicense: data.hasAlcoholLicense,
+            foodAndDrinkRules: data.foodAndDrinkRules,
+            personnel: data.personnel,
+            necessities: data.necessities,
+          },
+        ],
+      },
+      {
+        onSuccess: () => router.back(),
+      },
+    );
+  }
 
   const {
     control,
@@ -184,6 +256,7 @@ export default function EditGastroListingForm({
   } = useForm({
     resolver: zodResolver(schema),
     defaultValues: {
+      location: { regions: [], districts: [], cities: [] },
       eventTypes: [],
       cuisines: [],
       dishTypes: [],
@@ -218,7 +291,6 @@ export default function EditGastroListingForm({
 
     reset({
       name: listing.name,
-      slug: listing.slug,
       shortDescription: listing.shortDescription ?? undefined,
       description: listing.description ?? undefined,
       eventTypes: listing.eventTypes?.map(id) ?? [],
@@ -229,6 +301,12 @@ export default function EditGastroListingForm({
           listing.images.gallery?.map((g) => g.url ?? "").filter(Boolean) ?? [],
       },
       price: { startsAt: listing.price.startsAt },
+      location: {
+        regions: d.location?.region?.map(id) ?? [],
+        districts: d.location?.district?.map(id) ?? [],
+        cities: d.location?.city?.map(id) ?? [],
+        address: d.location?.address ?? undefined,
+      },
       capacity: d.capacity,
       minimumCapacity: d.minimumCapacity ?? undefined,
       cuisines: d.cuisines?.map(id) ?? [],
@@ -259,6 +337,7 @@ export default function EditGastroListingForm({
         listing.references?.map((r) => ({
           image: r.image ? id(r.image as string | { id: string }) : undefined,
           eventName: r.eventName ?? undefined,
+          description: r.description ?? undefined,
           clientName: r.clientName ?? undefined,
           eventType: r.eventType
             ? id(r.eventType as string | { id: string })
@@ -271,6 +350,34 @@ export default function EditGastroListingForm({
   const faqFieldArray = useFieldArray({ control, name: "faq" });
   const referencesFieldArray = useFieldArray({ control, name: "references" });
 
+  const regionsValue = watch("location.regions");
+  const districtsValue = watch("location.districts");
+  const citiesValue = watch("location.cities");
+
+  const [districtSearch, setDistrictSearch] = useState("");
+  const [citySearch, setCitySearch] = useState("");
+
+  const { data: regionsData } = useRegions(undefined, 20);
+  const { data: districtsData } = useDistricts(
+    regionsValue?.length || districtSearch
+      ? {
+          ...(regionsValue?.length ? { region: { in: regionsValue } } : {}),
+          ...(districtSearch ? { name: { contains: districtSearch } } : {}),
+        }
+      : undefined,
+  );
+  const { data: citiesData } = useCities({
+    query:
+      districtsValue?.length || citySearch
+        ? {
+            ...(districtsValue?.length
+              ? { district: { in: districtsValue } }
+              : {}),
+            ...(citySearch ? { name: { contains: citySearch } } : {}),
+          }
+        : undefined,
+  });
+
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="flex gap-6">
       <div className="flex flex-col w-full gap-4">
@@ -282,24 +389,14 @@ export default function EditGastroListingForm({
           color="text-listing"
           surfaceColor="bg-listing-surface"
         >
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <Input
-              label="Název"
-              inputProps={{
-                ...register("name"),
-                placeholder: "Novák Catering",
-              }}
-              error={errors.name?.message}
-            />
-            <Input
-              label="Slug"
-              inputProps={{
-                ...register("slug"),
-                placeholder: "novak-catering",
-              }}
-              error={errors.slug?.message}
-            />
-          </div>
+          <Input
+            label="Název"
+            inputProps={{
+              ...register("name"),
+              placeholder: "Novák Catering",
+            }}
+            error={errors.name?.message}
+          />
           <Input
             label="Krátký popis"
             inputProps={{
@@ -392,7 +489,80 @@ export default function EditGastroListingForm({
           />
         </FormSection>
 
-        {/* ── 4. Kapacita a objednávky ──────────────────────────────────────────── */}
+        {/* ── 4. Místo působení ─────────────────────────────────────────────────── */}
+        <FormSection
+          id="section-location"
+          icon={MapPin}
+          title="Místo působení"
+          color="text-listing"
+          surfaceColor="bg-listing-surface"
+          error={!!errors.location?.regions}
+        >
+          <Controller
+            control={control}
+            name="location.regions"
+            render={({ field }) => (
+              <CheckboxGroup
+                label="Kraj"
+                items={regionsData?.docs ?? []}
+                value={field.value}
+                onChange={field.onChange}
+                checkColor="text-listing"
+                searchable
+              />
+            )}
+          />
+          <Controller
+            control={control}
+            name="location.districts"
+            render={({ field }) => (
+              <CheckboxGroup
+                label="Okres"
+                items={districtsData?.docs ?? []}
+                value={field.value ?? []}
+                onChange={field.onChange}
+                checkColor="text-listing"
+                searchable
+                onSearchChange={setDistrictSearch}
+                closed={!regionsValue?.length}
+                closedMessage="Nejprve vyplňte předchozí pole"
+              />
+            )}
+          />
+          <Controller
+            control={control}
+            name="location.cities"
+            render={({ field }) => (
+              <CheckboxGroup
+                label="Město"
+                items={citiesData?.docs ?? []}
+                value={field.value ?? []}
+                onChange={field.onChange}
+                checkColor="text-listing"
+                searchable
+                onSearchChange={setCitySearch}
+                closed={!districtsValue?.length}
+                closedMessage="Nejprve vyplňte předchozí pole"
+              />
+            )}
+          />
+          <Input
+            label="Adresa"
+            subLabel={
+              !citiesValue?.length
+                ? "Nejprve vyplňte předchozí pole"
+                : undefined
+            }
+            inputProps={{
+              ...register("location.address"),
+              placeholder: "Václavské náměstí 1",
+            }}
+            disabled={!citiesValue?.length}
+            error={errors.location?.address?.message}
+          />
+        </FormSection>
+
+        {/* ── 5. Kapacita a objednávky ──────────────────────────────────────────── */}
         <FormSection
           id="section-capacity"
           icon={Users}
@@ -653,35 +823,37 @@ export default function EditGastroListingForm({
             addButtonLabel="Přidat zaměstnance"
             renderItem={(_item, index) => (
               <div className="flex flex-col gap-3">
-                <Controller
-                  control={control}
-                  name={`employees.${index}.image`}
-                  render={({ field }) => (
-                    <ImageInput
-                      label="Fotografie"
-                      value={field.value}
-                      onChange={(filename) => field.onChange(filename ?? "")}
-                      onUpload={uploadFileToCloud}
+                <div className="grid grid-cols-2 gap-3">
+                  <Controller
+                    control={control}
+                    name={`employees.${index}.image`}
+                    render={({ field }) => (
+                      <ImageInput
+                        label="Fotografie"
+                        value={field.value}
+                        onChange={(filename) => field.onChange(filename ?? "")}
+                        onUpload={uploadFileToCloud}
+                      />
+                    )}
+                  />
+                  <div className="flex flex-col gap-3">
+                    <Input
+                      label="Jméno"
+                      inputProps={{
+                        ...register(`employees.${index}.name`),
+                        placeholder: "Jan Novák",
+                      }}
+                      error={errors.employees?.[index]?.name?.message}
                     />
-                  )}
-                />
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <Input
-                    label="Jméno"
-                    inputProps={{
-                      ...register(`employees.${index}.name`),
-                      placeholder: "Jan Novák",
-                    }}
-                    error={errors.employees?.[index]?.name?.message}
-                  />
-                  <Input
-                    label="Role"
-                    inputProps={{
-                      ...register(`employees.${index}.role`),
-                      placeholder: "Šéfkuchař",
-                    }}
-                    error={errors.employees?.[index]?.role?.message}
-                  />
+                    <Input
+                      label="Role"
+                      inputProps={{
+                        ...register(`employees.${index}.role`),
+                        placeholder: "DJ",
+                      }}
+                      error={errors.employees?.[index]?.role?.message}
+                    />
+                  </div>
                 </div>
                 <Textarea
                   label="Popis"
@@ -791,6 +963,7 @@ export default function EditGastroListingForm({
               referencesFieldArray.append({
                 image: "",
                 eventName: "",
+                description: "",
                 clientName: "",
                 eventType: "",
               })
@@ -829,6 +1002,14 @@ export default function EditGastroListingForm({
                     error={errors.references?.[index]?.clientName?.message}
                   />
                 </div>
+                <Input
+                  label="Popis"
+                  inputProps={{
+                    ...register(`references.${index}.description`),
+                    placeholder: "Krátký popis akce nebo spolupráce...",
+                  }}
+                  error={errors.references?.[index]?.description?.message}
+                />
                 <Controller
                   control={control}
                   name={`references.${index}.eventType`}
@@ -839,11 +1020,11 @@ export default function EditGastroListingForm({
                       placeholder="Vyberte typ akce..."
                       options={MOCK_EVENT_TYPES.map((et) => ({
                         id: et.id,
-                        label: et.name,
+                        name: et.name,
                       }))}
                       value={{
                         id: field.value ?? "",
-                        label:
+                        name:
                           MOCK_EVENT_TYPES.find((et) => et.id === field.value)
                             ?.name ?? "",
                       }}

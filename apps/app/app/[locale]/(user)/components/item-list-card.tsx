@@ -2,11 +2,12 @@ import Text from "@/app/components/ui/atoms/text";
 import { ElementType } from "react";
 import DashboardSectionHeader from "./dashboard-section-header";
 import { DashboardSection } from "./dashboard-section";
-
+import { LucideIcons } from "@roo/common";
+import * as lucideIcons from "lucide-react";
 type Props = {
   heading: string;
   items: string[];
-  icon: ElementType;
+  icon: LucideIcons;
   iconColor: string;
   iconBgColor: string;
 };
@@ -14,14 +15,16 @@ type Props = {
 export function ItemListCard({
   heading,
   items,
-  icon: Icon,
+  icon,
   iconColor,
   iconBgColor,
 }: Props) {
+  const Icon = lucideIcons[icon] as ElementType;
+
   return (
     <DashboardSection
       title={heading}
-      icon={Icon}
+      icon={icon}
       iconColor={iconColor}
       iconBg={iconBgColor}
     >

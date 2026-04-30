@@ -159,6 +159,11 @@ export const listingsCommonFields: Field[] = [
       {
         name: 'eventName',
         type: 'text',
+        required: true,
+      },
+      {
+        name: 'description',
+        type: 'textarea',
       },
       {
         name: 'clientName',

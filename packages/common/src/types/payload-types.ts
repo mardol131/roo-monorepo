@@ -545,7 +545,8 @@ export interface Listing {
   references?:
     | {
         image?: string | null;
-        eventName?: string | null;
+        eventName: string;
+        description?: string | null;
         clientName?: string | null;
         eventType?: (string | null) | EventType;
         id?: string | null;
@@ -708,6 +709,17 @@ export interface Company {
     country: string;
   };
   vatId?: string | null;
+  collaborators?:
+    | {
+        user: string | User;
+        permissions: {
+          companies?: ('create' | 'edit' | 'delete')[] | null;
+          listings?: ('create' | 'edit' | 'delete' | 'activateCatalog' | 'deactivateCatalog')[] | null;
+          inquiries?: ('accept' | 'delete')[] | null;
+        };
+        id?: string | null;
+      }[]
+    | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1687,6 +1699,7 @@ export interface ListingsSelect<T extends boolean = true> {
     | {
         image?: T;
         eventName?: T;
+        description?: T;
         clientName?: T;
         eventType?: T;
         id?: T;
@@ -1907,6 +1920,19 @@ export interface CompaniesSelect<T extends boolean = true> {
         country?: T;
       };
   vatId?: T;
+  collaborators?:
+    | T
+    | {
+        user?: T;
+        permissions?:
+          | T
+          | {
+              companies?: T;
+              listings?: T;
+              inquiries?: T;
+            };
+        id?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
 }

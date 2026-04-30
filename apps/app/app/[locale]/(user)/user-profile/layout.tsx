@@ -12,12 +12,12 @@ export default function layout({ children }: Props) {
       { label: "Přehled", href: "/user-profile", icon: "LayoutDashboard" },
       {
         label: "Nová událost",
-        href: "/user-profile/my-events/new",
+        href: "/user-profile/events/new",
         icon: "Plus",
       },
       {
         label: "Události",
-        href: "/user-profile/my-events",
+        href: "/user-profile/events",
         icon: "Calendar",
       },
       {

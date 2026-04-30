@@ -104,11 +104,9 @@ export default function page() {
         </div>
         {/* Listings */}
         <RowContainer
-          icon={
-            <div className="w-8 h-8 rounded-xl bg-listing-surface flex items-center justify-center shrink-0">
-              <Tag className="w-4 h-4 text-listing" />
-            </div>
-          }
+          icon="Tag"
+          iconColor="text-listing"
+          iconBgColor="bg-listing-surface"
           label="Služby, které firma nabízí"
           headerRightComponent={
             <Button
@@ -166,7 +164,7 @@ export default function page() {
         />
         <DashboardSection
           title="Informace o firmě"
-          icon={Building2}
+          icon="Building2"
           iconBg="bg-company-surface"
           iconColor="text-company"
         >

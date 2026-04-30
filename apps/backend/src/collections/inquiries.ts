@@ -7,6 +7,44 @@ export const Inquiries: CollectionConfig = {
   admin: {
     useAsTitle: 'id',
   },
+  hooks: {
+    beforeChange: [
+      async ({ data, req, operation, originalDoc }) => {
+        if (operation !== 'update') return data
+
+        const bothConfirmed =
+          (data.companyStatus ?? originalDoc.companyStatus) === 'confirmed' &&
+          (data.userStatus ?? originalDoc.userStatus) === 'confirmed'
+
+        const alreadySnapped = originalDoc.dataSnapshots?.listing != null
+
+        if (!bothConfirmed || alreadySnapped) return data
+
+        const listingId =
+          typeof originalDoc.listing === 'object' ? originalDoc.listing?.id : originalDoc.listing
+        const variantId =
+          typeof originalDoc.variant === 'object' ? originalDoc.variant?.id : originalDoc.variant
+
+        const listing = await req.payload.findByID({
+          collection: 'listings',
+          id: listingId,
+          depth: 2,
+        })
+
+        const variant = variantId
+          ? await req.payload.findByID({
+              collection: 'variants',
+              id: variantId,
+              depth: 2,
+            })
+          : null
+
+        data.dataSnapshots = { listing, variant }
+
+        return data
+      },
+    ],
+  },
   fields: [
     {
       name: 'companyStatus',
@@ -90,6 +128,30 @@ export const Inquiries: CollectionConfig = {
       name: 'variant',
       type: 'relationship',
       relationTo: ['variants'],
+    },
+    {
+      name: 'customRequirements',
+      type: 'array',
+      fields: [
+        {
+          name: 'text',
+          type: 'text',
+        },
+      ],
+    },
+    {
+      name: 'dataSnapshots',
+      type: 'group',
+      fields: [
+        {
+          name: 'listing',
+          type: 'json',
+        },
+        {
+          name: 'variant',
+          type: 'json',
+        },
+      ],
     },
   ],
 }

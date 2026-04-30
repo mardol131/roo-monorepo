@@ -1,32 +1,49 @@
+import { ButtonProps } from "@/app/components/ui/atoms/button";
 import Text from "@/app/components/ui/atoms/text";
 import { ElementType } from "react";
+import { LucideIcons } from "../../../../../../packages/common/dist/types/icons";
+import DashboardSectionHeader from "./dashboard-section-header";
 
 export function DashboardSection({
   title,
-  icon: Icon,
+  icon,
   iconBg,
   iconColor,
   children,
+  emptyText,
 }: {
   title: string;
-  icon: ElementType;
+  icon: LucideIcons;
   iconBg: string;
   iconColor: string;
-  children: React.ReactNode;
+  children?: React.ReactNode;
+  emptyText?: string;
 }) {
   return (
     <div className="bg-white rounded-2xl border border-zinc-200">
-      <div className="flex items-center gap-2 p-5 border-b border-zinc-200">
-        <div
-          className={`w-7 h-7 rounded-lg flex items-center justify-center ${iconBg}`}
-        >
-          <Icon className={`w-3.5 h-3.5 ${iconColor}`} />
-        </div>
-        <Text variant="h4" color="textDark">
-          {title}
-        </Text>
+      <DashboardSectionHeader
+        heading={title}
+        icon={icon}
+        iconBgColor={iconBg}
+        iconColor={iconColor}
+      />
+      <div className="p-5">
+        {children ? (
+          children
+        ) : (
+          <EmptyDashboardSection text={emptyText || "Sekce je prázdná"} />
+        )}
       </div>
-      <div className="flex flex-col p-5">{children}</div>
     </div>
   );
 }
+
+const EmptyDashboardSection = ({ text }: { text: string }) => {
+  return (
+    <div className="bg-white rounded-2xl flex flex-col items-center justify-center text-center">
+      <Text variant="label-lg" color="textDark" className="font-semibold mb-1">
+        {text}
+      </Text>
+    </div>
+  );
+};

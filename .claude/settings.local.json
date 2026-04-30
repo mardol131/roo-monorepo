@@ -2,7 +2,8 @@
   "permissions": {
     "allow": [
       "Bash(npx --yes tsc --noEmit)",
-      "Bash(xargs grep *)"
+      "Bash(xargs grep *)",
+      "Bash(node_modules/.bin/tsc --noEmit -p apps/app/tsconfig.json)"
     ]
   }
 }

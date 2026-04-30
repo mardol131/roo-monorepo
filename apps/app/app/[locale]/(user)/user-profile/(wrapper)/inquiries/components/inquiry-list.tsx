@@ -135,8 +135,7 @@ export default function InquiryList({ inquiries }: { inquiries: Inquiry[] }) {
                           : []),
                       ]}
                       link={{
-                        pathname:
-                          "/user-profile/my-events/[eventId]/[inquiryId]",
+                        pathname: "/user-profile/events/[eventId]/[inquiryId]",
                         params: {
                           eventId: getIdFromRelationshipField(inquiry.event),
                           inquiryId: inquiry.id,
@@ -153,7 +152,7 @@ export default function InquiryList({ inquiries }: { inquiries: Inquiry[] }) {
                 headerRightComponent={
                   <Link
                     href={{
-                      pathname: "/user-profile/my-events/[eventId]",
+                      pathname: "/user-profile/events/[eventId]",
                       params: { eventId: event.id },
                     }}
                     className="text-xs text-rose-500 hover:text-rose-600 font-medium transition-colors"

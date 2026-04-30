@@ -2,7 +2,7 @@
 
 import React, { useCallback, useState } from "react";
 import Image from "next/image";
-import { ImagePlus, Loader2, Trash2 } from "lucide-react";
+import { ImageIcon, ImagePlus, Loader2, Trash2 } from "lucide-react";
 import Text from "../../text";
 import ErrorText from "../error-text";
 import { convertAndUploadImage, useFileDragDrop, useFileInput } from "./utils";
@@ -18,6 +18,11 @@ type ImageInputProps = {
   accept?: string;
 };
 
+function isDisplayableUrl(url: string) {
+  if (url.startsWith("blob:") || url.startsWith("data:")) return true;
+  try { new URL(url); return true; } catch { return false; }
+}
+
 export default function ImageInput({
   label,
   value,
@@ -28,16 +33,12 @@ export default function ImageInput({
   accept = "image/*",
 }: ImageInputProps) {
   const [isUploading, setIsUploading] = useState(false);
-  const [preview, setPreview] = useState<string | null>(() => {
-    if (!value) return null;
-    try { new URL(value); return value; } catch { return null; }
-  });
+  const [uploadPreview, setUploadPreview] = useState<string | null>(null);
   const [uploadError, setUploadError] = useState<string | null>(null);
 
   const handleFile = useCallback(
     async (file: File | null) => {
       if (!file) {
-        setPreview(null);
         onChange(null);
         return;
       }
@@ -45,18 +46,18 @@ export default function ImageInput({
       if (!file.type.startsWith("image/")) return;
 
       const objectUrl = URL.createObjectURL(file);
-      setPreview(objectUrl);
+      setUploadPreview(objectUrl);
       setUploadError(null);
       setIsUploading(true);
 
       try {
         const filename = await convertAndUploadImage(file, onUpload);
         URL.revokeObjectURL(objectUrl);
-        setPreview(filename);
+        setUploadPreview(null);
         onChange(filename);
       } catch {
         URL.revokeObjectURL(objectUrl);
-        setPreview(null);
+        setUploadPreview(null);
         setUploadError("Nahrávání se nezdařilo. Zkuste to znovu.");
         onChange(null);
       } finally {
@@ -67,9 +68,7 @@ export default function ImageInput({
   );
 
   const handleFiles = useCallback(
-    (files: FileList) => {
-      handleFile(files[0] ?? null);
-    },
+    (files: FileList) => { handleFile(files[0] ?? null); },
     [handleFile],
   );
 
@@ -78,10 +77,12 @@ export default function ImageInput({
   const { fileInputProps, handleClick } = useFileInput(handleFiles, { accept });
 
   const handleRemove = useCallback(() => {
-    setPreview(null);
     setUploadError(null);
     onChange(null);
   }, [onChange]);
+
+  const displayUrl = uploadPreview ?? (value && isDisplayableUrl(value) ? value : null);
+  const hasValue = isUploading || !!value;
 
   return (
     <div>
@@ -89,17 +90,24 @@ export default function ImageInput({
 
       <input {...fileInputProps} />
 
-      {preview ? (
+      {hasValue ? (
         <div
           className={`relative w-full overflow-hidden rounded-lg border ${error ? "border-red-500" : "border-zinc-300"}`}
         >
-          <Image
-            src={preview}
-            alt={label}
-            width={400}
-            height={200}
-            className="h-48 w-full object-cover"
-          />
+          {displayUrl ? (
+            <Image
+              src={displayUrl}
+              alt={label}
+              width={400}
+              height={200}
+              className="h-48 w-full object-cover"
+            />
+          ) : (
+            <div className="flex h-48 w-full items-center justify-center gap-2 bg-zinc-100">
+              <ImageIcon size={24} className="text-zinc-400" />
+              <Text variant="label" color="textLight">Obrázek</Text>
+            </div>
+          )}
           {isUploading && (
             <div className="absolute inset-0 flex items-center justify-center bg-white/60">
               <Loader2 size={28} className="animate-spin text-zinc-600" />

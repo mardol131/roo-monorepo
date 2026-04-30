@@ -75,14 +75,17 @@ export default function ChatWindow({
   return (
     <div className="lg:col-span-3 h-200 bg-white rounded-2xl border border-zinc-200 flex flex-col overflow-hidden">
       <DashboardSectionHeader
-        icon={MessageCircle}
+        icon={"MessageCircle"}
         heading="Konverzace"
         iconBgColor="bg-zinc-100"
         iconColor="text-zinc-500"
       />
 
       {/* Messages */}
-      <div ref={scrollContainerRef} className="flex-1 min-h-0 overflow-y-auto px-5 py-4 flex flex-col gap-3">
+      <div
+        ref={scrollContainerRef}
+        className="flex-1 min-h-0 overflow-y-auto px-5 py-4 flex flex-col gap-3"
+      >
         {messages.map((msg) => (
           <ChatBubble key={msg.id} message={msg} senderRole={senderRole} />
         ))}
@@ -135,7 +138,9 @@ function ChatBubble({
 }) {
   const isMine = message.senderType === senderRole;
   return (
-    <div className={`flex flex-col gap-1 ${isMine ? "items-end" : "items-start"}`}>
+    <div
+      className={`flex flex-col gap-1 ${isMine ? "items-end" : "items-start"}`}
+    >
       <div
         className={`max-w-[80%] px-4 py-2.5 rounded-2xl text-sm leading-relaxed ${
           isMine

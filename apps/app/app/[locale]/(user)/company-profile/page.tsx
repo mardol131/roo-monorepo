@@ -44,11 +44,9 @@ export default function page() {
       <RowContainer
         label="Vaše firmy"
         subLabel="Zde jsou všechny firmy pod vaším účtem"
-        icon={
-          <div className="w-8 h-8 rounded-xl bg-company-surface flex items-center justify-center shrink-0">
-            <Building2 className="w-4 h-4 text-company" />
-          </div>
-        }
+        icon="Building2"
+        iconColor="text-company"
+        iconBgColor="bg-company-surface"
         rowComponents={
           companies?.docs && companies?.docs.length !== 0
             ? companies.docs.map((company) => (
