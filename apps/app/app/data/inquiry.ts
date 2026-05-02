@@ -2,7 +2,7 @@ import { Inquiry } from "@roo/common";
 import { CheckCircle2, Clock, XCircle } from "lucide-react";
 
 export const INQUIRY_STATUS: Record<
-  Inquiry["userStatus"],
+  Inquiry["status"]["user"] | Inquiry["status"]["company"],
   {
     label: string;
     icon: React.ElementType;

@@ -2,13 +2,6 @@
 
 import { FormSection } from "@/app/[locale]/(user)/components/form-section";
 import FormToc, { TocGroup } from "@/app/[locale]/(user)/components/form-toc";
-import {
-  MOCK_CUISINES,
-  MOCK_DIETARY_OPTIONS,
-  MOCK_DISH_TYPES,
-  MOCK_FOOD_SERVICE_STYLES,
-  MOCK_NECESSITIES,
-} from "@/app/_mock/mock";
 import Button, { ButtonProps } from "@/app/components/ui/atoms/button";
 import Checkbox from "@/app/components/ui/atoms/inputs/checkbox";
 import CheckboxGroup from "@/app/components/ui/atoms/inputs/checkbox-group";
@@ -37,8 +30,15 @@ import { useState } from "react";
 import { Controller, Resolver, useForm } from "react-hook-form";
 import { z } from "zod";
 import { useRouter } from "@/app/i18n/navigation";
+import { useCuisines } from "@/app/react-query/filters/cuisines/hooks";
+import { useDishTypes } from "@/app/react-query/filters/dish-types/hooks";
+import { useDietaryOptions } from "@/app/react-query/filters/dietary-options/hooks";
+import { useFoodServiceStyles } from "@/app/react-query/filters/food-service-styles/hooks";
+import { useNecessities } from "@/app/react-query/specific/necessities/hooks";
 
 // ── Schema ─────────────────────────────────────────────────────────────────────
+
+const itemSchema = z.object({ id: z.string(), name: z.string() });
 
 const optionalPositiveNumber = z.preprocess(
   (val) => (val === "" || val === undefined || val === null ? undefined : val),
@@ -58,9 +58,9 @@ const schema = z.object({
       .positive("Cena musí být kladná"),
   }),
   location: z.object({
-    regions: z.array(z.string()).min(1, "Vyberte alespoň jeden kraj"),
-    districts: z.array(z.string()).default([]),
-    cities: z.array(z.string()).default([]),
+    regions: z.array(itemSchema).min(1, "Vyberte alespoň jeden kraj"),
+    districts: z.array(itemSchema).default([]),
+    cities: z.array(itemSchema).default([]),
     address: z.string().optional(),
   }),
   capacity: z.coerce
@@ -68,13 +68,13 @@ const schema = z.object({
     .positive("Kapacita musí být kladná")
     .int("Zadejte celé číslo"),
   minimumCapacity: optionalPositiveNumber,
-  cuisines: z.array(z.string()).default([]),
-  dishTypes: z.array(z.string()).default([]),
-  dietaryOptions: z.array(z.string()).default([]),
-  foodServiceStyles: z.array(z.string()).default([]),
+  cuisines: z.array(itemSchema).default([]),
+  dishTypes: z.array(itemSchema).default([]),
+  dietaryOptions: z.array(itemSchema).default([]),
+  foodServiceStyles: z.array(itemSchema).default([]),
   hasAlcoholLicense: z.boolean().default(false),
   kidsMenu: z.boolean().default(false),
-  necessities: z.array(z.string()).default([]),
+  necessities: z.array(itemSchema).default([]),
 });
 
 type Inputs = z.infer<typeof schema>;
@@ -166,6 +166,22 @@ export default function GastroListingForm({ onCancel }: Props) {
       kidsMenu: false,
     },
   });
+  const { data: cuisines } = useCuisines({
+    limit: 15,
+  });
+  const { data: dishTypes } = useDishTypes({
+    limit: 15,
+  });
+  const { data: dietaryOptions } = useDietaryOptions({
+    limit: 15,
+  });
+  const { data: foodServiceStyles } = useFoodServiceStyles({
+    limit: 15,
+  });
+
+  const { data: necessities } = useNecessities({
+    limit: 15,
+  });
 
   function onSubmit(data: Inputs) {
     const payload: CreateListingPayload = {
@@ -181,19 +197,19 @@ export default function GastroListingForm({ onCancel }: Props) {
         {
           location: {
             address: data.location.address,
-            region: data.location.regions,
-            district: data.location.districts,
-            city: data.location.cities,
+            region: data.location.regions.map((i) => i.id),
+            district: data.location.districts.map((i) => i.id),
+            city: data.location.cities.map((i) => i.id),
           },
           capacity: data.capacity,
           minimumCapacity: data.minimumCapacity,
-          cuisines: data.cuisines,
-          dishTypes: data.dishTypes,
-          dietaryOptions: data.dietaryOptions,
-          foodServiceStyles: data.foodServiceStyles,
+          cuisines: data.cuisines.map((i) => i.id),
+          dishTypes: data.dishTypes.map((i) => i.id),
+          dietaryOptions: data.dietaryOptions.map((i) => i.id),
+          foodServiceStyles: data.foodServiceStyles.map((i) => i.id),
           hasAlcoholLicense: data.hasAlcoholLicense,
           kidsMenu: data.kidsMenu,
-          necessities: data.necessities,
+          necessities: data.necessities.map((i) => i.id),
           blockType: "gastro",
         },
       ],
@@ -220,7 +236,9 @@ export default function GastroListingForm({ onCancel }: Props) {
   const { data: districtsData } = useDistricts(
     regionsValue?.length || districtSearch
       ? {
-          ...(regionsValue?.length ? { region: { in: regionsValue } } : {}),
+          ...(regionsValue?.length
+            ? { region: { in: regionsValue.map((i) => i.id) } }
+            : {}),
           ...(districtSearch ? { name: { contains: districtSearch } } : {}),
         }
       : undefined,
@@ -231,7 +249,7 @@ export default function GastroListingForm({ onCancel }: Props) {
       districtsValue?.length || citySearch
         ? {
             ...(districtsValue?.length
-              ? { district: { in: districtsValue } }
+              ? { district: { in: districtsValue.map((i) => i.id) } }
               : {}),
             ...(citySearch ? { name: { contains: citySearch } } : {}),
           }
@@ -460,7 +478,7 @@ export default function GastroListingForm({ onCancel }: Props) {
               <CheckboxGroup
                 searchable
                 label="Kuchyně"
-                items={MOCK_CUISINES}
+                items={cuisines?.docs ?? []}
                 value={field.value}
                 onChange={field.onChange}
                 checkColor={COLOR_SCHEME.text}
@@ -473,7 +491,7 @@ export default function GastroListingForm({ onCancel }: Props) {
             render={({ field }) => (
               <CheckboxGroup
                 label="Typy pokrmů"
-                items={MOCK_DISH_TYPES}
+                items={dishTypes?.docs ?? []}
                 searchable
                 value={field.value}
                 onChange={field.onChange}
@@ -487,7 +505,7 @@ export default function GastroListingForm({ onCancel }: Props) {
             render={({ field }) => (
               <CheckboxGroup
                 label="Styl servisu"
-                items={MOCK_FOOD_SERVICE_STYLES}
+                items={foodServiceStyles?.docs ?? []}
                 searchable
                 value={field.value}
                 onChange={field.onChange}
@@ -501,7 +519,7 @@ export default function GastroListingForm({ onCancel }: Props) {
             render={({ field }) => (
               <CheckboxGroup
                 label="Dietní možnosti"
-                items={MOCK_DIETARY_OPTIONS}
+                items={dietaryOptions?.docs ?? []}
                 searchable
                 value={field.value}
                 onChange={field.onChange}
@@ -561,7 +579,7 @@ export default function GastroListingForm({ onCancel }: Props) {
             render={({ field }) => (
               <CheckboxGroup
                 label="Provozní požadavky"
-                items={MOCK_NECESSITIES}
+                items={necessities?.docs ?? []}
                 searchable
                 value={field.value}
                 onChange={field.onChange}

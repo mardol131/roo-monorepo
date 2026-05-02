@@ -72,3 +72,13 @@ export async function refreshUser() {
 
   return response;
 }
+
+export async function refreshToken() {
+  const response = await fetch(`${apiUrl}/api/users/refresh-token`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+  });
+
+  return response;
+}

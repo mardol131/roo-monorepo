@@ -5,13 +5,14 @@ import { useTranslations } from "next-intl";
 import EntityComponentTag from "./entity-component-tag";
 
 type Props = {
-  userStatus: Inquiry["userStatus"];
-  companyStatus: Inquiry["companyStatus"];
+  status: Inquiry["status"];
 };
 
-const color = ({ userStatus, companyStatus }: Props) => {
-  const status = aggregateInquiryStatus({ userStatus, companyStatus });
-  switch (status) {
+const color = ({ status }: Props) => {
+  const { user: userStatus, company: compnyStatus } = status;
+
+  const aggregatedStatus = aggregateInquiryStatus(status);
+  switch (aggregatedStatus) {
     case "confirmed":
       return { bgColor: "bg-green-50", textColor: "text-green-500" };
     case "cancelled":
@@ -21,9 +22,9 @@ const color = ({ userStatus, companyStatus }: Props) => {
   }
 };
 
-const icon = ({ userStatus, companyStatus }: Props) => {
-  const status = aggregateInquiryStatus({ userStatus, companyStatus });
-  switch (status) {
+const icon = ({ status }: Props) => {
+  const aggregatedStatus = aggregateInquiryStatus(status);
+  switch (aggregatedStatus) {
     case "pending":
       return "CircleQuestionMark";
     case "cancelled":
@@ -33,18 +34,18 @@ const icon = ({ userStatus, companyStatus }: Props) => {
   }
 };
 
-export default function InquiryStatusTag({ userStatus, companyStatus }: Props) {
+export default function InquiryStatusTag({ status }: Props) {
   const t = useTranslations("inquiries.status");
 
-  const { bgColor, textColor } = color({ userStatus, companyStatus });
-  const status = aggregateInquiryStatus({ userStatus, companyStatus });
+  const { bgColor, textColor } = color({ status });
+  const aggregatedStatus = aggregateInquiryStatus(status);
 
   return (
     <EntityComponentTag
-      text={t(`${status}`)}
+      text={t(`${aggregatedStatus}`)}
       bgColor={bgColor}
       textColor={textColor}
-      icon={icon({ userStatus, companyStatus })}
+      icon={icon({ status })}
     />
   );
 }

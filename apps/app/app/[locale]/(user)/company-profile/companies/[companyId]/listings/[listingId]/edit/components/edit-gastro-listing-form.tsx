@@ -100,11 +100,13 @@ export const GASTRO_FORM_GROUPS: readonly TocGroup[] = [
 
 // ── Schema ────────────────────────────────────────────────────────────────────
 
+const itemSchema = z.object({ id: z.string(), name: z.string() });
+
 const schema = z.object({
   name: z.string().min(1, "Název je povinný"),
   shortDescription: z.string().optional(),
   description: z.string().optional(),
-  eventTypes: z.array(z.string()).default([]),
+  eventTypes: z.array(itemSchema).default([]),
   images: z.object({
     coverImage: z.string().min(1, "Titulní obrázek je povinný"),
     logo: z.string().optional(),
@@ -116,9 +118,9 @@ const schema = z.object({
       .positive("Cena musí být kladná"),
   }),
   location: z.object({
-    regions: z.array(z.string()).min(1, "Vyberte alespoň jeden kraj"),
-    districts: z.array(z.string()).default([]),
-    cities: z.array(z.string()).default([]),
+    regions: z.array(itemSchema).min(1, "Vyberte alespoň jeden kraj"),
+    districts: z.array(itemSchema).default([]),
+    cities: z.array(itemSchema).default([]),
     address: z.string().optional(),
   }),
   capacity: z.coerce
@@ -126,16 +128,16 @@ const schema = z.object({
     .positive("Kapacita musí být kladná")
     .int("Zadejte celé číslo"),
   minimumCapacity: z.coerce.number().nullable().optional(),
-  cuisines: z.array(z.string()).default([]),
-  dishTypes: z.array(z.string()).default([]),
-  dietaryOptions: z.array(z.string()).default([]),
-  foodServiceStyles: z.array(z.string()).default([]),
-  personnel: z.array(z.string()).default([]),
-  necessities: z.array(z.string()).default([]),
+  cuisines: z.array(itemSchema).default([]),
+  dishTypes: z.array(itemSchema).default([]),
+  dietaryOptions: z.array(itemSchema).default([]),
+  foodServiceStyles: z.array(itemSchema).default([]),
+  personnel: z.array(itemSchema).default([]),
+  necessities: z.array(itemSchema).default([]),
   kidsMenu: z.boolean().default(false),
   hasAlcoholLicense: z.boolean().default(false),
-  foodAndDrinkRules: z.array(z.string()).default([]),
-  rules: z.array(z.string()).default([]),
+  foodAndDrinkRules: z.array(itemSchema).default([]),
+  rules: z.array(itemSchema).default([]),
   employees: z
     .array(
       z.object({
@@ -206,13 +208,13 @@ export default function EditGastroListingForm({
         name: data.name,
         shortDescription: data.shortDescription,
         description: data.description,
-        eventTypes: data.eventTypes,
+        eventTypes: data.eventTypes.map(i => i.id),
         images: {
           ...data.images,
           gallery: data.images.gallery.map((url) => ({ url })),
         },
         price: data.price,
-        rules: data.rules,
+        rules: data.rules.map(i => i.id),
         employees: data.employees,
         faq: data.faq,
         references: data.references,
@@ -221,22 +223,22 @@ export default function EditGastroListingForm({
             ...existingDetail,
             blockType: "gastro",
             location: {
-              region: data.location.regions,
-              district: data.location.districts,
-              city: data.location.cities,
+              region: data.location.regions.map(i => i.id),
+              district: data.location.districts.map(i => i.id),
+              city: data.location.cities.map(i => i.id),
               address: data.location.address,
             },
             capacity: data.capacity,
             minimumCapacity: data.minimumCapacity,
-            cuisines: data.cuisines,
-            dishTypes: data.dishTypes,
-            dietaryOptions: data.dietaryOptions,
-            foodServiceStyles: data.foodServiceStyles,
+            cuisines: data.cuisines.map(i => i.id),
+            dishTypes: data.dishTypes.map(i => i.id),
+            dietaryOptions: data.dietaryOptions.map(i => i.id),
+            foodServiceStyles: data.foodServiceStyles.map(i => i.id),
             kidsMenu: data.kidsMenu,
             hasAlcoholLicense: data.hasAlcoholLicense,
-            foodAndDrinkRules: data.foodAndDrinkRules,
-            personnel: data.personnel,
-            necessities: data.necessities,
+            foodAndDrinkRules: data.foodAndDrinkRules.map(i => i.id),
+            personnel: data.personnel.map(i => i.id),
+            necessities: data.necessities.map(i => i.id),
           },
         ],
       },
@@ -289,11 +291,14 @@ export default function EditGastroListingForm({
     const id = <T extends string | { id: string }>(v: T) =>
       typeof v === "string" ? v : v.id;
 
+    const toItem = <T extends { id: string; name: string }>(v: string | T): { id: string; name: string } =>
+      typeof v === 'string' ? { id: v, name: '' } : { id: v.id, name: v.name };
+
     reset({
       name: listing.name,
       shortDescription: listing.shortDescription ?? undefined,
       description: listing.description ?? undefined,
-      eventTypes: listing.eventTypes?.map(id) ?? [],
+      eventTypes: listing.eventTypes?.map(toItem) ?? [],
       images: {
         coverImage: listing.images.coverImage,
         logo: listing.images.logo ?? undefined,
@@ -302,23 +307,23 @@ export default function EditGastroListingForm({
       },
       price: { startsAt: listing.price.startsAt },
       location: {
-        regions: d.location?.region?.map(id) ?? [],
-        districts: d.location?.district?.map(id) ?? [],
-        cities: d.location?.city?.map(id) ?? [],
+        regions: d.location?.region?.map(toItem) ?? [],
+        districts: d.location?.district?.map(toItem) ?? [],
+        cities: d.location?.city?.map(toItem) ?? [],
         address: d.location?.address ?? undefined,
       },
       capacity: d.capacity,
       minimumCapacity: d.minimumCapacity ?? undefined,
-      cuisines: d.cuisines?.map(id) ?? [],
-      dishTypes: d.dishTypes?.map(id) ?? [],
-      dietaryOptions: d.dietaryOptions?.map(id) ?? [],
-      foodServiceStyles: d.foodServiceStyles?.map(id) ?? [],
-      personnel: d.personnel?.map(id) ?? [],
-      necessities: d.necessities?.map(id) ?? [],
+      cuisines: d.cuisines?.map(toItem) ?? [],
+      dishTypes: d.dishTypes?.map(toItem) ?? [],
+      dietaryOptions: d.dietaryOptions?.map(toItem) ?? [],
+      foodServiceStyles: d.foodServiceStyles?.map(toItem) ?? [],
+      personnel: d.personnel?.map(toItem) ?? [],
+      necessities: d.necessities?.map(toItem) ?? [],
       kidsMenu: d.kidsMenu ?? false,
       hasAlcoholLicense: d.hasAlcoholLicense ?? false,
-      foodAndDrinkRules: d.foodAndDrinkRules?.map(id) ?? [],
-      rules: listing.rules?.map(id) ?? [],
+      foodAndDrinkRules: d.foodAndDrinkRules?.map(toItem) ?? [],
+      rules: listing.rules?.map(toItem) ?? [],
       employees:
         listing.employees?.map((e) => ({
           name: e.name,
@@ -361,7 +366,7 @@ export default function EditGastroListingForm({
   const { data: districtsData } = useDistricts(
     regionsValue?.length || districtSearch
       ? {
-          ...(regionsValue?.length ? { region: { in: regionsValue } } : {}),
+          ...(regionsValue?.length ? { region: { in: regionsValue.map(i => i.id) } } : {}),
           ...(districtSearch ? { name: { contains: districtSearch } } : {}),
         }
       : undefined,
@@ -371,7 +376,7 @@ export default function EditGastroListingForm({
       districtsValue?.length || citySearch
         ? {
             ...(districtsValue?.length
-              ? { district: { in: districtsValue } }
+              ? { district: { in: districtsValue.map(i => i.id) } }
               : {}),
             ...(citySearch ? { name: { contains: citySearch } } : {}),
           }

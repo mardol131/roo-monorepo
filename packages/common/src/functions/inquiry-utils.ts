@@ -1,9 +1,9 @@
 import { Inquiry } from "../types/payload-types";
 
-export function aggregateInquiryStatus({
-  userStatus,
-  companyStatus,
-}: Pick<Inquiry, "userStatus" | "companyStatus">): Inquiry["userStatus"] {
+export function aggregateInquiryStatus(
+  status: Inquiry["status"],
+): Inquiry["status"]["user"] {
+  const { user: userStatus, company: companyStatus } = status;
   if (userStatus === "pending" || companyStatus === "pending") {
     return "pending";
   } else if (userStatus === "confirmed" && companyStatus === "confirmed") {
@@ -16,9 +16,11 @@ export function aggregateInquiryStatus({
 }
 
 export function hasUnreadMessageForUser(inquiry: Inquiry): boolean {
-  if (!inquiry.lastCompanyMessageSentAt) return false;
-  if (!inquiry.lastUserSeenAt) return true;
-  return inquiry.lastCompanyMessageSentAt > inquiry.lastUserSeenAt;
+  if (!inquiry.activity?.lastCompanyMessageSentAt) return false;
+  if (!inquiry.activity?.lastUserSeenAt) return true;
+  return (
+    inquiry.activity.lastCompanyMessageSentAt > inquiry.activity.lastUserSeenAt
+  );
 }
 
 export const formatInquiryCountLabel = (count: number) => {

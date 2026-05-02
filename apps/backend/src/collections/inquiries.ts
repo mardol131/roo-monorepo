@@ -13,10 +13,10 @@ export const Inquiries: CollectionConfig = {
         if (operation !== 'update') return data
 
         const bothConfirmed =
-          (data.companyStatus ?? originalDoc.companyStatus) === 'confirmed' &&
-          (data.userStatus ?? originalDoc.userStatus) === 'confirmed'
+          (data.status?.company ?? originalDoc.status?.company) === 'confirmed' &&
+          (data.status?.user ?? originalDoc.status?.user) === 'confirmed'
 
-        const alreadySnapped = originalDoc.dataSnapshots?.listing != null
+        const alreadySnapped = originalDoc.snapshots?.listing != null
 
         if (!bothConfirmed || alreadySnapped) return data
 
@@ -39,67 +39,14 @@ export const Inquiries: CollectionConfig = {
             })
           : null
 
-        data.dataSnapshots = { listing, variant }
+        data.snapshots = { listing, variant }
 
         return data
       },
     ],
   },
   fields: [
-    {
-      name: 'companyStatus',
-      type: 'select',
-      required: true,
-      defaultValue: 'pending',
-      options: INQUIRY_STATUS,
-    },
-    {
-      name: 'userStatus',
-      type: 'select',
-      required: true,
-      defaultValue: 'pending',
-      options: INQUIRY_STATUS,
-    },
-    {
-      name: 'pricingMode',
-      type: 'select',
-      required: true,
-      defaultValue: 'fixed',
-      options: ['fixed', 'open'],
-    },
-    {
-      name: 'quotedPrice',
-      type: 'number',
-    },
-    {
-      name: 'agreedPrice',
-      type: 'number',
-    },
-    {
-      name: 'customRequest',
-      type: 'textarea',
-    },
-    {
-      name: 'sentAt',
-      type: 'date',
-      required: true,
-    },
-    {
-      name: 'lastCompanyMessageSentAt',
-      type: 'date',
-    },
-    {
-      name: 'lastUserMessageSentAt',
-      type: 'date',
-    },
-    {
-      name: 'lastUserSeenAt',
-      type: 'date',
-    },
-    {
-      name: 'lastCompanySeenAt',
-      type: 'date',
-    },
+    // ── Relace ──────────────────────────────────────────────────────────────────
     {
       name: 'user',
       type: 'relationship',
@@ -129,18 +76,102 @@ export const Inquiries: CollectionConfig = {
       type: 'relationship',
       relationTo: ['variants'],
     },
+    // ── Request ─────────────────────────────────────────────────────────────────
     {
-      name: 'customRequirements',
-      type: 'array',
+      name: 'request',
+      type: 'group',
       fields: [
         {
-          name: 'text',
-          type: 'text',
+          name: 'note',
+          type: 'textarea',
+        },
+        {
+          name: 'requirements',
+          type: 'array',
+          fields: [
+            {
+              name: 'text',
+              type: 'text',
+            },
+          ],
         },
       ],
     },
+    // ── Status ──────────────────────────────────────────────────────────────────
     {
-      name: 'dataSnapshots',
+      name: 'status',
+      type: 'group',
+      fields: [
+        {
+          name: 'company',
+          type: 'select',
+          required: true,
+          defaultValue: 'pending',
+          options: INQUIRY_STATUS,
+        },
+        {
+          name: 'user',
+          type: 'select',
+          required: true,
+          defaultValue: 'pending',
+          options: INQUIRY_STATUS,
+        },
+      ],
+    },
+    // ── Pricing ─────────────────────────────────────────────────────────────────
+    {
+      name: 'pricing',
+      type: 'group',
+      fields: [
+        {
+          name: 'mode',
+          type: 'select',
+          required: true,
+          defaultValue: 'fixed',
+          options: ['fixed', 'open'],
+        },
+        {
+          name: 'quotedPrice',
+          type: 'number',
+        },
+        {
+          name: 'agreedPrice',
+          type: 'number',
+        },
+      ],
+    },
+
+    // ── Activity ─────────────────────────────────────────────────────────────────
+    {
+      name: 'activity',
+      type: 'group',
+      fields: [
+        {
+          name: 'sentAt',
+          type: 'date',
+          required: true,
+        },
+        {
+          name: 'lastCompanyMessageSentAt',
+          type: 'date',
+        },
+        {
+          name: 'lastUserMessageSentAt',
+          type: 'date',
+        },
+        {
+          name: 'lastUserSeenAt',
+          type: 'date',
+        },
+        {
+          name: 'lastCompanySeenAt',
+          type: 'date',
+        },
+      ],
+    },
+    // ── Snapshots ────────────────────────────────────────────────────────────────
+    {
+      name: 'snapshots',
       type: 'group',
       fields: [
         {

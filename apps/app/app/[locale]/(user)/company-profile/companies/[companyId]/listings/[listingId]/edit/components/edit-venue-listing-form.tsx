@@ -57,6 +57,7 @@ import { useRouter } from "@/app/i18n/navigation";
 import { useUpdateListing } from "@/app/react-query/listings/hooks";
 import { Listing } from "@roo/common";
 import { de } from "date-fns/locale";
+import { useActivities } from "@/app/react-query/filters/activities/hooks";
 
 // ── TOC groups (exported for page sidebar) ────────────────────────────────────
 
@@ -120,139 +121,143 @@ export const VENUE_FORM_GROUPS: readonly TocGroup[] = [
 
 // ── Schema ─────────────────────────────────────────────────────────────────────
 
-const schema = z.object({
-  name: z.string().min(1, "Název je povinný"),
-  shortDescription: z.string().optional(),
-  description: z.string().optional(),
-  indoor: z.boolean().default(false),
-  outdoor: z.boolean().default(false),
-  eventTypes: z.array(z.string()).default([]),
-  images: z.object({
-    coverImage: z.string().min(1, "Titulní obrázek je povinný"),
-    logo: z.string().optional(),
-    gallery: z.array(z.string()).default([]),
-  }),
-  price: z.object({
-    startsAt: z.coerce
-      .number({ message: "Zadejte číslo" })
-      .positive("Cena musí být kladná"),
-  }),
-  location: z.object({
-    address: z.string().min(1, "Adresa je povinná"),
-    city: z.object({
-      id: z.string().min(1, "Město je povinné"),
-      name: z.string(),
+const itemSchema = z.object({ id: z.string(), name: z.string() });
+
+const schema = z
+  .object({
+    name: z.string().min(1, "Název je povinný"),
+    shortDescription: z.string().optional(),
+    description: z.string().optional(),
+    indoor: z.boolean().default(false),
+    outdoor: z.boolean().default(false),
+    eventTypes: z.array(itemSchema).default([]),
+    images: z.object({
+      coverImage: z.string().min(1, "Titulní obrázek je povinný"),
+      logo: z.string().optional(),
+      gallery: z.array(z.string()).default([]),
     }),
-  }),
-  capacity: z.coerce
-    .number({ message: "Zadejte číslo" })
-    .positive("Kapacita musí být kladná")
-    .int("Zadejte celé číslo"),
-  area: z.coerce
-    .number({ message: "Zadejte číslo" })
-    .positive("Plocha musí být kladná"),
-  canBeBookedAsWhole: z.boolean().default(false),
-  hasAccommodation: z.boolean().default(false),
-  accommodationCapacity: z.coerce.number().nullable().optional(),
-  activities: z.array(z.string()).default([]),
-  activityAddons: z
-    .array(
-      z.object({
-        activity: z.string().min(1, "Vyberte aktivitu"),
-        price: z.coerce.number({ message: "Zadejte číslo" }).min(0),
-        space: z.string().optional(),
-        type: z.enum(["indoor", "outdoor"]),
+    price: z.object({
+      startsAt: z.coerce
+        .number({ message: "Zadejte číslo" })
+        .positive("Cena musí být kladná"),
+    }),
+    location: z.object({
+      address: z.string().min(1, "Adresa je povinná"),
+      city: z.object({
+        id: z.string().min(1, "Město je povinné"),
+        name: z.string(),
       }),
-    )
-    .default([]),
-  services: z.array(z.string()).default([]),
-  personnel: z.array(z.string()).default([]),
-  amenities: z.array(z.string()).default([]),
-  technology: z.array(z.string()).default([]),
-  placeTypes: z.array(z.string()).default([]),
-  foodAndDrinkRules: z.array(z.string()).default([]),
-  venueRules: z.array(z.string()).default([]),
-  rules: z.array(z.string()).default([]),
-  storage: z
-    .array(
-      z.object({
-        name: z.string().min(1, "Název je povinný"),
-        area: z.coerce.number({ message: "Zadejte číslo" }).positive(),
-      }),
-    )
-    .default([]),
-  access: z
-    .object({
-      vehicleTypes: z.array(z.string()).default([]),
-      helpWithLoadingAndUnloading: z.boolean().default(false),
-      loadingRamp: z.boolean().default(false),
-      loadingElevator: z.boolean().default(false),
-      serviceAccess: z.boolean().default(false),
-      serviceArea: z.boolean().default(false),
-    })
-    .optional(),
-  parking: z
-    .object({
-      hasParking: z.boolean().default(false),
-      parkingCapacity: z.coerce.number().nullable().optional(),
-      parkingIsIncludedInPrice: z.boolean().default(false),
-      parkingPrice: z.coerce.number().nullable().optional(),
-    })
-    .optional(),
-  breakfast: z
-    .object({
-      included: z.boolean().default(false),
-      allowAccommodationWithoutBreakfast: z.boolean().default(false),
-      allowMoreBreakfastsThanAccommodation: z.boolean().default(false),
-      breakfastIsIncludedInPrice: z.boolean().default(false),
-      price: z.coerce.number().nullable().optional(),
-      pricePer: z.enum(["person", "booking"]).nullable().optional(),
-      timeFrom: z.string().nullable().optional(),
-      timeTo: z.string().nullable().optional(),
-    })
-    .optional(),
-  employees: z
-    .array(
-      z.object({
-        name: z.string().min(1, "Jméno je povinné"),
-        role: z.string().min(1, "Role je povinná"),
-        description: z.string().optional(),
-        image: z.string().optional(),
-      }),
-    )
-    .default([]),
-  faq: z
-    .array(
-      z.object({
-        active: z.boolean().default(true),
-        question: z.string().min(1, "Otázka je povinná"),
-        answer: z.string().min(1, "Odpověď je povinná"),
-        groupedBy: z
-          .enum(["general", "booking", "cancellation", "payment", "other"])
-          .default("general"),
-      }),
-    )
-    .default([]),
-  references: z
-    .array(
-      z.object({
-        image: z.string().optional(),
-        eventName: z.string().min(1, "Název akce je povinný"),
-        clientName: z.string().optional(),
-        eventType: z.string().optional(),
-        description: z.string().optional(),
-      }),
-    )
-    .default([]),
-}).superRefine((data, ctx) => {
-  if (data.hasAccommodation && !data.accommodationCapacity) {
-    ctx.addIssue({
-      code: "custom",
-      message: "Ubytovací kapacita je povinná",
-      path: ["accommodationCapacity"],
-    });
-  }
-});
+    }),
+    capacity: z.coerce
+      .number({ message: "Zadejte číslo" })
+      .positive("Kapacita musí být kladná")
+      .int("Zadejte celé číslo"),
+    area: z.coerce
+      .number({ message: "Zadejte číslo" })
+      .positive("Plocha musí být kladná"),
+    canBeBookedAsWhole: z.boolean().default(false),
+    hasAccommodation: z.boolean().default(false),
+    accommodationCapacity: z.coerce.number().nullable().optional(),
+    activities: z.array(itemSchema).default([]),
+    activityAddons: z
+      .array(
+        z.object({
+          activity: z.string().min(1, "Vyberte aktivitu"),
+          price: z.coerce.number({ message: "Zadejte číslo" }).min(0),
+          space: z.string().optional(),
+          type: z.enum(["indoor", "outdoor"]),
+        }),
+      )
+      .default([]),
+    services: z.array(itemSchema).default([]),
+    personnel: z.array(itemSchema).default([]),
+    amenities: z.array(itemSchema).default([]),
+    technology: z.array(itemSchema).default([]),
+    placeTypes: z.array(itemSchema).default([]),
+    foodAndDrinkRules: z.array(itemSchema).default([]),
+    venueRules: z.array(itemSchema).default([]),
+    rules: z.array(itemSchema).default([]),
+    storage: z
+      .array(
+        z.object({
+          name: z.string().min(1, "Název je povinný"),
+          area: z.coerce.number({ message: "Zadejte číslo" }).positive(),
+        }),
+      )
+      .default([]),
+    access: z
+      .object({
+        vehicleTypes: z.array(z.string()).default([]),
+        helpWithLoadingAndUnloading: z.boolean().default(false),
+        loadingRamp: z.boolean().default(false),
+        loadingElevator: z.boolean().default(false),
+        serviceAccess: z.boolean().default(false),
+        serviceArea: z.boolean().default(false),
+      })
+      .optional(),
+    parking: z
+      .object({
+        hasParking: z.boolean().default(false),
+        parkingCapacity: z.coerce.number().nullable().optional(),
+        parkingIsIncludedInPrice: z.boolean().default(false),
+        parkingPrice: z.coerce.number().nullable().optional(),
+      })
+      .optional(),
+    breakfast: z
+      .object({
+        included: z.boolean().default(false),
+        allowAccommodationWithoutBreakfast: z.boolean().default(false),
+        allowMoreBreakfastsThanAccommodation: z.boolean().default(false),
+        breakfastIsIncludedInPrice: z.boolean().default(false),
+        price: z.coerce.number().nullable().optional(),
+        pricePer: z.enum(["person", "booking"]).nullable().optional(),
+        timeFrom: z.string().nullable().optional(),
+        timeTo: z.string().nullable().optional(),
+      })
+      .optional(),
+    employees: z
+      .array(
+        z.object({
+          name: z.string().min(1, "Jméno je povinné"),
+          role: z.string().min(1, "Role je povinná"),
+          description: z.string().optional(),
+          image: z.string().optional(),
+        }),
+      )
+      .default([]),
+    faq: z
+      .array(
+        z.object({
+          active: z.boolean().default(true),
+          question: z.string().min(1, "Otázka je povinná"),
+          answer: z.string().min(1, "Odpověď je povinná"),
+          groupedBy: z
+            .enum(["general", "booking", "cancellation", "payment", "other"])
+            .default("general"),
+        }),
+      )
+      .default([]),
+    references: z
+      .array(
+        z.object({
+          image: z.string().optional(),
+          eventName: z.string().min(1, "Název akce je povinný"),
+          clientName: z.string().optional(),
+          eventType: z.string().optional(),
+          description: z.string().optional(),
+        }),
+      )
+      .default([]),
+  })
+  .superRefine((data, ctx) => {
+    if (data.hasAccommodation && !data.accommodationCapacity) {
+      ctx.addIssue({
+        code: "custom",
+        message: "Ubytovací kapacita je povinná",
+        path: ["accommodationCapacity"],
+      });
+    }
+  });
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 
@@ -286,6 +291,10 @@ export default function EditVenueListingForm({
   const { data: citiesData } = useCities({
     query: citySearch ? { name: { contains: citySearch } } : undefined,
   });
+  const { data: activities, isLoading: activitiesLoading } = useActivities({
+    query: citySearch ? { name: { contains: citySearch } } : undefined,
+    limit: 15,
+  });
 
   function onSubmit(data: FormInputs) {
     const venueDetail = listing?.details[0];
@@ -298,8 +307,8 @@ export default function EditVenueListingForm({
         description: data.description,
         indoor: data.indoor,
         outdoor: data.outdoor,
-        eventTypes: data.eventTypes,
-        rules: data.rules,
+        eventTypes: data.eventTypes.map(i => i.id),
+        rules: data.rules.map(i => i.id),
         employees: data.employees,
         faq: data.faq,
         references: data.references,
@@ -321,15 +330,15 @@ export default function EditVenueListingForm({
             canBeBookedAsWhole: data.canBeBookedAsWhole,
             hasAccommodation: data.hasAccommodation,
             accommodationCapacity: data.accommodationCapacity,
-            activities: data.activities,
+            activities: data.activities.map(i => i.id),
             activityAddons: data.activityAddons,
-            services: data.services,
-            personnel: data.personnel,
-            amenities: data.amenities,
-            technology: data.technology,
-            placeTypes: data.placeTypes,
-            foodAndDrinkRules: data.foodAndDrinkRules,
-            venueRules: data.venueRules,
+            services: data.services.map(i => i.id),
+            personnel: data.personnel.map(i => i.id),
+            amenities: data.amenities.map(i => i.id),
+            technology: data.technology.map(i => i.id),
+            placeTypes: data.placeTypes.map(i => i.id),
+            foodAndDrinkRules: data.foodAndDrinkRules.map(i => i.id),
+            venueRules: data.venueRules.map(i => i.id),
             storage: data.storage,
             access: data.access
               ? {
@@ -419,13 +428,16 @@ export default function EditVenueListingForm({
     const id = <T extends string | { id: string }>(v: T) =>
       typeof v === "string" ? v : v.id;
 
+    const toItem = <T extends { id: string; name: string }>(v: string | T): { id: string; name: string } =>
+      typeof v === 'string' ? { id: v, name: '' } : { id: v.id, name: v.name };
+
     reset({
       name: listing.name,
       shortDescription: listing.shortDescription ?? undefined,
       description: listing.description ?? undefined,
       indoor: listing.indoor ?? false,
       outdoor: listing.outdoor ?? false,
-      eventTypes: listing.eventTypes?.map(id) ?? [],
+      eventTypes: listing.eventTypes?.map(toItem) ?? [],
       images: {
         coverImage: listing.images.coverImage,
         logo: listing.images.logo ?? undefined,
@@ -448,7 +460,7 @@ export default function EditVenueListingForm({
       canBeBookedAsWhole: d.canBeBookedAsWhole ?? false,
       hasAccommodation: d.hasAccommodation ?? false,
       accommodationCapacity: d.accommodationCapacity ?? undefined,
-      activities: d.activities?.map(id) ?? [],
+      activities: d.activities?.map(toItem) ?? [],
       activityAddons:
         d.activityAddons?.map((a) => ({
           activity: id(a.activity),
@@ -456,14 +468,14 @@ export default function EditVenueListingForm({
           space: a.space ? id(a.space as string | { id: string }) : undefined,
           type: a.type,
         })) ?? [],
-      services: d.services?.map(id) ?? [],
-      personnel: d.personnel?.map(id) ?? [],
-      amenities: d.amenities?.map(id) ?? [],
-      technology: d.technology?.map(id) ?? [],
-      placeTypes: d.placeTypes?.map(id) ?? [],
-      foodAndDrinkRules: d.foodAndDrinkRules?.map(id) ?? [],
-      venueRules: d.venueRules?.map(id) ?? [],
-      rules: listing.rules?.map(id) ?? [],
+      services: d.services?.map(toItem) ?? [],
+      personnel: d.personnel?.map(toItem) ?? [],
+      amenities: d.amenities?.map(toItem) ?? [],
+      technology: d.technology?.map(toItem) ?? [],
+      placeTypes: d.placeTypes?.map(toItem) ?? [],
+      foodAndDrinkRules: d.foodAndDrinkRules?.map(toItem) ?? [],
+      venueRules: d.venueRules?.map(toItem) ?? [],
+      rules: listing.rules?.map(toItem) ?? [],
       storage: d.storage?.map((s) => ({ name: s.name, area: s.area })) ?? [],
       access: {
         vehicleTypes: (d.access?.vehicleTypes ?? []) as string[],
@@ -533,9 +545,6 @@ export default function EditVenueListingForm({
   const hasParking = watch("parking.hasParking");
   const breakfastIncluded = watch("breakfast.included");
   const parkingIsIncludedInPrice = watch("parking.parkingIsIncludedInPrice");
-
-  // ── Helpers ──────────────────────────────────────────────────────────────────
-  console.log("form errors", errors);
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="flex gap-6">
@@ -849,7 +858,7 @@ export default function EditVenueListingForm({
             name="activities"
             render={({ field }) => (
               <CheckboxGroup
-                items={MOCK_ACTIVITIES}
+                items={activities?.docs || []}
                 value={field.value ?? []}
                 onChange={field.onChange}
                 checkColor="text-listing"

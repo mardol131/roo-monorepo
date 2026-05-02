@@ -25,13 +25,19 @@ export default function ChatWindow({
   inquiryId: string;
 }) {
   const [messages, setMessages] = useState<Message[]>(
-    initialMessages.map((msg) => ({
-      id: msg.id,
-      inquiryId,
-      senderType: msg.senderType,
-      content: msg.content,
-      sentAt: new Date(msg.sentAt),
-    })),
+    initialMessages
+      .map((msg) => {
+        const block = msg.content?.[0];
+        if (block?.blockType !== "text") return undefined;
+        return {
+          id: msg.id,
+          inquiryId,
+          senderType: msg.senderType,
+          content: block.text ?? "",
+          sentAt: new Date(msg.sentAt),
+        };
+      })
+      .filter((msg) => !!msg),
   );
   const [draft, setDraft] = useState("");
   const [countdown, setCountdown] = useState(10);

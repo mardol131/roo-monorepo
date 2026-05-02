@@ -66,7 +66,11 @@ export default function page() {
   );
   const totalCost = confirmed
     ? confirmed
-        .reduce((sum, i) => sum + (i.agreedPrice || i.quotedPrice || 0), 0)
+        .reduce(
+          (sum, i) =>
+            sum + (i.pricing.agreedPrice || i.pricing.quotedPrice || 0),
+          0,
+        )
         .toLocaleString("cs-CZ")
     : "0";
 
@@ -132,11 +136,9 @@ export default function page() {
         </div>
         {/* Inquiries */}
         <RowContainer
-          icon={
-            <div className="w-8 h-8 rounded-xl bg-inquiry-surface flex items-center justify-center shrink-0">
-              <MessageSquare className="w-4 h-4 text-inquiry" />
-            </div>
-          }
+          iconBgColor="bg-inquiry-surface"
+          iconColor="text-inquiry"
+          icon="MessageSquare"
           label="Poptávky dodavatelů"
           subLabel={`${inquiries?.length || 0} celkem, ${pending?.length || 0} čekají na odpověď`}
           headerRightComponent={
@@ -164,16 +166,16 @@ export default function page() {
                         icon: "Box",
                       },
                       {
-                        content: inquiry.quotedPrice
-                          ? `${inquiry.quotedPrice.toLocaleString("cs-CZ")} Kč`
+                        content: inquiry.pricing.quotedPrice
+                          ? `${inquiry.pricing.quotedPrice.toLocaleString("cs-CZ")} Kč`
                           : "Neoceněno",
                         icon: "Banknote",
                       },
                     ]}
                     rightComponent={
                       <InquiryStatusTag
-                        userStatus={inquiry.userStatus}
-                        companyStatus={inquiry.companyStatus}
+                        userStatus={inquiry.status.user}
+                        companyStatus={inquiry.status.company}
                       />
                     }
                     link={{
@@ -186,8 +188,10 @@ export default function page() {
                   />
                 ))
           }
-          emptyHeading="Zatím žádné poptávky"
-          emptyText="Přejděte do katalogu a oslovte dodavatele pro svou akci."
+          emptyState={{
+            text: "Zatím žádné poptávky",
+            subtext: "Přejděte do katalogu a oslovte dodavatele pro svou akci.",
+          }}
         />
         <EventChecklistSection
           eventId={eventId}

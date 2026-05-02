@@ -1,0 +1,241 @@
+collection;name;slug
+activities;Laser game;laser-game
+activities;Paintball;paintball
+activities;Lukostřelba;lukostrelba
+activities;Lezecká stěna;lezecka-stena
+activities;Horská kola;horska-kola
+activities;Minigolf;minigolf
+activities;Bowling;bowling
+activities;Sauna;sauna
+activities;Bazén;bazen
+activities;Jacuzzi;jacuzzi
+activities;Plážový volejbal;plazovy-volejbal
+activities;Tenis;tenis
+activities;Šipky;sipky
+activities;Kulečník;kulecnik
+activities;Stolní tenis;stolni-tenis
+activities;Karaoke;karaoke
+activities;Escape room;escape-room
+activities;Go-kart;go-kart
+activities;Jízda na koni;jizda-na-koni
+activities;Archery tag;archery-tag
+amenities;WiFi;wifi
+amenities;Projektor;projektor
+amenities;Plátno;platno
+amenities;Klimatizace;klimatizace
+amenities;Bar;bar
+amenities;Kuchyňka;kuchynka
+amenities;Šatna;satna
+amenities;Bezbariérový přístup;bezbarierovy-pristup
+amenities;Parkoviště;parkoviste
+amenities;Nabíjecí stanice;nabijeci-stanice
+amenities;Taneční parket;tanecni-parket
+amenities;Pódium;podium
+amenities;Zvuková technika;zvukova-technika
+amenities;Světelná technika;svetelna-technika
+amenities;Venkovní terasa;venkovni-terasa
+amenities;Zahrada;zahrada
+amenities;Fotobúdka;fotobudka
+amenities;Zrcadlový sál;zrcadlovy-sal
+amenities;Toalety pro invalidy;toalety-pro-invalidy
+amenities;Videoprojektor 4K;videoprojektor-4k
+cuisines;Česká;ceska
+cuisines;Italská;italska
+cuisines;Asijská;asijska
+cuisines;Japonská;japonska
+cuisines;Mexická;mexicka
+cuisines;Indická;indicka
+cuisines;Francouzská;francouzska
+cuisines;Středomořská;stredomorska
+cuisines;Americká;americka
+cuisines;Řecká;recka
+cuisines;Thajská;thajska
+cuisines;Vietnamská;vietnamska
+cuisines;Španělská;spanelska
+cuisines;Turecká;turecka
+cuisines;Čínská;cinska
+cuisines;Korejská;korejska
+cuisines;Peruánská;peruanska
+cuisines;Brazilská;brazilska
+cuisines;Libanonská;libanonska
+cuisines;Fúzní kuchyně;fuzni-kuchyne
+dietary-options;Vegetariánské;vegetarianske
+dietary-options;Veganské;veganske
+dietary-options;Bezlepkové;bezlepkove
+dietary-options;Bezlaktózové;bezlaktozove
+dietary-options;Halal;halal
+dietary-options;Kosher;kosher
+dietary-options;Paleo;paleo
+dietary-options;Keto;keto
+dietary-options;Bez vajec;bez-vajec
+dietary-options;Bez ořechů;bez-orechu
+dietary-options;Bez mořských plodů;bez-morskych-plodu
+dietary-options;Nízkokalorické;nizkokalorické
+dietary-options;Diabetická dieta;diabeticka-dieta
+dietary-options;Raw strava;raw-strava
+dietary-options;Makrobiotické;makrobioticke
+dietary-options;Bez sóji;bez-soji
+dietary-options;Dětské menu;detske-menu
+dietary-options;Seniorské menu;seniorske-menu
+dietary-options;Bez vajec a bez ořechů;bez-vajec-bez-orechu
+dietary-options;Fruktariánské;fruktarianske
+dish-types;Předkrm;predkrm
+dish-types;Polévka;polevka
+dish-types;Hlavní chod;hlavni-chod
+dish-types;Dezert;dezert
+dish-types;Salát;salat
+dish-types;Příloha;priloha
+dish-types;Grilované maso;grilovane-maso
+dish-types;Ryby a mořské plody;ryby-morske-plody
+dish-types;Vegetariánský pokrm;vegetarianski-pokrm
+dish-types;Veganský pokrm;vegansky-pokrm
+dish-types;Sushi;sushi
+dish-types;Pizza;pizza
+dish-types;Pasta;pasta
+dish-types;Burger;burger
+dish-types;Steak;steak
+dish-types;Tapas;tapas
+dish-types;Canapé;canape
+dish-types;Cheese board;cheese-board
+dish-types;Degustační menu;degustacni-menu
+dish-types;Brunch;brunch
+entertainment-types;Živá hudba;ziva-hudba
+entertainment-types;DJ;dj
+entertainment-types;Kouzelník;kouzelnik
+entertainment-types;Akrobat;akrobat
+entertainment-types;Komik;komik
+entertainment-types;Tanečník;tanecnik
+entertainment-types;Moderátor;moderator
+entertainment-types;Jazzová kapela;jazzova-kapela
+entertainment-types;Rocková kapela;rockova-kapela
+entertainment-types;Swing kapela;swing-kapela
+entertainment-types;Smyčcový kvartet;smyccovy-kvartet
+entertainment-types;Zpěvák;zpevak
+entertainment-types;Ohňová show;ohnova-show
+entertainment-types;Bublinová show;bublinova-show
+entertainment-types;Dětský animátor;detsky-animator
+entertainment-types;Bubeník;kubenik
+entertainment-types;Bavič;bavic
+entertainment-types;Fotoshow;fotoshow
+entertainment-types;360° kameraman;kameraman-360
+entertainment-types;Laserová show;laserova-show
+event-types;Firemní večírek;firemni-vecirek
+event-types;Svatba;svatba
+event-types;Narozeninová oslava;narozeninova-oslava
+event-types;Teambuilding;teambuilding
+event-types;Konference;konference
+event-types;Workshop;workshop
+event-types;Školení;skoleni
+event-types;Výstava;vystava
+event-types;Koktejlový večírek;koktejlovy-vecirek
+event-types;Vánoční večírek;vanocni-vecirek
+event-types;Letní party;letni-party
+event-types;Slavnostní raut;slavnostni-raut
+event-types;Produktový launch;produktovy-launch
+event-types;Módní přehlídka;modni-prehlidka
+event-types;Sportovní event;sportovni-event
+event-types;Charitativní akce;charitativni-akce
+event-types;Absolventský večírek;absolventsky-vecirek
+event-types;Rozlučka se svobodou;rozlucka-se-svobodou
+event-types;Dětská oslava;detska-oslava
+event-types;Tiskový brífinkg;tiskovy-brifink
+food-service-styles;Bufet;bufet
+food-service-styles;À la carte;a-la-carte
+food-service-styles;Raut;raut
+food-service-styles;Catering;catering
+food-service-styles;Degustační menu;degustacni-menu-servis
+food-service-styles;Švédský stůl;svedsky-stul
+food-service-styles;Box lunch;box-lunch
+food-service-styles;Food stations;food-stations
+food-service-styles;Finger food;finger-food
+food-service-styles;Rodinný styl;rodinny-styl
+food-service-styles;Koktejlový raut;koktejlovy-raut
+food-service-styles;Roznáška číšníky;roznaska-cisniky
+food-service-styles;Samoobslužný bar;samoobsluzny-bar
+food-service-styles;Grill station;grill-station
+food-service-styles;Carvery;carvery
+food-service-styles;Tasting menu;tasting-menu
+food-service-styles;Plated dinner;plated-dinner
+food-service-styles;Vysoký raut;vysoky-raut
+food-service-styles;Piknik;piknik
+food-service-styles;BBQ;bbq
+personnel;Číšník;cisnik
+personnel;Barmanka;barmanka
+personnel;Kuchař;kuchar
+personnel;Šéfkuchař;sefkuchar
+personnel;Sommeliér;sommelier
+personnel;Moderátor;moderator-personel
+personnel;Hosteska;hosteska
+personnel;Recepční;recepcni
+personnel;Bezpečnostní pracovník;bezpecnostni-pracovnik
+personnel;Zvukový technik;zvukovy-technik
+personnel;Osvětlovač;osvetlovac
+personnel;Fotografka;fotografka
+personnel;Videograf;videograf
+personnel;Dekoratér;dekorater
+personnel;Floristka;floristka
+personnel;Asistent eventu;asistent-eventu
+personnel;Koordinátor;koordinator
+personnel;Animátor;animator-personel
+personnel;Cateringový manažer;cateringovy-manazer
+personnel;Správce objektu;spravce-objektu
+place-types;Hotel;hotel
+place-types;Restaurace;restaurace
+place-types;Vinárna;vinarna
+place-types;Pivovar;pivovar
+place-types;Rooftop bar;rooftop-bar
+place-types;Historický palác;historicky-palac
+place-types;Zámek;zamek
+place-types;Vila;vila
+place-types;Penzion;penzion
+place-types;Kongresové centrum;kongresove-centrum
+place-types;Kulturní dům;kulturni-dum
+place-types;Galerie;galerie
+place-types;Muzeum;muzeum
+place-types;Divadlo;divadlo
+place-types;Sportovní hala;sportovni-hala
+place-types;Country club;country-club
+place-types;Farma;farma
+place-types;Industriální prostor;industrialni-prostor
+place-types;Loď;lod
+place-types;Zahradní restaurace;zahradni-restaurace
+services;Catering;catering-service
+services;Dekorace;dekorace
+services;Floristics;floristics
+services;Fotografie;fotografie
+services;Video;video
+services;Zvuková technika;zvukova-technika-service
+services;Světelná technika;svetelna-technika-service
+services;Moderování;moderovani
+services;Tlumočení;tlumoceni
+services;Security;security
+services;Valet parking;valet-parking
+services;Shuttle bus;shuttle-bus
+services;Ubytování;ubytovani
+services;Pronájem stolů;pronajem-stolu
+services;Pronájem židlí;pronajem-zidli
+services;Projekce;projekce
+services;Livestream;livestream
+services;Pohostinství;pohostinstvi
+services;Čistící služba;cisticí-sluzba
+services;Koordinace eventu;koordinace-eventu
+technologies;Projektor Full HD;projektor-full-hd
+technologies;LED stěna;led-stena
+technologies;Interaktivní tabule;interaktivni-tabule
+technologies;Profesionální ozvučení;profesionalni-ozvuceni
+technologies;Bezdrátové mikrofony;bezdratove-mikrofony
+technologies;Livestream;livestream-tech
+technologies;360° kamera;kamera-360
+technologies;Fotobúdka;fotobudka-tech
+technologies;Virtuální realita;virtualni-realita
+technologies;Simultánní tlumočení;simultanni-tlumoceni
+technologies;Videokonference;videokonference
+technologies;HDMI splitter;hdmi-splitter
+technologies;Hologram;hologram
+technologies;LED osvětlení;led-osvetleni
+technologies;Pohyblivá světla;pohybliva-svetla
+technologies;CO2 efekty;co2-efekty
+technologies;Dýmový stroj;dymovy-stroj
+technologies;Laserová show technika;laserova-show-technika
+technologies;Zvuková závora;zvukova-zavora
+technologies;4K displej;4k-displej

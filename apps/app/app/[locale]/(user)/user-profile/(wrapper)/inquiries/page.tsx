@@ -11,10 +11,10 @@ export default function page() {
 
   const total = inquiries?.length;
   const pending = inquiries?.filter(
-    (i) => aggregateInquiryStatus({ ...i }) === "pending",
+    (i) => aggregateInquiryStatus(i.status) === "pending",
   ).length;
   const confirmed = inquiries?.filter(
-    (i) => aggregateInquiryStatus({ ...i }) === "confirmed",
+    (i) => aggregateInquiryStatus(i.status) === "confirmed",
   ).length;
 
   return (

@@ -2,35 +2,34 @@
 
 import { FormSection } from "@/app/[locale]/(user)/components/form-section";
 import FormToc, { TocGroup } from "@/app/[locale]/(user)/components/form-toc";
-import { MOCK_ENTERTAINMENT_TYPES, MOCK_NECESSITIES } from "@/app/_mock/mock";
 import Button, { ButtonProps } from "@/app/components/ui/atoms/button";
 import InputLabel from "@/app/components/ui/atoms/input-label";
-import Checkbox from "@/app/components/ui/atoms/inputs/checkbox";
-import CheckboxGroup from "@/app/components/ui/atoms/inputs/checkbox-group";
+import ErrorText from "@/app/components/ui/atoms/inputs/error-text";
 import GalleryInput from "@/app/components/ui/atoms/inputs/images/gallery-input";
 import ImageInput from "@/app/components/ui/atoms/inputs/images/image-input";
 import Input from "@/app/components/ui/atoms/inputs/input";
-import { useCities } from "@/app/react-query/cities/hooks";
-import { useDistricts } from "@/app/react-query/districts/hooks";
-import { useRegions } from "@/app/react-query/regions/hooks";
+import SearchInput from "@/app/components/ui/atoms/inputs/search-input";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useCities } from "@/app/react-query/cities/hooks";
 import { CreateListingPayload } from "@/app/react-query/listings/fetch";
 import { useCreateListing } from "@/app/react-query/listings/hooks";
 import { uploadFileToCloud } from "@roo/common";
-import { useParams } from "next/navigation";
 import {
   Banknote,
   Building2,
-  ClipboardList,
-  Clock,
+  DoorOpen,
   Image,
   MapPin,
-  Music,
   Users,
 } from "lucide-react";
 import { useState } from "react";
-import { Controller, Resolver, useForm } from "react-hook-form";
+import { Control, Controller, Resolver, useForm } from "react-hook-form";
+import { useParams } from "next/navigation";
 import { z } from "zod";
+import AreaSpacesFields from "../components/area-spaces-fields";
+import BuildingSpacesFields from "../components/building-spaces-fields";
+import IconCard from "../components/icon-card";
+import RoomSpacesFields from "../components/room-spaces-fields";
 import { useRouter } from "@/app/i18n/navigation";
 
 // ── Schema ─────────────────────────────────────────────────────────────────────
@@ -40,37 +39,91 @@ const optionalPositiveNumber = z.preprocess(
   z.coerce.number().positive("Musí být kladné číslo").optional(),
 );
 
-const schema = z.object({
-  name: z.string().min(1, "Název je povinný"),
-  images: z.object({
-    coverImage: z.string().min(1, "Titulní obrázek je povinný"),
-    logo: z.string().optional(),
-    gallery: z.array(z.string()).min(4, "Přidejte alespoň čtyři obrázky"),
-  }),
-  price: z.object({
-    startsAt: z.coerce
-      .number({ message: "Zadejte číslo" })
-      .positive("Cena musí být kladná"),
-  }),
-  location: z.object({
-    regions: z.array(z.string()).min(1, "Vyberte alespoň jeden kraj"),
-    districts: z.array(z.string()).default([]),
-    cities: z.array(z.string()).default([]),
-    address: z.string().optional(),
-  }),
-  capacity: z.coerce
-    .number({ message: "Zadejte číslo" })
-    .positive("Kapacita musí být kladná")
-    .int("Zadejte celé číslo"),
-  minimumCapacity: optionalPositiveNumber,
-  entertainmentTypes: z.array(z.string()).default([]),
-  audience: z.array(z.enum(["adults", "kids", "seniors"])).default([]),
-  setupTime: optionalPositiveNumber,
-  tearDownTime: optionalPositiveNumber,
-  necessities: z.array(z.string()).default([]),
+const roomSchema = z.object({
+  name: z.string().min(1, "Název místnosti je povinný"),
+  description: z.string().optional(),
+  capacity: optionalPositiveNumber,
+  area: optionalPositiveNumber,
 });
 
-type Inputs = z.infer<typeof schema>;
+const buildingSchema = z.object({
+  name: z.string().optional(),
+  description: z.string().optional(),
+  capacity: optionalPositiveNumber,
+  area: optionalPositiveNumber,
+  hasRooms: z.boolean().default(false),
+  rooms: z.array(roomSchema).default([]),
+});
+
+const schema = z
+  .object({
+    name: z.string().min(1, "Název je povinný"),
+    images: z.object({
+      coverImage: z.string().min(1, "Titulní obrázek je povinný"),
+      logo: z.string().optional(),
+      gallery: z.array(z.string()).min(4, "Přidejte alespoň čtyři obrázky"),
+    }),
+    price: z.object({
+      startsAt: z.coerce
+        .number({ message: "Zadejte číslo" })
+        .positive("Cena musí být kladná"),
+    }),
+    location: z.object({
+      address: z.string().min(1, "Adresa je povinná"),
+      city: z.string().min(1, "Město je povinné"),
+    }),
+    capacity: z.coerce
+      .number({ message: "Zadejte číslo" })
+      .positive("Kapacita musí být kladná")
+      .int("Zadejte celé číslo"),
+    area: optionalPositiveNumber,
+    spaceType: z.enum(["area", "building", "room"] as const, {
+      message: "Vyberte typ prostoru",
+    }),
+    areaName: z.string().optional(),
+    areaDescription: z.string().optional(),
+    areaCapacity: optionalPositiveNumber,
+    areaArea: optionalPositiveNumber,
+    hasBuildings: z.boolean().default(false),
+    buildings: z.array(buildingSchema).default([]),
+    buildingName: z.string().optional(),
+    buildingDescription: z.string().optional(),
+    buildingCapacity: optionalPositiveNumber,
+    buildingArea: optionalPositiveNumber,
+    buildingHasRooms: z.boolean().default(false),
+    buildingRooms: z.array(roomSchema).default([]),
+    rooms: z.array(roomSchema).default([]),
+  })
+  .superRefine((data, ctx) => {
+    if (data.spaceType === "area" && !data.areaName?.trim()) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Název areálu je povinný",
+        path: ["areaName"],
+      });
+    }
+    if (data.spaceType === "area" && data.hasBuildings) {
+      data.buildings?.forEach((b, bi) => {
+        if (!b.name?.trim()) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: "Název budovy je povinný",
+            path: ["buildings", bi, "name"],
+          });
+        }
+      });
+    }
+    if (data.spaceType === "building" && !data.buildingName?.trim()) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Název budovy je povinný",
+        path: ["buildingName"],
+      });
+    }
+  });
+
+export type VenueFormInputs = z.infer<typeof schema>;
+type Inputs = VenueFormInputs;
 
 // ── TOC ────────────────────────────────────────────────────────────────────────
 
@@ -83,7 +136,7 @@ const SECTION_PRICE = { id: "section-price", title: "Cena", icon: Banknote };
 const SECTION_IMAGES = { id: "section-images", title: "Obrázky", icon: Image };
 const SECTION_LOCATION = {
   id: "section-location",
-  title: "Místo působení",
+  title: "Lokalita",
   icon: MapPin,
 };
 const SECTION_CAPACITY = {
@@ -91,20 +144,10 @@ const SECTION_CAPACITY = {
   title: "Kapacita",
   icon: Users,
 };
-const SECTION_ENT_TYPES = {
-  id: "section-ent-types",
-  title: "Typ programu",
-  icon: Music,
-};
-const SECTION_REQUIREMENTS = {
-  id: "section-requirements",
-  title: "Provozní požadavky",
-  icon: ClipboardList,
-};
-const SECTION_LOGISTICS = {
-  id: "section-logistics",
-  title: "Logistika",
-  icon: Clock,
+const SECTION_SPACES = {
+  id: "section-spaces",
+  title: "Prostory",
+  icon: DoorOpen,
 };
 
 const FORM_GROUPS: readonly TocGroup[] = [
@@ -112,15 +155,9 @@ const FORM_GROUPS: readonly TocGroup[] = [
     label: "Základní",
     sections: [SECTION_BASIC, SECTION_PRICE, SECTION_IMAGES],
   },
-  { label: "Místo působení", sections: [SECTION_LOCATION] },
   {
-    label: "Program",
-    sections: [
-      SECTION_CAPACITY,
-      SECTION_ENT_TYPES,
-      SECTION_REQUIREMENTS,
-      SECTION_LOGISTICS,
-    ],
+    label: "Místo a prostor",
+    sections: [SECTION_LOCATION, SECTION_CAPACITY, SECTION_SPACES],
   },
 ];
 
@@ -135,7 +172,7 @@ type Props = {
 
 // ── Component ──────────────────────────────────────────────────────────────────
 
-export default function EntertainmentListingForm({ onCancel }: Props) {
+export default function VenueListingForm({ onCancel }: Props) {
   const { companyId } = useParams<{ companyId: string }>();
   const { mutate } = useCreateListing();
   const router = useRouter();
@@ -149,11 +186,12 @@ export default function EntertainmentListingForm({ onCancel }: Props) {
   } = useForm<Inputs>({
     resolver: zodResolver(schema) as Resolver<Inputs>,
     defaultValues: {
-      location: { regions: [], districts: [], cities: [] },
       images: { gallery: [] },
-      entertainmentTypes: [],
-      audience: [],
-      necessities: [],
+      rooms: [],
+      buildings: [],
+      buildingRooms: [],
+      hasBuildings: false,
+      buildingHasRooms: false,
     },
   });
 
@@ -171,20 +209,12 @@ export default function EntertainmentListingForm({ onCancel }: Props) {
         {
           location: {
             address: data.location.address,
-            region: data.location.regions,
-            district: data.location.districts,
-            city: data.location.cities,
+            city: data.location.city,
           },
+          spacesType: data.spaceType,
           capacity: data.capacity,
-          minimumCapacity: data.minimumCapacity,
-          entertainmentTypes: data.entertainmentTypes,
-          audience: data.audience,
-          setupAndTearDownRules: {
-            setupTime: data.setupTime,
-            tearDownTime: data.tearDownTime,
-          },
-          necessities: data.necessities,
-          blockType: "entertainment",
+          area: data.area ?? 0,
+          blockType: "venue",
         },
       ],
     };
@@ -198,34 +228,13 @@ export default function EntertainmentListingForm({ onCancel }: Props) {
     });
   }
 
-  const regionsValue = watch("location.regions");
-  const districtsValue = watch("location.districts");
-  const citiesValue = watch("location.cities");
+  const spaceTypeValue = watch("spaceType");
 
-  const [districtSearch, setDistrictSearch] = useState("");
-  const [citySearch, setCitySearch] = useState("");
-
-  const { data: regionsData } = useRegions(undefined, 20);
-
-  const { data: districtsData } = useDistricts(
-    regionsValue?.length || districtSearch
-      ? {
-          ...(regionsValue?.length ? { region: { in: regionsValue } } : {}),
-          ...(districtSearch ? { name: { contains: districtSearch } } : {}),
-        }
+  const [venueCitySearch, setVenueCitySearch] = useState("");
+  const { data: venueCitiesData } = useCities({
+    query: venueCitySearch
+      ? { name: { contains: venueCitySearch } }
       : undefined,
-  );
-
-  const { data: citiesData } = useCities({
-    query:
-      districtsValue?.length || citySearch
-        ? {
-            ...(districtsValue?.length
-              ? { district: { in: districtsValue } }
-              : {}),
-            ...(citySearch ? { name: { contains: citySearch } } : {}),
-          }
-        : undefined,
   });
 
   return (
@@ -244,7 +253,7 @@ export default function EntertainmentListingForm({ onCancel }: Props) {
             label="Název"
             inputProps={{
               ...register("name"),
-              placeholder: "Živá kapela Groove",
+              placeholder: "Kongresové centrum Praha",
             }}
             error={errors.name?.message}
           />
@@ -329,76 +338,49 @@ export default function EntertainmentListingForm({ onCancel }: Props) {
           />
         </FormSection>
 
-        {/* ── Místo působení ──────────────────────────────────────────────────── */}
+        {/* ── Lokalita ────────────────────────────────────────────────────────── */}
         <FormSection
           id={SECTION_LOCATION.id}
           icon={SECTION_LOCATION.icon}
           title={SECTION_LOCATION.title}
           surfaceColor={COLOR_SCHEME.surface}
           color={COLOR_SCHEME.text}
-          error={!!errors.location?.regions}
+          error={!!(errors.location?.address || errors.location?.city)}
         >
-          <Controller
-            control={control}
-            name="location.regions"
-            render={({ field }) => (
-              <CheckboxGroup
-                label="Kraj"
-                items={regionsData?.docs ?? []}
-                value={field.value}
-                onChange={field.onChange}
-                checkColor={COLOR_SCHEME.text}
-                searchable
-              />
-            )}
-          />
-          <Controller
-            control={control}
-            name="location.districts"
-            render={({ field }) => (
-              <CheckboxGroup
-                label="Okres"
-                items={districtsData?.docs ?? []}
-                value={field.value}
-                onChange={field.onChange}
-                checkColor={COLOR_SCHEME.text}
-                searchable
-                onSearchChange={setDistrictSearch}
-                closed={!regionsValue?.length}
-                closedMessage="Nejprve vyplňte předchozí pole"
-              />
-            )}
-          />
-          <Controller
-            control={control}
-            name="location.cities"
-            render={({ field }) => (
-              <CheckboxGroup
-                label="Město"
-                items={citiesData?.docs ?? []}
-                value={field.value}
-                onChange={field.onChange}
-                checkColor={COLOR_SCHEME.text}
-                searchable
-                onSearchChange={setCitySearch}
-                closed={!districtsValue?.length}
-                closedMessage="Nejprve vyplňte předchozí pole"
-              />
-            )}
-          />
           <Input
-            label="Adresa"
-            subLabel={
-              !citiesValue?.length
-                ? "Nejprve vyplňte předchozí pole"
-                : undefined
-            }
+            label="Adresa *"
             inputProps={{
               ...register("location.address"),
               placeholder: "Václavské náměstí 1",
             }}
-            disabled={!citiesValue?.length}
             error={errors.location?.address?.message}
+          />
+          <Controller
+            control={control}
+            name="location.city"
+            render={({ field }) => (
+              <SearchInput
+                label="Město *"
+                placeholder="Vyberte město..."
+                onSearchQueryChange={setVenueCitySearch}
+                options={venueCitiesData?.docs ?? []}
+                type="dropdown"
+                value={
+                  field.value
+                    ? {
+                        id: field.value,
+                        name:
+                          venueCitiesData?.docs.find(
+                            (c) => c.id === field.value,
+                          )?.name ?? "",
+                      }
+                    : undefined
+                }
+                onSelect={(o) => field.onChange(o.id)}
+                onClear={() => field.onChange("")}
+                error={errors.location?.city?.message}
+              />
+            )}
           />
         </FormSection>
 
@@ -413,137 +395,114 @@ export default function EntertainmentListingForm({ onCancel }: Props) {
         >
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Input
-              label="Maximální počet diváků"
+              label="Kapacita (osob)"
               inputProps={{
                 ...register("capacity"),
                 type: "number",
                 min: 1,
-                placeholder: "500",
+                placeholder: "300",
               }}
               error={errors.capacity?.message}
             />
             <Input
-              label="Minimální počet diváků"
+              label="Plocha (m²)"
               inputProps={{
-                ...register("minimumCapacity"),
+                ...register("area"),
                 type: "number",
                 min: 1,
-                placeholder: "20",
+                placeholder: "800",
               }}
-              error={errors.minimumCapacity?.message}
+              error={errors.area?.message}
             />
           </div>
         </FormSection>
 
-        {/* ── Typ programu ────────────────────────────────────────────────────── */}
+        {/* ── Prostory ────────────────────────────────────────────────────────── */}
         <FormSection
-          id={SECTION_ENT_TYPES.id}
-          icon={SECTION_ENT_TYPES.icon}
-          title={SECTION_ENT_TYPES.title}
+          id={SECTION_SPACES.id}
+          icon={SECTION_SPACES.icon}
+          title={SECTION_SPACES.title}
           surfaceColor={COLOR_SCHEME.surface}
           color={COLOR_SCHEME.text}
+          error={
+            !!(
+              errors.spaceType ||
+              errors.areaName ||
+              errors.buildings ||
+              errors.buildingName ||
+              errors.rooms?.[0]?.name
+            )
+          }
         >
           <Controller
             control={control}
-            name="entertainmentTypes"
+            name="spaceType"
             render={({ field }) => (
-              <CheckboxGroup
-                label="Co nabízíte?"
-                items={MOCK_ENTERTAINMENT_TYPES}
-                value={field.value}
-                onChange={field.onChange}
-                checkColor={COLOR_SCHEME.text}
-              />
-            )}
-          />
-          <div className="flex flex-col gap-2">
-            <InputLabel label="Cílové publikum" />
-            <div className="grid grid-cols-3 gap-2">
-              {(
-                [
-                  { value: "adults", label: "Dospělí" },
-                  { value: "kids", label: "Děti" },
-                  { value: "seniors", label: "Senioři" },
-                ] as const
-              ).map(({ value, label }) => (
-                <Controller
-                  key={value}
-                  control={control}
-                  name="audience"
-                  render={({ field }) => (
-                    <Checkbox
-                      checked={field.value.includes(value)}
-                      onChange={(checked) =>
-                        field.onChange(
-                          checked
-                            ? [...field.value, value]
-                            : field.value.filter((v) => v !== value),
-                        )
-                      }
-                      label={label}
-                      checkColor={COLOR_SCHEME.text}
+              <div className="flex flex-col gap-2">
+                <InputLabel label="Co nabízíte?" />
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  {(
+                    [
+                      {
+                        value: "area",
+                        label: "Areál",
+                        description:
+                          "Nabízíme celý areál s více budovami a prostory",
+                        icon: "TreePine",
+                      },
+                      {
+                        value: "building",
+                        label: "Budova",
+                        description: "Nabízíme budovu s více místnostmi",
+                        icon: "Landmark",
+                      },
+                      {
+                        value: "room",
+                        label: "Místnosti",
+                        description: "Nabízíme jednotlivé místnosti",
+                        icon: "DoorOpen",
+                      },
+                    ] as const
+                  ).map((option) => (
+                    <IconCard
+                      key={option.value}
+                      label={option.label}
+                      description={option.description}
+                      icon={option.icon}
+                      selected={field.value === option.value}
+                      onClick={() => field.onChange(option.value)}
                     />
-                  )}
-                />
-              ))}
-            </div>
-          </div>
-        </FormSection>
-
-        {/* ── Provozní požadavky ──────────────────────────────────────────────── */}
-        <FormSection
-          id={SECTION_REQUIREMENTS.id}
-          icon={SECTION_REQUIREMENTS.icon}
-          title={SECTION_REQUIREMENTS.title}
-          surfaceColor={COLOR_SCHEME.surface}
-          color={COLOR_SCHEME.text}
-        >
-          <Controller
-            control={control}
-            name="necessities"
-            render={({ field }) => (
-              <CheckboxGroup
-                label="Provozní požadavky"
-                items={MOCK_NECESSITIES}
-                searchable
-                value={field.value}
-                onChange={field.onChange}
-                checkColor={COLOR_SCHEME.text}
-              />
+                  ))}
+                </div>
+                {errors.spaceType?.message && (
+                  <ErrorText error={errors.spaceType.message} />
+                )}
+              </div>
             )}
           />
-        </FormSection>
-
-        {/* ── Logistika ───────────────────────────────────────────────────────── */}
-        <FormSection
-          id={SECTION_LOGISTICS.id}
-          icon={SECTION_LOGISTICS.icon}
-          title={SECTION_LOGISTICS.title}
-          surfaceColor={COLOR_SCHEME.surface}
-          color={COLOR_SCHEME.text}
-        >
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <Input
-              label="Čas přípravy (minuty)"
-              inputProps={{
-                ...register("setupTime"),
-                type: "number",
-                min: 0,
-                placeholder: "60",
-              }}
-              error={errors.setupTime?.message}
+          {spaceTypeValue === "area" && (
+            <AreaSpacesFields
+              control={control as Control<VenueFormInputs>}
+              register={register}
+              errors={errors}
+              watch={watch}
             />
-            <Input
-              label="Čas úklidu (minuty)"
-              inputProps={{
-                ...register("tearDownTime"),
-                type: "number",
-                min: 0,
-                placeholder: "30",
-              }}
-              error={errors.tearDownTime?.message}
+          )}
+          {spaceTypeValue === "building" && (
+            <BuildingSpacesFields
+              control={control as Control<VenueFormInputs>}
+              register={register}
+              errors={errors}
+              watch={watch}
             />
-          </div>
+          )}
+          {spaceTypeValue === "room" && (
+            <RoomSpacesFields
+              control={control as Control<VenueFormInputs>}
+              register={register}
+              errors={errors}
+            />
+          )}
         </FormSection>
 
         {/* ── Submit ──────────────────────────────────────────────────────────── */}

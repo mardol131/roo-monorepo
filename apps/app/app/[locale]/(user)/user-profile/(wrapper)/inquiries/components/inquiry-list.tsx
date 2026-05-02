@@ -19,7 +19,7 @@ import { EmptyState } from "@/app/[locale]/(user)/components/empty-state";
 
 // ── Config ─────────────────────────────────────────────────────────────────────
 
-const TABS: { label: string; value: Inquiry["userStatus"] | "all" }[] = [
+const TABS: { label: string; value: Inquiry["status"]["user"] | "all" }[] = [
   { label: "Všechny", value: "all" },
   { label: "Čekající", value: "pending" },
   { label: "Potvrzené", value: "confirmed" },
@@ -52,14 +52,14 @@ function groupByEvent(
 // ── Component ──────────────────────────────────────────────────────────────────
 
 export default function InquiryList({ inquiries }: { inquiries: Inquiry[] }) {
-  const [activeTab, setActiveTab] = useState<Inquiry["userStatus"] | "all">(
+  const [activeTab, setActiveTab] = useState<Inquiry["status"]["user"] | "all">(
     "all",
   );
 
   const filtered =
     activeTab === "all"
       ? inquiries
-      : inquiries.filter((i) => aggregateInquiryStatus(i) === activeTab);
+      : inquiries.filter((i) => aggregateInquiryStatus(i.status) === activeTab);
 
   const grouped = groupByEvent(filtered);
 
@@ -85,11 +85,9 @@ export default function InquiryList({ inquiries }: { inquiries: Inquiry[] }) {
             return (
               <RowContainer
                 key={getIdFromRelationshipField(event)}
-                icon={
-                  <div className="w-8 h-8 rounded-xl bg-inquiry-surface flex items-center justify-center shrink-0">
-                    <MessageSquare className="w-4 h-4 text-inquiry" />
-                  </div>
-                }
+                icon="MessageSquare"
+                iconBgColor="bg-inquiry-surface"
+                iconColor="text-inquiry"
                 label={event.name}
                 subLabel={formatInquiryCountLabel(group.length)}
                 rowComponents={group
@@ -113,7 +111,7 @@ export default function InquiryList({ inquiries }: { inquiries: Inquiry[] }) {
                         {
                           icon: "Clock",
                           content: format(
-                            new Date(inquiry.sentAt),
+                            new Date(inquiry.activity.sentAt),
                             "d. M. yyyy",
                           ),
                         },
@@ -123,13 +121,13 @@ export default function InquiryList({ inquiries }: { inquiries: Inquiry[] }) {
                             pending: "Čeká na odpověď",
                             confirmed: "Potvrzeno",
                             cancelled: "Zrušeno",
-                          }[inquiry.userStatus],
+                          }[inquiry.status.user],
                         },
-                        ...(inquiry.quotedPrice
+                        ...(inquiry.pricing.quotedPrice
                           ? [
                               {
                                 icon: "Wallet" as const,
-                                content: `${inquiry.quotedPrice.toLocaleString("cs-CZ")} Kč`,
+                                content: `${inquiry.pricing.quotedPrice.toLocaleString("cs-CZ")} Kč`,
                               },
                             ]
                           : []),
@@ -142,10 +140,7 @@ export default function InquiryList({ inquiries }: { inquiries: Inquiry[] }) {
                         },
                       }}
                       rightComponent={
-                        <InquiryStatusTag
-                          userStatus={inquiry.userStatus}
-                          companyStatus={inquiry.companyStatus}
-                        />
+                        <InquiryStatusTag status={inquiry.status} />
                       }
                     />
                   ))}
@@ -160,6 +155,11 @@ export default function InquiryList({ inquiries }: { inquiries: Inquiry[] }) {
                     Detail události →
                   </Link>
                 }
+                emptyState={{
+                  text: "Zatím nemáte žádnou aktivní poptávku",
+                  subtext:
+                    "Pro přidání poptávky jděte do katalogu, vyberte některého z dodavatelů a objednejte jeho služby.",
+                }}
               />
             );
           })}

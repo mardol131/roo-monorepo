@@ -6,10 +6,10 @@ import { Listing, LucideIcons } from "@roo/common";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import IconCard from "./components/icon-card";
-import NewListingForm, { ListingType } from "./components/new-listing-form";
+import NewListingForm from "./forms/new-listing-form";
 
 const LISTING_TYPES: {
-  type: ListingType;
+  type: Listing["details"][0]["blockType"];
   label: string;
   description: string;
   icon: LucideIcons;
@@ -36,7 +36,9 @@ const LISTING_TYPES: {
 
 export default function NewListingPage() {
   const router = useRouter();
-  const [selectedType, setSelectedType] = useState<ListingType | null>(null);
+  const [selectedType, setSelectedType] = useState<
+    Listing["details"][0]["blockType"] | null
+  >(null);
 
   if (!selectedType) {
     return (

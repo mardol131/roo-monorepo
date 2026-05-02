@@ -47,9 +47,10 @@ export default function UserProfilePage() {
               ? inquiries
                   .filter(
                     (inq) =>
-                      !!inq.lastCompanyMessageSentAt &&
-                      (!inq.lastUserSeenAt ||
-                        inq.lastCompanyMessageSentAt > inq.lastUserSeenAt),
+                      !!inq.activity.lastCompanyMessageSentAt &&
+                      (!inq.activity.lastUserSeenAt ||
+                        inq.activity.lastCompanyMessageSentAt >
+                          inq.activity.lastUserSeenAt),
                   )
                   .length.toString()
               : ""
@@ -147,7 +148,7 @@ export default function UserProfilePage() {
                       {
                         icon: "Clock",
                         content: format(
-                          new Date(inquiry.sentAt),
+                          new Date(inquiry.activity.sentAt),
                           "d. M. yyyy",
                           { locale: cs },
                         ),
@@ -158,13 +159,13 @@ export default function UserProfilePage() {
                           pending: "Čeká na odpověď",
                           confirmed: "Potvrzeno",
                           cancelled: "Zrušeno",
-                        }[inquiry.userStatus],
+                        }[inquiry.status.user],
                       },
-                      ...(inquiry.quotedPrice
+                      ...(inquiry.pricing.quotedPrice
                         ? [
                             {
                               icon: "Wallet" as const,
-                              content: `${inquiry.quotedPrice.toLocaleString("cs-CZ")} Kč`,
+                              content: `${inquiry.pricing.quotedPrice.toLocaleString("cs-CZ")} Kč`,
                             },
                           ]
                         : []),
@@ -178,8 +179,8 @@ export default function UserProfilePage() {
                     }}
                     rightComponent={
                       <InquiryStatusTag
-                        userStatus={inquiry.userStatus}
-                        companyStatus={inquiry.companyStatus}
+                        userStatus={inquiry.status.user}
+                        companyStatus={inquiry.status.company}
                       />
                     }
                   />

@@ -2,18 +2,54 @@
 
 import PageHeading from "@/app/[locale]/(user)/components/page-heading";
 import Button from "@/app/components/ui/atoms/button";
-import NewVariantForm from "./components/new-variant-form";
-import { useParams } from "next/navigation";
+import { useListing } from "@/app/react-query/listings/hooks";
+import { useCreateVariant } from "@/app/react-query/variants/hooks";
 import { useRouter } from "@/app/i18n/navigation";
+import { useParams } from "next/navigation";
+import NewVariantForm, {
+  VariantFormInputs,
+} from "./components/new-variant-form";
 
-type Props = {};
-
-export default function page({}: Props) {
+export default function page() {
   const { companyId, listingId } = useParams<{
     companyId: string;
     listingId: string;
   }>();
   const router = useRouter();
+  const { data: listing } = useListing(listingId);
+  const { mutate: createVariant } = useCreateVariant({
+    onSuccess: () => {
+      router.push({
+        pathname:
+          "/company-profile/companies/[companyId]/listings/[listingId]/variants",
+        params: { companyId, listingId },
+      });
+    },
+  });
+
+  const handleSubmit = (data: VariantFormInputs) => {
+    const blockType = listing?.details[0]?.blockType;
+    if (!blockType) return;
+
+    createVariant({
+      listing: listingId,
+      name: data.name,
+      shortDescription: data.shortDescription,
+      description: data.description ?? null,
+      type: data.type,
+      availability: data.availability,
+      selectedHours: data.selectedHours,
+      price: data.price,
+      images: {
+        mainImage: data.images.mainImage,
+        gallery: data.images.gallery.map((image) => ({ image })),
+      },
+      eventTypes: data.eventTypes.map((et) => et.id),
+      includes: data.includes,
+      excludes: data.excludes,
+      details: [{ blockType, capacity: data.capacity }],
+    });
+  };
 
   return (
     <main className="w-full">
@@ -36,12 +72,7 @@ export default function page({}: Props) {
           },
         }}
       />
-      <NewVariantForm
-        onSubmit={(data) => {
-          console.log("submit", data);
-        }}
-        onCancel={() => router.back()}
-      />
+      <NewVariantForm onSubmit={handleSubmit} onCancel={() => router.back()} />
     </main>
   );
 }

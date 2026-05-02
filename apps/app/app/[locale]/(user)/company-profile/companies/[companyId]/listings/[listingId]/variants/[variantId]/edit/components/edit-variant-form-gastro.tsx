@@ -2,15 +2,7 @@
 
 import { FormSection } from "@/app/[locale]/(user)/components/form-section";
 import FormToc, { TocGroup } from "@/app/[locale]/(user)/components/form-toc";
-import {
-  MOCK_CUISINES,
-  MOCK_DIETARY_OPTIONS,
-  MOCK_DISH_TYPES,
-  MOCK_EVENT_TYPES,
-  MOCK_FOOD_SERVICE_STYLES,
-  MOCK_NECESSITIES,
-  MOCK_PERSONNEL,
-} from "@/app/_mock/mock";
+import { useListing } from "@/app/react-query/listings/hooks";
 import Button from "@/app/components/ui/atoms/button";
 import InputLabel from "@/app/components/ui/atoms/input-label";
 import Checkbox from "@/app/components/ui/atoms/inputs/checkbox";
@@ -81,6 +73,10 @@ const FORM_GROUPS: readonly TocGroup[] = [
   { label: "Nabídka", sections: [S.cuisine, S.extras, S.personnel] },
 ];
 
+// ── Shared item schema ─────────────────────────────────────────────────────────
+
+const itemSchema = z.object({ id: z.string(), name: z.string() });
+
 // ── Schema ─────────────────────────────────────────────────────────────────────
 
 const optionalPositiveInt = z.preprocess(
@@ -136,7 +132,7 @@ const schema = z.object({
     mainImage: z.string().min(1, "Obrázek je povinný"),
     gallery: z.array(z.string()).default([]),
   }),
-  eventTypes: z.array(z.string()).default([]),
+  eventTypes: z.array(itemSchema).default([]),
   includes: z.array(z.object({ item: z.string() })).default([]),
   excludes: z.array(z.object({ item: z.string() })).default([]),
   // ── Gastro detail ──
@@ -149,14 +145,14 @@ const schema = z.object({
   }),
   pricePerPerson: optionalPositiveNumber,
   minimumOrderCount: optionalPositiveInt,
-  cuisines: z.array(z.string()).default([]),
-  dishTypes: z.array(z.string()).default([]),
-  dietaryOptions: z.array(z.string()).default([]),
-  foodServiceStyle: z.array(z.string()).default([]),
+  cuisines: z.array(itemSchema).default([]),
+  dishTypes: z.array(itemSchema).default([]),
+  dietaryOptions: z.array(itemSchema).default([]),
+  foodServiceStyle: z.array(itemSchema).default([]),
   kidsMenu: z.boolean().default(false),
   alcoholIncluded: z.boolean().default(false),
-  personnel: z.array(z.string()).default([]),
-  necessities: z.array(z.string()).default([]),
+  personnel: z.array(itemSchema).default([]),
+  necessities: z.array(itemSchema).default([]),
 });
 
 export type GastroFormInputs = z.infer<typeof schema>;
@@ -193,6 +189,7 @@ function makeResolver(): ResolverFn {
 // ── Props ──────────────────────────────────────────────────────────────────────
 
 type Props = {
+  listingId: string;
   onSubmit: (data: GastroFormInputs) => void;
   onCancel: () => void;
   defaultValues?: Partial<GastroFormInputs>;
@@ -201,10 +198,25 @@ type Props = {
 // ── Component ──────────────────────────────────────────────────────────────────
 
 export default function EditVariantFormGastro({
+  listingId,
   onSubmit,
   onCancel,
   defaultValues,
 }: Props) {
+  const { data: listing } = useListing(listingId);
+  const gastroDetail = listing?.details.find((d) => d.blockType === "gastro");
+
+  const toItem = <T extends { id: string; name: string }>(v: string | T) =>
+    typeof v === "string" ? { id: v, name: "" } : { id: v.id, name: v.name };
+
+  const listingEventTypes = (listing?.eventTypes ?? []).map(toItem);
+  const listingCuisines = (gastroDetail?.blockType === "gastro" ? (gastroDetail.cuisines ?? []) : []).map(toItem);
+  const listingDishTypes = (gastroDetail?.blockType === "gastro" ? (gastroDetail.dishTypes ?? []) : []).map(toItem);
+  const listingFoodServiceStyles = (gastroDetail?.blockType === "gastro" ? (gastroDetail.foodServiceStyles ?? []) : []).map(toItem);
+  const listingDietaryOptions = (gastroDetail?.blockType === "gastro" ? (gastroDetail.dietaryOptions ?? []) : []).map(toItem);
+  const listingPersonnel = (gastroDetail?.blockType === "gastro" ? (gastroDetail.personnel ?? []) : []).map(toItem);
+  const listingNecessities = (gastroDetail?.blockType === "gastro" ? (gastroDetail.necessities ?? []) : []).map(toItem);
+
   const {
     control,
     register,
@@ -434,7 +446,7 @@ export default function EditVariantFormGastro({
             render={({ field }) => (
               <CheckboxGroup
                 label="Pro jaké typy akcí je varianta vhodná?"
-                items={MOCK_EVENT_TYPES}
+                items={listingEventTypes}
                 value={field.value ?? []}
                 onChange={field.onChange}
                 checkColor={COLOR.text}
@@ -689,7 +701,7 @@ export default function EditVariantFormGastro({
               <CheckboxGroup
                 searchable
                 label="Kuchyně"
-                items={MOCK_CUISINES}
+                items={listingCuisines}
                 value={field.value ?? []}
                 onChange={field.onChange}
                 checkColor={COLOR.text}
@@ -703,7 +715,7 @@ export default function EditVariantFormGastro({
               <CheckboxGroup
                 searchable
                 label="Typy pokrmů"
-                items={MOCK_DISH_TYPES}
+                items={listingDishTypes}
                 value={field.value ?? []}
                 onChange={field.onChange}
                 checkColor={COLOR.text}
@@ -717,7 +729,7 @@ export default function EditVariantFormGastro({
               <CheckboxGroup
                 searchable
                 label="Styl servisu"
-                items={MOCK_FOOD_SERVICE_STYLES}
+                items={listingFoodServiceStyles}
                 value={field.value ?? []}
                 onChange={field.onChange}
                 checkColor={COLOR.text}
@@ -731,7 +743,7 @@ export default function EditVariantFormGastro({
               <CheckboxGroup
                 searchable
                 label="Dietní možnosti"
-                items={MOCK_DIETARY_OPTIONS}
+                items={listingDietaryOptions}
                 value={field.value ?? []}
                 onChange={field.onChange}
                 checkColor={COLOR.text}
@@ -789,7 +801,7 @@ export default function EditVariantFormGastro({
               <CheckboxGroup
                 searchable
                 label="Personál"
-                items={MOCK_PERSONNEL}
+                items={listingPersonnel}
                 value={field.value ?? []}
                 onChange={field.onChange}
                 checkColor={COLOR.text}
@@ -803,7 +815,7 @@ export default function EditVariantFormGastro({
               <CheckboxGroup
                 searchable
                 label="Provozní požadavky"
-                items={MOCK_NECESSITIES}
+                items={listingNecessities}
                 value={field.value ?? []}
                 onChange={field.onChange}
                 checkColor={COLOR.text}

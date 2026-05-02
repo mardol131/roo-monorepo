@@ -2,15 +2,6 @@
 
 import { FormSection } from "@/app/[locale]/(user)/components/form-section";
 import FormToc, { TocGroup } from "@/app/[locale]/(user)/components/form-toc";
-import {
-  MOCK_ACTIVITIES,
-  MOCK_AMENITIES,
-  MOCK_EVENT_TYPES,
-  MOCK_PERSONNEL,
-  MOCK_SERVICES,
-  MOCK_SPACES,
-  MOCK_TECHNOLOGIES,
-} from "@/app/_mock/mock";
 import Button from "@/app/components/ui/atoms/button";
 import InputLabel from "@/app/components/ui/atoms/input-label";
 import Checkbox from "@/app/components/ui/atoms/inputs/checkbox";
@@ -21,6 +12,8 @@ import ImageInput from "@/app/components/ui/atoms/inputs/images/image-input";
 import Input from "@/app/components/ui/atoms/inputs/input";
 import RepeaterField from "@/app/components/ui/atoms/inputs/repeater-field";
 import { Textarea } from "@/app/components/ui/atoms/inputs/textarea";
+import { useListing } from "@/app/react-query/listings/hooks";
+import { useSpacesByListing } from "@/app/react-query/spaces/hooks";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { uploadFileToCloud } from "@roo/common";
 import {
@@ -87,6 +80,10 @@ const FORM_GROUPS: readonly TocGroup[] = [
   },
 ];
 
+// ── Item schema ────────────────────────────────────────────────────────────────
+
+const itemSchema = z.object({ id: z.string(), name: z.string() });
+
 // ── Schema ─────────────────────────────────────────────────────────────────────
 
 const optionalPositiveInt = z.preprocess(
@@ -142,7 +139,7 @@ const schema = z.object({
     mainImage: z.string().min(1, "Obrázek je povinný"),
     gallery: z.array(z.string()).default([]),
   }),
-  eventTypes: z.array(z.string()).default([]),
+  eventTypes: z.array(itemSchema).default([]),
   includes: z.array(z.object({ item: z.string() })).default([]),
   excludes: z.array(z.object({ item: z.string() })).default([]),
   // ── Venue detail ──
@@ -154,12 +151,12 @@ const schema = z.object({
     min: optionalPositiveInt,
   }),
   canBeBookedAsWhole: z.boolean().default(false),
-  includedSpaces: z.array(z.string()).default([]),
-  amenities: z.array(z.string()).default([]),
-  technology: z.array(z.string()).default([]),
-  services: z.array(z.string()).default([]),
-  activities: z.array(z.string()).default([]),
-  personnel: z.array(z.string()).default([]),
+  includedSpaces: z.array(itemSchema).default([]),
+  amenities: z.array(itemSchema).default([]),
+  technology: z.array(itemSchema).default([]),
+  services: z.array(itemSchema).default([]),
+  activities: z.array(itemSchema).default([]),
+  personnel: z.array(itemSchema).default([]),
   // parking (maps to Variant detail: parking: { included, spots })
   hasParking: z.boolean().default(false),
   parkingIncluded: z.boolean().default(false),
@@ -209,6 +206,7 @@ function makeResolver(): ResolverFn {
 // ── Props ──────────────────────────────────────────────────────────────────────
 
 type Props = {
+  listingId: string;
   onSubmit: (data: VenueFormInputs) => void;
   onCancel: () => void;
   defaultValues?: Partial<VenueFormInputs>;
@@ -217,10 +215,26 @@ type Props = {
 // ── Component ──────────────────────────────────────────────────────────────────
 
 export default function EditVariantFormVenue({
+  listingId,
   onSubmit,
   onCancel,
   defaultValues,
 }: Props) {
+  const { data: listing } = useListing(listingId);
+  const { data: spaces } = useSpacesByListing(listingId);
+  const venueDetail = listing?.details.find((d) => d.blockType === "venue");
+
+  const toItem = <T extends { id: string; name: string }>(v: string | T) =>
+    typeof v === "string" ? { id: v, name: "" } : { id: v.id, name: v.name };
+
+  const listingEventTypes = (listing?.eventTypes ?? []).map(toItem);
+  const listingSpaces = (spaces ?? []).map((s) => ({ id: s.id, name: s.name ?? "" }));
+  const listingAmenities = (venueDetail?.blockType === "venue" ? (venueDetail.amenities ?? []) : []).map(toItem);
+  const listingTechnologies = (venueDetail?.blockType === "venue" ? (venueDetail.technology ?? []) : []).map(toItem);
+  const listingServices = (venueDetail?.blockType === "venue" ? (venueDetail.services ?? []) : []).map(toItem);
+  const listingActivities = (venueDetail?.blockType === "venue" ? (venueDetail.activities ?? []) : []).map(toItem);
+  const listingPersonnel = (venueDetail?.blockType === "venue" ? (venueDetail.personnel ?? []) : []).map(toItem);
+
   const {
     control,
     register,
@@ -458,7 +472,7 @@ export default function EditVariantFormVenue({
             render={({ field }) => (
               <CheckboxGroup
                 label="Pro jaké typy akcí je varianta vhodná?"
-                items={MOCK_EVENT_TYPES}
+                items={listingEventTypes}
                 value={field.value ?? []}
                 onChange={field.onChange}
                 checkColor={COLOR.text}
@@ -705,7 +719,7 @@ export default function EditVariantFormVenue({
               <CheckboxGroup
                 searchable
                 label="Zahrnuté prostory"
-                items={MOCK_SPACES}
+                items={listingSpaces}
                 value={field.value ?? []}
                 onChange={field.onChange}
                 checkColor={COLOR.text}
@@ -719,7 +733,7 @@ export default function EditVariantFormVenue({
               <CheckboxGroup
                 searchable
                 label="Vybavení"
-                items={MOCK_AMENITIES}
+                items={listingAmenities}
                 value={field.value ?? []}
                 onChange={field.onChange}
                 checkColor={COLOR.text}
@@ -733,7 +747,7 @@ export default function EditVariantFormVenue({
               <CheckboxGroup
                 searchable
                 label="Technika"
-                items={MOCK_TECHNOLOGIES}
+                items={listingTechnologies}
                 value={field.value ?? []}
                 onChange={field.onChange}
                 checkColor={COLOR.text}
@@ -747,7 +761,7 @@ export default function EditVariantFormVenue({
               <CheckboxGroup
                 searchable
                 label="Služby"
-                items={MOCK_SERVICES}
+                items={listingServices}
                 value={field.value ?? []}
                 onChange={field.onChange}
                 checkColor={COLOR.text}
@@ -761,7 +775,7 @@ export default function EditVariantFormVenue({
               <CheckboxGroup
                 searchable
                 label="Aktivity"
-                items={MOCK_ACTIVITIES}
+                items={listingActivities}
                 value={field.value ?? []}
                 onChange={field.onChange}
                 checkColor={COLOR.text}
@@ -775,7 +789,7 @@ export default function EditVariantFormVenue({
               <CheckboxGroup
                 searchable
                 label="Personál"
-                items={MOCK_PERSONNEL}
+                items={listingPersonnel}
                 value={field.value ?? []}
                 onChange={field.onChange}
                 checkColor={COLOR.text}

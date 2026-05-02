@@ -1,0 +1,61 @@
+collection;name;slug
+necessities;Vlastní catering povolen;vlastni-catering-povolen
+necessities;Vlastní alkohol povolen;vlastni-alkohol-povolen
+necessities;Hudba povolena do 22:00;hudba-do-22
+necessities;Hudba povolena do 24:00;hudba-do-24
+necessities;Otevřený oheň povolen;otevreny-ohen
+necessities;Pyrotechnika povolena;pyrotechnika
+necessities;Vlastní dekorace povoleny;vlastni-dekorace
+necessities;Venkovní amplifikace povolena;venkovni-amplifikace
+necessities;Pojištění akce povinné;pojisteni-akce
+necessities;Bezpečnostní služba povinná;bezpecnostni-sluzba
+necessities;Zdravotnický dozor povinný;zdravotnicky-dozor
+necessities;Pronájem nádobí zahrnut;pronajem-nadob
+necessities;Elektrická přípojka dostupná;elektricka-pripojka
+necessities;Vodovodní přípojka dostupná;vodovodní-pripojka
+necessities;Záloha na škody vyžadována;zaloha-na-skody
+necessities;Klimatizace povinná;klimatizace-povinna
+necessities;Šatna povinná;satna-povinna
+necessities;Čistící záloha povinná;cisticí-zaloha
+necessities;Zajištění odpadů povinné;zajisteni-odpadu
+necessities;Pronájem mobiliáře zahrnut;pronajem-mobiliare
+room-amenities;Klimatizace;room-klimatizace
+room-amenities;WiFi;room-wifi
+room-amenities;Smart TV;room-smart-tv
+room-amenities;Mini bar;mini-bar
+room-amenities;Trezor;trezor
+room-amenities;Sprchový kout;sprchovy-kout
+room-amenities;Vana;vana
+room-amenities;Vysoušeč vlasů;vysousec-vlasu
+room-amenities;Žehlička se žehlicím prknem;zehlicka
+room-amenities;Kávovar;kavovar
+room-amenities;Rychlovarná konvice;rychlovarna-konvice
+room-amenities;Postel King-size;postel-king-size
+room-amenities;Sedací souprava;sedaci-souprava
+room-amenities;Pracovní stůl;pracovni-stul
+room-amenities;Balkón;balkon
+room-amenities;Výhled na zahradu;vyhled-zahrada
+room-amenities;Bezbariérový přístup;room-bezbarierovy-pristup
+room-amenities;Dětská postýlka na vyžádání;detska-postylka
+room-amenities;Domácí zvířata povolena;domaci-zvirata
+room-amenities;Blackout závěsy;blackout-zavesy
+rules;Zákaz kouření v interiéru;zakaz-koureni-interier
+rules;Kouření povoleno na terase;koureni-terasa
+rules;Zákaz domácích zvířat;zakaz-zvirat
+rules;Psi povoleni;psi-povoleni
+rules;Zákaz hlasité hudby po 22:00;zakaz-hlasita-hudba-22
+rules;Zákaz hlasité hudby po 24:00;zakaz-hlasita-hudba-24
+rules;Zákaz otevřeného ohně;zakaz-ohen
+rules;Minimální konzumace vyžadována;minimalni-konzumace
+rules;Věková hranice 18+;vekova-hranice-18
+rules;Dress code povinný;dress-code
+rules;Zákaz vlastního jídla;zakaz-vlastni-jidlo
+rules;Zákaz vlastního alkoholu;zakaz-vlastni-alkohol
+rules;Povinná rezervace předem;povinna-rezervace
+rules;Akce pouze pro dospělé;akce-dospeli
+rules;Zákaz natáčení bez souhlasu;zakaz-nataceni
+rules;Povinné pojištění akce;povinna-pojisteni-akce
+rules;Placené parkoviste;placene-parkoviste
+rules;Zákaz konfet a serpentýn;zakaz-konfet
+rules;Zákaz pyrotechniky;zakaz-pyrotechniky
+rules;Povinná vratná záloha;povinna-zaloha

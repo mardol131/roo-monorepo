@@ -42,11 +42,11 @@ export default function MessagesPage() {
   const allInquiries = getInquiries();
 
   const unread = allInquiries.filter((inquiry) => {
-    if (!inquiry.lastCompanyMessageSentAt) return false;
-    if (!inquiry.lastUserSeenAt) return true;
+    if (!inquiry.activity.lastCompanyMessageSentAt) return false;
+    if (!inquiry.activity.lastUserSeenAt) return true;
     return (
-      new Date(inquiry.lastCompanyMessageSentAt) >
-      new Date(inquiry.lastUserSeenAt)
+      new Date(inquiry.activity.lastCompanyMessageSentAt) >
+      new Date(inquiry.activity.lastUserSeenAt)
     );
   });
   const grouped = groupByEvent(unread);
@@ -71,7 +71,9 @@ export default function MessagesPage() {
             return (
               <RowContainer
                 key={event.id}
-                icon={<MessageSquare className="w-4 h-4 text-inquiry" />}
+                icon="MessageSquare"
+                iconBgColor="bg-inquiry-surface"
+                iconColor="text-inquiry"
                 label={event.name}
                 subLabel={formatInquiryCountLabel(inquiries.length)}
                 headerRightComponent={
@@ -101,11 +103,11 @@ export default function MessagesPage() {
                       items={[
                         {
                           icon: "Banknote",
-                          content: `${inquiry.quotedPrice ? `${inquiry.quotedPrice} Kč (nabídka)` : inquiry.agreedPrice ? `${inquiry.agreedPrice} Kč (dohodnutá cena)` : "Cena neuvedena"}`,
+                          content: `${inquiry.pricing.quotedPrice ? `${inquiry.pricing.quotedPrice} Kč (nabídka)` : inquiry.pricing.agreedPrice ? `${inquiry.pricing.agreedPrice} Kč (dohodnutá cena)` : "Cena neuvedena"}`,
                         },
                         {
                           icon: "Calendar",
-                          content: `${inquiry.customRequest ? "Zákaznická poptávka" : "Standardní poptávka"}`,
+                          content: `${inquiry.request ? "Zákaznická poptávka" : "Standardní poptávka"}`,
                         },
                       ]}
                       link={{
@@ -116,12 +118,14 @@ export default function MessagesPage() {
                         },
                       }}
                       rightComponent={
-                        inquiry.lastCompanyMessageSentAt ? (
+                        inquiry.activity.lastCompanyMessageSentAt ? (
                           <EntityComponentTag
                             bgColor="bg-zinc-100"
                             textColor="text-text-light"
                             text={format(
-                              new Date(inquiry.lastCompanyMessageSentAt),
+                              new Date(
+                                inquiry.activity.lastCompanyMessageSentAt,
+                              ),
                               "dd.mm.yyyy",
                               { locale: cs },
                             )}
@@ -133,6 +137,11 @@ export default function MessagesPage() {
                       }
                     />
                   ))}
+                emptyState={{
+                  text: "Nemáte žádné nepřečtené zprávy",
+                  subtext:
+                    "Pokud budete mít u některé poptávky nepřečtenou zprávu, zobrazí se vám zde.",
+                }}
               />
             );
           })}

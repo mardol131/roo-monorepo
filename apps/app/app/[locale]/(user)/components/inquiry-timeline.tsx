@@ -21,12 +21,11 @@ type Step = {
 };
 
 export default function InquiryTimeline({
-  userStatus,
-  companyStatus,
+  status,
 }: {
-  userStatus: Inquiry["userStatus"];
-  companyStatus: Inquiry["companyStatus"];
+  status: Inquiry["status"];
 }) {
+  const { user: userStatus, company: companyStatus } = status;
   const isCancelled =
     userStatus === "cancelled" || companyStatus === "cancelled";
   const bothConfirmed =

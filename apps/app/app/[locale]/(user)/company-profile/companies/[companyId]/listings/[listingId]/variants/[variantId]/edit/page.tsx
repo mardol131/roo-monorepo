@@ -17,8 +17,8 @@ import EditVariantFormVenue, {
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
-const id = (item: string | { id: string }) =>
-  typeof item === "string" ? item : item.id;
+const toItem = <T extends { id: string; name: string }>(v: string | T) =>
+  typeof v === "string" ? { id: v, name: "" } : { id: v.id, name: v.name };
 
 function commonDefaults(v: Variant) {
   return {
@@ -45,7 +45,7 @@ function commonDefaults(v: Variant) {
         .map(({ image }) => image ?? "")
         .filter(Boolean),
     },
-    eventTypes: (v.eventTypes ?? []).map(id),
+    eventTypes: (v.eventTypes ?? []).map(toItem),
     includes: (v.includes ?? []).map(({ item }) => ({ item: item ?? "" })),
     excludes: (v.excludes ?? []).map(({ item }) => ({ item: item ?? "" })),
   };
@@ -58,12 +58,12 @@ function venueDefaults(v: Variant): Partial<VenueFormInputs> {
     ...commonDefaults(v),
     capacity: { max: d.capacity.max, min: d.capacity.min ?? undefined },
     canBeBookedAsWhole: d.canBeBookedAsWhole ?? false,
-    includedSpaces: (d.includedSpaces ?? []).map(id),
-    amenities: (d.amenities ?? []).map(id),
-    technology: (d.technology ?? []).map(id),
-    services: (d.services ?? []).map(id),
-    activities: (d.activities ?? []).map(id),
-    personnel: (d.personnel ?? []).map(id),
+    includedSpaces: (d.includedSpaces ?? []).map(toItem),
+    amenities: (d.amenities ?? []).map(toItem),
+    technology: (d.technology ?? []).map(toItem),
+    services: (d.services ?? []).map(toItem),
+    activities: (d.activities ?? []).map(toItem),
+    personnel: (d.personnel ?? []).map(toItem),
     hasParking: !!d.parking,
     parkingIncluded: d.parking?.included ?? false,
     parkingSpots: d.parking?.spots ?? undefined,
@@ -85,14 +85,14 @@ function gastroDefaults(v: Variant): Partial<GastroFormInputs> {
     capacity: { max: d.capacity.max, min: d.capacity.min ?? undefined },
     pricePerPerson: d.pricePerPerson ?? undefined,
     minimumOrderCount: d.minimumOrderCount ?? undefined,
-    cuisines: (d.cuisines ?? []).map(id),
-    dishTypes: (d.dishTypes ?? []).map(id),
-    dietaryOptions: (d.dietaryOptions ?? []).map(id),
-    foodServiceStyle: (d.foodServiceStyle ?? []).map(id),
+    cuisines: (d.cuisines ?? []).map(toItem),
+    dishTypes: (d.dishTypes ?? []).map(toItem),
+    dietaryOptions: (d.dietaryOptions ?? []).map(toItem),
+    foodServiceStyle: (d.foodServiceStyle ?? []).map(toItem),
     kidsMenu: d.kidsMenu ?? false,
     alcoholIncluded: d.alcoholIncluded ?? false,
-    personnel: (d.personnel ?? []).map(id),
-    necessities: (d.necessities ?? []).map(id),
+    personnel: (d.personnel ?? []).map(toItem),
+    necessities: (d.necessities ?? []).map(toItem),
   };
 }
 
@@ -109,15 +109,15 @@ function entertainmentDefaults(v: Variant): Partial<EntertainmentFormInputs> {
     setupAndTeardownIncluded: d.setupAndTeardown?.included ?? false,
     setupTime: d.setupAndTeardown?.setupTime ?? undefined,
     teardownTime: d.setupAndTeardown?.teardownTime ?? undefined,
-    personnel: (d.personnel ?? []).map(id),
-    necessities: (d.necessities ?? []).map(id),
+    personnel: (d.personnel ?? []).map(toItem),
+    necessities: (d.necessities ?? []).map(toItem),
   };
 }
 
 // ── Page ──────────────────────────────────────────────────────────────────────
 
 export default function page() {
-  const { variantId } = useParams<{ variantId: string }>();
+  const { variantId, listingId } = useParams<{ variantId: string; listingId: string }>();
   const { data: variant } = useVariant(variantId);
   const router = useRouter();
 
@@ -132,6 +132,7 @@ export default function page() {
 
       {blockType === "venue" && variant && (
         <EditVariantFormVenue
+          listingId={listingId}
           defaultValues={venueDefaults(variant)}
           onSubmit={(data) => {
             console.log("submit", data);
@@ -141,6 +142,7 @@ export default function page() {
       )}
       {blockType === "gastro" && variant && (
         <EditVariantFormGastro
+          listingId={listingId}
           defaultValues={gastroDefaults(variant)}
           onSubmit={(data) => {
             console.log("submit", data);
@@ -150,6 +152,7 @@ export default function page() {
       )}
       {blockType === "entertainment" && variant && (
         <EditVariantFormEntertainment
+          listingId={listingId}
           defaultValues={entertainmentDefaults(variant)}
           onSubmit={(data) => {
             console.log("submit", data);

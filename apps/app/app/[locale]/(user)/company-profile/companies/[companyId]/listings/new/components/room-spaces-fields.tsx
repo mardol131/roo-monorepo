@@ -10,7 +10,7 @@ import Input from "@/app/components/ui/atoms/inputs/input";
 import { Textarea } from "@/app/components/ui/atoms/inputs/textarea";
 import Button from "@/app/components/ui/atoms/button";
 import { Trash2 } from "lucide-react";
-import type { FormInputs } from "./new-listing-form";
+import type { FormInputs } from "../forms/new-listing-form";
 
 interface RoomSpacesFieldsProps {
   control: Control<FormInputs>;
@@ -113,7 +113,11 @@ export default function RoomSpacesFields({
             >
               <Trash2 size={16} />
             </button>
-            <RoomFields register={register} errors={errors} roomIndex={roomIndex} />
+            <RoomFields
+              register={register}
+              errors={errors}
+              roomIndex={roomIndex}
+            />
           </div>
         );
       })}

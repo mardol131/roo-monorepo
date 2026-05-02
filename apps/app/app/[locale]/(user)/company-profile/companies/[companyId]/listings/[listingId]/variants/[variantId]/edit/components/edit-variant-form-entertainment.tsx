@@ -2,11 +2,7 @@
 
 import { FormSection } from "@/app/[locale]/(user)/components/form-section";
 import FormToc, { TocGroup } from "@/app/[locale]/(user)/components/form-toc";
-import {
-  MOCK_EVENT_TYPES,
-  MOCK_NECESSITIES,
-  MOCK_PERSONNEL,
-} from "@/app/_mock/mock";
+import { useListing } from "@/app/react-query/listings/hooks";
 import Button from "@/app/components/ui/atoms/button";
 import InputLabel from "@/app/components/ui/atoms/input-label";
 import Checkbox from "@/app/components/ui/atoms/inputs/checkbox";
@@ -89,6 +85,8 @@ const optionalPositiveInt = z.preprocess(
     .optional(),
 );
 
+const itemSchema = z.object({ id: z.string(), name: z.string() });
+
 const schema = z.object({
   // ── Variant top-level ──
   name: z.string().min(1, "Název je povinný"),
@@ -128,7 +126,7 @@ const schema = z.object({
     mainImage: z.string().min(1, "Obrázek je povinný"),
     gallery: z.array(z.string()).default([]),
   }),
-  eventTypes: z.array(z.string()).default([]),
+  eventTypes: z.array(itemSchema).default([]),
   includes: z.array(z.object({ item: z.string() })).default([]),
   excludes: z.array(z.object({ item: z.string() })).default([]),
   // ── Entertainment detail ──
@@ -147,8 +145,8 @@ const schema = z.object({
   setupAndTeardownIncluded: z.boolean().default(false),
   setupTime: optionalPositiveInt,
   teardownTime: optionalPositiveInt,
-  personnel: z.array(z.string()).default([]),
-  necessities: z.array(z.string()).default([]),
+  personnel: z.array(itemSchema).default([]),
+  necessities: z.array(itemSchema).default([]),
 });
 
 export type EntertainmentFormInputs = z.infer<typeof schema>;
@@ -185,6 +183,7 @@ function makeResolver(): ResolverFn {
 // ── Props ──────────────────────────────────────────────────────────────────────
 
 type Props = {
+  listingId: string;
   onSubmit: (data: EntertainmentFormInputs) => void;
   onCancel: () => void;
   defaultValues?: Partial<EntertainmentFormInputs>;
@@ -193,10 +192,28 @@ type Props = {
 // ── Component ──────────────────────────────────────────────────────────────────
 
 export default function EditVariantFormEntertainment({
+  listingId,
   onSubmit,
   onCancel,
   defaultValues,
 }: Props) {
+  const { data: listing } = useListing(listingId);
+  const entertainmentDetail = listing?.details.find(
+    (d) => d.blockType === "entertainment",
+  );
+
+  const toItem = <T extends { id: string; name: string }>(v: string | T) =>
+    typeof v === "string" ? { id: v, name: "" } : { id: v.id, name: v.name };
+
+  const listingEventTypes = (listing?.eventTypes ?? []).map(toItem);
+  const listingPersonnel =
+    entertainmentDetail?.blockType === "entertainment"
+      ? (entertainmentDetail.personnel ?? []).map(toItem)
+      : [];
+  const listingNecessities =
+    entertainmentDetail?.blockType === "entertainment"
+      ? (entertainmentDetail.necessities ?? []).map(toItem)
+      : [];
   const {
     control,
     register,
@@ -422,7 +439,7 @@ export default function EditVariantFormEntertainment({
             render={({ field }) => (
               <CheckboxGroup
                 label="Pro jaké typy akcí je varianta vhodná?"
-                items={MOCK_EVENT_TYPES}
+                items={listingEventTypes}
                 value={field.value ?? []}
                 onChange={field.onChange}
                 checkColor={COLOR.text}
@@ -785,7 +802,7 @@ export default function EditVariantFormEntertainment({
               <CheckboxGroup
                 searchable
                 label="Personál"
-                items={MOCK_PERSONNEL}
+                items={listingPersonnel}
                 value={field.value ?? []}
                 onChange={field.onChange}
                 checkColor={COLOR.text}
@@ -799,7 +816,7 @@ export default function EditVariantFormEntertainment({
               <CheckboxGroup
                 searchable
                 label="Technické požadavky"
-                items={MOCK_NECESSITIES}
+                items={listingNecessities}
                 value={field.value ?? []}
                 onChange={field.onChange}
                 checkColor={COLOR.text}

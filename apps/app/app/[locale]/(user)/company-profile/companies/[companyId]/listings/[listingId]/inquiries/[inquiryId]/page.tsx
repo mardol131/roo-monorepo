@@ -72,18 +72,18 @@ export default function page() {
           { icon: "Tag", text: t(`listings.type.${inquiry.listingType}`) },
           {
             icon: "Clock",
-            text: `Odesláno ${format(new Date(inquiry.sentAt), "d. M. yyyy", { locale: cs })}`,
+            text: `Odesláno ${format(new Date(inquiry.activity.sentAt), "d. M. yyyy", { locale: cs })}`,
           },
           { icon: "User", text: customerName },
         ]}
       />
       <div className="bg-white rounded-2xl border border-zinc-200 px-8 py-5">
         <InquiryTimeline
-          userStatus={inquiry.userStatus}
-          companyStatus={inquiry.companyStatus}
+          userStatus={inquiry.status.user}
+          companyStatus={inquiry.status.company}
         />
       </div>
-      {inquiry.userStatus === "confirmed" && (
+      {inquiry.status.user === "confirmed" && (
         <AlertSection
           icon={Check}
           iconBg="bg-success-surface"
@@ -123,7 +123,7 @@ export default function page() {
           }}
         />
       )}
-      {inquiry.userStatus === "cancelled" && (
+      {inquiry.status.user === "cancelled" && (
         <AlertSection
           icon={X}
           iconBg="bg-danger-surface"
@@ -139,12 +139,12 @@ export default function page() {
         isOpen={priceChangeModalOpen}
         onClose={priceChangeModalStateHandler}
         inquiryId={inquiry.id}
-        currentPrice={inquiry.quotedPrice || undefined}
+        currentPrice={inquiry.pricing.quotedPrice || undefined}
       />
       <ControlSection
         rows={[
           {
-            disabled: inquiry.userStatus === "confirmed",
+            disabled: inquiry.status.user === "confirmed",
             title: "Navrhnout novou cenu",
             text: "Můžete přizpůsobit cenu poptávky a odeslat návrh zákazníkovi.",
             icon: "Coins",

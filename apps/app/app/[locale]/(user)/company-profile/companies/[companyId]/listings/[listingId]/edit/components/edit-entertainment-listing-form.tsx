@@ -2,13 +2,6 @@
 
 import { FormSection } from "@/app/[locale]/(user)/components/form-section";
 import FormToc, { TocGroup } from "@/app/[locale]/(user)/components/form-toc";
-import {
-  MOCK_ENTERTAINMENT_TYPES,
-  MOCK_EVENT_TYPES,
-  MOCK_NECESSITIES,
-  MOCK_PERSONNEL,
-  MOCK_RULES,
-} from "@/app/_mock/mock";
 import Button from "@/app/components/ui/atoms/button";
 import Checkbox from "@/app/components/ui/atoms/inputs/checkbox";
 import CheckboxGroup from "@/app/components/ui/atoms/inputs/checkbox-group";
@@ -45,6 +38,11 @@ import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Controller, useFieldArray, useForm } from "react-hook-form";
 import { z } from "zod";
+import { useEntertainmentTypes } from "@/app/react-query/filters/entertainment-types/hooks";
+import { useEventTypes } from "@/app/react-query/filters/event-types/hooks";
+import { useNecessities } from "@/app/react-query/specific/necessities/hooks";
+import { usePersonnel } from "@/app/react-query/filters/personnel/hooks";
+import { useRules } from "@/app/react-query/specific/rules/hooks";
 
 // ── TOC groups ────────────────────────────────────────────────────────────────
 
@@ -93,11 +91,13 @@ export const ENTERTAINMENT_FORM_GROUPS: readonly TocGroup[] = [
 
 // ── Schema ────────────────────────────────────────────────────────────────────
 
+const itemSchema = z.object({ id: z.string(), name: z.string() });
+
 const schema = z.object({
   name: z.string().min(1, "Název je povinný"),
   shortDescription: z.string().optional(),
   description: z.string().optional(),
-  eventTypes: z.array(z.string()).default([]),
+  eventTypes: z.array(itemSchema).default([]),
   images: z.object({
     coverImage: z.string().min(1, "Titulní obrázek je povinný"),
     logo: z.string().optional(),
@@ -109,9 +109,9 @@ const schema = z.object({
       .positive("Cena musí být kladná"),
   }),
   location: z.object({
-    regions: z.array(z.string()).min(1, "Vyberte alespoň jeden kraj"),
-    districts: z.array(z.string()).default([]),
-    cities: z.array(z.string()).default([]),
+    regions: z.array(itemSchema).min(1, "Vyberte alespoň jeden kraj"),
+    districts: z.array(itemSchema).default([]),
+    cities: z.array(itemSchema).default([]),
     address: z.string().optional(),
   }),
   capacity: z.coerce
@@ -119,7 +119,7 @@ const schema = z.object({
     .positive("Kapacita musí být kladná")
     .int("Zadejte celé číslo"),
   minimumCapacity: z.coerce.number().nullable().optional(),
-  entertainmentTypes: z.array(z.string()).default([]),
+  entertainmentTypes: z.array(itemSchema).default([]),
   audience: z.array(z.enum(["adults", "kids", "seniors"])).default([]),
   setupAndTearDownRules: z
     .object({
@@ -127,9 +127,9 @@ const schema = z.object({
       tearDownTime: z.coerce.number().nullable().optional(),
     })
     .optional(),
-  personnel: z.array(z.string()).default([]),
-  necessities: z.array(z.string()).default([]),
-  rules: z.array(z.string()).default([]),
+  personnel: z.array(itemSchema).default([]),
+  necessities: z.array(itemSchema).default([]),
+  rules: z.array(itemSchema).default([]),
   employees: z
     .array(
       z.object({
@@ -204,13 +204,13 @@ export default function EditEntertainmentListingForm({
         name: data.name,
         shortDescription: data.shortDescription,
         description: data.description,
-        eventTypes: data.eventTypes,
+        eventTypes: data.eventTypes.map((i) => i.id),
         images: {
           ...data.images,
           gallery: data.images.gallery.map((url) => ({ url })),
         },
         price: data.price,
-        rules: data.rules,
+        rules: data.rules.map((i) => i.id),
         employees: data.employees,
         faq: data.faq,
         references: data.references,
@@ -220,17 +220,17 @@ export default function EditEntertainmentListingForm({
             blockType: "entertainment",
             location: {
               address: data.location.address ?? null,
-              region: data.location.regions,
-              district: data.location.districts,
-              city: data.location.cities,
+              region: data.location.regions.map((i) => i.id),
+              district: data.location.districts.map((i) => i.id),
+              city: data.location.cities.map((i) => i.id),
             },
             capacity: data.capacity,
             minimumCapacity: data.minimumCapacity,
-            entertainmentTypes: data.entertainmentTypes,
+            entertainmentTypes: data.entertainmentTypes.map((i) => i.id),
             audience: data.audience,
             setupAndTearDownRules: data.setupAndTearDownRules,
-            personnel: data.personnel,
-            necessities: data.necessities,
+            personnel: data.personnel.map((i) => i.id),
+            necessities: data.necessities.map((i) => i.id),
           },
         ],
       },
@@ -262,6 +262,12 @@ export default function EditEntertainmentListingForm({
     },
   });
 
+  const { data: entertainmentTypes } = useEntertainmentTypes({ limit: 15 });
+  const { data: eventTypes } = useEventTypes({ limit: 15 });
+  const { data: necessities } = useNecessities({ limit: 15 });
+  const { data: personnel } = usePersonnel({ limit: 15 });
+  const { data: rules } = useRules({ limit: 15 });
+
   useEffect(() => {
     const subscription = watch((values) => {
       onFormChange?.(values as EntertainmentFormInputs);
@@ -277,11 +283,16 @@ export default function EditEntertainmentListingForm({
     const id = <T extends string | { id: string }>(v: T) =>
       typeof v === "string" ? v : v.id;
 
+    const toItem = <T extends { id: string; name: string }>(
+      v: string | T,
+    ): { id: string; name: string } =>
+      typeof v === "string" ? { id: v, name: "" } : { id: v.id, name: v.name };
+
     reset({
       name: listing.name,
       shortDescription: listing.shortDescription ?? undefined,
       description: listing.description ?? undefined,
-      eventTypes: listing.eventTypes?.map(id) ?? [],
+      eventTypes: listing.eventTypes?.map(toItem) ?? [],
       images: {
         coverImage: listing.images.coverImage,
         logo: listing.images.logo ?? undefined,
@@ -290,22 +301,25 @@ export default function EditEntertainmentListingForm({
       },
       price: { startsAt: listing.price.startsAt },
       location: {
-        regions: d.location?.region?.map(id) ?? [],
-        districts: d.location?.district?.map(id) ?? [],
-        cities: d.location?.city?.map(id) ?? [],
+        regions: d.location?.region?.map(toItem) ?? [],
+        districts: d.location?.district?.map(toItem) ?? [],
+        cities: d.location?.city?.map(toItem) ?? [],
         address: d.location?.address ?? undefined,
       },
       capacity: d.capacity,
       minimumCapacity: d.minimumCapacity ?? undefined,
-      entertainmentTypes: d.entertainmentTypes?.map(id) ?? [],
+      entertainmentTypes: d.entertainmentTypes?.map(toItem) ?? [],
       audience: (d.audience ?? []) as ("adults" | "kids" | "seniors")[],
       setupAndTearDownRules: {
         setupTime: d.setupAndTearDownRules?.setupTime ?? undefined,
         tearDownTime: d.setupAndTearDownRules?.tearDownTime ?? undefined,
       },
-      personnel: d.personnel?.map(id) ?? [],
-      necessities: d.necessities?.map(id) ?? [],
-      rules: [...(listing.rules?.map(id) ?? []), ...(d.rules?.map(id) ?? [])],
+      personnel: d.personnel?.map(toItem) ?? [],
+      necessities: d.necessities?.map(toItem) ?? [],
+      rules: [
+        ...(listing.rules?.map(toItem) ?? []),
+        ...(d.rules?.map(toItem) ?? []),
+      ],
       employees:
         listing.employees?.map((e) => ({
           name: e.name,
@@ -348,7 +362,9 @@ export default function EditEntertainmentListingForm({
   const { data: districtsData } = useDistricts(
     regionsValue?.length || districtSearch
       ? {
-          ...(regionsValue?.length ? { region: { in: regionsValue } } : {}),
+          ...(regionsValue?.length
+            ? { region: { in: regionsValue.map((i) => i.id) } }
+            : {}),
           ...(districtSearch ? { name: { contains: districtSearch } } : {}),
         }
       : undefined,
@@ -358,7 +374,7 @@ export default function EditEntertainmentListingForm({
       districtsValue?.length || citySearch
         ? {
             ...(districtsValue?.length
-              ? { district: { in: districtsValue } }
+              ? { district: { in: districtsValue.map((i) => i.id) } }
               : {}),
             ...(citySearch ? { name: { contains: citySearch } } : {}),
           }
@@ -600,7 +616,7 @@ export default function EditEntertainmentListingForm({
             name="entertainmentTypes"
             render={({ field }) => (
               <CheckboxGroup
-                items={MOCK_ENTERTAINMENT_TYPES}
+                items={entertainmentTypes?.docs ?? []}
                 value={field.value ?? []}
                 onChange={field.onChange}
                 checkColor="text-listing"
@@ -688,7 +704,7 @@ export default function EditEntertainmentListingForm({
             name="eventTypes"
             render={({ field }) => (
               <CheckboxGroup
-                items={MOCK_EVENT_TYPES}
+                items={eventTypes?.docs ?? []}
                 value={field.value ?? []}
                 onChange={field.onChange}
                 checkColor="text-listing"
@@ -711,7 +727,7 @@ export default function EditEntertainmentListingForm({
             name="personnel"
             render={({ field }) => (
               <CheckboxGroup
-                items={MOCK_PERSONNEL}
+                items={personnel?.docs ?? []}
                 value={field.value ?? []}
                 onChange={field.onChange}
                 checkColor="text-listing"
@@ -734,7 +750,7 @@ export default function EditEntertainmentListingForm({
             name="necessities"
             render={({ field }) => (
               <CheckboxGroup
-                items={MOCK_NECESSITIES}
+                items={necessities?.docs ?? []}
                 value={field.value ?? []}
                 onChange={field.onChange}
                 checkColor="text-listing"
@@ -757,7 +773,7 @@ export default function EditEntertainmentListingForm({
             name="rules"
             render={({ field }) => (
               <CheckboxGroup
-                items={MOCK_RULES}
+                items={rules?.docs ?? []}
                 value={field.value ?? []}
                 onChange={field.onChange}
                 checkColor="text-listing"
@@ -985,14 +1001,16 @@ export default function EditEntertainmentListingForm({
                       ref={field.ref}
                       label="Typ akce"
                       placeholder="Vyberte typ akce..."
-                      options={MOCK_EVENT_TYPES.map((et) => ({
-                        id: et.id,
-                        name: et.name,
-                      }))}
+                      options={
+                        eventTypes?.docs.map((et) => ({
+                          id: et.id,
+                          name: et.name,
+                        })) ?? []
+                      }
                       value={{
                         id: field.value ?? "",
                         name:
-                          MOCK_EVENT_TYPES.find((et) => et.id === field.value)
+                          eventTypes?.docs.find((et) => et.id === field.value)
                             ?.name ?? "",
                       }}
                       onSelect={(option) => field.onChange(option.id)}

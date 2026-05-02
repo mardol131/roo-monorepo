@@ -7,7 +7,7 @@ type Props = {
   inquiry: Inquiry;
 };
 
-const PRICING_MODE_LABELS: Record<Inquiry["pricingMode"], string> = {
+const PRICING_MODE_LABELS: Record<Inquiry["pricing"]["mode"], string> = {
   fixed: "Pevná cena",
   open: "Otevřená cena",
 };
@@ -32,34 +32,34 @@ export default function InquiryDetails({ inquiry }: Props) {
       <div className="flex flex-col gap-3">
         <Row
           label="Režim ceny"
-          value={PRICING_MODE_LABELS[inquiry.pricingMode]}
+          value={PRICING_MODE_LABELS[inquiry.pricing.mode]}
         />
-        {inquiry.quotedPrice != null && (
+        {inquiry.pricing.quotedPrice != null && (
           <Row
             label="Nabídnutá cena"
             value={
               <Text variant="body-sm" color="textDark">
-                {inquiry.quotedPrice} Kč
+                {inquiry.pricing.quotedPrice} Kč
               </Text>
             }
           />
         )}
-        {inquiry.agreedPrice != null && (
+        {inquiry.pricing.agreedPrice != null && (
           <Row
             label="Dohodnutá cena"
             value={
               <Text variant="body-sm" color="textDark">
-                {inquiry.agreedPrice} Kč
+                {inquiry.pricing.agreedPrice} Kč
               </Text>
             }
           />
         )}
-        {inquiry.customRequest && (
+        {inquiry.request?.note && (
           <Row
             label="Zpráva od zákazníka"
             value={
               <Text variant="body-sm" color="textDark">
-                {inquiry.customRequest}
+                {inquiry.request.note}
               </Text>
             }
           />

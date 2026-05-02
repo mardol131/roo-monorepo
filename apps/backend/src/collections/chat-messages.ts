@@ -3,7 +3,7 @@ import type { CollectionConfig } from 'payload'
 export const ChatMessages: CollectionConfig = {
   slug: 'chat-messages',
   admin: {
-    useAsTitle: 'content',
+    useAsTitle: 'id',
   },
   fields: [
     {
@@ -29,8 +29,42 @@ export const ChatMessages: CollectionConfig = {
     },
     {
       name: 'content',
-      type: 'textarea',
-      required: true,
+      type: 'blocks',
+      minRows: 1,
+      maxRows: 1,
+      blocks: [
+        {
+          slug: 'text',
+          labels: { singular: 'Zpráva', plural: 'Zprávy' },
+          fields: [
+            {
+              name: 'text',
+              type: 'textarea',
+            },
+          ],
+        },
+        {
+          slug: 'question',
+          labels: { singular: 'Otázka', plural: 'Otázky' },
+          fields: [
+            {
+              name: 'text',
+              type: 'text',
+            },
+            {
+              name: 'answer',
+              type: 'text',
+            },
+            {
+              name: 'answeredAt',
+              type: 'date',
+              admin: {
+                date: { pickerAppearance: 'dayAndTime' },
+              },
+            },
+          ],
+        },
+      ],
     },
     {
       name: 'sentAt',

@@ -2,7 +2,6 @@
 
 import { FormSection } from "@/app/[locale]/(user)/components/form-section";
 import FormToc, { TocGroup } from "@/app/[locale]/(user)/components/form-toc";
-import { MOCK_EVENT_TYPES } from "@/app/_mock/mock";
 import Button, { ButtonProps } from "@/app/components/ui/atoms/button";
 import InputLabel from "@/app/components/ui/atoms/input-label";
 import CheckboxGroup from "@/app/components/ui/atoms/inputs/checkbox-group";
@@ -133,7 +132,7 @@ const schema = z.object({
     mainImage: z.string().min(1, "Obrázek je povinný"),
     gallery: z.array(z.string()).default([]),
   }),
-  eventTypes: z.array(z.string()).default([]),
+  eventTypes: z.array(z.object({ id: z.string(), name: z.string() })).default([]),
   capacity: z.object({
     max: z.coerce
       .number({ message: "Zadejte číslo" })
@@ -170,7 +169,10 @@ function makeResolver(): ResolverFn {
       result.errors = {
         ...result.errors,
         selectedHours: {
-          root: { type: "required", message: "Přidejte alespoň jeden časový slot" },
+          root: {
+            type: "required",
+            message: "Přidejte alespoň jeden časový slot",
+          },
         },
       };
     }
@@ -192,6 +194,10 @@ export default function NewVariantForm({ onSubmit, onCancel }: Props) {
   const { listingId } = useParams<{ listingId: string }>();
   const { data: listing } = useListing(listingId);
   const listingType = listing?.details[0].blockType;
+
+  const toItem = <T extends { id: string; name: string }>(v: string | T) =>
+    typeof v === "string" ? { id: v, name: "" } : { id: v.id, name: v.name };
+  const listingEventTypes = (listing?.eventTypes ?? []).map(toItem);
 
   const {
     control,
@@ -433,10 +439,7 @@ export default function NewVariantForm({ onSubmit, onCancel }: Props) {
             render={({ field }) => (
               <CheckboxGroup
                 label="Pro jaké typy akcí je varianta vhodná?"
-                items={MOCK_EVENT_TYPES.map((et) => ({
-                  id: et.id,
-                  name: et.name,
-                }))}
+                items={listingEventTypes}
                 value={field.value}
                 onChange={field.onChange}
                 checkColor={COLOR_SCHEME.text}
@@ -565,7 +568,10 @@ export default function NewVariantForm({ onSubmit, onCancel }: Props) {
               onAppend={() => appendSelectedHour({ from: "", to: "" })}
               onRemove={removeSelectedHour}
               addButtonLabel="Přidat časový slot"
-              error={(errors.selectedHours as { root?: { message?: string } })?.root?.message}
+              error={
+                (errors.selectedHours as { root?: { message?: string } })?.root
+                  ?.message
+              }
               renderItem={(_, index) => (
                 <div className="grid grid-cols-2 gap-3">
                   <Input

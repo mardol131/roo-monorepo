@@ -37,7 +37,7 @@ export default function page() {
         ]}
         defaultFilter="all"
         items={inquiries ?? []}
-        filterFn={(item, filter) => (item as Inquiry).userStatus === filter}
+        filterFn={(item, filter) => (item as Inquiry).status.user === filter}
         renderItem={(item) => {
           const inquiry = item as Inquiry;
           return (
@@ -50,27 +50,27 @@ export default function page() {
               }
               rightComponent={
                 <InquiryStatusTag
-                  userStatus={inquiry.userStatus}
-                  companyStatus={inquiry.companyStatus}
+                  userStatus={inquiry.status.user}
+                  companyStatus={inquiry.status.company}
                 />
               }
               icon="MessageSquare"
               iconBackgroundColor="bg-inquiry-surface"
               iconColor="text-inquiry"
               items={[
-                ...(inquiry.agreedPrice
+                ...(inquiry.pricing.agreedPrice
                   ? [
                       {
-                        content: `${inquiry.agreedPrice} Kč`,
-                        icon: "Tag" as keyof typeof icons,
-                      },
+                        content: `${inquiry.pricing.agreedPrice} Kč`,
+                        icon: "Tag",
+                      } as const,
                     ]
-                  : inquiry.quotedPrice
+                  : inquiry.pricing.quotedPrice
                     ? [
                         {
-                          content: `${inquiry.quotedPrice} Kč`,
-                          icon: "Tag" as keyof typeof icons,
-                        },
+                          content: `${inquiry.pricing.quotedPrice} Kč`,
+                          icon: "Tag",
+                        } as const,
                       ]
                     : []),
               ]}

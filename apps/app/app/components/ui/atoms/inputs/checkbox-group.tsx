@@ -9,8 +9,8 @@ type Item = { id: string; name: string };
 
 type Props = {
   items: Item[];
-  value: string[];
-  onChange: (value: string[]) => void;
+  value: Item[];
+  onChange: (value: Item[]) => void;
   label?: string;
   checkColor?: string;
   columns?: string;
@@ -20,11 +20,8 @@ type Props = {
   disabled?: boolean;
   closed?: boolean;
   closedMessage?: string;
+  isLoading?: boolean;
 };
-
-function toggleItem(arr: string[], id: string, checked: boolean) {
-  return checked ? [...arr, id] : arr.filter((x) => x !== id);
-}
 
 export default function CheckboxGroup({
   items,
@@ -32,13 +29,14 @@ export default function CheckboxGroup({
   onChange,
   label,
   checkColor = "text-primary",
-  columns = "grid-cols-[repeat(auto-fit,minmax(130px,1fr))]",
+  columns = "grid-cols-[repeat(auto-fit,minmax(150px,1fr))]",
   searchable = false,
   defaultSearchValue = "",
   onSearchChange,
   disabled = false,
   closed = false,
   closedMessage,
+  isLoading = false,
 }: Props) {
   const [query, setQuery] = useState(defaultSearchValue);
 
@@ -81,15 +79,17 @@ export default function CheckboxGroup({
 
           {value.length > 0 && (
             <div className="flex flex-wrap gap-1.5 py-2">
-              {value.map((id) => (
+              {value.map((item) => (
                 <button
-                  key={id}
+                  key={item.id}
                   type="button"
-                  onClick={() => onChange(toggleItem(value, id, false))}
+                  onClick={() =>
+                    onChange(value.filter((i) => i.id !== item.id))
+                  }
                   disabled={disabled}
                   className="inline-flex items-center cursor-pointer gap-1 px-2 py-0.5 rounded-md text-xs font-medium bg-zinc-100 text-zinc-700 hover:bg-zinc-200 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                 >
-                  {seenNames.current[id] ?? id}
+                  {seenNames.current[item.id] ?? item.name}
                   <X className="w-3 h-3 shrink-0" />
                 </button>
               ))}
@@ -101,26 +101,36 @@ export default function CheckboxGroup({
               searchable ? "min-h-52 max-h-52 overflow-y-auto pr-1" : ""
             }
           >
-            <div
-              className={`grid ${columns} gap-2 gap-x-4 ${disabled ? "opacity-40 pointer-events-none" : ""}`}
-            >
-              {items.map((item) => (
-                <Checkbox
-                  key={item.id}
-                  checked={value.includes(item.id)}
-                  onChange={(checked) =>
-                    onChange(toggleItem(value, item.id, checked))
-                  }
-                  label={item.name}
-                  checkColor={checkColor}
-                />
-              ))}
-              {items.length === 0 && (
-                <p className="col-span-full text-xs text-zinc-400 py-2">
-                  Žádné výsledky
-                </p>
-              )}
-            </div>
+            {isLoading ? (
+              <div className="flex justify-center py-4">
+                <div className="w-4 h-4 border-2 border-zinc-300 border-t-transparent rounded-full animate-spin" />
+              </div>
+            ) : (
+              <div
+                className={`grid ${columns} gap-2 gap-x-4 ${disabled ? "opacity-40 pointer-events-none" : ""}`}
+              >
+                {items.map((item) => (
+                  <Checkbox
+                    key={item.id}
+                    checked={value.some((i) => i.id === item.id)}
+                    onChange={(checked) =>
+                      onChange(
+                        checked
+                          ? [...value, { id: item.id, name: item.name }]
+                          : value.filter((i) => i.id !== item.id),
+                      )
+                    }
+                    label={item.name}
+                    checkColor={checkColor}
+                  />
+                ))}
+                {items.length === 0 && (
+                  <p className="col-span-full text-xs text-zinc-400 py-2">
+                    Žádné výsledky
+                  </p>
+                )}
+              </div>
+            )}
           </div>
         </>
       )}

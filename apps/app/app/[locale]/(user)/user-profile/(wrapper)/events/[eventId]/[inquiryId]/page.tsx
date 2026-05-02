@@ -41,7 +41,7 @@ export default function page() {
   if (isPending) return <Loader text="Načítám poptávku..." />;
   if (!inquiry) return null;
 
-  const status = INQUIRY_STATUS[aggregateInquiryStatus(inquiry)];
+  const status = INQUIRY_STATUS[aggregateInquiryStatus(inquiry.status)];
   const listingName =
     typeof inquiry.listing.value === "string"
       ? "Poptávka"
@@ -71,19 +71,16 @@ export default function page() {
           { icon: "Tag", text: t(`listings.type.${inquiry.listingType}`) },
           {
             icon: "Clock",
-            text: `Odesláno ${format(new Date(inquiry.sentAt), "d. M. yyyy", { locale: cs })}`,
+            text: `Odesláno ${format(new Date(inquiry.activity.sentAt), "d. M. yyyy", { locale: cs })}`,
           },
           { icon: "User", text: customerName },
         ]}
       />
       <div className="bg-white rounded-2xl border border-zinc-200 px-8 py-5">
-        <InquiryTimeline
-          userStatus={inquiry.userStatus}
-          companyStatus={inquiry.companyStatus}
-        />
+        <InquiryTimeline status={inquiry.status} />
       </div>
-      {inquiry.userStatus === "confirmed" &&
-        inquiry.companyStatus === "confirmed" && (
+      {inquiry.status.user === "confirmed" &&
+        inquiry.status.company === "confirmed" && (
           <AlertSection
             icon={Check}
             iconBg="bg-success-surface"
@@ -94,7 +91,7 @@ export default function page() {
             bgColor="bg-success-surface"
           />
         )}
-      {inquiry.userStatus === "confirmed" && (
+      {inquiry.status.user === "confirmed" && (
         <AlertSection
           icon={Check}
           iconBg="bg-success-surface"
@@ -105,7 +102,7 @@ export default function page() {
           bgColor="bg-success-surface/40"
         />
       )}
-      {inquiry.userStatus === "cancelled" && (
+      {inquiry.status.user === "cancelled" && (
         <AlertSection
           icon={X}
           iconBg="bg-danger-surface"
@@ -121,7 +118,7 @@ export default function page() {
       <ControlSection
         rows={[
           {
-            disabled: inquiry.userStatus === "confirmed",
+            disabled: inquiry.status.user === "confirmed",
             title: "Potvrdit poptávku",
             text: "Potvzením poptávky uzavíráte dohodu s firmou. Z vaší strany již budou podmínky neměnné",
             icon: "Check",

@@ -970,7 +970,24 @@ export interface ChatMessage {
   inquiry: string | Inquiry;
   sender: string | User;
   senderType: 'user' | 'company';
-  content: string;
+  content?:
+    | (
+        | {
+            text?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'text';
+          }
+        | {
+            text?: string | null;
+            answer?: string | null;
+            answeredAt?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'question';
+          }
+      )[]
+    | null;
   sentAt: string;
   readAt?: string | null;
   updatedAt: string;
@@ -982,17 +999,6 @@ export interface ChatMessage {
  */
 export interface Inquiry {
   id: string;
-  companyStatus: 'pending' | 'confirmed' | 'cancelled';
-  userStatus: 'pending' | 'confirmed' | 'cancelled';
-  pricingMode: 'fixed' | 'open';
-  quotedPrice?: number | null;
-  agreedPrice?: number | null;
-  customRequest?: string | null;
-  sentAt: string;
-  lastCompanyMessageSentAt?: string | null;
-  lastUserMessageSentAt?: string | null;
-  lastUserSeenAt?: string | null;
-  lastCompanySeenAt?: string | null;
   user: string | User;
   listing: {
     relationTo: 'listings';
@@ -1004,6 +1010,51 @@ export interface Inquiry {
     relationTo: 'variants';
     value: string | Variant;
   } | null;
+  request?: {
+    note?: string | null;
+    requirements?:
+      | {
+          text?: string | null;
+          id?: string | null;
+        }[]
+      | null;
+  };
+  status: {
+    company: 'pending' | 'confirmed' | 'cancelled';
+    user: 'pending' | 'confirmed' | 'cancelled';
+  };
+  pricing: {
+    mode: 'fixed' | 'open';
+    quotedPrice?: number | null;
+    agreedPrice?: number | null;
+  };
+  activity: {
+    sentAt: string;
+    lastCompanyMessageSentAt?: string | null;
+    lastUserMessageSentAt?: string | null;
+    lastUserSeenAt?: string | null;
+    lastCompanySeenAt?: string | null;
+  };
+  snapshots?: {
+    listing?:
+      | {
+          [k: string]: unknown;
+        }
+      | unknown[]
+      | string
+      | number
+      | boolean
+      | null;
+    variant?:
+      | {
+          [k: string]: unknown;
+        }
+      | unknown[]
+      | string
+      | number
+      | boolean
+      | null;
+  };
   updatedAt: string;
   createdAt: string;
 }
@@ -2081,7 +2132,26 @@ export interface ChatMessagesSelect<T extends boolean = true> {
   inquiry?: T;
   sender?: T;
   senderType?: T;
-  content?: T;
+  content?:
+    | T
+    | {
+        text?:
+          | T
+          | {
+              text?: T;
+              id?: T;
+              blockName?: T;
+            };
+        question?:
+          | T
+          | {
+              text?: T;
+              answer?: T;
+              answeredAt?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
   sentAt?: T;
   readAt?: T;
   updatedAt?: T;
@@ -2092,22 +2162,50 @@ export interface ChatMessagesSelect<T extends boolean = true> {
  * via the `definition` "inquiries_select".
  */
 export interface InquiriesSelect<T extends boolean = true> {
-  companyStatus?: T;
-  userStatus?: T;
-  pricingMode?: T;
-  quotedPrice?: T;
-  agreedPrice?: T;
-  customRequest?: T;
-  sentAt?: T;
-  lastCompanyMessageSentAt?: T;
-  lastUserMessageSentAt?: T;
-  lastUserSeenAt?: T;
-  lastCompanySeenAt?: T;
   user?: T;
   listing?: T;
   event?: T;
   listingType?: T;
   variant?: T;
+  request?:
+    | T
+    | {
+        note?: T;
+        requirements?:
+          | T
+          | {
+              text?: T;
+              id?: T;
+            };
+      };
+  status?:
+    | T
+    | {
+        company?: T;
+        user?: T;
+      };
+  pricing?:
+    | T
+    | {
+        mode?: T;
+        quotedPrice?: T;
+        agreedPrice?: T;
+      };
+  activity?:
+    | T
+    | {
+        sentAt?: T;
+        lastCompanyMessageSentAt?: T;
+        lastUserMessageSentAt?: T;
+        lastUserSeenAt?: T;
+        lastCompanySeenAt?: T;
+      };
+  snapshots?:
+    | T
+    | {
+        listing?: T;
+        variant?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
 }

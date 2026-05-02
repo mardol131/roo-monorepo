@@ -1,20 +1,41 @@
-import { MOCK_VARIANTS } from "@/app/_mock/mock";
+import {
+  getCollection,
+  getCollectionItem,
+  postCollectionItem,
+} from "@/app/functions/api/general";
 import { PayloadResponse, Variant } from "@roo/common";
-
-const baseUrl = `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/variants`;
+import { CreateListingPayload } from "../listings/fetch";
 
 export async function fetchVariantsByListing(
   listingId: string,
 ): Promise<PayloadResponse<Variant>> {
-  const res = await fetch(`${baseUrl}?listingId=${listingId}`).then((res) =>
-    res.json(),
-  );
+  const res = await getCollection({
+    collection: "variants",
+    query: { listing: { equals: listingId } },
+  });
   if (!res) throw new Error("Failed to fetch variants");
   return res;
 }
 
 export async function fetchVariant(id: string) {
-  const res = MOCK_VARIANTS.find((variant) => variant.id === id);
+  const res = await getCollectionItem({
+    collection: "variants",
+    id,
+  });
   if (!res) throw new Error("Failed to fetch variant");
+  return res;
+}
+
+export type CreateVariantPayload = Omit<
+  Variant,
+  "id" | "createdAt" | "updatedAt"
+>;
+
+export async function createVariant(data: CreateVariantPayload) {
+  const res = await postCollectionItem({
+    collection: "variants",
+    data,
+  });
+  if (!res) throw new Error("Failed to create variant");
   return res;
 }

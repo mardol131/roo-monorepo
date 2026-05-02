@@ -45,23 +45,23 @@ export default function page() {
               items={[
                 {
                   icon: "Banknote",
-                  content: `${inquiry.quotedPrice ? `${inquiry.quotedPrice} Kč (nabídka)` : inquiry.agreedPrice ? `${inquiry.agreedPrice} Kč (dohodnutá cena)` : "Cena neuvedena"}`,
+                  content: `${inquiry.pricing.quotedPrice ? `${inquiry.pricing.quotedPrice} Kč (nabídka)` : inquiry.pricing.agreedPrice ? `${inquiry.pricing.agreedPrice} Kč (dohodnutá cena)` : "Cena neuvedena"}`,
                 },
                 {
                   icon: "Calendar",
-                  content: `${inquiry.customRequest ? "Zákaznická poptávka" : "Standardní poptávka"}`,
+                  content: `${inquiry.variant ? "Varianta" : "Zákaznická poptávka"}`,
                 },
               ]}
               labelComponent={
                 <span className="w-2 h-2 rounded-full bg-rose-500 shrink-0 self-center" />
               }
               rightComponent={
-                inquiry.lastUserMessageSentAt ? (
+                inquiry.activity.lastUserMessageSentAt ? (
                   <EntityComponentTag
                     bgColor="bg-zinc-100"
                     textColor="text-text-light"
                     text={format(
-                      new Date(inquiry.lastUserMessageSentAt),
+                      new Date(inquiry.activity.lastUserMessageSentAt),
                       "dd.MM.yyyy",
                     )}
                   />
