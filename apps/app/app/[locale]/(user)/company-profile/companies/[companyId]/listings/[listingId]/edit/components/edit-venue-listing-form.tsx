@@ -1,7 +1,10 @@
 "use client";
 
 import { FormSection } from "@/app/[locale]/(user)/components/form-section";
-import FormToc, { TocGroup } from "@/app/[locale]/(user)/components/form-toc";
+import FormToc, {
+  TocGroup,
+  TocSection,
+} from "@/app/[locale]/(user)/components/form-toc";
 import Button from "@/app/components/ui/atoms/button";
 import InputLabel from "@/app/components/ui/atoms/input-label";
 import Checkbox from "@/app/components/ui/atoms/inputs/checkbox";
@@ -16,28 +19,6 @@ import { Textarea } from "@/app/components/ui/atoms/inputs/textarea";
 import { useListing } from "@/app/react-query/listings/hooks";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { uploadFileToCloud } from "@roo/common";
-import {
-  Activity,
-  Banknote,
-  BookOpen,
-  Building2,
-  Calendar,
-  CircleHelp,
-  Coffee,
-  Image,
-  MapPin,
-  Maximize2,
-  Monitor,
-  Package,
-  ParkingSquare,
-  ScrollText,
-  Star,
-  Trophy,
-  Truck,
-  UserCheck,
-  Users,
-  Warehouse,
-} from "lucide-react";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Controller, useFieldArray, useForm } from "react-hook-form";
@@ -57,61 +38,93 @@ import { usePersonnel } from "@/app/react-query/filters/personnel/hooks";
 
 // ── TOC groups (exported for page sidebar) ────────────────────────────────────
 
+// ── TOC ───────────────────────────────────────────────────────────────────────
+
+const S: Record<string, TocSection> = {
+  basic: {
+    id: "section-basic",
+    title: "Základní informace",
+    icon: "Building2",
+  },
+  price: { id: "section-price", title: "Cena", icon: "Banknote" },
+  images: {
+    id: "section-images",
+    title: "Obrázky",
+    icon: "Image",
+    subTitle: "Podporované formáty: jpg, png, webp",
+  },
+  location: { id: "section-location", title: "Lokalita", icon: "MapPin" },
+  capacity: {
+    id: "section-capacity",
+    title: "Kapacita a prostor",
+    icon: "Maximize2",
+  },
+  placeTypes: {
+    id: "section-place-types",
+    title: "Typ místa",
+    icon: "Building2",
+  },
+  eventTypes: {
+    id: "section-event-types",
+    title: "Typy akcí",
+    icon: "Calendar",
+  },
+  activities: { id: "section-activities", title: "Aktivity", icon: "Activity" },
+  activityAddons: {
+    id: "section-activity-addons",
+    title: "Příplatky za aktivity",
+    icon: "Trophy",
+  },
+  services: { id: "section-services", title: "Služby", icon: "Star" },
+  personnel: { id: "section-personnel", title: "Personál", icon: "UserCheck" },
+  amenities: { id: "section-amenities", title: "Vybavení", icon: "Package" },
+  technology: {
+    id: "section-technology",
+    title: "Technologie",
+    icon: "Monitor",
+  },
+  storage: { id: "section-storage", title: "Skladování", icon: "Warehouse" },
+  rules: { id: "section-rules", title: "Pravidla", icon: "ScrollText" },
+  access: {
+    id: "section-access",
+    title: "Přístup a zásobování",
+    icon: "Truck",
+  },
+  parking: { id: "section-parking", title: "Parkování", icon: "ParkingSquare" },
+  breakfast: { id: "section-breakfast", title: "Snídaně", icon: "Coffee" },
+  employees: { id: "section-employees", title: "Zaměstnanci", icon: "Users" },
+  faq: { id: "section-faq", title: "FAQ", icon: "CircleHelp" },
+  references: {
+    id: "section-references",
+    title: "Reference",
+    icon: "BookOpen",
+  },
+};
+
 export const VENUE_FORM_GROUPS: readonly TocGroup[] = [
   {
     label: "Základní",
-    sections: [
-      { id: "section-basic", title: "Základní informace", icon: Building2 },
-      { id: "section-price", title: "Cena", icon: Banknote },
-      { id: "section-images", title: "Obrázky", icon: Image },
-      { id: "section-location", title: "Lokalita", icon: MapPin },
-    ],
+    sections: [S.basic, S.price, S.images, S.location],
   },
   {
     label: "Prostor",
-    sections: [
-      { id: "section-capacity", title: "Kapacita a prostor", icon: Maximize2 },
-      { id: "section-place-types", title: "Typ místa", icon: Building2 },
-    ],
+    sections: [S.capacity, S.placeTypes],
   },
   {
     label: "Program a nabídka",
-    sections: [
-      { id: "section-event-types", title: "Typy akcí", icon: Calendar },
-      { id: "section-activities", title: "Aktivity", icon: Activity },
-      {
-        id: "section-activity-addons",
-        title: "Příplatky za aktivity",
-        icon: Trophy,
-      },
-      { id: "section-services", title: "Služby", icon: Star },
-    ],
+    sections: [S.eventTypes, S.activities, S.activityAddons, S.services],
   },
   {
     label: "Vybavenost",
-    sections: [
-      { id: "section-personnel", title: "Personál", icon: UserCheck },
-      { id: "section-amenities", title: "Vybavení", icon: Package },
-      { id: "section-technology", title: "Technologie", icon: Monitor },
-    ],
+    sections: [S.personnel, S.amenities, S.technology],
   },
   {
     label: "Logistika",
-    sections: [
-      { id: "section-storage", title: "Skladování", icon: Warehouse },
-      { id: "section-rules", title: "Pravidla", icon: ScrollText },
-      { id: "section-access", title: "Přístup a zásobování", icon: Truck },
-      { id: "section-parking", title: "Parkování", icon: ParkingSquare },
-      { id: "section-breakfast", title: "Snídaně", icon: Coffee },
-    ],
+    sections: [S.storage, S.rules, S.access, S.parking, S.breakfast],
   },
   {
     label: "Prezentace",
-    sections: [
-      { id: "section-employees", title: "Zaměstnanci", icon: Users },
-      { id: "section-faq", title: "FAQ", icon: CircleHelp },
-      { id: "section-references", title: "Reference", icon: BookOpen },
-    ],
+    sections: [S.employees, S.faq, S.references],
   },
 ];
 
@@ -573,9 +586,10 @@ export default function EditVenueListingForm({
       <div className="flex w-full flex-col gap-4">
         {/* ── 1. Základní informace ─────────────────────────────────────────────── */}
         <FormSection
-          id="section-basic"
-          icon={Building2}
-          title="Základní informace"
+          id={S.basic.id}
+          icon={S.basic.icon}
+          title={S.basic.title}
+          subtitle={S.basic.subTitle}
           color="text-listing"
           surfaceColor="bg-listing-surface"
         >
@@ -637,11 +651,12 @@ export default function EditVenueListingForm({
 
         {/* ── 2. Cena ───────────────────────────────────────────────────────────── */}
         <FormSection
+          id={S.price.id}
+          icon={S.price.icon}
+          title={S.price.title}
+          subtitle={S.price.subTitle}
           color="text-listing"
           surfaceColor="bg-listing-surface"
-          id="section-price"
-          icon={Banknote}
-          title="Cena"
         >
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Input
@@ -659,10 +674,10 @@ export default function EditVenueListingForm({
 
         {/* ── 3. Obrázky ────────────────────────────────────────────────────────── */}
         <FormSection
-          id="section-images"
-          icon={Image}
-          title="Obrázky"
-          subtitle="Podporované formáty: jpg, png, webp"
+          id={S.images.id}
+          icon={S.images.icon}
+          title={S.images.title}
+          subtitle={S.images.subTitle}
           color="text-listing"
           surfaceColor="bg-listing-surface"
         >
@@ -710,11 +725,12 @@ export default function EditVenueListingForm({
 
         {/* ── 4. Lokalita ───────────────────────────────────────────────────────── */}
         <FormSection
+          id={S.location.id}
+          icon={S.location.icon}
+          title={S.location.title}
+          subtitle={S.location.subTitle}
           color="text-listing"
           surfaceColor="bg-listing-surface"
-          id="section-location"
-          icon={MapPin}
-          title="Lokalita"
         >
           <Input
             label="Adresa"
@@ -753,11 +769,12 @@ export default function EditVenueListingForm({
 
         {/* ── 5. Kapacita a prostor ─────────────────────────────────────────────── */}
         <FormSection
+          id={S.capacity.id}
+          icon={S.capacity.icon}
+          title={S.capacity.title}
+          subtitle={S.capacity.subTitle}
           color="text-listing"
           surfaceColor="bg-listing-surface"
-          id="section-capacity"
-          icon={Maximize2}
-          title="Kapacita a prostor"
         >
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Input
@@ -823,11 +840,12 @@ export default function EditVenueListingForm({
 
         {/* ── 6. Typ místa ──────────────────────────────────────────────────────── */}
         <FormSection
+          id={S.placeTypes.id}
+          icon={S.placeTypes.icon}
+          title={S.placeTypes.title}
+          subtitle={S.placeTypes.subTitle}
           color="text-listing"
           surfaceColor="bg-listing-surface"
-          id="section-place-types"
-          icon={Building2}
-          title="Typ místa"
         >
           <Controller
             control={control}
@@ -846,11 +864,12 @@ export default function EditVenueListingForm({
 
         {/* ── 7. Typy akcí ─────────────────────────────────────────────────────── */}
         <FormSection
+          id={S.eventTypes.id}
+          icon={S.eventTypes.icon}
+          title={S.eventTypes.title}
+          subtitle={S.eventTypes.subTitle}
           color="text-listing"
           surfaceColor="bg-listing-surface"
-          id="section-event-types"
-          icon={Calendar}
-          title="Typy akcí"
         >
           <Controller
             control={control}
@@ -869,11 +888,12 @@ export default function EditVenueListingForm({
 
         {/* ── 7. Aktivity ──────────────────────────────────────────────────────── */}
         <FormSection
+          id={S.activities.id}
+          icon={S.activities.icon}
+          title={S.activities.title}
+          subtitle={S.activities.subTitle}
           color="text-listing"
           surfaceColor="bg-listing-surface"
-          id="section-activities"
-          icon={Activity}
-          title="Aktivity"
         >
           <Controller
             control={control}
@@ -892,9 +912,10 @@ export default function EditVenueListingForm({
 
         {/* ── 9. Příplatky za aktivity ──────────────────────────────────────────── */}
         <FormSection
-          id="section-activity-addons"
-          icon={Trophy}
-          title="Příplatky za aktivity"
+          id={S.activityAddons.id}
+          icon={S.activityAddons.icon}
+          title={S.activityAddons.title}
+          subtitle={S.activityAddons.subTitle}
           color="text-listing"
           surfaceColor="bg-listing-surface"
         >
@@ -974,11 +995,12 @@ export default function EditVenueListingForm({
 
         {/* ── 10. Služby ────────────────────────────────────────────────────────── */}
         <FormSection
+          id={S.services.id}
+          icon={S.services.icon}
+          title={S.services.title}
+          subtitle={S.services.subTitle}
           color="text-listing"
           surfaceColor="bg-listing-surface"
-          id="section-services"
-          icon={Star}
-          title="Služby"
         >
           <Controller
             control={control}
@@ -997,11 +1019,12 @@ export default function EditVenueListingForm({
 
         {/* ── 11. Personál ──────────────────────────────────────────────────────── */}
         <FormSection
+          id={S.personnel.id}
+          icon={S.personnel.icon}
+          title={S.personnel.title}
+          subtitle={S.personnel.subTitle}
           color="text-listing"
           surfaceColor="bg-listing-surface"
-          id="section-personnel"
-          icon={UserCheck}
-          title="Personál"
         >
           <Controller
             control={control}
@@ -1020,11 +1043,12 @@ export default function EditVenueListingForm({
 
         {/* ── 9. Vybavení ──────────────────────────────────────────────────────── */}
         <FormSection
+          id={S.amenities.id}
+          icon={S.amenities.icon}
+          title={S.amenities.title}
+          subtitle={S.amenities.subTitle}
           color="text-listing"
           surfaceColor="bg-listing-surface"
-          id="section-amenities"
-          icon={Package}
-          title="Vybavení"
         >
           <Controller
             control={control}
@@ -1043,11 +1067,12 @@ export default function EditVenueListingForm({
 
         {/* ── 10. Technologie ───────────────────────────────────────────────────── */}
         <FormSection
+          id={S.technology.id}
+          icon={S.technology.icon}
+          title={S.technology.title}
+          subtitle={S.technology.subTitle}
           color="text-listing"
           surfaceColor="bg-listing-surface"
-          id="section-technology"
-          icon={Monitor}
-          title="Technologie"
         >
           <Controller
             control={control}
@@ -1066,11 +1091,12 @@ export default function EditVenueListingForm({
 
         {/* ── 14. Skladování ────────────────────────────────────────────────────── */}
         <FormSection
+          id={S.storage.id}
+          icon={S.storage.icon}
+          title={S.storage.title}
+          subtitle={S.storage.subTitle}
           color="text-listing"
           surfaceColor="bg-listing-surface"
-          id="section-storage"
-          icon={Warehouse}
-          title="Skladování"
         >
           <RepeaterField
             label="Skladovací prostory"
@@ -1104,11 +1130,12 @@ export default function EditVenueListingForm({
 
         {/* ── 15. Pravidla ──────────────────────────────────────────────────────── */}
         <FormSection
+          id={S.rules.id}
+          icon={S.rules.icon}
+          title={S.rules.title}
+          subtitle={S.rules.subTitle}
           color="text-listing"
           surfaceColor="bg-listing-surface"
-          id="section-rules"
-          icon={ScrollText}
-          title="Pravidla"
         >
           <Controller
             control={control}
@@ -1156,9 +1183,10 @@ export default function EditVenueListingForm({
 
         {/* ── 16. Přístup ───────────────────────────────────────────────────────── */}
         <FormSection
-          id="section-access"
-          icon={Truck}
-          title="Přístup a zásobování"
+          id={S.access.id}
+          icon={S.access.icon}
+          title={S.access.title}
+          subtitle={S.access.subTitle}
           color="text-listing"
           surfaceColor="bg-listing-surface"
         >
@@ -1228,11 +1256,12 @@ export default function EditVenueListingForm({
 
         {/* ── 12. Parkování ─────────────────────────────────────────────────────── */}
         <FormSection
+          id={S.parking.id}
+          icon={S.parking.icon}
+          title={S.parking.title}
+          subtitle={S.parking.subTitle}
           color="text-listing"
           surfaceColor="bg-listing-surface"
-          id="section-parking"
-          icon={ParkingSquare}
-          title="Parkování"
         >
           <Controller
             control={control}
@@ -1294,11 +1323,12 @@ export default function EditVenueListingForm({
 
         {/* ── 13. Snídaně ───────────────────────────────────────────────────────── */}
         <FormSection
+          id={S.breakfast.id}
+          icon={S.breakfast.icon}
+          title={S.breakfast.title}
+          subtitle={S.breakfast.subTitle}
           color="text-listing"
           surfaceColor="bg-listing-surface"
-          id="section-breakfast"
-          icon={Coffee}
-          title="Snídaně"
         >
           <Controller
             control={control}
@@ -1407,11 +1437,12 @@ export default function EditVenueListingForm({
 
         {/* ── 19. Zaměstnanci ───────────────────────────────────────────────────── */}
         <FormSection
+          id={S.employees.id}
+          icon={S.employees.icon}
+          title={S.employees.title}
+          subtitle={S.employees.subTitle}
           color="text-listing"
           surfaceColor="bg-listing-surface"
-          id="section-employees"
-          icon={Users}
-          title="Zaměstnanci"
         >
           <RepeaterField
             label="Zaměstnanci"
@@ -1478,9 +1509,10 @@ export default function EditVenueListingForm({
         <FormSection
           color="text-listing"
           surfaceColor="bg-listing-surface"
-          id="section-faq"
-          icon={CircleHelp}
-          title="FAQ"
+          id={S.faq.id}
+          icon={S.faq.icon}
+          title={S.faq.title}
+          subtitle={S.faq.subTitle}
         >
           <RepeaterField
             label="Často kladené otázky"
@@ -1557,9 +1589,10 @@ export default function EditVenueListingForm({
         <FormSection
           color="text-listing"
           surfaceColor="bg-listing-surface"
-          id="section-references"
-          icon={BookOpen}
-          title="Reference"
+          id={S.references.id}
+          icon={S.references.icon}
+          title={S.references.title}
+          subtitle={S.references.subTitle}
         >
           <RepeaterField
             label="Reference"

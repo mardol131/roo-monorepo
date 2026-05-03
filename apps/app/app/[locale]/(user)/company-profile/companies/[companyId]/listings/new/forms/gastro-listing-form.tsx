@@ -1,7 +1,10 @@
 "use client";
 
 import { FormSection } from "@/app/[locale]/(user)/components/form-section";
-import FormToc, { TocGroup } from "@/app/[locale]/(user)/components/form-toc";
+import FormToc, {
+  TocGroup,
+  TocSection,
+} from "@/app/[locale]/(user)/components/form-toc";
 import Button, { ButtonProps } from "@/app/components/ui/atoms/button";
 import Checkbox from "@/app/components/ui/atoms/inputs/checkbox";
 import CheckboxGroup from "@/app/components/ui/atoms/inputs/checkbox-group";
@@ -35,6 +38,7 @@ import { useDishTypes } from "@/app/react-query/filters/dish-types/hooks";
 import { useDietaryOptions } from "@/app/react-query/filters/dietary-options/hooks";
 import { useFoodServiceStyles } from "@/app/react-query/filters/food-service-styles/hooks";
 import { useNecessities } from "@/app/react-query/specific/necessities/hooks";
+import { useEventTypes } from "@/app/react-query/filters/event-types/hooks";
 
 // ── Schema ─────────────────────────────────────────────────────────────────────
 
@@ -75,59 +79,62 @@ const schema = z.object({
   hasAlcoholLicense: z.boolean().default(false),
   kidsMenu: z.boolean().default(false),
   necessities: z.array(itemSchema).default([]),
+  eventTypes: z.array(itemSchema).default([]),
 });
 
 type Inputs = z.infer<typeof schema>;
 
 // ── TOC ────────────────────────────────────────────────────────────────────────
 
-const SECTION_BASIC = {
-  id: "section-basic",
-  title: "Základní informace",
-  icon: Building2,
-};
-const SECTION_PRICE = { id: "section-price", title: "Cena", icon: Banknote };
-const SECTION_IMAGES = { id: "section-images", title: "Obrázky", icon: Image };
-const SECTION_LOCATION = {
-  id: "section-location",
-  title: "Místo působení",
-  icon: MapPin,
-};
-const SECTION_CAPACITY = {
-  id: "section-capacity",
-  title: "Kapacita",
-  icon: Users,
-};
-const SECTION_CUISINE = {
-  id: "section-cuisine",
-  title: "Kuchyně a styl",
-  icon: UtensilsCrossed,
-};
-const SECTION_EXTRAS = {
-  id: "section-extras",
-  title: "Doplňky",
-  icon: Package,
-};
-const SECTION_REQUIREMENTS = {
-  id: "section-requirements",
-  title: "Provozní požadavky",
-  icon: ClipboardList,
+const S: Record<string, TocSection> = {
+  basics: {
+    id: "section-basic",
+    title: "Základní informace",
+    icon: "Building2",
+  },
+  price: { id: "section-price", title: "Cena", icon: "Banknote" },
+  images: { id: "section-images", title: "Obrázky", icon: "Image" },
+  location: {
+    id: "section-location",
+    title: "Místo působení",
+    icon: "MapPin",
+  },
+  capacity: {
+    id: "section-capacity",
+    title: "Kapacita",
+    icon: "Users",
+  },
+  cuisine: {
+    id: "section-cuisine",
+    title: "Kuchyně a styl",
+    icon: "UtensilsCrossed",
+  },
+  extras: {
+    id: "section-extras",
+    title: "Doplňky",
+    icon: "Package",
+  },
+  requirements: {
+    id: "section-requirements",
+    title: "Provozní požadavky",
+    icon: "ClipboardList",
+  },
+  eventTypes: {
+    id: "section-event-types",
+    title: "Typy akcí",
+    icon: "Banknote",
+  },
 };
 
 const FORM_GROUPS: readonly TocGroup[] = [
   {
     label: "Základní",
-    sections: [SECTION_BASIC, SECTION_PRICE, SECTION_IMAGES],
+    sections: [S.basics, S.price, S.images],
   },
-  { label: "Místo působení", sections: [SECTION_LOCATION] },
+  { label: "Místo působení", sections: [S.location] },
   {
     label: "Nabídka",
-    sections: [
-      SECTION_CAPACITY,
-      SECTION_CUISINE,
-      SECTION_EXTRAS,
-      SECTION_REQUIREMENTS,
-    ],
+    sections: [S.capacity, S.cuisine, S.extras, S.requirements],
   },
 ];
 
@@ -182,6 +189,9 @@ export default function GastroListingForm({ onCancel }: Props) {
   const { data: necessities } = useNecessities({
     limit: 15,
   });
+  const { data: eventTypes } = useEventTypes({
+    limit: 15,
+  });
 
   function onSubmit(data: Inputs) {
     const payload: CreateListingPayload = {
@@ -193,6 +203,7 @@ export default function GastroListingForm({ onCancel }: Props) {
         gallery: data.images.gallery.map((url) => ({ url })),
       },
       price: { startsAt: data.price.startsAt },
+      eventTypes: data.eventTypes.map((i) => i.id),
       details: [
         {
           location: {
@@ -261,9 +272,10 @@ export default function GastroListingForm({ onCancel }: Props) {
       <div className="flex w-full flex-col gap-4">
         {/* ── Základní informace ──────────────────────────────────────────────── */}
         <FormSection
-          id={SECTION_BASIC.id}
-          icon={SECTION_BASIC.icon}
-          title={SECTION_BASIC.title}
+          id={S.basics.id}
+          icon={S.basics.icon}
+          title={S.basics.title}
+          subtitle={S.basics.subTitle}
           surfaceColor={COLOR_SCHEME.surface}
           color={COLOR_SCHEME.text}
           error={!!errors.name}
@@ -280,9 +292,10 @@ export default function GastroListingForm({ onCancel }: Props) {
 
         {/* ── Cena ────────────────────────────────────────────────────────────── */}
         <FormSection
-          id={SECTION_PRICE.id}
-          icon={SECTION_PRICE.icon}
-          title={SECTION_PRICE.title}
+          id={S.price.id}
+          icon={S.price.icon}
+          title={S.price.title}
+          subtitle={S.price.subTitle}
           surfaceColor={COLOR_SCHEME.surface}
           color={COLOR_SCHEME.text}
           error={!!errors.price?.startsAt}
@@ -303,10 +316,10 @@ export default function GastroListingForm({ onCancel }: Props) {
 
         {/* ── Obrázky ─────────────────────────────────────────────────────────── */}
         <FormSection
-          id={SECTION_IMAGES.id}
-          icon={SECTION_IMAGES.icon}
-          title={SECTION_IMAGES.title}
-          subtitle="Podporované formáty: jpg, png, webp"
+          id={S.images.id}
+          icon={S.images.icon}
+          title={S.images.title}
+          subtitle={S.images.subTitle}
           surfaceColor={COLOR_SCHEME.surface}
           color={COLOR_SCHEME.text}
           error={!!(errors.images?.coverImage || errors.images?.gallery)}
@@ -359,9 +372,10 @@ export default function GastroListingForm({ onCancel }: Props) {
 
         {/* ── Místo působení ──────────────────────────────────────────────────── */}
         <FormSection
-          id={SECTION_LOCATION.id}
-          icon={SECTION_LOCATION.icon}
-          title={SECTION_LOCATION.title}
+          id={S.location.id}
+          icon={S.location.icon}
+          title={S.location.title}
+          subtitle={S.location.subTitle}
           surfaceColor={COLOR_SCHEME.surface}
           color={COLOR_SCHEME.text}
           error={!!errors.location?.regions}
@@ -432,9 +446,10 @@ export default function GastroListingForm({ onCancel }: Props) {
 
         {/* ── Kapacita ────────────────────────────────────────────────────────── */}
         <FormSection
-          id={SECTION_CAPACITY.id}
-          icon={SECTION_CAPACITY.icon}
-          title={SECTION_CAPACITY.title}
+          id={S.capacity.id}
+          icon={S.capacity.icon}
+          title={S.capacity.title}
+          subtitle={S.capacity.subTitle}
           surfaceColor={COLOR_SCHEME.surface}
           color={COLOR_SCHEME.text}
           error={!!errors.capacity}
@@ -463,11 +478,37 @@ export default function GastroListingForm({ onCancel }: Props) {
           </div>
         </FormSection>
 
+        {/* ── Typy eventů ──────────────────────────────────────────────────── */}
+        <FormSection
+          id={S.eventTypes.id}
+          icon={S.eventTypes.icon}
+          title={S.eventTypes.title}
+          subtitle={S.eventTypes.subTitle}
+          surfaceColor={COLOR_SCHEME.surface}
+          color={COLOR_SCHEME.text}
+        >
+          <Controller
+            control={control}
+            name="eventTypes"
+            render={({ field }) => (
+              <CheckboxGroup
+                searchable
+                label="Typy eventů"
+                items={eventTypes?.docs ?? []}
+                value={field.value}
+                onChange={field.onChange}
+                checkColor={COLOR_SCHEME.text}
+              />
+            )}
+          />
+        </FormSection>
+
         {/* ── Kuchyně a styl ──────────────────────────────────────────────────── */}
         <FormSection
-          id={SECTION_CUISINE.id}
-          icon={SECTION_CUISINE.icon}
-          title={SECTION_CUISINE.title}
+          id={S.cuisine.id}
+          icon={S.cuisine.icon}
+          title={S.cuisine.title}
+          subtitle={S.cuisine.subTitle}
           surfaceColor={COLOR_SCHEME.surface}
           color={COLOR_SCHEME.text}
         >
@@ -531,9 +572,10 @@ export default function GastroListingForm({ onCancel }: Props) {
 
         {/* ── Doplňky ─────────────────────────────────────────────────────────── */}
         <FormSection
-          id={SECTION_EXTRAS.id}
-          icon={SECTION_EXTRAS.icon}
-          title={SECTION_EXTRAS.title}
+          id={S.extras.id}
+          icon={S.extras.icon}
+          title={S.extras.title}
+          subtitle={S.extras.subTitle}
           surfaceColor={COLOR_SCHEME.surface}
           color={COLOR_SCHEME.text}
         >
@@ -567,9 +609,10 @@ export default function GastroListingForm({ onCancel }: Props) {
 
         {/* ── Provozní požadavky ──────────────────────────────────────────────── */}
         <FormSection
-          id={SECTION_REQUIREMENTS.id}
-          icon={SECTION_REQUIREMENTS.icon}
-          title={SECTION_REQUIREMENTS.title}
+          id={S.requirements.id}
+          icon={S.requirements.icon}
+          title={S.requirements.title}
+          subtitle={S.requirements.subTitle}
           surfaceColor={COLOR_SCHEME.surface}
           color={COLOR_SCHEME.text}
         >

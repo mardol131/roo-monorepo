@@ -1,7 +1,10 @@
 "use client";
 
 import { FormSection } from "@/app/[locale]/(user)/components/form-section";
-import FormToc, { TocGroup } from "@/app/[locale]/(user)/components/form-toc";
+import FormToc, {
+  TocGroup,
+  TocSection,
+} from "@/app/[locale]/(user)/components/form-toc";
 import Button from "@/app/components/ui/atoms/button";
 import Input from "@/app/components/ui/atoms/inputs/input";
 import ImageInput from "@/app/components/ui/atoms/inputs/images/image-input";
@@ -16,27 +19,29 @@ import { useTranslations } from "next-intl";
 import PhoneInput from "@/app/components/ui/atoms/inputs/phone-input";
 import { CreateCompanyPayload } from "@/app/react-query/companies/fetch";
 
-const SECTION_BASIC = {
-  id: "section-basic",
-  title: "Základní informace",
-  icon: Building2,
+const S: Record<string, TocSection> = {
+  basic: {
+    id: "section-basic",
+    title: "Základní informace",
+    icon: "Building2",
+  },
+  contact: {
+    id: "section-contact",
+    title: "Kontaktní údaje",
+    icon: "Phone",
+  },
+  address: {
+    id: "section-address",
+    title: "Fakturační adresa",
+    icon: "MapPin",
+  },
+  tax: { id: "section-tax", title: "Daňové údaje", icon: "Receipt" },
 };
-const SECTION_CONTACT = {
-  id: "section-contact",
-  title: "Kontaktní údaje",
-  icon: Phone,
-};
-const SECTION_ADDRESS = {
-  id: "section-address",
-  title: "Fakturační adresa",
-  icon: MapPin,
-};
-const SECTION_TAX = { id: "section-tax", title: "Daňové údaje", icon: Receipt };
 
 export const COMPANY_FORM_GROUPS: readonly TocGroup[] = [
   {
     label: "Informace",
-    sections: [SECTION_BASIC, SECTION_CONTACT, SECTION_ADDRESS, SECTION_TAX],
+    sections: [S.basic, S.contact, S.address, S.tax],
   },
 ];
 
@@ -99,9 +104,10 @@ export default function CompanyForm({
       <div className="flex w-full flex-col gap-4">
         {/* Section 1 — Základní informace */}
         <FormSection
-          id={SECTION_BASIC.id}
-          icon={Building2}
-          title="Základní informace"
+          id={S.basic.id}
+          icon={S.basic.icon}
+          title={S.basic.title}
+          subtitle={S.basic.subTitle}
           error={Boolean(errors.name || errors.ico)}
         >
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -144,9 +150,10 @@ export default function CompanyForm({
 
         {/* Section 2 — Kontaktní údaje */}
         <FormSection
-          id={SECTION_CONTACT.id}
-          icon={Phone}
-          title="Kontaktní údaje"
+          id={S.contact.id}
+          icon={S.contact.icon}
+          title={S.contact.title}
+          subtitle={S.contact.subTitle}
           error={Boolean(errors.email || errors.phone)}
         >
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -178,9 +185,10 @@ export default function CompanyForm({
 
         {/* Section 3 — Fakturační adresa */}
         <FormSection
-          id={SECTION_ADDRESS.id}
-          icon={MapPin}
-          title="Fakturační adresa"
+          id={S.address.id}
+          icon={S.address.icon}
+          title={S.address.title}
+          subtitle={S.address.subTitle}
           error={Boolean(errors.billingAddress)}
         >
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -218,9 +226,10 @@ export default function CompanyForm({
 
         {/* Section 4 — Daňové údaje */}
         <FormSection
-          id={SECTION_TAX.id}
-          icon={Receipt}
-          title="Daňové údaje"
+          id={S.tax.id}
+          icon={S.tax.icon}
+          title={S.tax.title}
+          subtitle={S.tax.subTitle}
           error={Boolean(errors.vatId)}
         >
           <Input

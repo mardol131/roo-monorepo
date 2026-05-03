@@ -1,7 +1,10 @@
 "use client";
 
 import { FormSection } from "@/app/[locale]/(user)/components/form-section";
-import FormToc, { TocGroup } from "@/app/[locale]/(user)/components/form-toc";
+import FormToc, {
+  TocGroup,
+  TocSection,
+} from "@/app/[locale]/(user)/components/form-toc";
 import PageHeading from "@/app/[locale]/(user)/components/page-heading";
 import Button from "@/app/components/ui/atoms/button";
 import Checkbox from "@/app/components/ui/atoms/inputs/checkbox";
@@ -31,20 +34,43 @@ import { z } from "zod";
 
 // ── TOC ────────────────────────────────────────────────────────────────────────
 
+const S: Record<string, TocSection> = {
+  basics: {
+    id: "section-basic",
+    title: "Základní informace",
+    icon: "LayoutDashboard",
+  },
+  images: {
+    id: "section-images",
+    title: "Obrázky",
+    icon: "Image",
+  },
+  capacity: {
+    id: "section-capacity",
+    title: "Kapacita a plocha",
+    icon: "Maximize2",
+    subTitle: "Kolik lidí může prostor pojmout a jaká je jeho velikost.",
+  },
+  accommodation: {
+    id: "section-accommodation",
+    title: "Ubytování",
+    icon: "BedDouble",
+    subTitle:
+      "Nabízí prostor možnost ubytování? Pokud ano, jaká je kapacita ubytování a jaké typy pokojů jsou k dispozici?",
+  },
+  rules: {
+    id: "section-rules",
+    title: "Pravidla prostoru",
+    icon: "ScrollText",
+    subTitle:
+      "Jaká pravidla platí pro využívání prostoru? Například zákaz kouření, povolení domácích mazlíčků, atd.",
+  },
+};
+
 const SPACE_FORM_GROUPS: readonly TocGroup[] = [
   {
     label: "Prostor",
-    sections: [
-      {
-        id: "section-basic",
-        title: "Základní informace",
-        icon: LayoutDashboard,
-      },
-      { id: "section-images", title: "Obrázky", icon: Image },
-      { id: "section-capacity", title: "Kapacita a plocha", icon: Maximize2 },
-      { id: "section-accommodation", title: "Ubytování", icon: BedDouble },
-      { id: "section-rules", title: "Pravidla prostoru", icon: ScrollText },
-    ],
+    sections: [S.basics, S.images, S.capacity, S.accommodation, S.rules],
   },
 ];
 
@@ -215,9 +241,10 @@ export default function NewSpacePage() {
         <div className="flex w-full flex-col gap-4">
           {/* ── 1. Základní informace ─────────────────────────────────────────── */}
           <FormSection
-            id="section-basic"
-            icon={TypeIcon}
-            title="Základní informace"
+            id={S.basics.id}
+            icon={S.basics.icon}
+            title={S.basics.title}
+            subtitle={S.basics.subTitle}
             surfaceColor="bg-space-surface"
             color="text-space"
           >
@@ -243,10 +270,10 @@ export default function NewSpacePage() {
 
           {/* ── 2. Obrázky ────────────────────────────────────────────────────── */}
           <FormSection
-            id="section-images"
-            icon={Image}
-            title="Obrázky"
-            subtitle="Podporované formáty: jpg, png, webp"
+            id={S.images.id}
+            icon={S.images.icon}
+            title={S.images.title}
+            subtitle={S.images.subTitle}
             surfaceColor="bg-space-surface"
             color="text-space"
           >
@@ -268,9 +295,10 @@ export default function NewSpacePage() {
 
           {/* ── 3. Kapacita a plocha ──────────────────────────────────────────── */}
           <FormSection
-            id="section-capacity"
-            icon={Maximize2}
-            title="Kapacita a plocha"
+            id={S.capacity.id}
+            icon={S.capacity.icon}
+            title={S.capacity.title}
+            subtitle={S.capacity.subTitle}
             surfaceColor="bg-space-surface"
             color="text-space"
           >
@@ -300,9 +328,10 @@ export default function NewSpacePage() {
 
           {/* ── 4. Ubytování ──────────────────────────────────────────────────── */}
           <FormSection
-            id="section-accommodation"
-            icon={BedDouble}
-            title="Ubytování"
+            id={S.accommodation.id}
+            icon={S.accommodation.icon}
+            title={S.accommodation.title}
+            subtitle={S.accommodation.subTitle}
             surfaceColor="bg-space-surface"
             color="text-space"
           >
@@ -425,9 +454,10 @@ export default function NewSpacePage() {
 
           {/* ── 5. Pravidla ───────────────────────────────────────────────────── */}
           <FormSection
-            id="section-rules"
-            icon={ScrollText}
-            title="Pravidla prostoru"
+            id={S.rules.id}
+            icon={S.rules.icon}
+            title={S.rules.title}
+            subtitle={S.rules.subTitle}
             surfaceColor="bg-space-surface"
             color="text-space"
           >

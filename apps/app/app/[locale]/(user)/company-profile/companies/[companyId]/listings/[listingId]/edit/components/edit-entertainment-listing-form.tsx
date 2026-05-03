@@ -41,7 +41,7 @@ const S: Record<string, TocSection> = {
     icon: "Building2",
   },
   price: { id: "section-price", title: "Cena", icon: "Banknote" },
-  images: { id: "section-images", title: "Obrázky", icon: "Image" },
+  images: { id: "section-images", title: "Obrázky", icon: "Image", subTitle: "Podporované formáty: jpg, png, webp" },
   location: { id: "section-location", title: "Místo působení", icon: "MapPin" },
   capacity: { id: "section-capacity", title: "Kapacita", icon: "Users" },
   entertainmentTypes: {
@@ -401,6 +401,7 @@ export default function EditEntertainmentListingForm({
           id={S.basic.id}
           icon={S.basic.icon}
           title={S.basic.title}
+          subtitle={S.basic.subTitle}
           color="text-listing"
           surfaceColor="bg-listing-surface"
         >
@@ -436,6 +437,7 @@ export default function EditEntertainmentListingForm({
           id={S.price.id}
           icon={S.price.icon}
           title={S.price.title}
+          subtitle={S.price.subTitle}
           color="text-listing"
           surfaceColor="bg-listing-surface"
         >
@@ -458,7 +460,7 @@ export default function EditEntertainmentListingForm({
           id={S.images.id}
           icon={S.images.icon}
           title={S.images.title}
-          subtitle="Podporované formáty: jpg, png, webp"
+          subtitle={S.images.subTitle}
           color="text-listing"
           surfaceColor="bg-listing-surface"
         >
@@ -509,6 +511,7 @@ export default function EditEntertainmentListingForm({
           id={S.location.id}
           icon={S.location.icon}
           title={S.location.title}
+          subtitle={S.location.subTitle}
           color="text-listing"
           surfaceColor="bg-listing-surface"
           error={!!errors.location?.regions}
@@ -582,6 +585,7 @@ export default function EditEntertainmentListingForm({
           id={S.capacity.id}
           icon={S.capacity.icon}
           title={S.capacity.title}
+          subtitle={S.capacity.subTitle}
           color="text-listing"
           surfaceColor="bg-listing-surface"
         >
@@ -614,6 +618,7 @@ export default function EditEntertainmentListingForm({
           id={S.entertainmentTypes.id}
           icon={S.entertainmentTypes.icon}
           title={S.entertainmentTypes.title}
+          subtitle={S.entertainmentTypes.subTitle}
           color="text-listing"
           surfaceColor="bg-listing-surface"
         >
@@ -637,6 +642,7 @@ export default function EditEntertainmentListingForm({
           id={S.audience.id}
           icon={S.audience.icon}
           title={S.audience.title}
+          subtitle={S.audience.subTitle}
           color="text-listing"
           surfaceColor="bg-listing-surface"
         >
@@ -670,6 +676,7 @@ export default function EditEntertainmentListingForm({
           id={S.logistics.id}
           icon={S.logistics.icon}
           title={S.logistics.title}
+          subtitle={S.logistics.subTitle}
           color="text-listing"
           surfaceColor="bg-listing-surface"
         >
@@ -702,6 +709,7 @@ export default function EditEntertainmentListingForm({
           id={S.eventTypes.id}
           icon={S.eventTypes.icon}
           title={S.eventTypes.title}
+          subtitle={S.eventTypes.subTitle}
           color="text-listing"
           surfaceColor="bg-listing-surface"
         >
@@ -725,6 +733,7 @@ export default function EditEntertainmentListingForm({
           id={S.personnel.id}
           icon={S.personnel.icon}
           title={S.personnel.title}
+          subtitle={S.personnel.subTitle}
           color="text-listing"
           surfaceColor="bg-listing-surface"
         >
@@ -748,6 +757,7 @@ export default function EditEntertainmentListingForm({
           id={S.necessities.id}
           icon={S.necessities.icon}
           title={S.necessities.title}
+          subtitle={S.necessities.subTitle}
           color="text-listing"
           surfaceColor="bg-listing-surface"
         >
@@ -865,6 +875,7 @@ export default function EditEntertainmentListingForm({
           id={S.faq.id}
           icon={S.faq.icon}
           title={S.faq.title}
+          subtitle={S.faq.subTitle}
           color="text-listing"
           surfaceColor="bg-listing-surface"
         >
@@ -944,6 +955,7 @@ export default function EditEntertainmentListingForm({
           id={S.references.id}
           icon={S.references.icon}
           title={S.references.title}
+          subtitle={S.references.subTitle}
           color="text-listing"
           surfaceColor="bg-listing-surface"
         >

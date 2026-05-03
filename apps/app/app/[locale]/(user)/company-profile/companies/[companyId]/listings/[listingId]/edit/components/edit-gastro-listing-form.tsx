@@ -1,7 +1,10 @@
 "use client";
 
 import { FormSection } from "@/app/[locale]/(user)/components/form-section";
-import FormToc, { TocGroup } from "@/app/[locale]/(user)/components/form-toc";
+import FormToc, {
+  TocGroup,
+  TocSection,
+} from "@/app/[locale]/(user)/components/form-toc";
 import Button from "@/app/components/ui/atoms/button";
 import InputLabel from "@/app/components/ui/atoms/input-label";
 import Checkbox from "@/app/components/ui/atoms/inputs/checkbox";
@@ -13,91 +16,68 @@ import RepeaterField from "@/app/components/ui/atoms/inputs/repeater-field";
 import SearchInput from "@/app/components/ui/atoms/inputs/search-input";
 import SelectInput from "@/app/components/ui/atoms/inputs/select-input";
 import { Textarea } from "@/app/components/ui/atoms/inputs/textarea";
-import { useListing } from "@/app/react-query/listings/hooks";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { uploadFileToCloud } from "@roo/common";
-import {
-  Banknote,
-  BookOpen,
-  Building2,
-  Calendar,
-  ChefHat,
-  CircleHelp,
-  Image,
-  MapPin,
-  Package,
-  ScrollText,
-  Star,
-  UserCheck,
-  Users,
-  Utensils,
-} from "lucide-react";
-import { useRegions } from "@/app/react-query/regions/hooks";
-import { useDistricts } from "@/app/react-query/districts/hooks";
+import { useRouter } from "@/app/i18n/navigation";
 import { useCities } from "@/app/react-query/cities/hooks";
+import { useDistricts } from "@/app/react-query/districts/hooks";
+import { useCuisines } from "@/app/react-query/filters/cuisines/hooks";
+import { useDietaryOptions } from "@/app/react-query/filters/dietary-options/hooks";
+import { useDishTypes } from "@/app/react-query/filters/dish-types/hooks";
+import { useEventTypes } from "@/app/react-query/filters/event-types/hooks";
+import { useFoodServiceStyles } from "@/app/react-query/filters/food-service-styles/hooks";
+import { usePersonnel } from "@/app/react-query/filters/personnel/hooks";
+import { useListing, useUpdateListing } from "@/app/react-query/listings/hooks";
+import { useRegions } from "@/app/react-query/regions/hooks";
+import { useNecessities } from "@/app/react-query/specific/necessities/hooks";
+import { useRules } from "@/app/react-query/specific/rules/hooks";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Listing, uploadFileToCloud } from "@roo/common";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Controller, useFieldArray, useForm } from "react-hook-form";
 import { z } from "zod";
-import { useRouter } from "@/app/i18n/navigation";
-import { useUpdateListing } from "@/app/react-query/listings/hooks";
-import { Listing } from "@roo/common";
-import { useActivities } from "@/app/react-query/filters/activities/hooks";
-import { useAmenities } from "@/app/react-query/filters/amenities/hooks";
-import { useEventTypes } from "@/app/react-query/filters/event-types/hooks";
-import { usePersonnel } from "@/app/react-query/filters/personnel/hooks";
-import { usePlaceTypes } from "@/app/react-query/filters/place-types/hooks";
-import { useRules } from "@/app/react-query/specific/rules/hooks";
-import { useServices } from "@/app/react-query/filters/services/hooks";
-import { useTechnologies } from "@/app/react-query/filters/technologies/hooks";
-import { useDishTypes } from "@/app/react-query/filters/dish-types/hooks";
-import { useFoodServiceStyles } from "@/app/react-query/filters/food-service-styles/hooks";
-import { useCuisines } from "@/app/react-query/filters/cuisines/hooks";
-import { useDietaryOptions } from "@/app/react-query/filters/dietary-options/hooks";
-import { useNecessities } from "@/app/react-query/specific/necessities/hooks";
 
 // ── TOC groups ────────────────────────────────────────────────────────────────
+
+// ── TOC ───────────────────────────────────────────────────────────────────────
+
+const S: Record<string, TocSection> = {
+  basic: { id: "section-basic", title: "Základní informace", icon: "Building2" },
+  price: { id: "section-price", title: "Cena", icon: "Banknote" },
+  images: { id: "section-images", title: "Obrázky", icon: "Image", subTitle: "Podporované formáty: jpg, png, webp" },
+  location: { id: "section-location", title: "Místo působení", icon: "MapPin" },
+  capacity: { id: "section-capacity", title: "Kapacita a objednávky", icon: "Users" },
+  cuisines: { id: "section-cuisines", title: "Kuchyně", icon: "ChefHat" },
+  offer: { id: "section-offer", title: "Nabídka", icon: "Utensils" },
+  extras: { id: "section-extras", title: "Doplňky", icon: "Star" },
+  eventTypes: { id: "section-event-types", title: "Typy akcí", icon: "Calendar" },
+  personnel: { id: "section-personnel", title: "Personál", icon: "UserCheck" },
+  necessities: { id: "section-necessities", title: "Nezbytnosti", icon: "Package" },
+  rules: { id: "section-rules", title: "Pravidla", icon: "ScrollText" },
+  employees: { id: "section-employees", title: "Zaměstnanci", icon: "Users" },
+  faq: { id: "section-faq", title: "FAQ", icon: "CircleHelp" },
+  references: { id: "section-references", title: "Reference", icon: "BookOpen" },
+};
 
 export const GASTRO_FORM_GROUPS: readonly TocGroup[] = [
   {
     label: "Základní",
-    sections: [
-      { id: "section-basic", title: "Základní informace", icon: Building2 },
-      { id: "section-price", title: "Cena", icon: Banknote },
-      { id: "section-images", title: "Obrázky", icon: Image },
-    ],
+    sections: [S.basic, S.price, S.images],
   },
   {
     label: "Místo působení",
-    sections: [
-      { id: "section-location", title: "Místo působení", icon: MapPin },
-    ],
+    sections: [S.location],
   },
   {
     label: "Kapacita a nabídka",
-    sections: [
-      { id: "section-capacity", title: "Kapacita a objednávky", icon: Users },
-      { id: "section-cuisines", title: "Kuchyně", icon: ChefHat },
-      { id: "section-offer", title: "Nabídka", icon: Utensils },
-      { id: "section-extras", title: "Doplňky", icon: Star },
-    ],
+    sections: [S.capacity, S.cuisines, S.offer, S.extras],
   },
   {
     label: "Program a vybavení",
-    sections: [
-      { id: "section-event-types", title: "Typy akcí", icon: Calendar },
-      { id: "section-personnel", title: "Personál", icon: UserCheck },
-      { id: "section-necessities", title: "Nezbytnosti", icon: Package },
-    ],
+    sections: [S.eventTypes, S.personnel, S.necessities],
   },
   {
     label: "Prezentace",
-    sections: [
-      { id: "section-rules", title: "Pravidla", icon: ScrollText },
-      { id: "section-employees", title: "Zaměstnanci", icon: Users },
-      { id: "section-faq", title: "FAQ", icon: CircleHelp },
-      { id: "section-references", title: "Reference", icon: BookOpen },
-    ],
+    sections: [S.rules, S.employees, S.faq, S.references],
   },
 ];
 
@@ -416,9 +396,10 @@ export default function EditGastroListingForm({
       <div className="flex flex-col w-full gap-4">
         {/* ── 1. Základní informace ─────────────────────────────────────────────── */}
         <FormSection
-          id="section-basic"
-          icon={Building2}
-          title="Základní informace"
+          id={S.basic.id}
+          icon={S.basic.icon}
+          title={S.basic.title}
+          subtitle={S.basic.subTitle}
           color="text-listing"
           surfaceColor="bg-listing-surface"
         >
@@ -451,9 +432,10 @@ export default function EditGastroListingForm({
 
         {/* ── 2. Cena ───────────────────────────────────────────────────────────── */}
         <FormSection
-          id="section-price"
-          icon={Banknote}
-          title="Cena"
+          id={S.price.id}
+          icon={S.price.icon}
+          title={S.price.title}
+          subtitle={S.price.subTitle}
           color="text-listing"
           surfaceColor="bg-listing-surface"
         >
@@ -473,10 +455,10 @@ export default function EditGastroListingForm({
 
         {/* ── 3. Obrázky ────────────────────────────────────────────────────────── */}
         <FormSection
-          id="section-images"
-          icon={Image}
-          title="Obrázky"
-          subtitle="Podporované formáty: jpg, png, webp"
+          id={S.images.id}
+          icon={S.images.icon}
+          title={S.images.title}
+          subtitle={S.images.subTitle}
           color="text-listing"
           surfaceColor="bg-listing-surface"
         >
@@ -524,9 +506,10 @@ export default function EditGastroListingForm({
 
         {/* ── 4. Místo působení ─────────────────────────────────────────────────── */}
         <FormSection
-          id="section-location"
-          icon={MapPin}
-          title="Místo působení"
+          id={S.location.id}
+          icon={S.location.icon}
+          title={S.location.title}
+          subtitle={S.location.subTitle}
           color="text-listing"
           surfaceColor="bg-listing-surface"
           error={!!errors.location?.regions}
@@ -597,9 +580,10 @@ export default function EditGastroListingForm({
 
         {/* ── 5. Kapacita a objednávky ──────────────────────────────────────────── */}
         <FormSection
-          id="section-capacity"
-          icon={Users}
-          title="Kapacita a objednávky"
+          id={S.capacity.id}
+          icon={S.capacity.icon}
+          title={S.capacity.title}
+          subtitle={S.capacity.subTitle}
           color="text-listing"
           surfaceColor="bg-listing-surface"
         >
@@ -629,9 +613,10 @@ export default function EditGastroListingForm({
 
         {/* ── 5. Kuchyně ────────────────────────────────────────────────────────── */}
         <FormSection
-          id="section-cuisines"
-          icon={ChefHat}
-          title="Kuchyně"
+          id={S.cuisines.id}
+          icon={S.cuisines.icon}
+          title={S.cuisines.title}
+          subtitle={S.cuisines.subTitle}
           color="text-listing"
           surfaceColor="bg-listing-surface"
         >
@@ -652,9 +637,10 @@ export default function EditGastroListingForm({
 
         {/* ── 6. Nabídka ────────────────────────────────────────────────────────── */}
         <FormSection
-          id="section-offer"
-          icon={Utensils}
-          title="Nabídka"
+          id={S.offer.id}
+          icon={S.offer.icon}
+          title={S.offer.title}
+          subtitle={S.offer.subTitle}
           color="text-listing"
           surfaceColor="bg-listing-surface"
         >
@@ -704,9 +690,10 @@ export default function EditGastroListingForm({
 
         {/* ── 7. Doplňky ────────────────────────────────────────────────────────── */}
         <FormSection
-          id="section-extras"
-          icon={Star}
-          title="Doplňky"
+          id={S.extras.id}
+          icon={S.extras.icon}
+          title={S.extras.title}
+          subtitle={S.extras.subTitle}
           color="text-listing"
           surfaceColor="bg-listing-surface"
         >
@@ -743,9 +730,10 @@ export default function EditGastroListingForm({
 
         {/* ── 8. Typy akcí ─────────────────────────────────────────────────────── */}
         <FormSection
-          id="section-event-types"
-          icon={Calendar}
-          title="Typy akcí"
+          id={S.eventTypes.id}
+          icon={S.eventTypes.icon}
+          title={S.eventTypes.title}
+          subtitle={S.eventTypes.subTitle}
           color="text-listing"
           surfaceColor="bg-listing-surface"
         >
@@ -766,9 +754,10 @@ export default function EditGastroListingForm({
 
         {/* ── 9. Personál ───────────────────────────────────────────────────────── */}
         <FormSection
-          id="section-personnel"
-          icon={UserCheck}
-          title="Personál"
+          id={S.personnel.id}
+          icon={S.personnel.icon}
+          title={S.personnel.title}
+          subtitle={S.personnel.subTitle}
           color="text-listing"
           surfaceColor="bg-listing-surface"
         >
@@ -789,9 +778,10 @@ export default function EditGastroListingForm({
 
         {/* ── 10. Nezbytnosti ───────────────────────────────────────────────────── */}
         <FormSection
-          id="section-necessities"
-          icon={Package}
-          title="Nezbytnosti"
+          id={S.necessities.id}
+          icon={S.necessities.icon}
+          title={S.necessities.title}
+          subtitle={S.necessities.subTitle}
           color="text-listing"
           surfaceColor="bg-listing-surface"
         >
@@ -812,9 +802,10 @@ export default function EditGastroListingForm({
 
         {/* ── 11. Pravidla ──────────────────────────────────────────────────────── */}
         <FormSection
-          id="section-rules"
-          icon={ScrollText}
-          title="Pravidla"
+          id={S.rules.id}
+          icon={S.rules.icon}
+          title={S.rules.title}
+          subtitle={S.rules.subTitle}
           color="text-listing"
           surfaceColor="bg-listing-surface"
         >
@@ -835,9 +826,10 @@ export default function EditGastroListingForm({
 
         {/* ── 12. Zaměstnanci ───────────────────────────────────────────────────── */}
         <FormSection
-          id="section-employees"
-          icon={Users}
-          title="Zaměstnanci"
+          id={S.employees.id}
+          icon={S.employees.icon}
+          title={S.employees.title}
+          subtitle={S.employees.subTitle}
           color="text-listing"
           surfaceColor="bg-listing-surface"
         >
@@ -904,9 +896,10 @@ export default function EditGastroListingForm({
 
         {/* ── 13. FAQ ───────────────────────────────────────────────────────────── */}
         <FormSection
-          id="section-faq"
-          icon={CircleHelp}
-          title="FAQ"
+          id={S.faq.id}
+          icon={S.faq.icon}
+          title={S.faq.title}
+          subtitle={S.faq.subTitle}
           color="text-listing"
           surfaceColor="bg-listing-surface"
         >
@@ -983,9 +976,10 @@ export default function EditGastroListingForm({
 
         {/* ── 14. Reference ─────────────────────────────────────────────────────── */}
         <FormSection
-          id="section-references"
-          icon={BookOpen}
-          title="Reference"
+          id={S.references.id}
+          icon={S.references.icon}
+          title={S.references.title}
+          subtitle={S.references.subTitle}
           color="text-listing"
           surfaceColor="bg-listing-surface"
         >
