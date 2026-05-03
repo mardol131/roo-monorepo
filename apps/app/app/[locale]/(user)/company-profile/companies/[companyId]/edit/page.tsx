@@ -1,17 +1,14 @@
 "use client";
 
+import Loader from "@/app/[locale]/(user)/components/loader";
 import PageHeading from "@/app/[locale]/(user)/components/page-heading";
-import { useParams } from "next/navigation";
-import { COMPANIES } from "../../../../../../_mock/mock";
-import CompanyForm from "../../components/company-form";
-import { CreateCompanyPayload } from "@/app/react-query/companies/fetch";
+import { useRouter } from "@/app/i18n/navigation";
 import {
   useCompany,
-  useCreateCompany,
   useUpdateCompany,
 } from "@/app/react-query/companies/hooks";
-import Loader from "@/app/[locale]/(user)/components/loader";
-import { useRouter } from "@/app/i18n/navigation";
+import { useParams } from "next/navigation";
+import CompanyForm from "../../components/company-form";
 
 export default function EditCompanyPage({
   params,

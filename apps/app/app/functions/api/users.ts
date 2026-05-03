@@ -55,8 +55,8 @@ export async function switchAccountTypeToCompany() {
 }
 
 export async function logout() {
-  const response = await fetch(`${apiUrl}/api/users/logout`, {
-    method: "GET",
+  const response = await fetch(`${apiUrl}/api/users/logout?allSesions=false`, {
+    method: "POST",
     headers: { "Content-Type": "application/json" },
     credentials: "include",
   });

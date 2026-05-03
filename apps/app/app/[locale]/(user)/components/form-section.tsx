@@ -1,4 +1,7 @@
 import Text from "@/app/components/ui/atoms/text";
+import DashboardHeader from "./dashboard-header";
+import DashboardSectionHeader from "./dashboard-section-header";
+import { LucideIcons } from "@roo/common";
 
 export function FormSection({
   id,
@@ -11,7 +14,7 @@ export function FormSection({
   error,
 }: {
   id?: string;
-  icon: React.ElementType;
+  icon: LucideIcons;
   title: string;
   subtitle?: string;
   children: React.ReactNode;
@@ -19,30 +22,18 @@ export function FormSection({
   color?: string;
   error?: boolean;
 }) {
-  const Icon = icon;
   return (
     <div
       id={id}
       className={`bg-white rounded-2xl border ${error ? "border-red-500" : "border-zinc-200"} scroll-mt-6`}
     >
-      <div className="px-6 py-4 border-b border-zinc-100 flex items-center gap-2.5">
-        <div
-          className={`w-8 h-8 rounded-xl ${surfaceColor} flex items-center justify-center shrink-0`}
-        >
-          <Icon className={`w-4 h-4 ${color}`} />
-        </div>
-        <div className="flex flex-col">
-          <Text variant="label-lg" color="textDark" className="font-semibold">
-            {title}
-          </Text>
-
-          {subtitle && (
-            <Text variant="label" color="textDark" className="font-medium">
-              {subtitle}
-            </Text>
-          )}
-        </div>
-      </div>
+      <DashboardSectionHeader
+        icon={icon}
+        heading={title}
+        subheading={subtitle}
+        iconBgColor={surfaceColor}
+        iconColor={color}
+      />
       <div className="px-6 py-5 flex flex-col gap-4">{children}</div>
     </div>
   );

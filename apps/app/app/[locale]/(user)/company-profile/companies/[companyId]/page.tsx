@@ -4,23 +4,21 @@ import Button from "@/app/components/ui/atoms/button";
 import { useRouter } from "@/app/i18n/navigation";
 import { useCompany } from "@/app/react-query/companies/hooks";
 import { useListingsByCompany } from "@/app/react-query/listings/hooks";
-import { Tag, Building2, MessageCircle } from "lucide-react";
-import { useEffect } from "react";
+import { formatCompanyBillingAddress, formatPhoneNumber } from "@roo/common";
+import { Building2, MessageCircle, Tag } from "lucide-react";
 import { useParams } from "next/navigation";
 import Breadcrumbs from "../../../components/breadcrumbs";
-import EntityRow from "../../../components/entity-row";
-import RowContainer from "../../../components/row-container";
-import ListingStatusTag from "../../../components/tags/listing-status-tag";
-import { SummaryCard } from "../../../components/summary-card";
 import DashboardHeader from "../../../components/dashboard-header";
-import InfoSection from "../../../components/info-section";
 import { DashboardSection } from "../../../components/dashboard-section";
-import { formatCompanyBillingAddress, formatPhoneNumber } from "@roo/common";
+import EntityRow from "../../../components/entity-row";
+import InfoSection from "../../../components/info-section";
 import Loader from "../../../components/loader";
+import RowContainer from "../../../components/row-container";
+import { SummaryCard } from "../../../components/summary-card";
+import ListingStatusTag from "../../../components/tags/listing-status-tag";
 
 export default function page() {
   const { companyId } = useParams<{ companyId: string }>();
-  const router = useRouter();
 
   const { data: company, isLoading: isCompanyLoading } = useCompany(companyId);
   const { data: listings, isLoading: isListingsLoading } =
@@ -75,7 +73,6 @@ export default function page() {
       />
 
       <div className="flex flex-col gap-5">
-        {" "}
         {/* Summary cards */}
         <div className="grid grid-cols-3 gap-4">
           <SummaryCard
@@ -85,13 +82,15 @@ export default function page() {
             iconBg="bg-listing-surface"
             iconColor="text-listing"
           />
-          <SummaryCard
+          {/* <SummaryCard
             label="Nepřečtených zpráv"
-            value={"3"} // TODO: get real number of unread messages
+            value={listings?.docs.filter((listing) => {
+                if (listing)
+            })} // TODO: get real number of unread messages
             icon={MessageCircle}
             iconBg="bg-inquiry-surface"
             iconColor="text-inquiry"
-          />
+          /> */}
           {/* 
         <SummaryCard
           label="Průměrné hodnocení"
@@ -205,8 +204,8 @@ export default function page() {
                 type: "text",
                 label: "Kontaktní telefon",
                 value: formatPhoneNumber(
-                  company.phone.number,
-                  company.phone.countryCode,
+                  company.phone?.number,
+                  company.phone?.countryCode,
                 ),
               },
             ]}

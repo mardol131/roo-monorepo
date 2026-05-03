@@ -1,6 +1,12 @@
 "use client";
 
-import { EVENT_STATUS } from "@/app/data/event";
+import { ControlSection } from "@/app/[locale]/(user)/components/control-section";
+import Loader from "@/app/[locale]/(user)/components/loader";
+import EventStatusTag from "@/app/[locale]/(user)/components/tags/event-status-tag";
+import { confirmActionModalEvents } from "@/app/components/ui/molecules/modals/confirm-action-modal";
+import { useRouter } from "@/app/i18n/navigation";
+import { useEvent } from "@/app/react-query/events/hooks";
+import { useInquiries } from "@/app/react-query/inquiries/hooks";
 import {
   aggregateInquiryStatus,
   formatEventAddress,
@@ -18,25 +24,16 @@ import {
   CheckCircle2,
   MessageSquare,
 } from "lucide-react";
-import { getTranslations } from "next-intl/server";
+import { useTranslations } from "next-intl";
 import Link from "next/link";
-import { getInquiries, MOCK_EVENT } from "../../../../../../_mock/mock";
+import { useParams } from "next/navigation";
 import DashboardHeader from "../../../../components/dashboard-header";
 import EntityRow from "../../../../components/entity-row";
 import RowContainer from "../../../../components/row-container";
 import { SummaryCard } from "../../../../components/summary-card";
 import InquiryStatusTag from "../../../../components/tags/inquiry-status-tag";
-import { useEvent } from "@/app/react-query/events/hooks";
-import { useParams } from "next/navigation";
-import Loader from "@/app/[locale]/(user)/components/loader";
-import { useRouter } from "@/app/i18n/navigation";
-import EventStatusTag from "@/app/[locale]/(user)/components/tags/event-status-tag";
-import { useTranslations } from "next-intl";
-import { useInquiries } from "@/app/react-query/inquiries/hooks";
-import EventNotesSection from "./components/event-notes-section";
 import EventChecklistSection from "./components/event-checklist-section";
-import { ControlSection } from "@/app/[locale]/(user)/components/control-section";
-import { confirmActionModalEvents } from "@/app/components/ui/molecules/modals/confirm-action-modal";
+import EventNotesSection from "./components/event-notes-section";
 
 // ── Page ───────────────────────────────────────────────────────────────────────
 

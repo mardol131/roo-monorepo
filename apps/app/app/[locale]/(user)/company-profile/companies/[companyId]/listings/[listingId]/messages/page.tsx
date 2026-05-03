@@ -1,13 +1,11 @@
 "use client";
 
-import { getInquiries } from "@/app/_mock/mock";
 import { EmptyState } from "@/app/[locale]/(user)/components/empty-state";
 import EntityCard from "@/app/[locale]/(user)/components/entity-card";
-import EntityComponentTag from "@/app/[locale]/(user)/components/tags/entity-component-tag";
 import PageHeading from "@/app/[locale]/(user)/components/page-heading";
-import { format } from "date-fns";
-import { useListingsByCompany } from "@/app/react-query/listings/hooks";
+import EntityComponentTag from "@/app/[locale]/(user)/components/tags/entity-component-tag";
 import { useInquiriesByListing } from "@/app/react-query/inquiries/hooks";
+import { format } from "date-fns";
 import { useParams } from "next/navigation";
 
 export default function page() {

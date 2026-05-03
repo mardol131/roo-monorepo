@@ -210,7 +210,7 @@ export default function SpacesPage() {
     listingId: string;
   }>();
 
-  const { data: spaces = [] } = useSpacesByListing(listingId);
+  const { data: spaces } = useSpacesByListing(listingId);
   const { data: listing } = useListing(listingId);
   const { mutate: updateListing, error } = useUpdateListing(
     listingId,
@@ -224,7 +224,7 @@ export default function SpacesPage() {
   const [pendingType, setPendingType] = useState<SpacesType | null>(null);
   const [confirmValue, setConfirmValue] = useState("");
 
-  const roots = spaces.filter(
+  const roots = spaces?.docs.filter(
     (s) => !getParentId(s) && spacesType != null && s.type === spacesType,
   );
 
@@ -394,17 +394,18 @@ export default function SpacesPage() {
             listingId={listingId}
             type={spacesType}
           />
-          {roots.map((root) => (
-            <div key={root.id} className="my-5">
-              <SpaceTree
-                key={root.id}
-                space={root}
-                allSpaces={spaces}
-                companyId={companyId}
-                listingId={listingId}
-              />
-            </div>
-          ))}
+          {roots &&
+            roots.map((root) => (
+              <div key={root.id} className="my-5">
+                <SpaceTree
+                  key={root.id}
+                  space={root}
+                  allSpaces={spaces?.docs ?? []}
+                  companyId={companyId}
+                  listingId={listingId}
+                />
+              </div>
+            ))}
         </div>
       )}
     </main>

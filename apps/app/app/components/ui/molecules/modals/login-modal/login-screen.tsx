@@ -33,7 +33,6 @@ export default function LoginScreen({
   async function onSubmit(data: LoginFormValues) {
     try {
       const res = await auth.login(data.email, data.password);
-      console.log(res);
       if (res.error) {
         setError("root", {
           message:

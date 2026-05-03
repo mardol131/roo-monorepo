@@ -517,7 +517,7 @@ export interface Listing {
   company: string | Company;
   description?: string | null;
   shortDescription?: string | null;
-  eventTypes?: (string | EventType)[] | null;
+  eventTypes: (string | EventType)[];
   indoor?: boolean | null;
   outdoor?: boolean | null;
   images: {

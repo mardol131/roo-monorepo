@@ -20,6 +20,7 @@ import {
   DoorOpen,
   Image,
   MapPin,
+  Tag,
   Users,
 } from "lucide-react";
 import { useState } from "react";
@@ -31,8 +32,12 @@ import BuildingSpacesFields from "../components/building-spaces-fields";
 import IconCard from "../components/icon-card";
 import RoomSpacesFields from "../components/room-spaces-fields";
 import { useRouter } from "@/app/i18n/navigation";
+import { useEventTypes } from "@/app/react-query/filters/event-types/hooks";
+import CheckboxGroup from "@/app/components/ui/atoms/inputs/checkbox-group";
 
 // ── Schema ─────────────────────────────────────────────────────────────────────
+
+const itemSchema = z.object({ id: z.string(), name: z.string() });
 
 const optionalPositiveNumber = z.preprocess(
   (val) => (val === "" || val === undefined || val === null ? undefined : val),
@@ -93,6 +98,7 @@ const schema = z
     buildingHasRooms: z.boolean().default(false),
     buildingRooms: z.array(roomSchema).default([]),
     rooms: z.array(roomSchema).default([]),
+    eventTypes: z.array(itemSchema).min(1, "Vyberte alespoň jeden typ akce"),
   })
   .superRefine((data, ctx) => {
     if (data.spaceType === "area" && !data.areaName?.trim()) {
@@ -149,6 +155,11 @@ const SECTION_SPACES = {
   title: "Prostory",
   icon: DoorOpen,
 };
+const SECTION_EVENT_TYPES = {
+  id: "section-event-types",
+  title: "Typy akcí",
+  icon: Tag,
+};
 
 const FORM_GROUPS: readonly TocGroup[] = [
   {
@@ -158,6 +169,10 @@ const FORM_GROUPS: readonly TocGroup[] = [
   {
     label: "Místo a prostor",
     sections: [SECTION_LOCATION, SECTION_CAPACITY, SECTION_SPACES],
+  },
+  {
+    label: "Akce",
+    sections: [SECTION_EVENT_TYPES],
   },
 ];
 
@@ -192,8 +207,11 @@ export default function VenueListingForm({ onCancel }: Props) {
       buildingRooms: [],
       hasBuildings: false,
       buildingHasRooms: false,
+      eventTypes: [],
     },
   });
+
+  const { data: eventTypesData } = useEventTypes({ limit: 50 });
 
   function onSubmit(data: Inputs) {
     const payload: CreateListingPayload = {
@@ -205,6 +223,7 @@ export default function VenueListingForm({ onCancel }: Props) {
         gallery: data.images.gallery.map((url) => ({ url })),
       },
       price: { startsAt: data.price.startsAt },
+      eventTypes: data.eventTypes.map((i) => i.id),
       details: [
         {
           location: {

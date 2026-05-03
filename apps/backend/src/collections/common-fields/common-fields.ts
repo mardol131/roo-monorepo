@@ -75,6 +75,7 @@ export const listingsCommonFields: Field[] = [
     type: 'relationship',
     relationTo: 'event-types',
     hasMany: true,
+    required: true,
   },
   {
     name: 'indoor',

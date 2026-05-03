@@ -8,6 +8,7 @@ export const routing = defineRouting({
   localePrefix: "as-needed",
   pathnames: {
     "/homepage": { cs: "/" },
+    "/login-required": { cs: "/prihlaseni" },
     "/catalog": { cs: "/katalog" },
     "/catalog/[type]": { cs: "/katalog/[type]" },
     "/listing/[listingId]": { cs: "/inzerat/[listingId]" },

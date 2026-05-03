@@ -21,10 +21,11 @@ import {
   Banknote,
   Calendar,
   CalendarRange,
-  ChefHat,
+  Clapperboard,
   Clock,
   Image,
   ListChecks,
+  Music,
   Package,
   Tag,
   UserCheck,
@@ -47,9 +48,10 @@ const S = {
   images: { id: "section-images", title: "Obrázky", icon: Image },
   eventTypes: { id: "section-event-types", title: "Typy akcí", icon: Tag },
   availability: { id: "section-availability", title: "Dostupnost", icon: Calendar },
-  capacity: { id: "section-capacity", title: "Kapacita a objednávky", icon: Users },
-  cuisine: { id: "section-cuisine", title: "Kuchyně a styl", icon: ChefHat },
-  extras: { id: "section-extras", title: "Doplňky", icon: Package },
+  capacity: { id: "section-capacity", title: "Kapacita", icon: Users },
+  audience: { id: "section-audience", title: "Publikum", icon: Users },
+  performance: { id: "section-performance", title: "Vystoupení", icon: Music },
+  setup: { id: "section-setup", title: "Příprava a úklid", icon: Clapperboard },
   personnel: { id: "section-personnel", title: "Personál a požadavky", icon: UserCheck },
   includes: { id: "section-includes", title: "Zahrnuto / Nezahrnuto", icon: ListChecks },
 };
@@ -57,7 +59,7 @@ const S = {
 const FORM_GROUPS: readonly TocGroup[] = [
   { label: "Základní", sections: [S.basic, S.price, S.images, S.eventTypes] },
   { label: "Konfigurace", sections: [S.availability, S.capacity, S.includes] },
-  { label: "Nabídka", sections: [S.cuisine, S.extras, S.personnel] },
+  { label: "Program", sections: [S.audience, S.performance, S.setup, S.personnel] },
 ];
 
 // ── Item schema ────────────────────────────────────────────────────────────────
@@ -69,11 +71,6 @@ const itemSchema = z.object({ id: z.string(), name: z.string() });
 const optionalPositiveInt = z.preprocess(
   (val) => (val === "" || val === undefined || val === null ? undefined : val),
   z.coerce.number().positive("Musí být kladné číslo").int("Zadejte celé číslo").optional(),
-);
-
-const optionalPositiveNumber = z.preprocess(
-  (val) => (val === "" || val === undefined || val === null ? undefined : val),
-  z.coerce.number().positive("Musí být kladné číslo").optional(),
 );
 
 const schema = z.object({
@@ -106,30 +103,29 @@ const schema = z.object({
     max: z.coerce.number({ message: "Zadejte číslo" }).positive("Kapacita musí být kladná").int("Zadejte celé číslo"),
     min: optionalPositiveInt,
   }),
-  pricePerPerson: optionalPositiveNumber,
-  minimumOrderCount: optionalPositiveInt,
-  cuisines: z.array(itemSchema).default([]),
-  dishTypes: z.array(itemSchema).default([]),
-  dietaryOptions: z.array(itemSchema).default([]),
-  foodServiceStyle: z.array(itemSchema).default([]),
-  kidsMenu: z.boolean().default(false),
-  alcoholIncluded: z.boolean().default(false),
+  audience: z.array(z.enum(["adults", "kids", "seniors"])).default([]),
+  performanceDuration: optionalPositiveInt,
+  numberOfSets: optionalPositiveInt,
+  breakDuration: optionalPositiveInt,
+  setupAndTeardownIncluded: z.boolean().default(false),
+  setupTime: optionalPositiveInt,
+  teardownTime: optionalPositiveInt,
   personnel: z.array(itemSchema).default([]),
   necessities: z.array(itemSchema).default([]),
 });
 
-type GastroFormInputs = z.infer<typeof schema>;
+type EntertainmentFormInputs = z.infer<typeof schema>;
 
 // ── Resolver ───────────────────────────────────────────────────────────────────
 
-type ResolverResult = { values: Partial<GastroFormInputs>; errors: Record<string, unknown> };
+type ResolverResult = { values: Partial<EntertainmentFormInputs>; errors: Record<string, unknown> };
 type ResolverFn = (values: unknown, ctx: unknown, opts: unknown) => Promise<ResolverResult>;
 
 function makeResolver(): ResolverFn {
   const zResolver = zodResolver(schema) as unknown as ResolverFn;
   return async (values, ctx, opts) => {
     const result = await zResolver(values, ctx, opts);
-    const v = values as GastroFormInputs;
+    const v = values as EntertainmentFormInputs;
     if (v.availability === "selectedHours" && !v.selectedHours?.length) {
       result.errors = {
         ...result.errors,
@@ -148,22 +144,22 @@ type Props = {
 
 // ── Component ──────────────────────────────────────────────────────────────────
 
-export default function NewVariantFormGastro({ onCancel }: Props) {
+export default function NewVariantFormEntertainment({ onCancel }: Props) {
   const { listingId, companyId } = useParams<{ listingId: string; companyId: string }>();
   const router = useRouter();
   const { data: listing } = useListing(listingId);
-  const gastroDetail = listing?.details.find((d) => d.blockType === "gastro");
+  const entertainmentDetail = listing?.details.find((d) => d.blockType === "entertainment");
 
   const toItem = <T extends { id: string; name: string }>(v: string | T) =>
     typeof v === "string" ? { id: v, name: "" } : { id: v.id, name: v.name };
 
   const listingEventTypes = (listing?.eventTypes ?? []).map(toItem);
-  const listingCuisines = (gastroDetail?.blockType === "gastro" ? (gastroDetail.cuisines ?? []) : []).map(toItem);
-  const listingDishTypes = (gastroDetail?.blockType === "gastro" ? (gastroDetail.dishTypes ?? []) : []).map(toItem);
-  const listingFoodServiceStyles = (gastroDetail?.blockType === "gastro" ? (gastroDetail.foodServiceStyles ?? []) : []).map(toItem);
-  const listingDietaryOptions = (gastroDetail?.blockType === "gastro" ? (gastroDetail.dietaryOptions ?? []) : []).map(toItem);
-  const listingPersonnel = (gastroDetail?.blockType === "gastro" ? (gastroDetail.personnel ?? []) : []).map(toItem);
-  const listingNecessities = (gastroDetail?.blockType === "gastro" ? (gastroDetail.necessities ?? []) : []).map(toItem);
+  const listingPersonnel = entertainmentDetail?.blockType === "entertainment"
+    ? (entertainmentDetail.personnel ?? []).map(toItem)
+    : [];
+  const listingNecessities = entertainmentDetail?.blockType === "entertainment"
+    ? (entertainmentDetail.necessities ?? []).map(toItem)
+    : [];
 
   const { mutate: createVariant } = useCreateVariant({
     onSuccess: (variant) => {
@@ -180,8 +176,8 @@ export default function NewVariantFormGastro({ onCancel }: Props) {
     handleSubmit: rhfHandleSubmit,
     watch,
     formState: { errors },
-  } = useForm<GastroFormInputs>({
-    resolver: makeResolver() as unknown as Resolver<GastroFormInputs>,
+  } = useForm<EntertainmentFormInputs>({
+    resolver: makeResolver() as unknown as Resolver<EntertainmentFormInputs>,
     defaultValues: {
       type: "allYear",
       availability: "allDay",
@@ -190,14 +186,10 @@ export default function NewVariantFormGastro({ onCancel }: Props) {
       eventTypes: [],
       includes: [],
       excludes: [],
-      cuisines: [],
-      dishTypes: [],
-      dietaryOptions: [],
-      foodServiceStyle: [],
+      audience: [],
       personnel: [],
       necessities: [],
-      kidsMenu: false,
-      alcoholIncluded: false,
+      setupAndTeardownIncluded: false,
     },
   });
 
@@ -212,7 +204,7 @@ export default function NewVariantFormGastro({ onCancel }: Props) {
   const { fields: excludesFields, append: appendExclude, remove: removeExclude } =
     useFieldArray({ control, name: "excludes" });
 
-  const handleSubmit = (data: GastroFormInputs) => {
+  const handleSubmit = (data: EntertainmentFormInputs) => {
     createVariant({
       listing: listingId,
       name: data.name,
@@ -231,16 +223,17 @@ export default function NewVariantFormGastro({ onCancel }: Props) {
       excludes: data.excludes,
       details: [
         {
-          blockType: "gastro",
+          blockType: "entertainment",
           capacity: data.capacity,
-          pricePerPerson: data.pricePerPerson,
-          minimumOrderCount: data.minimumOrderCount,
-          cuisines: data.cuisines.map((c) => c.id),
-          dishTypes: data.dishTypes.map((d) => d.id),
-          dietaryOptions: data.dietaryOptions.map((d) => d.id),
-          foodServiceStyle: data.foodServiceStyle.map((f) => f.id),
-          kidsMenu: data.kidsMenu,
-          alcoholIncluded: data.alcoholIncluded,
+          audience: data.audience,
+          performanceDuration: data.performanceDuration,
+          numberOfSets: data.numberOfSets,
+          breakDuration: data.breakDuration,
+          setupAndTeardown: {
+            included: data.setupAndTeardownIncluded,
+            setupTime: data.setupTime,
+            teardownTime: data.teardownTime,
+          },
           personnel: data.personnel.map((p) => p.id),
           necessities: data.necessities.map((n) => n.id),
         },
@@ -262,7 +255,7 @@ export default function NewVariantFormGastro({ onCancel }: Props) {
         >
           <Input
             label="Název"
-            inputProps={{ ...register("name"), placeholder: "Raut pro 50 osob" }}
+            inputProps={{ ...register("name"), placeholder: "Standardní vystoupení" }}
             error={errors.name?.message}
             isRequired
           />
@@ -291,7 +284,7 @@ export default function NewVariantFormGastro({ onCancel }: Props) {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Input
               label="Základní cena (Kč)"
-              inputProps={{ ...register("price.generalPrice"), type: "number", min: 0, placeholder: "9900" }}
+              inputProps={{ ...register("price.generalPrice"), type: "number", min: 0, placeholder: "15000" }}
               error={errors.price?.generalPrice?.message}
               isRequired
             />
@@ -496,7 +489,7 @@ export default function NewVariantFormGastro({ onCancel }: Props) {
           )}
         </FormSection>
 
-        {/* Kapacita a objednávky */}
+        {/* Kapacita */}
         <FormSection
           id={S.capacity.id}
           icon={S.capacity.icon}
@@ -507,25 +500,15 @@ export default function NewVariantFormGastro({ onCancel }: Props) {
         >
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Input
-              label="Maximální kapacita (osob)"
-              inputProps={{ ...register("capacity.max"), type: "number", min: 1, placeholder: "200" }}
+              label="Maximální kapacita (diváků)"
+              inputProps={{ ...register("capacity.max"), type: "number", min: 1, placeholder: "500" }}
               error={errors.capacity?.max?.message}
               isRequired
             />
             <Input
-              label="Minimální kapacita (osob)"
-              inputProps={{ ...register("capacity.min"), type: "number", min: 1, placeholder: "10" }}
+              label="Minimální kapacita (diváků)"
+              inputProps={{ ...register("capacity.min"), type: "number", min: 1, placeholder: "20" }}
               error={errors.capacity?.min?.message}
-            />
-            <Input
-              label="Cena na osobu (Kč)"
-              inputProps={{ ...register("pricePerPerson"), type: "number", min: 0, placeholder: "350" }}
-              error={errors.pricePerPerson?.message}
-            />
-            <Input
-              label="Minimální počet objednávek"
-              inputProps={{ ...register("minimumOrderCount"), type: "number", min: 1, placeholder: "5" }}
-              error={errors.minimumOrderCount?.message}
             />
           </div>
         </FormSection>
@@ -547,7 +530,7 @@ export default function NewVariantFormGastro({ onCancel }: Props) {
             renderItem={(_, i) => (
               <Input
                 label="Položka"
-                inputProps={{ ...register(`includes.${i}.item`), placeholder: "např. Obsluha, Nádobí..." }}
+                inputProps={{ ...register(`includes.${i}.item`), placeholder: "např. Ozvučení, Světla..." }}
               />
             )}
           />
@@ -560,110 +543,113 @@ export default function NewVariantFormGastro({ onCancel }: Props) {
             renderItem={(_, i) => (
               <Input
                 label="Položka"
-                inputProps={{ ...register(`excludes.${i}.item`), placeholder: "např. Alkohol, Doprava..." }}
+                inputProps={{ ...register(`excludes.${i}.item`), placeholder: "např. Doprava, Ubytování..." }}
               />
             )}
           />
         </FormSection>
 
-        {/* Kuchyně a styl */}
+        {/* Publikum */}
         <FormSection
-          id={S.cuisine.id}
-          icon={S.cuisine.icon}
-          title={S.cuisine.title}
+          id={S.audience.id}
+          icon={S.audience.icon}
+          title={S.audience.title}
           surfaceColor={COLOR.surface}
           color={COLOR.text}
         >
-          <Controller
-            control={control}
-            name="cuisines"
-            render={({ field }) => (
-              <CheckboxGroup
-                searchable
-                label="Kuchyně"
-                items={listingCuisines}
-                value={field.value ?? []}
-                onChange={field.onChange}
-                checkColor={COLOR.text}
-              />
-            )}
-          />
-          <Controller
-            control={control}
-            name="dishTypes"
-            render={({ field }) => (
-              <CheckboxGroup
-                searchable
-                label="Typy pokrmů"
-                items={listingDishTypes}
-                value={field.value ?? []}
-                onChange={field.onChange}
-                checkColor={COLOR.text}
-              />
-            )}
-          />
-          <Controller
-            control={control}
-            name="foodServiceStyle"
-            render={({ field }) => (
-              <CheckboxGroup
-                searchable
-                label="Styl servisu"
-                items={listingFoodServiceStyles}
-                value={field.value ?? []}
-                onChange={field.onChange}
-                checkColor={COLOR.text}
-              />
-            )}
-          />
-          <Controller
-            control={control}
-            name="dietaryOptions"
-            render={({ field }) => (
-              <CheckboxGroup
-                searchable
-                label="Dietní možnosti"
-                items={listingDietaryOptions}
-                value={field.value ?? []}
-                onChange={field.onChange}
-                checkColor={COLOR.text}
-              />
-            )}
-          />
+          <div className="flex flex-col gap-2">
+            <InputLabel label="Cílové publikum" />
+            <div className="flex flex-wrap gap-3">
+              {(
+                [
+                  { value: "adults", label: "Dospělí" },
+                  { value: "kids", label: "Děti" },
+                  { value: "seniors", label: "Senioři" },
+                ] as const
+              ).map(({ value, label }) => (
+                <Controller
+                  key={value}
+                  control={control}
+                  name="audience"
+                  render={({ field }) => (
+                    <Checkbox
+                      checked={(field.value ?? []).includes(value)}
+                      onChange={(checked) =>
+                        field.onChange(
+                          checked
+                            ? [...(field.value ?? []), value]
+                            : (field.value ?? []).filter((v) => v !== value),
+                        )
+                      }
+                      label={label}
+                      checkColor={COLOR.text}
+                    />
+                  )}
+                />
+              ))}
+            </div>
+          </div>
         </FormSection>
 
-        {/* Doplňky */}
+        {/* Vystoupení */}
         <FormSection
-          id={S.extras.id}
-          icon={S.extras.icon}
-          title={S.extras.title}
+          id={S.performance.id}
+          icon={S.performance.icon}
+          title={S.performance.title}
+          surfaceColor={COLOR.surface}
+          color={COLOR.text}
+        >
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <Input
+              label="Délka vystoupení (min)"
+              inputProps={{ ...register("performanceDuration"), type: "number", min: 1, placeholder: "60" }}
+              error={errors.performanceDuration?.message}
+            />
+            <Input
+              label="Počet setů"
+              inputProps={{ ...register("numberOfSets"), type: "number", min: 1, placeholder: "2" }}
+              error={errors.numberOfSets?.message}
+            />
+            <Input
+              label="Délka přestávky (min)"
+              inputProps={{ ...register("breakDuration"), type: "number", min: 0, placeholder: "15" }}
+              error={errors.breakDuration?.message}
+            />
+          </div>
+        </FormSection>
+
+        {/* Příprava a úklid */}
+        <FormSection
+          id={S.setup.id}
+          icon={S.setup.icon}
+          title={S.setup.title}
           surfaceColor={COLOR.surface}
           color={COLOR.text}
         >
           <Controller
             control={control}
-            name="alcoholIncluded"
+            name="setupAndTeardownIncluded"
             render={({ field }) => (
               <Checkbox
                 checked={field.value ?? false}
                 onChange={field.onChange}
-                label="Alkohol v nabídce"
+                label="Příprava a úklid v ceně"
                 checkColor={COLOR.text}
               />
             )}
           />
-          <Controller
-            control={control}
-            name="kidsMenu"
-            render={({ field }) => (
-              <Checkbox
-                checked={field.value ?? false}
-                onChange={field.onChange}
-                label="Dětské menu"
-                checkColor={COLOR.text}
-              />
-            )}
-          />
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <Input
+              label="Čas přípravy (min)"
+              inputProps={{ ...register("setupTime"), type: "number", min: 0, placeholder: "60" }}
+              error={errors.setupTime?.message}
+            />
+            <Input
+              label="Čas úklidu (min)"
+              inputProps={{ ...register("teardownTime"), type: "number", min: 0, placeholder: "30" }}
+              error={errors.teardownTime?.message}
+            />
+          </div>
         </FormSection>
 
         {/* Personál a požadavky */}
@@ -694,7 +680,7 @@ export default function NewVariantFormGastro({ onCancel }: Props) {
             render={({ field }) => (
               <CheckboxGroup
                 searchable
-                label="Provozní požadavky"
+                label="Technické požadavky"
                 items={listingNecessities}
                 value={field.value ?? []}
                 onChange={field.onChange}

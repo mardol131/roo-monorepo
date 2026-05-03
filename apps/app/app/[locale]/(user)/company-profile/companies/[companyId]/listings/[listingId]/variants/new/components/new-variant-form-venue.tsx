@@ -6,6 +6,7 @@ import Button from "@/app/components/ui/atoms/button";
 import InputLabel from "@/app/components/ui/atoms/input-label";
 import Checkbox from "@/app/components/ui/atoms/inputs/checkbox";
 import CheckboxGroup from "@/app/components/ui/atoms/inputs/checkbox-group";
+import SpacesCheckboxInput from "@/app/components/ui/atoms/inputs/spaces-checkbox-input";
 import ErrorText from "@/app/components/ui/atoms/inputs/error-text";
 import GalleryInput from "@/app/components/ui/atoms/inputs/images/gallery-input";
 import ImageInput from "@/app/components/ui/atoms/inputs/images/image-input";
@@ -17,7 +18,7 @@ import { useListing } from "@/app/react-query/listings/hooks";
 import { useSpacesByListing } from "@/app/react-query/spaces/hooks";
 import { useCreateVariant } from "@/app/react-query/variants/hooks";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { uploadFileToCloud } from "@roo/common";
+import { LucideIcons, uploadFileToCloud } from "@roo/common";
 import {
   Banknote,
   BedDouble,
@@ -27,6 +28,7 @@ import {
   Car,
   Clock,
   Coffee,
+  DoorOpen,
   Image,
   ListChecks,
   Tag,
@@ -44,33 +46,38 @@ const COLOR = { text: "text-variant", surface: "bg-variant-surface" };
 
 // ── TOC ────────────────────────────────────────────────────────────────────────
 
-const S = {
-  basic: { id: "section-basic", title: "Základní informace", icon: Building2 },
-  price: { id: "section-price", title: "Cena", icon: Banknote },
-  images: { id: "section-images", title: "Obrázky", icon: Image },
-  eventTypes: { id: "section-event-types", title: "Typy akcí", icon: Tag },
+const S: Record<string, { id: string; title: string; icon: LucideIcons }> = {
+  basic: {
+    id: "section-basic",
+    title: "Základní informace",
+    icon: "Building2",
+  },
+  price: { id: "section-price", title: "Cena", icon: "Banknote" },
+  images: { id: "section-images", title: "Obrázky", icon: "Image" },
+  eventTypes: { id: "section-event-types", title: "Typy akcí", icon: "Tag" },
   availability: {
     id: "section-availability",
     title: "Dostupnost",
-    icon: Calendar,
+    icon: "Calendar",
   },
-  capacity: { id: "section-capacity", title: "Kapacita", icon: Users },
+  capacity: { id: "section-capacity", title: "Kapacita", icon: "Users" },
+  spaces: { id: "section-spaces", title: "Prostory", icon: "DoorOpen" },
   equipment: {
     id: "section-equipment",
     title: "Vybavení a personál",
-    icon: Wifi,
+    icon: "Wifi",
   },
-  parking: { id: "section-parking", title: "Parkování", icon: Car },
+  parking: { id: "section-parking", title: "Parkování", icon: "Car" },
   accommodation: {
     id: "section-accommodation",
     title: "Ubytování",
-    icon: BedDouble,
+    icon: "BedDouble",
   },
-  breakfast: { id: "section-breakfast", title: "Snídaně", icon: Coffee },
+  breakfast: { id: "section-breakfast", title: "Snídaně", icon: "Coffee" },
   includes: {
     id: "section-includes",
     title: "Zahrnuto / Nezahrnuto",
-    icon: ListChecks,
+    icon: "ListChecks",
   },
 };
 
@@ -79,7 +86,7 @@ const FORM_GROUPS: readonly TocGroup[] = [
   { label: "Konfigurace", sections: [S.availability, S.capacity, S.includes] },
   {
     label: "Prostor",
-    sections: [S.equipment, S.parking, S.accommodation, S.breakfast],
+    sections: [S.spaces, S.equipment, S.parking, S.accommodation, S.breakfast],
   },
 ];
 
@@ -104,7 +111,6 @@ const optionalPositiveNumber = z.preprocess(
 );
 
 const schema = z.object({
-  // ── Variant top-level ──
   name: z.string().min(1, "Název je povinný"),
   shortDescription: z
     .string()
@@ -145,7 +151,6 @@ const schema = z.object({
   eventTypes: z.array(itemSchema).default([]),
   includes: z.array(z.object({ item: z.string() })).default([]),
   excludes: z.array(z.object({ item: z.string() })).default([]),
-  // ── Venue detail ──
   capacity: z.object({
     max: z.coerce
       .number({ message: "Zadejte číslo" })
@@ -160,22 +165,19 @@ const schema = z.object({
   services: z.array(itemSchema).default([]),
   activities: z.array(itemSchema).default([]),
   personnel: z.array(itemSchema).default([]),
-  // parking (maps to Variant detail: parking: { included, spots })
   hasParking: z.boolean().default(false),
   parkingIncluded: z.boolean().default(false),
   parkingSpots: optionalPositiveInt,
-  // accommodation (maps to Variant detail: accommodation: { included, capacity })
   hasAccommodation: z.boolean().default(false),
   accommodationIncluded: z.boolean().default(false),
   accommodationCapacity: optionalPositiveInt,
-  // breakfast (maps to Variant detail: breakfast: { included, price, loweredPrice })
   hasBreakfast: z.boolean().default(false),
   breakfastIncluded: z.boolean().default(false),
   breakfastPrice: optionalPositiveNumber,
   breakfastLoweredPrice: optionalPositiveNumber,
 });
 
-export type VenueFormInputs = z.infer<typeof schema>;
+type VenueFormInputs = z.infer<typeof schema>;
 
 // ── Resolver ───────────────────────────────────────────────────────────────────
 
@@ -223,17 +225,6 @@ export default function NewVariantFormVenue({ onCancel }: Props) {
     companyId: string;
   }>();
   const router = useRouter();
-
-  const { mutate: createVariant } = useCreateVariant({
-    onSuccess: (variant) => {
-      router.push({
-        pathname:
-          "/company-profile/companies/[companyId]/listings/[listingId]/variants/[variantId]/edit",
-        params: { companyId, listingId, variantId: variant.id },
-      });
-    },
-  });
-
   const { data: listing } = useListing(listingId);
   const { data: spaces } = useSpacesByListing(listingId);
   const venueDetail = listing?.details.find((d) => d.blockType === "venue");
@@ -242,10 +233,6 @@ export default function NewVariantFormVenue({ onCancel }: Props) {
     typeof v === "string" ? { id: v, name: "" } : { id: v.id, name: v.name };
 
   const listingEventTypes = (listing?.eventTypes ?? []).map(toItem);
-  const listingSpaces = (spaces ?? []).map((s) => ({
-    id: s.id,
-    name: s.name ?? "",
-  }));
   const listingAmenities = (
     venueDetail?.blockType === "venue" ? (venueDetail.amenities ?? []) : []
   ).map(toItem);
@@ -262,10 +249,20 @@ export default function NewVariantFormVenue({ onCancel }: Props) {
     venueDetail?.blockType === "venue" ? (venueDetail.personnel ?? []) : []
   ).map(toItem);
 
+  const { mutate: createVariant } = useCreateVariant({
+    onSuccess: (variant) => {
+      router.push({
+        pathname:
+          "/company-profile/companies/[companyId]/listings/[listingId]/variants",
+        params: { companyId, listingId },
+      });
+    },
+  });
+
   const {
     control,
     register,
-    handleSubmit,
+    handleSubmit: rhfHandleSubmit,
     watch,
     formState: { errors },
   } = useForm<VenueFormInputs>({
@@ -320,7 +317,7 @@ export default function NewVariantFormVenue({ onCancel }: Props) {
     remove: removeExclude,
   } = useFieldArray({ control, name: "excludes" });
 
-  const formSubmitHandler = (data: VenueFormInputs) => {
+  const handleSubmit = (data: VenueFormInputs) => {
     createVariant({
       listing: listingId,
       name: data.name,
@@ -369,10 +366,8 @@ export default function NewVariantFormVenue({ onCancel }: Props) {
     });
   };
 
-  console.log("form errors", errors);
-
   return (
-    <form onSubmit={handleSubmit(formSubmitHandler)} className="flex gap-6">
+    <form onSubmit={rhfHandleSubmit(handleSubmit)} className="flex gap-6">
       <div className="flex w-full flex-col gap-4">
         {/* Základní informace */}
         <FormSection
@@ -784,6 +779,28 @@ export default function NewVariantFormVenue({ onCancel }: Props) {
           />
         </FormSection>
 
+        {/* Prostory */}
+        <FormSection
+          id={S.spaces.id}
+          icon={S.spaces.icon}
+          title={S.spaces.title}
+          surfaceColor={COLOR.surface}
+          color={COLOR.text}
+        >
+          <Controller
+            control={control}
+            name="includedSpaces"
+            render={({ field }) => (
+              <SpacesCheckboxInput
+                spaces={spaces?.docs ?? []}
+                value={field.value ?? []}
+                onChange={field.onChange}
+                checkColor={COLOR.text}
+              />
+            )}
+          />
+        </FormSection>
+
         {/* Vybavení a personál */}
         <FormSection
           id={S.equipment.id}
@@ -792,20 +809,6 @@ export default function NewVariantFormVenue({ onCancel }: Props) {
           surfaceColor={COLOR.surface}
           color={COLOR.text}
         >
-          <Controller
-            control={control}
-            name="includedSpaces"
-            render={({ field }) => (
-              <CheckboxGroup
-                searchable
-                label="Zahrnuté prostory"
-                items={listingSpaces}
-                value={field.value ?? []}
-                onChange={field.onChange}
-                checkColor={COLOR.text}
-              />
-            )}
-          />
           <Controller
             control={control}
             name="amenities"

@@ -1,15 +1,14 @@
 "use client";
 
-import PageHeading from "@/app/[locale]/(user)/components/page-heading";
-import { LISTINGS } from "../../../../../../_mock/mock";
-import EntityCard from "@/app/[locale]/(user)/components/entity-card";
-import ListingStatusTag from "@/app/[locale]/(user)/components/tags/listing-status-tag";
-import { useParams } from "next/navigation";
-import { useListingsByCompany } from "@/app/react-query/listings/hooks";
 import CardContainer from "@/app/[locale]/(user)/components/card-container";
-import { Listing } from "@roo/common";
+import EntityCard from "@/app/[locale]/(user)/components/entity-card";
 import Loader from "@/app/[locale]/(user)/components/loader";
+import PageHeading from "@/app/[locale]/(user)/components/page-heading";
+import ListingStatusTag from "@/app/[locale]/(user)/components/tags/listing-status-tag";
+import { useListingsByCompany } from "@/app/react-query/listings/hooks";
+import { Listing } from "@roo/common";
 import { useTranslations } from "next-intl";
+import { useParams } from "next/navigation";
 
 export default function page() {
   const { companyId } = useParams<{ companyId: string }>();

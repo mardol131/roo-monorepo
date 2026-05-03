@@ -1,12 +1,9 @@
 "use client";
 
+import ListingCard from "@/app/components/ui/molecules/listing-card";
+import { useRouter } from "next/dist/client/components/navigation";
 import React, { useCallback } from "react";
 import CatalogFilters from "./catalog-filters";
-import Button from "@/app/components/ui/atoms/button";
-import ListingCard from "@/app/components/ui/molecules/listing-card";
-import Image from "next/image";
-import Text from "@/app/components/ui/atoms/text";
-import { useRouter } from "next/dist/client/components/navigation";
 import CatalogTypeSelection from "./catalog-type-selection";
 import GeneralFilters from "./general-filters";
 

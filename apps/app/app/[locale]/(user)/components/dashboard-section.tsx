@@ -1,31 +1,36 @@
 import { ButtonProps } from "@/app/components/ui/atoms/button";
 import Text from "@/app/components/ui/atoms/text";
-import { ElementType } from "react";
+import { ElementType, ReactElement } from "react";
 import { LucideIcons } from "../../../../../../packages/common/dist/types/icons";
 import DashboardSectionHeader from "./dashboard-section-header";
 
 export function DashboardSection({
+  id,
   title,
   icon,
   iconBg,
   iconColor,
   children,
   emptyText,
+  headerRightComponent,
 }: {
+  id?: string;
   title: string;
   icon: LucideIcons;
   iconBg: string;
   iconColor: string;
   children?: React.ReactNode;
   emptyText?: string;
+  headerRightComponent?: ReactElement;
 }) {
   return (
-    <div className="bg-white rounded-2xl border border-zinc-200">
+    <div id={id} className="bg-white rounded-2xl border border-zinc-200">
       <DashboardSectionHeader
         heading={title}
         icon={icon}
         iconBgColor={iconBg}
         iconColor={iconColor}
+        headerRightComponent={headerRightComponent}
       />
       <div className="p-5">
         {children ? (

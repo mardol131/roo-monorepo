@@ -1,35 +1,37 @@
-import { COMPANIES } from "@/app/_mock/mock";
+import {
+  getCollection,
+  getCollectionItem,
+  patchCollectionItem,
+  postCollectionItem,
+} from "@/app/functions/api/general";
 import { Company, PayloadResponse } from "@roo/common";
 
-const baseUrl = `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/companies`;
-
 export async function fetchCompanies(): Promise<PayloadResponse<Company>> {
-  const res = await fetch(`${baseUrl}`, {
-    credentials: "include",
+  const res = await getCollection({
+    collection: "companies",
+    sort: "-createdAt",
   });
-  if (!res.ok) throw new Error("Failed to fetch companies");
-  const data = await res.json();
-  return data;
+  if (!res) throw new Error("Failed to fetch companies");
+  return res;
 }
 
 export async function fetchCompany(id: string): Promise<Company> {
-  const res = await fetch(`${baseUrl}/${id}`, {
-    credentials: "include",
+  const res = await getCollectionItem({
+    collection: "companies",
+    id,
   });
-  if (!res.ok) throw new Error("Failed to fetch company");
-  const data = await res.json();
-  return data;
+  if (!res) throw new Error("Failed to fetch company");
+  return res;
 }
 
 export async function updateCompany(id: string, data: CreateCompanyPayload) {
-  const res = await fetch(`${baseUrl}/${id}`, {
-    method: "PATCH",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data),
-    credentials: "include",
+  const res = await patchCollectionItem({
+    collection: "companies",
+    id,
+    data,
   });
-  if (!res.ok) throw new Error("Failed to update company");
-  return res.json();
+  if (!res) throw new Error("Failed to update company");
+  return res;
 }
 
 export type CreateCompanyPayload = Omit<
@@ -38,12 +40,10 @@ export type CreateCompanyPayload = Omit<
 >;
 
 export async function createCompany(data: CreateCompanyPayload) {
-  const res = await fetch(`${baseUrl}`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data),
-    credentials: "include",
+  const res = await postCollectionItem({
+    collection: "companies",
+    data,
   });
-  if (!res.ok) throw new Error("Failed to create company");
-  return res.json();
+  if (!res) throw new Error("Failed to create company");
+  return res;
 }

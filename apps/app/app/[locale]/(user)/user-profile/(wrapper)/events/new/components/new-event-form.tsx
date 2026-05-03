@@ -2,7 +2,6 @@
 
 import { FormSection } from "@/app/[locale]/(user)/components/form-section";
 import FormToc, { TocGroup } from "@/app/[locale]/(user)/components/form-toc";
-import { MOCK_CITIES, MOCK_EVENT_TYPES } from "@/app/_mock/mock";
 import DateTimeInput from "@/app/components/ui/atoms/inputs/date-time-input";
 import GuestsInput from "@/app/components/ui/atoms/inputs/guests-input";
 import IconSelect from "@/app/components/ui/atoms/inputs/icon-select";
@@ -24,6 +23,8 @@ import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
 import Button from "@/app/components/ui/atoms/button";
 import { useRouter } from "@/app/i18n/navigation";
+import { useEventTypes } from "@/app/react-query/filters/event-types/hooks";
+import { useCities } from "@/app/react-query/cities/hooks";
 
 // ── TOC ────────────────────────────────────────────────────────────────────────
 
@@ -49,7 +50,7 @@ const schema = z
   .object({
     name: z.string().min(1, "Název události je povinný"),
     icon: z.string().min(1, "Ikona události je povinná"),
-    eventType: z.object({ id: z.string(), label: z.string() }),
+    eventType: z.object({ id: z.string(), name: z.string() }),
     budget: z.coerce.number().optional(),
     startDate: z.date(),
     endDate: z.date(),
@@ -61,7 +62,7 @@ const schema = z
     }),
     locationType: z.enum(["custom", "venue"]),
     locationCity: z
-      .object({ id: z.string(), label: z.string() })
+      .object({ id: z.string(), name: z.string() })
       .optional()
       .nullable(),
     locationAddress: z.string().optional(),
@@ -80,13 +81,6 @@ const schema = z
 type FormInputs = z.infer<typeof schema>;
 
 // ── Options ────────────────────────────────────────────────────────────────────
-
-const EVENT_TYPE_OPTIONS = MOCK_EVENT_TYPES.map((et) => ({
-  id: et.id,
-  label: et.name,
-}));
-
-const CITY_OPTIONS = MOCK_CITIES.map((c) => ({ id: c.id, label: c.name }));
 
 const BUILDING_TYPE_OPTIONS = [
   { id: "hotel", label: "Hotel" },
@@ -118,6 +112,9 @@ export default function NewEventForm() {
     },
   });
 
+  const { data: eventTypes } = useEventTypes({ limit: 15 });
+  const { data: cities } = useCities({ limit: 15 });
+
   const startDate = watch("startDate");
   const locationType = watch("locationType");
 
@@ -126,7 +123,7 @@ export default function NewEventForm() {
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit as any)} className="flex gap-6">
+    <form onSubmit={handleSubmit(onSubmit)} className="flex gap-6">
       <div className="flex w-full flex-col gap-4">
         {/* ── 1. Základní informace ──────────────────────────────────────────── */}
         <FormSection
@@ -186,7 +183,7 @@ export default function NewEventForm() {
                 <SearchInput
                   label="Typ události"
                   isRequired
-                  options={EVENT_TYPE_OPTIONS}
+                  options={eventTypes?.docs ?? []}
                   value={field.value}
                   onSelect={field.onChange}
                   onClear={() => field.onChange(null)}
@@ -345,7 +342,7 @@ export default function NewEventForm() {
                     <SearchInput
                       label="Město"
                       isRequired
-                      options={CITY_OPTIONS}
+                      options={cities?.docs ?? []}
                       value={field.value ?? undefined}
                       onSelect={field.onChange}
                       onClear={() => field.onChange(null)}
@@ -364,32 +361,6 @@ export default function NewEventForm() {
                 />
               </div>
               <div className="grid grid-cols-1 gap-4">
-                <Controller
-                  name="locationBuildingType"
-                  control={control}
-                  render={({ field }) => (
-                    <SearchInput
-                      label="Typ prostoru"
-                      options={BUILDING_TYPE_OPTIONS}
-                      value={
-                        field.value
-                          ? {
-                              id: field.value,
-                              label:
-                                BUILDING_TYPE_OPTIONS.find(
-                                  (o) => o.id === field.value,
-                                )?.label ?? field.value,
-                            }
-                          : undefined
-                      }
-                      onSelect={(opt) => field.onChange(opt.id)}
-                      onClear={() => field.onChange(undefined)}
-                      placeholder="Vyberte typ (volitelné)"
-                      error={errors.locationBuildingType?.message}
-                      type="dropdown"
-                    />
-                  )}
-                />
                 <Input
                   label="Popis místa"
                   inputProps={{

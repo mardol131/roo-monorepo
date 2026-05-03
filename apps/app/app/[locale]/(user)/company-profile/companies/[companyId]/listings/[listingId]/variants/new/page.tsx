@@ -2,13 +2,12 @@
 
 import PageHeading from "@/app/[locale]/(user)/components/page-heading";
 import Button from "@/app/components/ui/atoms/button";
-import { useListing } from "@/app/react-query/listings/hooks";
-import { useCreateVariant } from "@/app/react-query/variants/hooks";
 import { useRouter } from "@/app/i18n/navigation";
+import { useListing } from "@/app/react-query/listings/hooks";
 import { useParams } from "next/navigation";
-import NewVariantForm, {
-  VariantFormInputs,
-} from "./components/new-variant-form";
+import NewVariantFormEntertainment from "./components/new-variant-form-entertainment";
+import NewVariantFormGastro from "./components/new-variant-form-gastro";
+import NewVariantFormVenue from "./components/new-variant-form-venue";
 
 export default function page() {
   const { companyId, listingId } = useParams<{
@@ -17,39 +16,7 @@ export default function page() {
   }>();
   const router = useRouter();
   const { data: listing } = useListing(listingId);
-  const { mutate: createVariant } = useCreateVariant({
-    onSuccess: () => {
-      router.push({
-        pathname:
-          "/company-profile/companies/[companyId]/listings/[listingId]/variants",
-        params: { companyId, listingId },
-      });
-    },
-  });
-
-  const handleSubmit = (data: VariantFormInputs) => {
-    const blockType = listing?.details[0]?.blockType;
-    if (!blockType) return;
-
-    createVariant({
-      listing: listingId,
-      name: data.name,
-      shortDescription: data.shortDescription,
-      description: data.description ?? null,
-      type: data.type,
-      availability: data.availability,
-      selectedHours: data.selectedHours,
-      price: data.price,
-      images: {
-        mainImage: data.images.mainImage,
-        gallery: data.images.gallery.map((image) => ({ image })),
-      },
-      eventTypes: data.eventTypes.map((et) => et.id),
-      includes: data.includes,
-      excludes: data.excludes,
-      details: [{ blockType, capacity: data.capacity }],
-    });
-  };
+  const blockType = listing?.details[0]?.blockType;
 
   return (
     <main className="w-full">
@@ -66,13 +33,18 @@ export default function page() {
         link={{
           pathname:
             "/company-profile/companies/[companyId]/listings/[listingId]/variants",
-          params: {
-            companyId,
-            listingId,
-          },
+          params: { companyId, listingId },
         }}
       />
-      <NewVariantForm onSubmit={handleSubmit} onCancel={() => router.back()} />
+      {blockType === "venue" && (
+        <NewVariantFormVenue onCancel={() => router.back()} />
+      )}
+      {blockType === "gastro" && (
+        <NewVariantFormGastro onCancel={() => router.back()} />
+      )}
+      {blockType === "entertainment" && (
+        <NewVariantFormEntertainment onCancel={() => router.back()} />
+      )}
     </main>
   );
 }

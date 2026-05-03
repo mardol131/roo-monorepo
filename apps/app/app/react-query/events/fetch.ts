@@ -1,31 +1,37 @@
-import { MOCK_EVENTS } from "@/app/_mock/mock";
+import {
+  getCollection,
+  patchCollectionItem,
+} from "@/app/functions/api/general";
 import type { Event } from "@roo/common";
 
 export async function fetchEvents() {
-  const res = MOCK_EVENTS;
+  const res = await getCollection({
+    collection: "events",
+    sort: "-createdAt",
+  });
   if (!res) throw new Error("Failed to fetch events");
   return res;
 }
 
 export async function fetchEventById(id: string) {
-  const res = MOCK_EVENTS.find((event) => event.id === id);
+  const res = await getCollection({
+    collection: "events",
+    query: { id: { equals: id } },
+  });
   if (!res) throw new Error("Failed to fetch event");
   return res;
 }
 
-async function patchEvent(eventId: string, body: Partial<Event>): Promise<Event> {
-  const res = await fetch(
-    `${process.env.NEXT_PUBLIC_PAYLOAD_URL}/api/events/${eventId}`,
-    {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
-      body: JSON.stringify(body),
-    },
-  );
-  if (!res.ok) throw new Error("Failed to update event");
-  const data = await res.json();
-  return data.doc;
+async function patchEvent(
+  eventId: string,
+  body: Partial<Event>,
+): Promise<Event> {
+  const res = await patchCollectionItem({
+    collection: "events",
+    id: eventId,
+    data: body,
+  });
+  return res;
 }
 
 export async function addNoteToEvent(

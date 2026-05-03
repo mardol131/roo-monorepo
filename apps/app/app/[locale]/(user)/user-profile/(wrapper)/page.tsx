@@ -35,7 +35,7 @@ export default function UserProfilePage() {
         />
         <SummaryCard
           label="Aktivní poptávky"
-          value={inquiries ? inquiries.length.toString() : ""}
+          value={inquiries ? inquiries.docs.length.toString() : ""}
           icon={MessageSquare}
           iconBg={"bg-inquiry-surface"}
           iconColor="text-inquiry"
@@ -44,13 +44,13 @@ export default function UserProfilePage() {
           label="Nové zprávy"
           value={
             inquiries
-              ? inquiries
+              ? inquiries.docs
                   .filter(
                     (inq) =>
-                      !!inq.activity.lastCompanyMessageSentAt &&
-                      (!inq.activity.lastUserSeenAt ||
-                        inq.activity.lastCompanyMessageSentAt >
-                          inq.activity.lastUserSeenAt),
+                      !!inq.activity?.lastCompanyMessageSentAt &&
+                      (!inq.activity?.lastUserSeenAt ||
+                        inq.activity?.lastCompanyMessageSentAt >
+                          inq.activity?.lastUserSeenAt),
                   )
                   .length.toString()
               : ""
@@ -132,7 +132,7 @@ export default function UserProfilePage() {
         rowComponents={
           !inquiries
             ? []
-            : inquiries.map((inquiry) =>
+            : inquiries.docs.map((inquiry) =>
                 typeof inquiry.event !== "string" ? (
                   <EntityRow
                     key={inquiry.id}
@@ -145,21 +145,17 @@ export default function UserProfilePage() {
                         : "Poptávka"
                     }
                     items={[
-                      {
-                        icon: "Clock",
-                        content: format(
-                          new Date(inquiry.activity.sentAt),
-                          "d. M. yyyy",
-                          { locale: cs },
-                        ),
-                      },
+                      ...(inquiry.activity?.lastCompanyMessageSentAt
+                        ? [
+                            {
+                              icon: "CircleDot",
+                              content: "Nová zpráva od dodavatele",
+                            } as const,
+                          ]
+                        : []),
                       {
                         icon: "Activity",
-                        content: {
-                          pending: "Čeká na odpověď",
-                          confirmed: "Potvrzeno",
-                          cancelled: "Zrušeno",
-                        }[inquiry.status.user],
+                        content: inquiry.status?.user,
                       },
                       ...(inquiry.pricing.quotedPrice
                         ? [
@@ -178,10 +174,7 @@ export default function UserProfilePage() {
                       },
                     }}
                     rightComponent={
-                      <InquiryStatusTag
-                        userStatus={inquiry.status.user}
-                        companyStatus={inquiry.status.company}
-                      />
+                      <InquiryStatusTag status={inquiry.status} />
                     }
                   />
                 ) : null,

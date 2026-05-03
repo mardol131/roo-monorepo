@@ -1,4 +1,5 @@
 import { Config, PayloadResponse, Where } from "@roo/common";
+import { success } from "zod";
 
 export async function getCollection<T extends keyof Config["collections"]>({
   collection,
@@ -80,8 +81,11 @@ export async function postCollectionItem<
   data,
 }: {
   collection: T;
-  data: Omit<Config["collections"][T], "id" | "createdAt" | "updatedAt">;
-}): Promise<Config["collections"][T]> {
+  data: Omit<
+    Config["collections"][T],
+    "id" | "createdAt" | "updatedAt" | "owner" | "slug" | "status"
+  >;
+}): Promise<{ doc: Config["collections"][T]; message: string }> {
   const url = new URL(
     `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/${collection}`,
   );
@@ -101,7 +105,13 @@ export async function postCollectionItem<
 
 export async function deleteCollectionItem<
   T extends keyof Config["collections"],
->({ collection, id }: { collection: T; id: string }): Promise<void> {
+>({
+  collection,
+  id,
+}: {
+  collection: T;
+  id: string;
+}): Promise<{ success: boolean }> {
   const url = new URL(
     `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/${collection}/${id}`,
   );
@@ -115,4 +125,5 @@ export async function deleteCollectionItem<
   });
 
   if (!res.ok) throw new Error(`Failed to delete item from ${collection}`);
+  return { success: true };
 }

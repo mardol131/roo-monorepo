@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Listing } from "@roo/common";
+import { Inquiry, Listing } from "@roo/common";
 import { companyKeys, inquiryKeys, listingKeys } from "../query-keys";
 import {
   fetchInquiries,
@@ -31,11 +31,11 @@ export function useInquiry(id: string | undefined) {
   });
 }
 
-export function useUpdateListing(id: string, listingId: string) {
+export function useUpdateInquiry(id: string, listingId: string) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (data: Partial<Listing>) => updateInquiry(id, data),
+    mutationFn: (data: Partial<Inquiry>) => updateInquiry(id, data),
     onSuccess: () => {
       // Invaliduje detail listingu i seznam na dashboardu
       queryClient.invalidateQueries({ queryKey: inquiryKeys.byId(id) });

@@ -10,6 +10,7 @@ interface ModalLayoutProps extends PropsWithChildren {
   isOpen?: boolean;
   maxWidth?: string;
   disableClose?: boolean;
+  errorMessage?: string;
 }
 
 export default function ModalLayout({
@@ -19,6 +20,7 @@ export default function ModalLayout({
   isOpen,
   maxWidth = "max-w-2xl",
   disableClose = false,
+  errorMessage,
 }: ModalLayoutProps) {
   if (!isOpen) return null;
 
@@ -45,22 +47,31 @@ export default function ModalLayout({
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-zinc-200">
-          {typeof header === "string" ? (
-            <Text variant="h4" color="textDark">
-              {header}
-            </Text>
-          ) : (
-            header
+        <div>
+          <div className="flex items-center justify-between p-6 border-b border-zinc-200">
+            {typeof header === "string" ? (
+              <Text variant="h4" color="textDark">
+                {header}
+              </Text>
+            ) : (
+              header
+            )}
+            <button
+              onClick={handleClose}
+              disabled={disableClose}
+              className="p-1 hover:bg-zinc-100 rounded-lg transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+              aria-label="Zavřít modal"
+            >
+              <X className="w-5 h-5 text-zinc-600 hover:text-zinc-900" />
+            </button>
+          </div>
+          {errorMessage && (
+            <div className="px-6 py-2">
+              <Text variant="body-sm" color="danger">
+                {errorMessage}
+              </Text>
+            </div>
           )}
-          <button
-            onClick={handleClose}
-            disabled={disableClose}
-            className="p-1 hover:bg-zinc-100 rounded-lg transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-            aria-label="Zavřít modal"
-          >
-            <X className="w-5 h-5 text-zinc-600 hover:text-zinc-900" />
-          </button>
         </div>
 
         {/* Content */}

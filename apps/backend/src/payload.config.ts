@@ -107,4 +107,5 @@ export default buildConfig({
   }),
   plugins: [],
   cors: ['http://localhost:3000', process.env.NEXT_PUBLIC_WEBSITE_URL || ''],
+  csrf: ['http://localhost:3000', process.env.NEXT_PUBLIC_WEBSITE_URL || ''],
 })

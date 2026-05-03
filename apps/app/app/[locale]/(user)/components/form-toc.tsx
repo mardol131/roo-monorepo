@@ -2,13 +2,16 @@
 
 import Button, { ButtonProps } from "@/app/components/ui/atoms/button";
 import { useRouter } from "@/app/i18n/navigation";
+import { LucideIcons } from "@roo/common";
 import { ChevronDown } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
+import * as lucideIcons from "lucide-react";
 
 export type TocSection = {
   id: string;
   title: string;
-  icon: React.ElementType;
+  subTitle?: string;
+  icon: LucideIcons;
 };
 
 export type TocGroup = {
@@ -86,7 +89,7 @@ export default function FormToc({
   const handleClick = (id: string) => {
     document
       .getElementById(id)
-      ?.scrollIntoView({ behavior: "smooth", block: "start" });
+      ?.scrollIntoView({ behavior: "smooth", block: "center" });
   };
 
   const toggleGroup = (idx: number) => {
@@ -142,7 +145,9 @@ export default function FormToc({
                   <div className="flex flex-col gap-0.5 pb-1">
                     {group.sections.map((section) => {
                       const isActive = visibleIds.has(section.id);
-                      const Icon = section.icon;
+                      const Icon = lucideIcons[
+                        section.icon
+                      ] as React.ElementType;
 
                       return (
                         <button

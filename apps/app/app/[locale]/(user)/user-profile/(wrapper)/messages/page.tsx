@@ -1,6 +1,5 @@
-import Text from "@/app/components/ui/atoms/text";
-import { MessageCircle, MessageSquare } from "lucide-react";
 import { Link } from "@/app/i18n/navigation";
+import { useInquiries } from "@/app/react-query/inquiries/hooks";
 import {
   formatInquiryCountLabel,
   getIdFromRelationshipField,
@@ -8,12 +7,11 @@ import {
 } from "@roo/common";
 import { format } from "date-fns";
 import { cs } from "date-fns/locale";
+import { EmptyState } from "../../../components/empty-state";
+import EntityRow from "../../../components/entity-row";
 import PageHeading from "../../../components/page-heading";
 import RowContainer from "../../../components/row-container";
-import EntityRow from "../../../components/entity-row";
-import { EmptyState } from "../../../components/empty-state";
 import EntityComponentTag from "../../../components/tags/entity-component-tag";
-import { getInquiries } from "../../../../../_mock/mock";
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
 
@@ -39,9 +37,9 @@ function groupByEvent(
 // ── Page ───────────────────────────────────────────────────────────────────────
 
 export default function MessagesPage() {
-  const allInquiries = getInquiries();
+  const { data: inquiries } = useInquiries();
 
-  const unread = allInquiries.filter((inquiry) => {
+  const unread = inquiries?.docs.filter((inquiry) => {
     if (!inquiry.activity.lastCompanyMessageSentAt) return false;
     if (!inquiry.activity.lastUserSeenAt) return true;
     return (
@@ -49,7 +47,7 @@ export default function MessagesPage() {
       new Date(inquiry.activity.lastUserSeenAt)
     );
   });
-  const grouped = groupByEvent(unread);
+  const grouped = groupByEvent(unread || []);
 
   return (
     <main className="w-full">

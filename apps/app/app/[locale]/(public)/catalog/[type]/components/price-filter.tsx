@@ -8,7 +8,6 @@ interface PriceFilterProps {
   onPriceChange?: (min: number, max: number) => void;
 }
 
-// Default mock data - počet inzerátů v každém cenovém rozmezí
 const DEFAULT_HISTOGRAM = [
   45, 52, 38, 61, 55, 72, 48, 84, 91, 78, 95, 87, 73, 62, 58, 51, 44, 39, 28,
   15,
@@ -60,7 +59,10 @@ export default function PriceFilter({
 
   return (
     <div className="flex flex-col gap-4">
-      <Text variant="label-lg" className="mb-3 block text-zinc-900 font-semibold">
+      <Text
+        variant="label-lg"
+        className="mb-3 block text-zinc-900 font-semibold"
+      >
         Cena
       </Text>
 

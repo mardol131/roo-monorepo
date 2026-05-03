@@ -5,7 +5,6 @@ import { Tag, Building2 } from "lucide-react";
 import PageHeading from "../components/page-heading";
 import RowContainer from "../components/row-container";
 import { SummaryCard } from "../components/summary-card";
-import { COMPANIES, LISTINGS } from "../../../_mock/mock";
 import EntityRow from "../components/entity-row";
 import EntityComponentTag from "../components/tags/entity-component-tag";
 import { useListings } from "@/app/react-query/listings/hooks";

@@ -2,16 +2,6 @@
 
 import { FormSection } from "@/app/[locale]/(user)/components/form-section";
 import FormToc, { TocGroup } from "@/app/[locale]/(user)/components/form-toc";
-import {
-  MOCK_ACTIVITIES,
-  MOCK_AMENITIES,
-  MOCK_EVENT_TYPES,
-  MOCK_PERSONNEL,
-  MOCK_PLACE_TYPES,
-  MOCK_RULES,
-  MOCK_SERVICES,
-  MOCK_TECHNOLOGIES,
-} from "@/app/_mock/mock";
 import Button from "@/app/components/ui/atoms/button";
 import InputLabel from "@/app/components/ui/atoms/input-label";
 import Checkbox from "@/app/components/ui/atoms/inputs/checkbox";
@@ -55,9 +45,15 @@ import { useCities } from "@/app/react-query/cities/hooks";
 import { z } from "zod";
 import { useRouter } from "@/app/i18n/navigation";
 import { useUpdateListing } from "@/app/react-query/listings/hooks";
-import { Listing } from "@roo/common";
-import { de } from "date-fns/locale";
+
 import { useActivities } from "@/app/react-query/filters/activities/hooks";
+import { useEventTypes } from "@/app/react-query/filters/event-types/hooks";
+import { useAmenities } from "@/app/react-query/filters/amenities/hooks";
+import { useTechnologies } from "@/app/react-query/filters/technologies/hooks";
+import { useServices } from "@/app/react-query/filters/services/hooks";
+import { useRules } from "@/app/react-query/specific/rules/hooks";
+import { usePlaceTypes } from "@/app/react-query/filters/place-types/hooks";
+import { usePersonnel } from "@/app/react-query/filters/personnel/hooks";
 
 // ── TOC groups (exported for page sidebar) ────────────────────────────────────
 
@@ -130,7 +126,7 @@ const schema = z
     description: z.string().optional(),
     indoor: z.boolean().default(false),
     outdoor: z.boolean().default(false),
-    eventTypes: z.array(itemSchema).default([]),
+    eventTypes: z.array(itemSchema).min(1, "Vyberte alespoň jeden typ akce"),
     images: z.object({
       coverImage: z.string().min(1, "Titulní obrázek je povinný"),
       logo: z.string().optional(),
@@ -291,10 +287,6 @@ export default function EditVenueListingForm({
   const { data: citiesData } = useCities({
     query: citySearch ? { name: { contains: citySearch } } : undefined,
   });
-  const { data: activities, isLoading: activitiesLoading } = useActivities({
-    query: citySearch ? { name: { contains: citySearch } } : undefined,
-    limit: 15,
-  });
 
   function onSubmit(data: FormInputs) {
     const venueDetail = listing?.details[0];
@@ -307,8 +299,8 @@ export default function EditVenueListingForm({
         description: data.description,
         indoor: data.indoor,
         outdoor: data.outdoor,
-        eventTypes: data.eventTypes.map(i => i.id),
-        rules: data.rules.map(i => i.id),
+        eventTypes: data.eventTypes.map((i) => i.id),
+        rules: data.rules.map((i) => i.id),
         employees: data.employees,
         faq: data.faq,
         references: data.references,
@@ -330,15 +322,15 @@ export default function EditVenueListingForm({
             canBeBookedAsWhole: data.canBeBookedAsWhole,
             hasAccommodation: data.hasAccommodation,
             accommodationCapacity: data.accommodationCapacity,
-            activities: data.activities.map(i => i.id),
+            activities: data.activities.map((i) => i.id),
             activityAddons: data.activityAddons,
-            services: data.services.map(i => i.id),
-            personnel: data.personnel.map(i => i.id),
-            amenities: data.amenities.map(i => i.id),
-            technology: data.technology.map(i => i.id),
-            placeTypes: data.placeTypes.map(i => i.id),
-            foodAndDrinkRules: data.foodAndDrinkRules.map(i => i.id),
-            venueRules: data.venueRules.map(i => i.id),
+            services: data.services.map((i) => i.id),
+            personnel: data.personnel.map((i) => i.id),
+            amenities: data.amenities.map((i) => i.id),
+            technology: data.technology.map((i) => i.id),
+            placeTypes: data.placeTypes.map((i) => i.id),
+            foodAndDrinkRules: data.foodAndDrinkRules.map((i) => i.id),
+            venueRules: data.venueRules.map((i) => i.id),
             storage: data.storage,
             access: data.access
               ? {
@@ -357,10 +349,38 @@ export default function EditVenueListingForm({
         ],
       },
       {
-        onSuccess: () => router.back(),
+        onSuccess: () =>
+          router.push({
+            pathname:
+              "/company-profile/companies/[companyId]/listings/[listingId]",
+            params: { companyId, listingId },
+          }),
       },
     );
   }
+
+  const { data: activities, isLoading: activitiesLoading } = useActivities({
+    limit: 15,
+    query: citySearch ? { name: { contains: citySearch } } : undefined,
+  });
+  const { data: amenities, isLoading: amenitiesLoading } = useAmenities({
+    limit: 15,
+  });
+  const { data: eventTypes, isLoading: eventTypesLoading } = useEventTypes({
+    limit: 15,
+  });
+  const { data: personnel, isLoading: personnelLoading } = usePersonnel({
+    limit: 15,
+  });
+  const { data: placeTypes, isLoading: placeTypesLoading } = usePlaceTypes({
+    limit: 15,
+  });
+  const { data: rules, isLoading: rulesLoading } = useRules({ limit: 15 });
+  const { data: services, isLoading: servicesLoading } = useServices({
+    limit: 15,
+  });
+  const { data: technologies, isLoading: technologiesLoading } =
+    useTechnologies({ limit: 15 });
 
   const {
     control,
@@ -428,8 +448,10 @@ export default function EditVenueListingForm({
     const id = <T extends string | { id: string }>(v: T) =>
       typeof v === "string" ? v : v.id;
 
-    const toItem = <T extends { id: string; name: string }>(v: string | T): { id: string; name: string } =>
-      typeof v === 'string' ? { id: v, name: '' } : { id: v.id, name: v.name };
+    const toItem = <T extends { id: string; name: string }>(
+      v: string | T,
+    ): { id: string; name: string } =>
+      typeof v === "string" ? { id: v, name: "" } : { id: v.id, name: v.name };
 
     reset({
       name: listing.name,
@@ -812,7 +834,7 @@ export default function EditVenueListingForm({
             name="placeTypes"
             render={({ field }) => (
               <CheckboxGroup
-                items={MOCK_PLACE_TYPES}
+                items={placeTypes?.docs ?? []}
                 value={field.value ?? []}
                 onChange={field.onChange}
                 checkColor="text-listing"
@@ -835,7 +857,7 @@ export default function EditVenueListingForm({
             name="eventTypes"
             render={({ field }) => (
               <CheckboxGroup
-                items={MOCK_EVENT_TYPES}
+                items={eventTypes?.docs ?? []}
                 value={field.value ?? []}
                 onChange={field.onChange}
                 checkColor="text-listing"
@@ -900,14 +922,16 @@ export default function EditVenueListingForm({
                         ref={field.ref}
                         label="Aktivita"
                         placeholder="Vyberte aktivitu..."
-                        options={MOCK_ACTIVITIES.map((a) => ({
-                          id: a.id,
-                          name: a.name,
-                        }))}
+                        options={
+                          activities?.docs.map((a) => ({
+                            id: a.id,
+                            name: a.name,
+                          })) ?? []
+                        }
                         value={{
                           id: field.value ?? "",
                           name:
-                            MOCK_ACTIVITIES.find((a) => a.id === field.value)
+                            activities?.docs.find((a) => a.id === field.value)
                               ?.name ?? "",
                         }}
                         onSelect={(option) => field.onChange(option.id)}
@@ -961,7 +985,7 @@ export default function EditVenueListingForm({
             name="services"
             render={({ field }) => (
               <CheckboxGroup
-                items={MOCK_SERVICES}
+                items={services?.docs ?? []}
                 value={field.value ?? []}
                 onChange={field.onChange}
                 checkColor="text-listing"
@@ -984,7 +1008,7 @@ export default function EditVenueListingForm({
             name="personnel"
             render={({ field }) => (
               <CheckboxGroup
-                items={MOCK_PERSONNEL}
+                items={personnel?.docs ?? []}
                 value={field.value ?? []}
                 onChange={field.onChange}
                 checkColor="text-listing"
@@ -1007,7 +1031,7 @@ export default function EditVenueListingForm({
             name="amenities"
             render={({ field }) => (
               <CheckboxGroup
-                items={MOCK_AMENITIES}
+                items={amenities?.docs ?? []}
                 value={field.value ?? []}
                 onChange={field.onChange}
                 checkColor="text-listing"
@@ -1030,7 +1054,7 @@ export default function EditVenueListingForm({
             name="technology"
             render={({ field }) => (
               <CheckboxGroup
-                items={MOCK_TECHNOLOGIES}
+                items={technologies?.docs ?? []}
                 value={field.value ?? []}
                 onChange={field.onChange}
                 checkColor="text-listing"
@@ -1092,7 +1116,7 @@ export default function EditVenueListingForm({
             render={({ field }) => (
               <CheckboxGroup
                 label="Obecná pravidla"
-                items={MOCK_RULES}
+                items={rules?.docs ?? []}
                 value={field.value ?? []}
                 onChange={field.onChange}
                 checkColor="text-listing"
@@ -1106,7 +1130,7 @@ export default function EditVenueListingForm({
             render={({ field }) => (
               <CheckboxGroup
                 label="Pravidla pro jídlo a pití"
-                items={MOCK_RULES}
+                items={rules?.docs ?? []}
                 value={field.value ?? []}
                 onChange={field.onChange}
                 checkColor="text-listing"
@@ -1120,7 +1144,7 @@ export default function EditVenueListingForm({
             render={({ field }) => (
               <CheckboxGroup
                 label="Pravidla prostoru"
-                items={MOCK_RULES}
+                items={rules?.docs ?? []}
                 value={field.value ?? []}
                 onChange={field.onChange}
                 checkColor="text-listing"
@@ -1598,14 +1622,16 @@ export default function EditVenueListingForm({
                     <SearchInput
                       label="Typ akce"
                       placeholder="Vyberte typ akce..."
-                      options={MOCK_EVENT_TYPES.map((et) => ({
-                        id: et.id,
-                        name: et.name,
-                      }))}
+                      options={
+                        eventTypes?.docs.map((et) => ({
+                          id: et.id,
+                          name: et.name,
+                        })) ?? []
+                      }
                       value={{
                         id: field.value ?? "",
                         name:
-                          MOCK_EVENT_TYPES.find((et) => et.id === field.value)
+                          eventTypes?.docs.find((et) => et.id === field.value)
                             ?.name ?? "",
                       }}
                       onSelect={(option) => field.onChange(option.id)}

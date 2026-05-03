@@ -1,20 +1,20 @@
 "use client";
 
-import Button from "@/app/components/ui/atoms/button";
-import Checkbox from "@/app/components/ui/atoms/inputs/checkbox";
-import Input from "@/app/components/ui/atoms/inputs/input";
-import GalleryInput from "@/app/components/ui/atoms/inputs/images/gallery-input";
-import RepeaterField from "@/app/components/ui/atoms/inputs/repeater-field";
-import { Textarea } from "@/app/components/ui/atoms/inputs/textarea";
 import { FormSection } from "@/app/[locale]/(user)/components/form-section";
 import FormToc, { TocGroup } from "@/app/[locale]/(user)/components/form-toc";
 import PageHeading from "@/app/[locale]/(user)/components/page-heading";
-import { MOCK_ROOM_AMENITIES, MOCK_RULES } from "@/app/_mock/mock";
+import Button from "@/app/components/ui/atoms/button";
+import Checkbox from "@/app/components/ui/atoms/inputs/checkbox";
+import GalleryInput from "@/app/components/ui/atoms/inputs/images/gallery-input";
+import Input from "@/app/components/ui/atoms/inputs/input";
+import RepeaterField from "@/app/components/ui/atoms/inputs/repeater-field";
+import { Textarea } from "@/app/components/ui/atoms/inputs/textarea";
 import { useRouter } from "@/app/i18n/navigation";
+import { useAmenities } from "@/app/react-query/filters/amenities/hooks";
 import { useCreateSpace, useSpace } from "@/app/react-query/spaces/hooks";
+import { useRules } from "@/app/react-query/specific/rules/hooks";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { uploadFileToCloud } from "@roo/common";
-import { Space } from "@roo/common";
+import { Space, uploadFileToCloud } from "@roo/common";
 import {
   BedDouble,
   Building2,
@@ -25,8 +25,8 @@ import {
   TreePine,
 } from "lucide-react";
 import { useParams, useSearchParams } from "next/navigation";
-import { Controller, useFieldArray, useForm } from "react-hook-form";
 import type { Resolver } from "react-hook-form";
+import { Controller, useFieldArray, useForm } from "react-hook-form";
 import { z } from "zod";
 
 // ── TOC ────────────────────────────────────────────────────────────────────────
@@ -142,6 +142,9 @@ export default function NewSpacePage() {
       spaceRuleIds: [],
     },
   });
+
+  const { data: amenities } = useAmenities({ limit: 15 });
+  const { data: rules } = useRules({ limit: 15 });
 
   const {
     fields: roomFields,
@@ -390,7 +393,7 @@ export default function NewSpacePage() {
                               Vybavení pokoje
                             </span>
                             <div className="grid grid-cols-3 gap-1.5">
-                              {MOCK_ROOM_AMENITIES.map((amenity) => (
+                              {amenities?.docs.map((amenity) => (
                                 <Checkbox
                                   key={amenity.id}
                                   size="sm"
@@ -433,7 +436,7 @@ export default function NewSpacePage() {
               name="spaceRuleIds"
               render={({ field }) => (
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                  {MOCK_RULES.map((rule) => (
+                  {rules?.docs.map((rule) => (
                     <Checkbox
                       key={rule.id}
                       checked={field.value.includes(rule.id)}

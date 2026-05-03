@@ -30,7 +30,7 @@ export default function layout({ children }: Props) {
         href: "/user-profile/messages",
         icon: "MessageCircle",
       },
-      { label: "Oblíbené", href: "/user-profile/favorites", icon: "Heart" },
+      { label: "Oblíbené", href: "/user-profile/favourites", icon: "Heart" },
     ],
     subMenuItems: [
       {

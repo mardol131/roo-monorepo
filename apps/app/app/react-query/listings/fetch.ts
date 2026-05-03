@@ -1,40 +1,48 @@
-import { LISTINGS } from "@/app/_mock/mock";
-import { Listing, PayloadResponse, wait } from "@roo/common";
-
-const baseUrl = `${process.env.NEXT_PUBLIC_BACKEND_URL ?? ""}/api/listings`;
+import {
+  deleteCollectionItem,
+  getCollection,
+  getCollectionItem,
+  patchCollectionItem,
+  postCollectionItem,
+} from "@/app/functions/api/general";
+import { Listing } from "@roo/common";
 
 export async function fetchAllListings() {
-  return LISTINGS;
+  const res = await getCollection({
+    collection: "listings",
+    sort: "-createdAt",
+  });
+  if (!res) throw new Error("Failed to fetch listings");
+  return res;
 }
 
-export async function fetchListingsByCompany(
-  companyId: string,
-): Promise<PayloadResponse<Listing>> {
-  const res = await fetch(`${baseUrl}?companyId=${companyId}`, {
-    credentials: "include",
+export async function fetchListingsByCompany(companyId: string) {
+  const res = await getCollection({
+    collection: "listings",
+    query: { companyId: { equals: companyId } },
+    sort: "-createdAt",
   });
-  if (!res.ok) throw new Error("Failed to fetch listings");
-  return res.json();
+  if (!res) throw new Error("Failed to fetch listings");
+  return res;
 }
 
 export async function fetchListing(id: string): Promise<Listing> {
-  const res = await fetch(`${baseUrl}/${id}`, { credentials: "include" });
-  console.log("fetching listing with id:", id);
-  if (!res.ok) throw new Error("Failed to fetch listing");
-  const data = await res.json();
-  console.log("fetched listing data:", data);
-  return data;
+  const res = await getCollectionItem({
+    collection: "listings",
+    id,
+  });
+  if (!res) throw new Error("Failed to fetch listing");
+  return res;
 }
 
 export async function updateListing(id: string, data: Partial<Listing>) {
-  const res = await fetch(`${baseUrl}/${id}`, {
-    method: "PATCH",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data),
-    credentials: "include",
+  const res = await patchCollectionItem({
+    collection: "listings",
+    id,
+    data,
   });
-  if (!res.ok) throw new Error("Failed to update listing");
-  return res.json();
+  if (!res) throw new Error("Failed to update listing");
+  return res;
 }
 
 export type CreateListingPayload = Omit<
@@ -43,18 +51,20 @@ export type CreateListingPayload = Omit<
 >;
 
 export async function createListing(data: CreateListingPayload) {
-  const res = await fetch(`${baseUrl}`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data),
-    credentials: "include",
+  const res = await postCollectionItem({
+    collection: "listings",
+    data,
   });
-  if (!res.ok) throw new Error("Failed to create listing");
-  return res.json();
+  if (!res) throw new Error("Failed to create listing");
+  return res;
 }
 
 export async function deleteListing(id: string) {
-  const res = await fetch(`${baseUrl}/${id}`, { method: "DELETE" });
+  const res = await deleteCollectionItem({
+    collection: "listings",
+    id,
+  });
 
-  if (!res.ok) throw new Error("Failed to delete listing");
+  if (!res) throw new Error("Failed to delete listing");
+  return res;
 }

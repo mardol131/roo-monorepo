@@ -1,20 +1,18 @@
 "use client";
 
-import React from "react";
-import Text from "@/app/components/ui/atoms/text";
 import Button from "@/app/components/ui/atoms/button";
-import { useOrderStore } from "@/app/store/order-store";
-import { Controller, useForm } from "react-hook-form";
-import Input from "@/app/components/ui/atoms/inputs/input";
-import * as yup from "yup";
-import { yupResolver } from "@hookform/resolvers/yup";
-import SearchInput from "../../../../../../../../components/ui/atoms/inputs/search-input";
-import DateTimeInput from "../../../../../../../../components/ui/atoms/inputs/date-time-input";
-import IconSelect, {
-  LucideIcons,
-} from "@/app/components/ui/atoms/inputs/icon-select";
-import { Calendar, MapPin, Smile, Users } from "lucide-react";
 import GuestsInput from "@/app/components/ui/atoms/inputs/guests-input";
+import IconSelect from "@/app/components/ui/atoms/inputs/icon-select";
+import Input from "@/app/components/ui/atoms/inputs/input";
+import Text from "@/app/components/ui/atoms/text";
+import { useOrderStore } from "@/app/store/order-store";
+import { yupResolver } from "@hookform/resolvers/yup";
+import { Calendar, MapPin, Smile } from "lucide-react";
+import React from "react";
+import { Controller, useForm } from "react-hook-form";
+import * as yup from "yup";
+import DateTimeInput from "../../../../../../../../components/ui/atoms/inputs/date-time-input";
+import SearchInput from "../../../../../../../../components/ui/atoms/inputs/search-input";
 
 const MOCK_LOCATIONS = [
   { id: "loc-1", label: "Praha" },

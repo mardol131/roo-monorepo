@@ -2,16 +2,6 @@
 
 import { FormSection } from "@/app/[locale]/(user)/components/form-section";
 import FormToc, { TocGroup } from "@/app/[locale]/(user)/components/form-toc";
-import {
-  MOCK_CUISINES,
-  MOCK_DIETARY_OPTIONS,
-  MOCK_DISH_TYPES,
-  MOCK_EVENT_TYPES,
-  MOCK_FOOD_SERVICE_STYLES,
-  MOCK_NECESSITIES,
-  MOCK_PERSONNEL,
-  MOCK_RULES,
-} from "@/app/_mock/mock";
 import Button from "@/app/components/ui/atoms/button";
 import InputLabel from "@/app/components/ui/atoms/input-label";
 import Checkbox from "@/app/components/ui/atoms/inputs/checkbox";
@@ -52,6 +42,19 @@ import { z } from "zod";
 import { useRouter } from "@/app/i18n/navigation";
 import { useUpdateListing } from "@/app/react-query/listings/hooks";
 import { Listing } from "@roo/common";
+import { useActivities } from "@/app/react-query/filters/activities/hooks";
+import { useAmenities } from "@/app/react-query/filters/amenities/hooks";
+import { useEventTypes } from "@/app/react-query/filters/event-types/hooks";
+import { usePersonnel } from "@/app/react-query/filters/personnel/hooks";
+import { usePlaceTypes } from "@/app/react-query/filters/place-types/hooks";
+import { useRules } from "@/app/react-query/specific/rules/hooks";
+import { useServices } from "@/app/react-query/filters/services/hooks";
+import { useTechnologies } from "@/app/react-query/filters/technologies/hooks";
+import { useDishTypes } from "@/app/react-query/filters/dish-types/hooks";
+import { useFoodServiceStyles } from "@/app/react-query/filters/food-service-styles/hooks";
+import { useCuisines } from "@/app/react-query/filters/cuisines/hooks";
+import { useDietaryOptions } from "@/app/react-query/filters/dietary-options/hooks";
+import { useNecessities } from "@/app/react-query/specific/necessities/hooks";
 
 // ── TOC groups ────────────────────────────────────────────────────────────────
 
@@ -106,7 +109,7 @@ const schema = z.object({
   name: z.string().min(1, "Název je povinný"),
   shortDescription: z.string().optional(),
   description: z.string().optional(),
-  eventTypes: z.array(itemSchema).default([]),
+  eventTypes: z.array(itemSchema).min(1, "Vyberte alespoň jeden typ akce"),
   images: z.object({
     coverImage: z.string().min(1, "Titulní obrázek je povinný"),
     logo: z.string().optional(),
@@ -208,13 +211,13 @@ export default function EditGastroListingForm({
         name: data.name,
         shortDescription: data.shortDescription,
         description: data.description,
-        eventTypes: data.eventTypes.map(i => i.id),
+        eventTypes: data.eventTypes.map((i) => i.id),
         images: {
           ...data.images,
           gallery: data.images.gallery.map((url) => ({ url })),
         },
         price: data.price,
-        rules: data.rules.map(i => i.id),
+        rules: data.rules.map((i) => i.id),
         employees: data.employees,
         faq: data.faq,
         references: data.references,
@@ -223,22 +226,22 @@ export default function EditGastroListingForm({
             ...existingDetail,
             blockType: "gastro",
             location: {
-              region: data.location.regions.map(i => i.id),
-              district: data.location.districts.map(i => i.id),
-              city: data.location.cities.map(i => i.id),
+              region: data.location.regions.map((i) => i.id),
+              district: data.location.districts.map((i) => i.id),
+              city: data.location.cities.map((i) => i.id),
               address: data.location.address,
             },
             capacity: data.capacity,
             minimumCapacity: data.minimumCapacity,
-            cuisines: data.cuisines.map(i => i.id),
-            dishTypes: data.dishTypes.map(i => i.id),
-            dietaryOptions: data.dietaryOptions.map(i => i.id),
-            foodServiceStyles: data.foodServiceStyles.map(i => i.id),
+            cuisines: data.cuisines.map((i) => i.id),
+            dishTypes: data.dishTypes.map((i) => i.id),
+            dietaryOptions: data.dietaryOptions.map((i) => i.id),
+            foodServiceStyles: data.foodServiceStyles.map((i) => i.id),
             kidsMenu: data.kidsMenu,
             hasAlcoholLicense: data.hasAlcoholLicense,
-            foodAndDrinkRules: data.foodAndDrinkRules.map(i => i.id),
-            personnel: data.personnel.map(i => i.id),
-            necessities: data.necessities.map(i => i.id),
+            foodAndDrinkRules: data.foodAndDrinkRules.map((i) => i.id),
+            personnel: data.personnel.map((i) => i.id),
+            necessities: data.necessities.map((i) => i.id),
           },
         ],
       },
@@ -276,6 +279,27 @@ export default function EditGastroListingForm({
     },
   });
 
+  const { data: eventTypes, isLoading: eventTypesLoading } = useEventTypes({
+    limit: 15,
+  });
+  const { data: personnel, isLoading: personnelLoading } = usePersonnel({
+    limit: 15,
+  });
+  const { data: rules, isLoading: rulesLoading } = useRules({ limit: 15 });
+  const { data: dishTypes, isLoading: dishTypesLoading } = useDishTypes({
+    limit: 15,
+  });
+  const { data: foodAndServiceStyles, isLoading: foodAndServiceStylesLoading } =
+    useFoodServiceStyles({ limit: 15 });
+  const { data: cuisines, isLoading: cuisinesLoading } = useCuisines({
+    limit: 15,
+  });
+  const { data: dietaryOptions, isLoading: dietaryOptionsLoading } =
+    useDietaryOptions({ limit: 15 });
+  const { data: necessities, isLoading: necessitiesLoading } = useNecessities({
+    limit: 15,
+  });
+
   useEffect(() => {
     const subscription = watch((values) => {
       onFormChange?.(values as GastroFormInputs);
@@ -291,8 +315,10 @@ export default function EditGastroListingForm({
     const id = <T extends string | { id: string }>(v: T) =>
       typeof v === "string" ? v : v.id;
 
-    const toItem = <T extends { id: string; name: string }>(v: string | T): { id: string; name: string } =>
-      typeof v === 'string' ? { id: v, name: '' } : { id: v.id, name: v.name };
+    const toItem = <T extends { id: string; name: string }>(
+      v: string | T,
+    ): { id: string; name: string } =>
+      typeof v === "string" ? { id: v, name: "" } : { id: v.id, name: v.name };
 
     reset({
       name: listing.name,
@@ -366,7 +392,9 @@ export default function EditGastroListingForm({
   const { data: districtsData } = useDistricts(
     regionsValue?.length || districtSearch
       ? {
-          ...(regionsValue?.length ? { region: { in: regionsValue.map(i => i.id) } } : {}),
+          ...(regionsValue?.length
+            ? { region: { in: regionsValue.map((i) => i.id) } }
+            : {}),
           ...(districtSearch ? { name: { contains: districtSearch } } : {}),
         }
       : undefined,
@@ -376,7 +404,7 @@ export default function EditGastroListingForm({
       districtsValue?.length || citySearch
         ? {
             ...(districtsValue?.length
-              ? { district: { in: districtsValue.map(i => i.id) } }
+              ? { district: { in: districtsValue.map((i) => i.id) } }
               : {}),
             ...(citySearch ? { name: { contains: citySearch } } : {}),
           }
@@ -612,7 +640,7 @@ export default function EditGastroListingForm({
             name="cuisines"
             render={({ field }) => (
               <CheckboxGroup
-                items={MOCK_CUISINES}
+                items={cuisines?.docs ?? []}
                 value={field.value ?? []}
                 onChange={field.onChange}
                 checkColor="text-listing"
@@ -636,7 +664,7 @@ export default function EditGastroListingForm({
             render={({ field }) => (
               <CheckboxGroup
                 label="Typy jídel"
-                items={MOCK_DISH_TYPES}
+                items={dishTypes?.docs ?? []}
                 value={field.value ?? []}
                 onChange={field.onChange}
                 checkColor="text-listing"
@@ -650,7 +678,7 @@ export default function EditGastroListingForm({
             render={({ field }) => (
               <CheckboxGroup
                 label="Dietní možnosti"
-                items={MOCK_DIETARY_OPTIONS}
+                items={dietaryOptions?.docs ?? []}
                 value={field.value ?? []}
                 onChange={field.onChange}
                 checkColor="text-listing"
@@ -664,7 +692,7 @@ export default function EditGastroListingForm({
             render={({ field }) => (
               <CheckboxGroup
                 label="Styl servisu"
-                items={MOCK_FOOD_SERVICE_STYLES}
+                items={foodAndServiceStyles?.docs ?? []}
                 value={field.value ?? []}
                 onChange={field.onChange}
                 checkColor="text-listing"
@@ -726,7 +754,7 @@ export default function EditGastroListingForm({
             name="eventTypes"
             render={({ field }) => (
               <CheckboxGroup
-                items={MOCK_EVENT_TYPES}
+                items={eventTypes?.docs ?? []}
                 value={field.value ?? []}
                 onChange={field.onChange}
                 checkColor="text-listing"
@@ -749,7 +777,7 @@ export default function EditGastroListingForm({
             name="personnel"
             render={({ field }) => (
               <CheckboxGroup
-                items={MOCK_PERSONNEL}
+                items={personnel?.docs ?? []}
                 value={field.value ?? []}
                 onChange={field.onChange}
                 checkColor="text-listing"
@@ -772,7 +800,7 @@ export default function EditGastroListingForm({
             name="necessities"
             render={({ field }) => (
               <CheckboxGroup
-                items={MOCK_NECESSITIES}
+                items={necessities?.docs ?? []}
                 value={field.value ?? []}
                 onChange={field.onChange}
                 checkColor="text-listing"
@@ -795,7 +823,7 @@ export default function EditGastroListingForm({
             name="rules"
             render={({ field }) => (
               <CheckboxGroup
-                items={MOCK_RULES}
+                items={rules?.docs ?? []}
                 value={field.value ?? []}
                 onChange={field.onChange}
                 checkColor="text-listing"
@@ -1023,14 +1051,16 @@ export default function EditGastroListingForm({
                       ref={field.ref}
                       label="Typ akce"
                       placeholder="Vyberte typ akce..."
-                      options={MOCK_EVENT_TYPES.map((et) => ({
-                        id: et.id,
-                        name: et.name,
-                      }))}
+                      options={
+                        eventTypes?.docs.map((et) => ({
+                          id: et.id,
+                          name: et.name,
+                        })) ?? []
+                      }
                       value={{
                         id: field.value ?? "",
                         name:
-                          MOCK_EVENT_TYPES.find((et) => et.id === field.value)
+                          eventTypes?.docs.find((et) => et.id === field.value)
                             ?.name ?? "",
                       }}
                       onSelect={(option) => field.onChange(option.id)}
