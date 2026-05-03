@@ -258,6 +258,18 @@ export const entertainmentVariantDetails: Field[] = [
 
 export const Variants: CollectionConfig = {
   slug: 'variants',
+  access: {
+    create: ({ req }) => {
+      return !!req.user
+    },
+    read: () => true,
+    update: ({ req }) => {
+      if (!req.user) return false
+      if (req.user.collection === 'admins') return true
+      return { 'listing.company.owner': { equals: req.user.id } }
+    },
+    delete: ({ req }) => req.user?.collection === 'admins',
+  },
   fields: [
     ...variantsCommonFields,
     {

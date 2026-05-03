@@ -156,7 +156,7 @@ function SpaceTree({
               label={space.name}
               link={{
                 pathname:
-                  "/company-profile/companies/[companyId]/listings/[listingId]/spaces/[spaceId]",
+                  "/company-profile/companies/[companyId]/listings/[listingId]/spaces/[spaceId]/edit",
                 params: { companyId, listingId, spaceId: space.id },
               }}
               items={[

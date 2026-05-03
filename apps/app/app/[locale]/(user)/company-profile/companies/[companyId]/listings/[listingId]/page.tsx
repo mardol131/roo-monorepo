@@ -39,6 +39,7 @@ import { useTranslations } from "next-intl";
 import EntityCard from "@/app/[locale]/(user)/components/entity-card";
 import EntityComponentTag from "@/app/[locale]/(user)/components/tags/entity-component-tag";
 import Button from "@/app/components/ui/atoms/button";
+import { useSpacesByListing } from "@/app/react-query/spaces/hooks";
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
@@ -57,6 +58,7 @@ export default function Page() {
     listingId,
     companyId,
   );
+  const { data: spaces } = useSpacesByListing(listingId);
   const { mutate: deleteListing } = useDeleteListing(listingId, companyId);
   if (isPending) return <Loader text="Načítám službu..." />;
   if (!listing) return router.back();
@@ -166,6 +168,7 @@ export default function Page() {
           listing={listing}
           companyId={companyId}
           listingId={listingId}
+          spacesCount={spaces?.docs.length || 0}
         />
         <ControlSection
           rows={[

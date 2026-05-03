@@ -1,7 +1,10 @@
 "use client";
 
 import { FormSection } from "@/app/[locale]/(user)/components/form-section";
-import FormToc, { TocGroup } from "@/app/[locale]/(user)/components/form-toc";
+import FormToc, {
+  TocGroup,
+  TocSection,
+} from "@/app/[locale]/(user)/components/form-toc";
 import Button from "@/app/components/ui/atoms/button";
 import InputLabel from "@/app/components/ui/atoms/input-label";
 import Checkbox from "@/app/components/ui/atoms/inputs/checkbox";
@@ -41,33 +44,37 @@ const COLOR = { text: "text-variant", surface: "bg-variant-surface" };
 
 // ── TOC ────────────────────────────────────────────────────────────────────────
 
-const S = {
-  basic: { id: "section-basic", title: "Základní informace", icon: Building2 },
-  price: { id: "section-price", title: "Cena", icon: Banknote },
-  images: { id: "section-images", title: "Obrázky", icon: Image },
-  eventTypes: { id: "section-event-types", title: "Typy akcí", icon: Tag },
+const S: Record<string, TocSection> = {
+  basic: {
+    id: "section-basic",
+    title: "Základní informace",
+    icon: "Building2",
+  },
+  price: { id: "section-price", title: "Cena", icon: "Banknote" },
+  images: { id: "section-images", title: "Obrázky", icon: "Image" },
+  eventTypes: { id: "section-event-types", title: "Typy akcí", icon: "Tag" },
   availability: {
     id: "section-availability",
     title: "Dostupnost",
-    icon: Calendar,
+    icon: "Calendar",
   },
-  capacity: { id: "section-capacity", title: "Kapacita", icon: Users },
+  capacity: { id: "section-capacity", title: "Kapacita", icon: "Users" },
   equipment: {
     id: "section-equipment",
     title: "Vybavení a personál",
-    icon: Wifi,
+    icon: "Wifi",
   },
-  parking: { id: "section-parking", title: "Parkování", icon: Car },
+  parking: { id: "section-parking", title: "Parkování", icon: "Car" },
   accommodation: {
     id: "section-accommodation",
     title: "Ubytování",
-    icon: BedDouble,
+    icon: "BedDouble",
   },
-  breakfast: { id: "section-breakfast", title: "Snídaně", icon: Coffee },
+  breakfast: { id: "section-breakfast", title: "Snídaně", icon: "Coffee" },
   includes: {
     id: "section-includes",
     title: "Zahrnuto / Nezahrnuto",
-    icon: ListChecks,
+    icon: "ListChecks",
   },
 };
 
@@ -195,7 +202,10 @@ function makeResolver(): ResolverFn {
       result.errors = {
         ...result.errors,
         selectedHours: {
-          root: { type: "required", message: "Přidejte alespoň jeden časový slot" },
+          root: {
+            type: "required",
+            message: "Přidejte alespoň jeden časový slot",
+          },
         },
       };
     }
@@ -228,12 +238,25 @@ export default function EditVariantFormVenue({
     typeof v === "string" ? { id: v, name: "" } : { id: v.id, name: v.name };
 
   const listingEventTypes = (listing?.eventTypes ?? []).map(toItem);
-  const listingSpaces = (spaces ?? []).map((s) => ({ id: s.id, name: s.name ?? "" }));
-  const listingAmenities = (venueDetail?.blockType === "venue" ? (venueDetail.amenities ?? []) : []).map(toItem);
-  const listingTechnologies = (venueDetail?.blockType === "venue" ? (venueDetail.technology ?? []) : []).map(toItem);
-  const listingServices = (venueDetail?.blockType === "venue" ? (venueDetail.services ?? []) : []).map(toItem);
-  const listingActivities = (venueDetail?.blockType === "venue" ? (venueDetail.activities ?? []) : []).map(toItem);
-  const listingPersonnel = (venueDetail?.blockType === "venue" ? (venueDetail.personnel ?? []) : []).map(toItem);
+  const listingSpaces = (spaces?.docs ?? []).map((s) => ({
+    id: s.id,
+    name: s.name ?? "",
+  }));
+  const listingAmenities = (
+    venueDetail?.blockType === "venue" ? (venueDetail.amenities ?? []) : []
+  ).map(toItem);
+  const listingTechnologies = (
+    venueDetail?.blockType === "venue" ? (venueDetail.technology ?? []) : []
+  ).map(toItem);
+  const listingServices = (
+    venueDetail?.blockType === "venue" ? (venueDetail.services ?? []) : []
+  ).map(toItem);
+  const listingActivities = (
+    venueDetail?.blockType === "venue" ? (venueDetail.activities ?? []) : []
+  ).map(toItem);
+  const listingPersonnel = (
+    venueDetail?.blockType === "venue" ? (venueDetail.personnel ?? []) : []
+  ).map(toItem);
 
   const {
     control,
@@ -589,7 +612,10 @@ export default function EditVariantFormVenue({
               onAppend={() => appendSelectedHour({ from: "", to: "" })}
               onRemove={removeSelectedHour}
               addButtonLabel="Přidat časový slot"
-              error={(errors.selectedHours as { root?: { message?: string } })?.root?.message}
+              error={
+                (errors.selectedHours as { root?: { message?: string } })?.root
+                  ?.message
+              }
               renderItem={(_, index) => (
                 <div className="grid grid-cols-2 gap-3">
                   <Input

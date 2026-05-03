@@ -1,4 +1,5 @@
 import { Config, PayloadResponse, Where } from "@roo/common";
+import { stringify } from "qs-esm";
 import { success } from "zod";
 
 export async function getCollection<T extends keyof Config["collections"]>({
@@ -15,11 +16,14 @@ export async function getCollection<T extends keyof Config["collections"]>({
   const url = new URL(
     `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/${collection}`,
   );
-  if (query) url.searchParams.append("where", JSON.stringify(query));
+  const stringifiedQuery = query
+    ? stringify({ where: query }, { encodeValuesOnly: true })
+    : undefined;
+
   if (limit) url.searchParams.append("limit", limit.toString());
   if (sort) url.searchParams.append("sort", sort);
 
-  return await fetch(url.toString(), {
+  return await fetch(`${url.toString()}&${stringifiedQuery}`, {
     headers: {
       "Content-Type": "application/json",
     },

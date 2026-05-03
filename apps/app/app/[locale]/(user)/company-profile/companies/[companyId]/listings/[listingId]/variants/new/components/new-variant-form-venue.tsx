@@ -1,7 +1,10 @@
 "use client";
 
 import { FormSection } from "@/app/[locale]/(user)/components/form-section";
-import FormToc, { TocGroup } from "@/app/[locale]/(user)/components/form-toc";
+import FormToc, {
+  TocGroup,
+  TocSection,
+} from "@/app/[locale]/(user)/components/form-toc";
 import Button from "@/app/components/ui/atoms/button";
 import InputLabel from "@/app/components/ui/atoms/input-label";
 import Checkbox from "@/app/components/ui/atoms/inputs/checkbox";
@@ -46,7 +49,7 @@ const COLOR = { text: "text-variant", surface: "bg-variant-surface" };
 
 // ── TOC ────────────────────────────────────────────────────────────────────────
 
-const S: Record<string, { id: string; title: string; icon: LucideIcons }> = {
+const S: Record<string, TocSection> = {
   basic: {
     id: "section-basic",
     title: "Základní informace",
@@ -784,8 +787,21 @@ export default function NewVariantFormVenue({ onCancel }: Props) {
           id={S.spaces.id}
           icon={S.spaces.icon}
           title={S.spaces.title}
+          subtitle={S.spaces.subTitle}
           surfaceColor={COLOR.surface}
           color={COLOR.text}
+          headerRightComponent={
+            <Button
+              text="Nastavení prostorů"
+              link={{
+                pathname:
+                  "/company-profile/companies/[companyId]/listings/[listingId]/spaces",
+                params: { listingId, companyId },
+              }}
+              size="xs"
+              version="variantFull"
+            />
+          }
         >
           <Controller
             control={control}

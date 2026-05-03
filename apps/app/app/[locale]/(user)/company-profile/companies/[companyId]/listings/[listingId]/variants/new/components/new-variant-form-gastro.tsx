@@ -1,7 +1,10 @@
 "use client";
 
 import { FormSection } from "@/app/[locale]/(user)/components/form-section";
-import FormToc, { TocGroup } from "@/app/[locale]/(user)/components/form-toc";
+import FormToc, {
+  TocGroup,
+  TocSection,
+} from "@/app/[locale]/(user)/components/form-toc";
 import Button from "@/app/components/ui/atoms/button";
 import InputLabel from "@/app/components/ui/atoms/input-label";
 import Checkbox from "@/app/components/ui/atoms/inputs/checkbox";
@@ -41,17 +44,33 @@ const COLOR = { text: "text-variant", surface: "bg-variant-surface" };
 
 // ── TOC ────────────────────────────────────────────────────────────────────────
 
-const S = {
-  basic: { id: "section-basic", title: "Základní informace", icon: Package },
-  price: { id: "section-price", title: "Cena", icon: Banknote },
-  images: { id: "section-images", title: "Obrázky", icon: Image },
-  eventTypes: { id: "section-event-types", title: "Typy akcí", icon: Tag },
-  availability: { id: "section-availability", title: "Dostupnost", icon: Calendar },
-  capacity: { id: "section-capacity", title: "Kapacita a objednávky", icon: Users },
-  cuisine: { id: "section-cuisine", title: "Kuchyně a styl", icon: ChefHat },
-  extras: { id: "section-extras", title: "Doplňky", icon: Package },
-  personnel: { id: "section-personnel", title: "Personál a požadavky", icon: UserCheck },
-  includes: { id: "section-includes", title: "Zahrnuto / Nezahrnuto", icon: ListChecks },
+const S: Record<string, TocSection> = {
+  basic: { id: "section-basic", title: "Základní informace", icon: "Package" },
+  price: { id: "section-price", title: "Cena", icon: "Banknote" },
+  images: { id: "section-images", title: "Obrázky", icon: "Image" },
+  eventTypes: { id: "section-event-types", title: "Typy akcí", icon: "Tag" },
+  availability: {
+    id: "section-availability",
+    title: "Dostupnost",
+    icon: "Calendar",
+  },
+  capacity: {
+    id: "section-capacity",
+    title: "Kapacita a objednávky",
+    icon: "Users",
+  },
+  cuisine: { id: "section-cuisine", title: "Kuchyně a styl", icon: "ChefHat" },
+  extras: { id: "section-extras", title: "Doplňky", icon: "Package" },
+  personnel: {
+    id: "section-personnel",
+    title: "Personál a požadavky",
+    icon: "UserCheck",
+  },
+  includes: {
+    id: "section-includes",
+    title: "Zahrnuto / Nezahrnuto",
+    icon: "ListChecks",
+  },
 };
 
 const FORM_GROUPS: readonly TocGroup[] = [
@@ -68,7 +87,11 @@ const itemSchema = z.object({ id: z.string(), name: z.string() });
 
 const optionalPositiveInt = z.preprocess(
   (val) => (val === "" || val === undefined || val === null ? undefined : val),
-  z.coerce.number().positive("Musí být kladné číslo").int("Zadejte celé číslo").optional(),
+  z.coerce
+    .number()
+    .positive("Musí být kladné číslo")
+    .int("Zadejte celé číslo")
+    .optional(),
 );
 
 const optionalPositiveNumber = z.preprocess(
@@ -78,22 +101,37 @@ const optionalPositiveNumber = z.preprocess(
 
 const schema = z.object({
   name: z.string().min(1, "Název je povinný"),
-  shortDescription: z.string().min(1, "Krátký popis je povinný").max(50, "Max. 50 znaků"),
+  shortDescription: z
+    .string()
+    .min(1, "Krátký popis je povinný")
+    .max(50, "Max. 50 znaků"),
   description: z.string().optional(),
   type: z.enum(["allYear", "seasonal"]),
   availability: z.enum(["allDay", "selectedHours"]),
-  selectedHours: z.array(z.object({
-    from: z.string().min(1, "Čas od je povinný"),
-    to: z.string().min(1, "Čas do je povinný"),
-  })).default([]),
+  selectedHours: z
+    .array(
+      z.object({
+        from: z.string().min(1, "Čas od je povinný"),
+        to: z.string().min(1, "Čas do je povinný"),
+      }),
+    )
+    .default([]),
   price: z.object({
-    generalPrice: z.coerce.number({ message: "Zadejte číslo" }).positive("Cena musí být kladná"),
-    seasonalPrices: z.array(z.object({
-      price: z.coerce.number({ message: "Zadejte číslo" }).positive("Cena musí být kladná"),
-      description: z.string().optional(),
-      from: z.string().min(1, "Datum od je povinné"),
-      to: z.string().min(1, "Datum do je povinné"),
-    })).default([]),
+    generalPrice: z.coerce
+      .number({ message: "Zadejte číslo" })
+      .positive("Cena musí být kladná"),
+    seasonalPrices: z
+      .array(
+        z.object({
+          price: z.coerce
+            .number({ message: "Zadejte číslo" })
+            .positive("Cena musí být kladná"),
+          description: z.string().optional(),
+          from: z.string().min(1, "Datum od je povinné"),
+          to: z.string().min(1, "Datum do je povinné"),
+        }),
+      )
+      .default([]),
   }),
   images: z.object({
     mainImage: z.string().min(1, "Obrázek je povinný"),
@@ -103,7 +141,10 @@ const schema = z.object({
   includes: z.array(z.object({ item: z.string() })).default([]),
   excludes: z.array(z.object({ item: z.string() })).default([]),
   capacity: z.object({
-    max: z.coerce.number({ message: "Zadejte číslo" }).positive("Kapacita musí být kladná").int("Zadejte celé číslo"),
+    max: z.coerce
+      .number({ message: "Zadejte číslo" })
+      .positive("Kapacita musí být kladná")
+      .int("Zadejte celé číslo"),
     min: optionalPositiveInt,
   }),
   pricePerPerson: optionalPositiveNumber,
@@ -122,8 +163,15 @@ type GastroFormInputs = z.infer<typeof schema>;
 
 // ── Resolver ───────────────────────────────────────────────────────────────────
 
-type ResolverResult = { values: Partial<GastroFormInputs>; errors: Record<string, unknown> };
-type ResolverFn = (values: unknown, ctx: unknown, opts: unknown) => Promise<ResolverResult>;
+type ResolverResult = {
+  values: Partial<GastroFormInputs>;
+  errors: Record<string, unknown>;
+};
+type ResolverFn = (
+  values: unknown,
+  ctx: unknown,
+  opts: unknown,
+) => Promise<ResolverResult>;
 
 function makeResolver(): ResolverFn {
   const zResolver = zodResolver(schema) as unknown as ResolverFn;
@@ -133,7 +181,12 @@ function makeResolver(): ResolverFn {
     if (v.availability === "selectedHours" && !v.selectedHours?.length) {
       result.errors = {
         ...result.errors,
-        selectedHours: { root: { type: "required", message: "Přidejte alespoň jeden časový slot" } },
+        selectedHours: {
+          root: {
+            type: "required",
+            message: "Přidejte alespoň jeden časový slot",
+          },
+        },
       };
     }
     return result;
@@ -149,7 +202,10 @@ type Props = {
 // ── Component ──────────────────────────────────────────────────────────────────
 
 export default function NewVariantFormGastro({ onCancel }: Props) {
-  const { listingId, companyId } = useParams<{ listingId: string; companyId: string }>();
+  const { listingId, companyId } = useParams<{
+    listingId: string;
+    companyId: string;
+  }>();
   const router = useRouter();
   const { data: listing } = useListing(listingId);
   const gastroDetail = listing?.details.find((d) => d.blockType === "gastro");
@@ -158,17 +214,34 @@ export default function NewVariantFormGastro({ onCancel }: Props) {
     typeof v === "string" ? { id: v, name: "" } : { id: v.id, name: v.name };
 
   const listingEventTypes = (listing?.eventTypes ?? []).map(toItem);
-  const listingCuisines = (gastroDetail?.blockType === "gastro" ? (gastroDetail.cuisines ?? []) : []).map(toItem);
-  const listingDishTypes = (gastroDetail?.blockType === "gastro" ? (gastroDetail.dishTypes ?? []) : []).map(toItem);
-  const listingFoodServiceStyles = (gastroDetail?.blockType === "gastro" ? (gastroDetail.foodServiceStyles ?? []) : []).map(toItem);
-  const listingDietaryOptions = (gastroDetail?.blockType === "gastro" ? (gastroDetail.dietaryOptions ?? []) : []).map(toItem);
-  const listingPersonnel = (gastroDetail?.blockType === "gastro" ? (gastroDetail.personnel ?? []) : []).map(toItem);
-  const listingNecessities = (gastroDetail?.blockType === "gastro" ? (gastroDetail.necessities ?? []) : []).map(toItem);
+  const listingCuisines = (
+    gastroDetail?.blockType === "gastro" ? (gastroDetail.cuisines ?? []) : []
+  ).map(toItem);
+  const listingDishTypes = (
+    gastroDetail?.blockType === "gastro" ? (gastroDetail.dishTypes ?? []) : []
+  ).map(toItem);
+  const listingFoodServiceStyles = (
+    gastroDetail?.blockType === "gastro"
+      ? (gastroDetail.foodServiceStyles ?? [])
+      : []
+  ).map(toItem);
+  const listingDietaryOptions = (
+    gastroDetail?.blockType === "gastro"
+      ? (gastroDetail.dietaryOptions ?? [])
+      : []
+  ).map(toItem);
+  const listingPersonnel = (
+    gastroDetail?.blockType === "gastro" ? (gastroDetail.personnel ?? []) : []
+  ).map(toItem);
+  const listingNecessities = (
+    gastroDetail?.blockType === "gastro" ? (gastroDetail.necessities ?? []) : []
+  ).map(toItem);
 
   const { mutate: createVariant } = useCreateVariant({
     onSuccess: (variant) => {
       router.push({
-        pathname: "/company-profile/companies/[companyId]/listings/[listingId]/variants/[variantId]/edit",
+        pathname:
+          "/company-profile/companies/[companyId]/listings/[listingId]/variants/[variantId]/edit",
         params: { companyId, listingId, variantId: variant.id },
       });
     },
@@ -203,14 +276,26 @@ export default function NewVariantFormGastro({ onCancel }: Props) {
 
   const availabilityValue = watch("availability");
 
-  const { fields: seasonalPricesFields, append: appendSeasonalPrice, remove: removeSeasonalPrice } =
-    useFieldArray({ control, name: "price.seasonalPrices" });
-  const { fields: selectedHoursFields, append: appendSelectedHour, remove: removeSelectedHour } =
-    useFieldArray({ control, name: "selectedHours" });
-  const { fields: includesFields, append: appendInclude, remove: removeInclude } =
-    useFieldArray({ control, name: "includes" });
-  const { fields: excludesFields, append: appendExclude, remove: removeExclude } =
-    useFieldArray({ control, name: "excludes" });
+  const {
+    fields: seasonalPricesFields,
+    append: appendSeasonalPrice,
+    remove: removeSeasonalPrice,
+  } = useFieldArray({ control, name: "price.seasonalPrices" });
+  const {
+    fields: selectedHoursFields,
+    append: appendSelectedHour,
+    remove: removeSelectedHour,
+  } = useFieldArray({ control, name: "selectedHours" });
+  const {
+    fields: includesFields,
+    append: appendInclude,
+    remove: removeInclude,
+  } = useFieldArray({ control, name: "includes" });
+  const {
+    fields: excludesFields,
+    append: appendExclude,
+    remove: removeExclude,
+  } = useFieldArray({ control, name: "excludes" });
 
   const handleSubmit = (data: GastroFormInputs) => {
     createVariant({
@@ -262,19 +347,30 @@ export default function NewVariantFormGastro({ onCancel }: Props) {
         >
           <Input
             label="Název"
-            inputProps={{ ...register("name"), placeholder: "Raut pro 50 osob" }}
+            inputProps={{
+              ...register("name"),
+              placeholder: "Raut pro 50 osob",
+            }}
             error={errors.name?.message}
             isRequired
           />
           <Input
             label="Krátký popis"
-            inputProps={{ ...register("shortDescription"), placeholder: "Stručný popis varianty (max. 50 znaků)", maxLength: 50 }}
+            inputProps={{
+              ...register("shortDescription"),
+              placeholder: "Stručný popis varianty (max. 50 znaků)",
+              maxLength: 50,
+            }}
             error={errors.shortDescription?.message}
             isRequired
           />
           <Textarea
             label="Detailní popis"
-            inputProps={{ ...register("description"), placeholder: "Podrobný popis varianty...", rows: 4 }}
+            inputProps={{
+              ...register("description"),
+              placeholder: "Podrobný popis varianty...",
+              rows: 4,
+            }}
             error={errors.description?.message}
           />
         </FormSection>
@@ -291,7 +387,12 @@ export default function NewVariantFormGastro({ onCancel }: Props) {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Input
               label="Základní cena (Kč)"
-              inputProps={{ ...register("price.generalPrice"), type: "number", min: 0, placeholder: "9900" }}
+              inputProps={{
+                ...register("price.generalPrice"),
+                type: "number",
+                min: 0,
+                placeholder: "9900",
+              }}
               error={errors.price?.generalPrice?.message}
               isRequired
             />
@@ -299,7 +400,14 @@ export default function NewVariantFormGastro({ onCancel }: Props) {
           <RepeaterField
             label="Sezónní ceny"
             fields={seasonalPricesFields}
-            onAppend={() => appendSeasonalPrice({ price: 0, description: "", from: "", to: "" })}
+            onAppend={() =>
+              appendSeasonalPrice({
+                price: 0,
+                description: "",
+                from: "",
+                to: "",
+              })
+            }
             onRemove={removeSeasonalPrice}
             addButtonLabel="Přidat sezónní cenu"
             renderItem={(_, index) => (
@@ -307,25 +415,40 @@ export default function NewVariantFormGastro({ onCancel }: Props) {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <Input
                     label="Cena (Kč)"
-                    inputProps={{ ...register(`price.seasonalPrices.${index}.price`), type: "number", min: 0 }}
-                    error={errors.price?.seasonalPrices?.[index]?.price?.message}
+                    inputProps={{
+                      ...register(`price.seasonalPrices.${index}.price`),
+                      type: "number",
+                      min: 0,
+                    }}
+                    error={
+                      errors.price?.seasonalPrices?.[index]?.price?.message
+                    }
                     isRequired
                   />
                   <Input
                     label="Popis"
-                    inputProps={{ ...register(`price.seasonalPrices.${index}.description`), placeholder: "např. Letní sezóna" }}
+                    inputProps={{
+                      ...register(`price.seasonalPrices.${index}.description`),
+                      placeholder: "např. Letní sezóna",
+                    }}
                   />
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <Input
                     label="Od"
-                    inputProps={{ ...register(`price.seasonalPrices.${index}.from`), type: "date" }}
+                    inputProps={{
+                      ...register(`price.seasonalPrices.${index}.from`),
+                      type: "date",
+                    }}
                     error={errors.price?.seasonalPrices?.[index]?.from?.message}
                     isRequired
                   />
                   <Input
                     label="Do"
-                    inputProps={{ ...register(`price.seasonalPrices.${index}.to`), type: "date" }}
+                    inputProps={{
+                      ...register(`price.seasonalPrices.${index}.to`),
+                      type: "date",
+                    }}
                     error={errors.price?.seasonalPrices?.[index]?.to?.message}
                     isRequired
                   />
@@ -415,8 +538,17 @@ export default function NewVariantFormGastro({ onCancel }: Props) {
                 <div className="flex flex-col sm:flex-row gap-3">
                   {(
                     [
-                      { value: "allYear", label: "Celoroční", description: "Varianta je dostupná po celý rok" },
-                      { value: "seasonal", label: "Sezónní", description: "Varianta je dostupná pouze v určitém období" },
+                      {
+                        value: "allYear",
+                        label: "Celoroční",
+                        description: "Varianta je dostupná po celý rok",
+                      },
+                      {
+                        value: "seasonal",
+                        label: "Sezónní",
+                        description:
+                          "Varianta je dostupná pouze v určitém období",
+                      },
                     ] as const
                   ).map((option) => (
                     <button
@@ -427,13 +559,19 @@ export default function NewVariantFormGastro({ onCancel }: Props) {
                     >
                       <div className="flex items-center gap-2 mb-1">
                         <CalendarRange className="w-4 h-4 text-variant shrink-0" />
-                        <span className="text-sm font-medium text-zinc-900">{option.label}</span>
+                        <span className="text-sm font-medium text-zinc-900">
+                          {option.label}
+                        </span>
                       </div>
-                      <p className="text-xs text-zinc-500">{option.description}</p>
+                      <p className="text-xs text-zinc-500">
+                        {option.description}
+                      </p>
                     </button>
                   ))}
                 </div>
-                {errors.type?.message && <ErrorText error={errors.type.message} />}
+                {errors.type?.message && (
+                  <ErrorText error={errors.type.message} />
+                )}
               </div>
             )}
           />
@@ -446,8 +584,17 @@ export default function NewVariantFormGastro({ onCancel }: Props) {
                 <div className="flex flex-col sm:flex-row gap-3">
                   {(
                     [
-                      { value: "allDay", label: "Celý den", description: "Varianta je dostupná po celý den" },
-                      { value: "selectedHours", label: "Vybrané hodiny", description: "Varianta je dostupná ve vybraném časovém rozsahu" },
+                      {
+                        value: "allDay",
+                        label: "Celý den",
+                        description: "Varianta je dostupná po celý den",
+                      },
+                      {
+                        value: "selectedHours",
+                        label: "Vybrané hodiny",
+                        description:
+                          "Varianta je dostupná ve vybraném časovém rozsahu",
+                      },
                     ] as const
                   ).map((option) => (
                     <button
@@ -458,13 +605,19 @@ export default function NewVariantFormGastro({ onCancel }: Props) {
                     >
                       <div className="flex items-center gap-2 mb-1">
                         <Clock className="w-4 h-4 text-variant shrink-0" />
-                        <span className="text-sm font-medium text-zinc-900">{option.label}</span>
+                        <span className="text-sm font-medium text-zinc-900">
+                          {option.label}
+                        </span>
                       </div>
-                      <p className="text-xs text-zinc-500">{option.description}</p>
+                      <p className="text-xs text-zinc-500">
+                        {option.description}
+                      </p>
                     </button>
                   ))}
                 </div>
-                {errors.availability?.message && <ErrorText error={errors.availability.message} />}
+                {errors.availability?.message && (
+                  <ErrorText error={errors.availability.message} />
+                )}
               </div>
             )}
           />
@@ -475,18 +628,27 @@ export default function NewVariantFormGastro({ onCancel }: Props) {
               onAppend={() => appendSelectedHour({ from: "", to: "" })}
               onRemove={removeSelectedHour}
               addButtonLabel="Přidat časový slot"
-              error={(errors.selectedHours as { root?: { message?: string } })?.root?.message}
+              error={
+                (errors.selectedHours as { root?: { message?: string } })?.root
+                  ?.message
+              }
               renderItem={(_, index) => (
                 <div className="grid grid-cols-2 gap-3">
                   <Input
                     label="Čas od"
-                    inputProps={{ ...register(`selectedHours.${index}.from`), type: "time" }}
+                    inputProps={{
+                      ...register(`selectedHours.${index}.from`),
+                      type: "time",
+                    }}
                     error={errors.selectedHours?.[index]?.from?.message}
                     isRequired
                   />
                   <Input
                     label="Čas do"
-                    inputProps={{ ...register(`selectedHours.${index}.to`), type: "time" }}
+                    inputProps={{
+                      ...register(`selectedHours.${index}.to`),
+                      type: "time",
+                    }}
                     error={errors.selectedHours?.[index]?.to?.message}
                     isRequired
                   />
@@ -508,23 +670,43 @@ export default function NewVariantFormGastro({ onCancel }: Props) {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Input
               label="Maximální kapacita (osob)"
-              inputProps={{ ...register("capacity.max"), type: "number", min: 1, placeholder: "200" }}
+              inputProps={{
+                ...register("capacity.max"),
+                type: "number",
+                min: 1,
+                placeholder: "200",
+              }}
               error={errors.capacity?.max?.message}
               isRequired
             />
             <Input
               label="Minimální kapacita (osob)"
-              inputProps={{ ...register("capacity.min"), type: "number", min: 1, placeholder: "10" }}
+              inputProps={{
+                ...register("capacity.min"),
+                type: "number",
+                min: 1,
+                placeholder: "10",
+              }}
               error={errors.capacity?.min?.message}
             />
             <Input
               label="Cena na osobu (Kč)"
-              inputProps={{ ...register("pricePerPerson"), type: "number", min: 0, placeholder: "350" }}
+              inputProps={{
+                ...register("pricePerPerson"),
+                type: "number",
+                min: 0,
+                placeholder: "350",
+              }}
               error={errors.pricePerPerson?.message}
             />
             <Input
               label="Minimální počet objednávek"
-              inputProps={{ ...register("minimumOrderCount"), type: "number", min: 1, placeholder: "5" }}
+              inputProps={{
+                ...register("minimumOrderCount"),
+                type: "number",
+                min: 1,
+                placeholder: "5",
+              }}
               error={errors.minimumOrderCount?.message}
             />
           </div>
@@ -547,7 +729,10 @@ export default function NewVariantFormGastro({ onCancel }: Props) {
             renderItem={(_, i) => (
               <Input
                 label="Položka"
-                inputProps={{ ...register(`includes.${i}.item`), placeholder: "např. Obsluha, Nádobí..." }}
+                inputProps={{
+                  ...register(`includes.${i}.item`),
+                  placeholder: "např. Obsluha, Nádobí...",
+                }}
               />
             )}
           />
@@ -560,7 +745,10 @@ export default function NewVariantFormGastro({ onCancel }: Props) {
             renderItem={(_, i) => (
               <Input
                 label="Položka"
-                inputProps={{ ...register(`excludes.${i}.item`), placeholder: "např. Alkohol, Doprava..." }}
+                inputProps={{
+                  ...register(`excludes.${i}.item`),
+                  placeholder: "např. Alkohol, Doprava...",
+                }}
               />
             )}
           />
@@ -706,8 +894,17 @@ export default function NewVariantFormGastro({ onCancel }: Props) {
 
         {/* Submit */}
         <div className="flex justify-end gap-3 pt-2">
-          <Button htmlType="button" text="Zrušit" onClick={onCancel} version="plain" />
-          <Button text="Vytvořit variantu" version="variantFull" htmlType="submit" />
+          <Button
+            htmlType="button"
+            text="Zrušit"
+            onClick={onCancel}
+            version="plain"
+          />
+          <Button
+            text="Vytvořit variantu"
+            version="variantFull"
+            htmlType="submit"
+          />
         </div>
       </div>
       <FormToc

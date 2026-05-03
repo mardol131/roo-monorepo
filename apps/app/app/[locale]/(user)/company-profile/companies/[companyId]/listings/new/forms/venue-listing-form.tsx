@@ -1,7 +1,10 @@
 "use client";
 
 import { FormSection } from "@/app/[locale]/(user)/components/form-section";
-import FormToc, { TocGroup } from "@/app/[locale]/(user)/components/form-toc";
+import FormToc, {
+  TocGroup,
+  TocSection,
+} from "@/app/[locale]/(user)/components/form-toc";
 import Button, { ButtonProps } from "@/app/components/ui/atoms/button";
 import InputLabel from "@/app/components/ui/atoms/input-label";
 import ErrorText from "@/app/components/ui/atoms/inputs/error-text";
@@ -24,13 +27,10 @@ import {
   Users,
 } from "lucide-react";
 import { useState } from "react";
-import { Control, Controller, Resolver, useForm } from "react-hook-form";
+import { Controller, Resolver, useForm } from "react-hook-form";
 import { useParams } from "next/navigation";
 import { z } from "zod";
-import AreaSpacesFields from "../components/area-spaces-fields";
-import BuildingSpacesFields from "../components/building-spaces-fields";
 import IconCard from "../components/icon-card";
-import RoomSpacesFields from "../components/room-spaces-fields";
 import { useRouter } from "@/app/i18n/navigation";
 import { useEventTypes } from "@/app/react-query/filters/event-types/hooks";
 import CheckboxGroup from "@/app/components/ui/atoms/inputs/checkbox-group";
@@ -44,135 +44,80 @@ const optionalPositiveNumber = z.preprocess(
   z.coerce.number().positive("Musí být kladné číslo").optional(),
 );
 
-const roomSchema = z.object({
-  name: z.string().min(1, "Název místnosti je povinný"),
-  description: z.string().optional(),
-  capacity: optionalPositiveNumber,
-  area: optionalPositiveNumber,
-});
-
-const buildingSchema = z.object({
-  name: z.string().optional(),
-  description: z.string().optional(),
-  capacity: optionalPositiveNumber,
-  area: optionalPositiveNumber,
-  hasRooms: z.boolean().default(false),
-  rooms: z.array(roomSchema).default([]),
-});
-
-const schema = z
-  .object({
-    name: z.string().min(1, "Název je povinný"),
-    images: z.object({
-      coverImage: z.string().min(1, "Titulní obrázek je povinný"),
-      logo: z.string().optional(),
-      gallery: z.array(z.string()).min(4, "Přidejte alespoň čtyři obrázky"),
-    }),
-    price: z.object({
-      startsAt: z.coerce
-        .number({ message: "Zadejte číslo" })
-        .positive("Cena musí být kladná"),
-    }),
-    location: z.object({
-      address: z.string().min(1, "Adresa je povinná"),
-      city: z.string().min(1, "Město je povinné"),
-    }),
-    capacity: z.coerce
+const schema = z.object({
+  name: z.string().min(1, "Název je povinný"),
+  images: z.object({
+    coverImage: z.string().min(1, "Titulní obrázek je povinný"),
+    logo: z.string().optional(),
+    gallery: z.array(z.string()).min(4, "Přidejte alespoň čtyři obrázky"),
+  }),
+  price: z.object({
+    startsAt: z.coerce
       .number({ message: "Zadejte číslo" })
-      .positive("Kapacita musí být kladná")
-      .int("Zadejte celé číslo"),
-    area: optionalPositiveNumber,
-    spaceType: z.enum(["area", "building", "room"] as const, {
-      message: "Vyberte typ prostoru",
-    }),
-    areaName: z.string().optional(),
-    areaDescription: z.string().optional(),
-    areaCapacity: optionalPositiveNumber,
-    areaArea: optionalPositiveNumber,
-    hasBuildings: z.boolean().default(false),
-    buildings: z.array(buildingSchema).default([]),
-    buildingName: z.string().optional(),
-    buildingDescription: z.string().optional(),
-    buildingCapacity: optionalPositiveNumber,
-    buildingArea: optionalPositiveNumber,
-    buildingHasRooms: z.boolean().default(false),
-    buildingRooms: z.array(roomSchema).default([]),
-    rooms: z.array(roomSchema).default([]),
-    eventTypes: z.array(itemSchema).min(1, "Vyberte alespoň jeden typ akce"),
-  })
-  .superRefine((data, ctx) => {
-    if (data.spaceType === "area" && !data.areaName?.trim()) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: "Název areálu je povinný",
-        path: ["areaName"],
-      });
-    }
-    if (data.spaceType === "area" && data.hasBuildings) {
-      data.buildings?.forEach((b, bi) => {
-        if (!b.name?.trim()) {
-          ctx.addIssue({
-            code: z.ZodIssueCode.custom,
-            message: "Název budovy je povinný",
-            path: ["buildings", bi, "name"],
-          });
-        }
-      });
-    }
-    if (data.spaceType === "building" && !data.buildingName?.trim()) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: "Název budovy je povinný",
-        path: ["buildingName"],
-      });
-    }
-  });
+      .positive("Cena musí být kladná"),
+  }),
+  location: z.object({
+    address: z.string().min(1, "Adresa je povinná"),
+    city: z.string().min(1, "Město je povinné"),
+  }),
+  capacity: z.coerce
+    .number({ message: "Zadejte číslo" })
+    .positive("Kapacita musí být kladná")
+    .int("Zadejte celé číslo"),
+  area: optionalPositiveNumber,
+  spaceType: z.enum(["area", "building", "room"] as const, {
+    message: "Vyberte typ prostoru",
+  }),
+  eventTypes: z.array(itemSchema).min(1, "Vyberte alespoň jeden typ akce"),
+});
 
 export type VenueFormInputs = z.infer<typeof schema>;
 type Inputs = VenueFormInputs;
 
 // ── TOC ────────────────────────────────────────────────────────────────────────
 
-const SECTION_BASIC = {
-  id: "section-basic",
-  title: "Základní informace",
-  icon: Building2,
-};
-const SECTION_PRICE = { id: "section-price", title: "Cena", icon: Banknote };
-const SECTION_IMAGES = { id: "section-images", title: "Obrázky", icon: Image };
-const SECTION_LOCATION = {
-  id: "section-location",
-  title: "Lokalita",
-  icon: MapPin,
-};
-const SECTION_CAPACITY = {
-  id: "section-capacity",
-  title: "Kapacita",
-  icon: Users,
-};
-const SECTION_SPACES = {
-  id: "section-spaces",
-  title: "Prostory",
-  icon: DoorOpen,
-};
-const SECTION_EVENT_TYPES = {
-  id: "section-event-types",
-  title: "Typy akcí",
-  icon: Tag,
+const S: Record<string, TocSection> = {
+  basic: {
+    id: "section-basic",
+    title: "Základní informace",
+    icon: "Building2",
+  },
+  price: { id: "section-price", title: "Cena", icon: "Banknote" },
+  images: { id: "section-images", title: "Obrázky", icon: "Image" },
+  eventTypes: {
+    id: "section-event-types",
+    title: "Typy akcí",
+    icon: "Tag",
+  },
+  location: {
+    id: "section-location",
+    title: "Lokalita",
+    icon: "MapPin",
+  },
+  capacity: {
+    id: "section-capacity",
+    title: "Kapacita",
+    icon: "Users",
+  },
+  spaces: {
+    id: "section-spaces",
+    title: "Prostory",
+    icon: "DoorOpen",
+  },
 };
 
 const FORM_GROUPS: readonly TocGroup[] = [
   {
     label: "Základní",
-    sections: [SECTION_BASIC, SECTION_PRICE, SECTION_IMAGES],
+    sections: [S.basic, S.price, S.images],
+  },
+  {
+    label: "Typy akcí",
+    sections: [S.eventTypes],
   },
   {
     label: "Místo a prostor",
-    sections: [SECTION_LOCATION, SECTION_CAPACITY, SECTION_SPACES],
-  },
-  {
-    label: "Akce",
-    sections: [SECTION_EVENT_TYPES],
+    sections: [S.location, S.capacity, S.spaces],
   },
 ];
 
@@ -196,22 +141,23 @@ export default function VenueListingForm({ onCancel }: Props) {
     control,
     register,
     handleSubmit,
-    watch,
     formState: { errors },
   } = useForm<Inputs>({
     resolver: zodResolver(schema) as Resolver<Inputs>,
     defaultValues: {
       images: { gallery: [] },
-      rooms: [],
-      buildings: [],
-      buildingRooms: [],
-      hasBuildings: false,
-      buildingHasRooms: false,
       eventTypes: [],
     },
   });
 
-  const { data: eventTypesData } = useEventTypes({ limit: 50 });
+  const [eventTypeSearch, setEventTypeSearch] = useState("");
+
+  const { data: eventTypesData } = useEventTypes({
+    limit: 10,
+    query: eventTypeSearch
+      ? { name: { contains: eventTypeSearch } }
+      : undefined,
+  });
 
   function onSubmit(data: Inputs) {
     const payload: CreateListingPayload = {
@@ -247,8 +193,6 @@ export default function VenueListingForm({ onCancel }: Props) {
     });
   }
 
-  const spaceTypeValue = watch("spaceType");
-
   const [venueCitySearch, setVenueCitySearch] = useState("");
   const { data: venueCitiesData } = useCities({
     query: venueCitySearch
@@ -261,9 +205,10 @@ export default function VenueListingForm({ onCancel }: Props) {
       <div className="flex w-full flex-col gap-4">
         {/* ── Základní informace ──────────────────────────────────────────────── */}
         <FormSection
-          id={SECTION_BASIC.id}
-          icon={SECTION_BASIC.icon}
-          title={SECTION_BASIC.title}
+          id={S.basic.id}
+          icon={S.basic.icon}
+          title={S.basic.title}
+          subtitle={S.basic.subTitle}
           surfaceColor={COLOR_SCHEME.surface}
           color={COLOR_SCHEME.text}
           error={!!errors.name}
@@ -280,9 +225,10 @@ export default function VenueListingForm({ onCancel }: Props) {
 
         {/* ── Cena ────────────────────────────────────────────────────────────── */}
         <FormSection
-          id={SECTION_PRICE.id}
-          icon={SECTION_PRICE.icon}
-          title={SECTION_PRICE.title}
+          id={S.price.id}
+          icon={S.price.icon}
+          title={S.price.title}
+          subtitle={S.price.subTitle}
           surfaceColor={COLOR_SCHEME.surface}
           color={COLOR_SCHEME.text}
           error={!!errors.price?.startsAt}
@@ -303,10 +249,10 @@ export default function VenueListingForm({ onCancel }: Props) {
 
         {/* ── Obrázky ─────────────────────────────────────────────────────────── */}
         <FormSection
-          id={SECTION_IMAGES.id}
-          icon={SECTION_IMAGES.icon}
-          title={SECTION_IMAGES.title}
-          subtitle="Podporované formáty: jpg, png, webp"
+          id={S.images.id}
+          icon={S.images.icon}
+          title={S.images.title}
+          subtitle={S.images.subTitle}
           surfaceColor={COLOR_SCHEME.surface}
           color={COLOR_SCHEME.text}
           error={!!(errors.images?.coverImage || errors.images?.gallery)}
@@ -356,12 +302,52 @@ export default function VenueListingForm({ onCancel }: Props) {
             )}
           />
         </FormSection>
+        {/* ── Typy akcí ───────────────────────────────────────────────────────── */}
+        <FormSection
+          id={S.eventTypes.id}
+          icon={S.eventTypes.icon}
+          title={S.eventTypes.title}
+          subtitle={S.eventTypes.subTitle}
+          surfaceColor={COLOR_SCHEME.surface}
+          color={COLOR_SCHEME.text}
+          error={!!errors.eventTypes}
+        >
+          <Controller
+            control={control}
+            name="eventTypes"
+            render={({ field }) => (
+              <>
+                <CheckboxGroup
+                  items={eventTypesData?.docs ?? []}
+                  value={field.value}
+                  onChange={field.onChange}
+                  searchable
+                  checkColor="text-listing"
+                  onSearchChange={(data) => {
+                    setEventTypeSearch(data);
+                  }}
+                />
+                {(errors.eventTypes?.message ??
+                  errors.eventTypes?.root?.message) && (
+                  <ErrorText
+                    error={
+                      errors.eventTypes?.message ??
+                      errors.eventTypes?.root?.message ??
+                      ""
+                    }
+                  />
+                )}
+              </>
+            )}
+          />
+        </FormSection>
 
         {/* ── Lokalita ────────────────────────────────────────────────────────── */}
         <FormSection
-          id={SECTION_LOCATION.id}
-          icon={SECTION_LOCATION.icon}
-          title={SECTION_LOCATION.title}
+          id={S.location.id}
+          icon={S.location.icon}
+          title={S.location.title}
+          subtitle={S.location.subTitle}
           surfaceColor={COLOR_SCHEME.surface}
           color={COLOR_SCHEME.text}
           error={!!(errors.location?.address || errors.location?.city)}
@@ -405,9 +391,10 @@ export default function VenueListingForm({ onCancel }: Props) {
 
         {/* ── Kapacita ────────────────────────────────────────────────────────── */}
         <FormSection
-          id={SECTION_CAPACITY.id}
-          icon={SECTION_CAPACITY.icon}
-          title={SECTION_CAPACITY.title}
+          id={S.capacity.id}
+          icon={S.capacity.icon}
+          title={S.capacity.title}
+          subtitle={S.capacity.subTitle}
           surfaceColor={COLOR_SCHEME.surface}
           color={COLOR_SCHEME.text}
           error={!!errors.capacity}
@@ -438,20 +425,13 @@ export default function VenueListingForm({ onCancel }: Props) {
 
         {/* ── Prostory ────────────────────────────────────────────────────────── */}
         <FormSection
-          id={SECTION_SPACES.id}
-          icon={SECTION_SPACES.icon}
-          title={SECTION_SPACES.title}
+          id={S.spaces.id}
+          icon={S.spaces.icon}
+          title={S.spaces.title}
+          subtitle={S.spaces.subTitle}
           surfaceColor={COLOR_SCHEME.surface}
           color={COLOR_SCHEME.text}
-          error={
-            !!(
-              errors.spaceType ||
-              errors.areaName ||
-              errors.buildings ||
-              errors.buildingName ||
-              errors.rooms?.[0]?.name
-            )
-          }
+          error={!!errors.spaceType}
         >
           <Controller
             control={control}
@@ -499,29 +479,6 @@ export default function VenueListingForm({ onCancel }: Props) {
               </div>
             )}
           />
-          {spaceTypeValue === "area" && (
-            <AreaSpacesFields
-              control={control as Control<VenueFormInputs>}
-              register={register}
-              errors={errors}
-              watch={watch}
-            />
-          )}
-          {spaceTypeValue === "building" && (
-            <BuildingSpacesFields
-              control={control as Control<VenueFormInputs>}
-              register={register}
-              errors={errors}
-              watch={watch}
-            />
-          )}
-          {spaceTypeValue === "room" && (
-            <RoomSpacesFields
-              control={control as Control<VenueFormInputs>}
-              register={register}
-              errors={errors}
-            />
-          )}
         </FormSection>
 
         {/* ── Submit ──────────────────────────────────────────────────────────── */}

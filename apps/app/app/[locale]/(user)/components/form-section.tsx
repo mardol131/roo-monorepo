@@ -12,6 +12,7 @@ export function FormSection({
   surfaceColor = "bg-primary-surface",
   color = "text-primary",
   error,
+  headerRightComponent,
 }: {
   id?: string;
   icon: LucideIcons;
@@ -21,6 +22,7 @@ export function FormSection({
   surfaceColor?: string;
   color?: string;
   error?: boolean;
+  headerRightComponent?: React.ReactElement;
 }) {
   return (
     <div
@@ -33,6 +35,7 @@ export function FormSection({
         subheading={subtitle}
         iconBgColor={surfaceColor}
         iconColor={color}
+        headerRightComponent={headerRightComponent}
       />
       <div className="px-6 py-5 flex flex-col gap-4">{children}</div>
     </div>

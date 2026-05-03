@@ -3,12 +3,7 @@
 import Button from "@/app/components/ui/atoms/button";
 import Text from "@/app/components/ui/atoms/text";
 import { IntlLink } from "@/app/i18n/navigation";
-import {
-  CheckCircle2,
-  ChevronDown,
-  CircleDashed,
-  ClipboardList,
-} from "lucide-react";
+import { CheckCircle2, ChevronDown, CircleDashed } from "lucide-react";
 import { useState } from "react";
 import { DashboardSection } from "./dashboard-section";
 
@@ -32,27 +27,48 @@ export type CompletionField = {
   relevant?: boolean;
 };
 
-type Props = {
+export type CompletionGroup = {
+  label: string;
+  weight: number;
   fields: CompletionField[];
+};
+
+type Props = {
+  groups: CompletionGroup[];
   title?: string;
 };
 
 export function CompletionWidget({
-  fields,
+  groups,
   title = "Dokončení profilu",
 }: Props) {
   const [open, setOpen] = useState(false);
-  const relevant = fields.filter((f) => f.relevant !== false);
-  const filled = relevant.filter((f) => f.filled).length;
-  const total = relevant.length;
-  const percent = Math.round((filled / total) * 100);
 
-  if (relevant.every((f) => f.filled)) return null;
+  const totalWeight = groups.reduce((s, g) => s + g.weight, 0);
+
+  const relevantGroups = groups.map((g) => ({
+    ...g,
+    fields: g.fields.filter((f) => f.relevant !== false),
+  }));
+
+  const percent = Math.round(
+    relevantGroups.reduce((sum, g) => {
+      const filled = g.fields.filter((f) => f.filled).length;
+      const total = g.fields.length;
+      if (total === 0) return sum;
+      return sum + (filled / total) * (g.weight / totalWeight) * 100;
+    }, 0),
+  );
+
+  const allFilled = relevantGroups.every((g) =>
+    g.fields.every((f) => f.filled),
+  );
+  if (allFilled) return null;
 
   return (
     <DashboardSection
       title={title}
-      icon={"ClipboardList"}
+      icon="ClipboardList"
       iconBg="bg-success-surface"
       iconColor="text-success"
     >
@@ -97,36 +113,64 @@ export function CompletionWidget({
       </button>
 
       {open && (
-        <div className="divide-y divide-zinc-100 pt-1">
-          {relevant.map((field) => (
-            <div
-              key={field.label}
-              className="flex items-center justify-between py-2.5 rounded-lg"
-            >
-              <div className="flex items-center gap-2">
-                {field.filled ? (
-                  <CheckCircle2 className="w-4 h-4 text-success shrink-0" />
-                ) : (
-                  <CircleDashed className="w-4 h-4 text-zinc-400 shrink-0" />
-                )}
-                <Text
-                  variant="label"
-                  color={field.filled ? "success" : "textDark"}
+        <div className="flex flex-col gap-4 pt-1">
+          {relevantGroups.map((group) => {
+            const filledCount = group.fields.filter((f) => f.filled).length;
+            const groupPercent = Math.round(
+              group.fields.length > 0
+                ? (filledCount / group.fields.length) * 100
+                : 0,
+            );
+            return (
+              <div key={group.label}>
+                <div
+                  className={`flex ${groupPercent === 100 ? "bg-success-surface" : "bg-zinc-100"} p-1 px-2 rounded-lg items-center justify-between mb-1.5`}
                 >
-                  {field.label}
-                </Text>
+                  <Text
+                    variant="label"
+                    color="textDark"
+                    className="font-medium"
+                  >
+                    {group.label}
+                  </Text>
+                  <Text variant="caption" color="secondary">
+                    {groupPercent} %
+                  </Text>
+                </div>
+                <div className="divide-y divide-zinc-100">
+                  {group.fields.map((field) => (
+                    <div
+                      key={field.label}
+                      className="flex items-center justify-between py-2 rounded-lg"
+                    >
+                      <div className="flex items-center gap-2">
+                        {field.filled ? (
+                          <CheckCircle2 className="w-4 h-4 text-success shrink-0" />
+                        ) : (
+                          <CircleDashed className="w-4 h-4 text-zinc-400 shrink-0" />
+                        )}
+                        <Text
+                          variant="label"
+                          color={field.filled ? "success" : "textDark"}
+                        >
+                          {field.label}
+                        </Text>
+                      </div>
+                      {!field.filled && (
+                        <Button
+                          text="Vyplnit"
+                          size="xs"
+                          version="plain"
+                          iconRight="Pencil"
+                          link={field.editHref}
+                        />
+                      )}
+                    </div>
+                  ))}
+                </div>
               </div>
-              {!field.filled && (
-                <Button
-                  text="Vyplnit"
-                  size="xs"
-                  version="plain"
-                  iconRight="Pencil"
-                  link={field.editHref}
-                />
-              )}
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </DashboardSection>

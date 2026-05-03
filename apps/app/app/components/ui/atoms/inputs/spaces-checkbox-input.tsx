@@ -106,7 +106,8 @@ export default function SpacesCheckboxInput({
       <div className="flex flex-col gap-2">
         {label && <InputLabel label={label} />}
         <p className="text-sm text-zinc-400">
-          Žádné prostory zatím neexistují. Nejdříve je přidejte ve správě prostorů.
+          Žádné prostory zatím neexistují. Nejdříve je přidejte ve správě
+          prostorů.
         </p>
       </div>
     );
@@ -115,7 +116,7 @@ export default function SpacesCheckboxInput({
   return (
     <div className="flex flex-col gap-2">
       {label && <InputLabel label={label} />}
-      <div className="flex flex-col gap-1.5">
+      <div className="flex flex-col gap-5">
         {roots.map((root) => (
           <SpaceNode
             key={root.id}

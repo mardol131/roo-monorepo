@@ -38,6 +38,7 @@ export default function CheckboxGroup({
   closedMessage,
   isLoading = false,
 }: Props) {
+  value = value ?? [];
   const [query, setQuery] = useState(defaultSearchValue);
 
   // Accumulate names for all items ever seen so selected tags remain
@@ -51,6 +52,7 @@ export default function CheckboxGroup({
     setQuery(e.target.value);
     onSearchChange?.(e.target.value);
   };
+
 
   return (
     <div className="flex flex-col gap-2">

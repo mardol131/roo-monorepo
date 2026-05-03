@@ -3,7 +3,8 @@
     "allow": [
       "Bash(npx --yes tsc --noEmit)",
       "Bash(xargs grep *)",
-      "Bash(node_modules/.bin/tsc --noEmit -p apps/app/tsconfig.json)"
+      "Bash(node_modules/.bin/tsc --noEmit -p apps/app/tsconfig.json)",
+      "Bash(kill 1092091 1103435)"
     ]
   }
 }

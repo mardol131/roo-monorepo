@@ -495,7 +495,7 @@ export default function GastroListingForm({ onCancel }: Props) {
                 searchable
                 label="Typy eventů"
                 items={eventTypes?.docs ?? []}
-                value={field.value}
+                value={field.value || undefined}
                 onChange={field.onChange}
                 checkColor={COLOR_SCHEME.text}
               />

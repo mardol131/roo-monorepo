@@ -1,7 +1,10 @@
 "use client";
 
 import { FormSection } from "@/app/[locale]/(user)/components/form-section";
-import FormToc, { TocGroup } from "@/app/[locale]/(user)/components/form-toc";
+import FormToc, {
+  TocGroup,
+  TocSection,
+} from "@/app/[locale]/(user)/components/form-toc";
 import Button from "@/app/components/ui/atoms/button";
 import InputLabel from "@/app/components/ui/atoms/input-label";
 import Checkbox from "@/app/components/ui/atoms/inputs/checkbox";
@@ -42,24 +45,47 @@ const COLOR = { text: "text-variant", surface: "bg-variant-surface" };
 
 // ── TOC ────────────────────────────────────────────────────────────────────────
 
-const S = {
-  basic: { id: "section-basic", title: "Základní informace", icon: Package },
-  price: { id: "section-price", title: "Cena", icon: Banknote },
-  images: { id: "section-images", title: "Obrázky", icon: Image },
-  eventTypes: { id: "section-event-types", title: "Typy akcí", icon: Tag },
-  availability: { id: "section-availability", title: "Dostupnost", icon: Calendar },
-  capacity: { id: "section-capacity", title: "Kapacita", icon: Users },
-  audience: { id: "section-audience", title: "Publikum", icon: Users },
-  performance: { id: "section-performance", title: "Vystoupení", icon: Music },
-  setup: { id: "section-setup", title: "Příprava a úklid", icon: Clapperboard },
-  personnel: { id: "section-personnel", title: "Personál a požadavky", icon: UserCheck },
-  includes: { id: "section-includes", title: "Zahrnuto / Nezahrnuto", icon: ListChecks },
+const S: Record<string, TocSection> = {
+  basic: { id: "section-basic", title: "Základní informace", icon: "Package" },
+  price: { id: "section-price", title: "Cena", icon: "Banknote" },
+  images: { id: "section-images", title: "Obrázky", icon: "Image" },
+  eventTypes: { id: "section-event-types", title: "Typy akcí", icon: "Tag" },
+  availability: {
+    id: "section-availability",
+    title: "Dostupnost",
+    icon: "Calendar",
+  },
+  capacity: { id: "section-capacity", title: "Kapacita", icon: "Users" },
+  audience: { id: "section-audience", title: "Publikum", icon: "Users" },
+  performance: {
+    id: "section-performance",
+    title: "Vystoupení",
+    icon: "Music",
+  },
+  setup: {
+    id: "section-setup",
+    title: "Příprava a úklid",
+    icon: "Clapperboard",
+  },
+  personnel: {
+    id: "section-personnel",
+    title: "Personál a požadavky",
+    icon: "UserCheck",
+  },
+  includes: {
+    id: "section-includes",
+    title: "Zahrnuto / Nezahrnuto",
+    icon: "ListChecks",
+  },
 };
 
 const FORM_GROUPS: readonly TocGroup[] = [
   { label: "Základní", sections: [S.basic, S.price, S.images, S.eventTypes] },
   { label: "Konfigurace", sections: [S.availability, S.capacity, S.includes] },
-  { label: "Program", sections: [S.audience, S.performance, S.setup, S.personnel] },
+  {
+    label: "Program",
+    sections: [S.audience, S.performance, S.setup, S.personnel],
+  },
 ];
 
 // ── Item schema ────────────────────────────────────────────────────────────────
@@ -70,27 +96,46 @@ const itemSchema = z.object({ id: z.string(), name: z.string() });
 
 const optionalPositiveInt = z.preprocess(
   (val) => (val === "" || val === undefined || val === null ? undefined : val),
-  z.coerce.number().positive("Musí být kladné číslo").int("Zadejte celé číslo").optional(),
+  z.coerce
+    .number()
+    .positive("Musí být kladné číslo")
+    .int("Zadejte celé číslo")
+    .optional(),
 );
 
 const schema = z.object({
   name: z.string().min(1, "Název je povinný"),
-  shortDescription: z.string().min(1, "Krátký popis je povinný").max(50, "Max. 50 znaků"),
+  shortDescription: z
+    .string()
+    .min(1, "Krátký popis je povinný")
+    .max(50, "Max. 50 znaků"),
   description: z.string().optional(),
   type: z.enum(["allYear", "seasonal"]),
   availability: z.enum(["allDay", "selectedHours"]),
-  selectedHours: z.array(z.object({
-    from: z.string().min(1, "Čas od je povinný"),
-    to: z.string().min(1, "Čas do je povinný"),
-  })).default([]),
+  selectedHours: z
+    .array(
+      z.object({
+        from: z.string().min(1, "Čas od je povinný"),
+        to: z.string().min(1, "Čas do je povinný"),
+      }),
+    )
+    .default([]),
   price: z.object({
-    generalPrice: z.coerce.number({ message: "Zadejte číslo" }).positive("Cena musí být kladná"),
-    seasonalPrices: z.array(z.object({
-      price: z.coerce.number({ message: "Zadejte číslo" }).positive("Cena musí být kladná"),
-      description: z.string().optional(),
-      from: z.string().min(1, "Datum od je povinné"),
-      to: z.string().min(1, "Datum do je povinné"),
-    })).default([]),
+    generalPrice: z.coerce
+      .number({ message: "Zadejte číslo" })
+      .positive("Cena musí být kladná"),
+    seasonalPrices: z
+      .array(
+        z.object({
+          price: z.coerce
+            .number({ message: "Zadejte číslo" })
+            .positive("Cena musí být kladná"),
+          description: z.string().optional(),
+          from: z.string().min(1, "Datum od je povinné"),
+          to: z.string().min(1, "Datum do je povinné"),
+        }),
+      )
+      .default([]),
   }),
   images: z.object({
     mainImage: z.string().min(1, "Obrázek je povinný"),
@@ -100,7 +145,10 @@ const schema = z.object({
   includes: z.array(z.object({ item: z.string() })).default([]),
   excludes: z.array(z.object({ item: z.string() })).default([]),
   capacity: z.object({
-    max: z.coerce.number({ message: "Zadejte číslo" }).positive("Kapacita musí být kladná").int("Zadejte celé číslo"),
+    max: z.coerce
+      .number({ message: "Zadejte číslo" })
+      .positive("Kapacita musí být kladná")
+      .int("Zadejte celé číslo"),
     min: optionalPositiveInt,
   }),
   audience: z.array(z.enum(["adults", "kids", "seniors"])).default([]),
@@ -118,8 +166,15 @@ type EntertainmentFormInputs = z.infer<typeof schema>;
 
 // ── Resolver ───────────────────────────────────────────────────────────────────
 
-type ResolverResult = { values: Partial<EntertainmentFormInputs>; errors: Record<string, unknown> };
-type ResolverFn = (values: unknown, ctx: unknown, opts: unknown) => Promise<ResolverResult>;
+type ResolverResult = {
+  values: Partial<EntertainmentFormInputs>;
+  errors: Record<string, unknown>;
+};
+type ResolverFn = (
+  values: unknown,
+  ctx: unknown,
+  opts: unknown,
+) => Promise<ResolverResult>;
 
 function makeResolver(): ResolverFn {
   const zResolver = zodResolver(schema) as unknown as ResolverFn;
@@ -129,7 +184,12 @@ function makeResolver(): ResolverFn {
     if (v.availability === "selectedHours" && !v.selectedHours?.length) {
       result.errors = {
         ...result.errors,
-        selectedHours: { root: { type: "required", message: "Přidejte alespoň jeden časový slot" } },
+        selectedHours: {
+          root: {
+            type: "required",
+            message: "Přidejte alespoň jeden časový slot",
+          },
+        },
       };
     }
     return result;
@@ -145,26 +205,34 @@ type Props = {
 // ── Component ──────────────────────────────────────────────────────────────────
 
 export default function NewVariantFormEntertainment({ onCancel }: Props) {
-  const { listingId, companyId } = useParams<{ listingId: string; companyId: string }>();
+  const { listingId, companyId } = useParams<{
+    listingId: string;
+    companyId: string;
+  }>();
   const router = useRouter();
   const { data: listing } = useListing(listingId);
-  const entertainmentDetail = listing?.details.find((d) => d.blockType === "entertainment");
+  const entertainmentDetail = listing?.details.find(
+    (d) => d.blockType === "entertainment",
+  );
 
   const toItem = <T extends { id: string; name: string }>(v: string | T) =>
     typeof v === "string" ? { id: v, name: "" } : { id: v.id, name: v.name };
 
   const listingEventTypes = (listing?.eventTypes ?? []).map(toItem);
-  const listingPersonnel = entertainmentDetail?.blockType === "entertainment"
-    ? (entertainmentDetail.personnel ?? []).map(toItem)
-    : [];
-  const listingNecessities = entertainmentDetail?.blockType === "entertainment"
-    ? (entertainmentDetail.necessities ?? []).map(toItem)
-    : [];
+  const listingPersonnel =
+    entertainmentDetail?.blockType === "entertainment"
+      ? (entertainmentDetail.personnel ?? []).map(toItem)
+      : [];
+  const listingNecessities =
+    entertainmentDetail?.blockType === "entertainment"
+      ? (entertainmentDetail.necessities ?? []).map(toItem)
+      : [];
 
   const { mutate: createVariant } = useCreateVariant({
     onSuccess: (variant) => {
       router.push({
-        pathname: "/company-profile/companies/[companyId]/listings/[listingId]/variants/[variantId]/edit",
+        pathname:
+          "/company-profile/companies/[companyId]/listings/[listingId]/variants/[variantId]/edit",
         params: { companyId, listingId, variantId: variant.id },
       });
     },
@@ -195,14 +263,26 @@ export default function NewVariantFormEntertainment({ onCancel }: Props) {
 
   const availabilityValue = watch("availability");
 
-  const { fields: seasonalPricesFields, append: appendSeasonalPrice, remove: removeSeasonalPrice } =
-    useFieldArray({ control, name: "price.seasonalPrices" });
-  const { fields: selectedHoursFields, append: appendSelectedHour, remove: removeSelectedHour } =
-    useFieldArray({ control, name: "selectedHours" });
-  const { fields: includesFields, append: appendInclude, remove: removeInclude } =
-    useFieldArray({ control, name: "includes" });
-  const { fields: excludesFields, append: appendExclude, remove: removeExclude } =
-    useFieldArray({ control, name: "excludes" });
+  const {
+    fields: seasonalPricesFields,
+    append: appendSeasonalPrice,
+    remove: removeSeasonalPrice,
+  } = useFieldArray({ control, name: "price.seasonalPrices" });
+  const {
+    fields: selectedHoursFields,
+    append: appendSelectedHour,
+    remove: removeSelectedHour,
+  } = useFieldArray({ control, name: "selectedHours" });
+  const {
+    fields: includesFields,
+    append: appendInclude,
+    remove: removeInclude,
+  } = useFieldArray({ control, name: "includes" });
+  const {
+    fields: excludesFields,
+    append: appendExclude,
+    remove: removeExclude,
+  } = useFieldArray({ control, name: "excludes" });
 
   const handleSubmit = (data: EntertainmentFormInputs) => {
     createVariant({
@@ -255,19 +335,30 @@ export default function NewVariantFormEntertainment({ onCancel }: Props) {
         >
           <Input
             label="Název"
-            inputProps={{ ...register("name"), placeholder: "Standardní vystoupení" }}
+            inputProps={{
+              ...register("name"),
+              placeholder: "Standardní vystoupení",
+            }}
             error={errors.name?.message}
             isRequired
           />
           <Input
             label="Krátký popis"
-            inputProps={{ ...register("shortDescription"), placeholder: "Stručný popis varianty (max. 50 znaků)", maxLength: 50 }}
+            inputProps={{
+              ...register("shortDescription"),
+              placeholder: "Stručný popis varianty (max. 50 znaků)",
+              maxLength: 50,
+            }}
             error={errors.shortDescription?.message}
             isRequired
           />
           <Textarea
             label="Detailní popis"
-            inputProps={{ ...register("description"), placeholder: "Podrobný popis varianty...", rows: 4 }}
+            inputProps={{
+              ...register("description"),
+              placeholder: "Podrobný popis varianty...",
+              rows: 4,
+            }}
             error={errors.description?.message}
           />
         </FormSection>
@@ -284,7 +375,12 @@ export default function NewVariantFormEntertainment({ onCancel }: Props) {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Input
               label="Základní cena (Kč)"
-              inputProps={{ ...register("price.generalPrice"), type: "number", min: 0, placeholder: "15000" }}
+              inputProps={{
+                ...register("price.generalPrice"),
+                type: "number",
+                min: 0,
+                placeholder: "15000",
+              }}
               error={errors.price?.generalPrice?.message}
               isRequired
             />
@@ -292,7 +388,14 @@ export default function NewVariantFormEntertainment({ onCancel }: Props) {
           <RepeaterField
             label="Sezónní ceny"
             fields={seasonalPricesFields}
-            onAppend={() => appendSeasonalPrice({ price: 0, description: "", from: "", to: "" })}
+            onAppend={() =>
+              appendSeasonalPrice({
+                price: 0,
+                description: "",
+                from: "",
+                to: "",
+              })
+            }
             onRemove={removeSeasonalPrice}
             addButtonLabel="Přidat sezónní cenu"
             renderItem={(_, index) => (
@@ -300,25 +403,40 @@ export default function NewVariantFormEntertainment({ onCancel }: Props) {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <Input
                     label="Cena (Kč)"
-                    inputProps={{ ...register(`price.seasonalPrices.${index}.price`), type: "number", min: 0 }}
-                    error={errors.price?.seasonalPrices?.[index]?.price?.message}
+                    inputProps={{
+                      ...register(`price.seasonalPrices.${index}.price`),
+                      type: "number",
+                      min: 0,
+                    }}
+                    error={
+                      errors.price?.seasonalPrices?.[index]?.price?.message
+                    }
                     isRequired
                   />
                   <Input
                     label="Popis"
-                    inputProps={{ ...register(`price.seasonalPrices.${index}.description`), placeholder: "např. Letní sezóna" }}
+                    inputProps={{
+                      ...register(`price.seasonalPrices.${index}.description`),
+                      placeholder: "např. Letní sezóna",
+                    }}
                   />
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <Input
                     label="Od"
-                    inputProps={{ ...register(`price.seasonalPrices.${index}.from`), type: "date" }}
+                    inputProps={{
+                      ...register(`price.seasonalPrices.${index}.from`),
+                      type: "date",
+                    }}
                     error={errors.price?.seasonalPrices?.[index]?.from?.message}
                     isRequired
                   />
                   <Input
                     label="Do"
-                    inputProps={{ ...register(`price.seasonalPrices.${index}.to`), type: "date" }}
+                    inputProps={{
+                      ...register(`price.seasonalPrices.${index}.to`),
+                      type: "date",
+                    }}
                     error={errors.price?.seasonalPrices?.[index]?.to?.message}
                     isRequired
                   />
@@ -408,8 +526,17 @@ export default function NewVariantFormEntertainment({ onCancel }: Props) {
                 <div className="flex flex-col sm:flex-row gap-3">
                   {(
                     [
-                      { value: "allYear", label: "Celoroční", description: "Varianta je dostupná po celý rok" },
-                      { value: "seasonal", label: "Sezónní", description: "Varianta je dostupná pouze v určitém období" },
+                      {
+                        value: "allYear",
+                        label: "Celoroční",
+                        description: "Varianta je dostupná po celý rok",
+                      },
+                      {
+                        value: "seasonal",
+                        label: "Sezónní",
+                        description:
+                          "Varianta je dostupná pouze v určitém období",
+                      },
                     ] as const
                   ).map((option) => (
                     <button
@@ -420,13 +547,19 @@ export default function NewVariantFormEntertainment({ onCancel }: Props) {
                     >
                       <div className="flex items-center gap-2 mb-1">
                         <CalendarRange className="w-4 h-4 text-variant shrink-0" />
-                        <span className="text-sm font-medium text-zinc-900">{option.label}</span>
+                        <span className="text-sm font-medium text-zinc-900">
+                          {option.label}
+                        </span>
                       </div>
-                      <p className="text-xs text-zinc-500">{option.description}</p>
+                      <p className="text-xs text-zinc-500">
+                        {option.description}
+                      </p>
                     </button>
                   ))}
                 </div>
-                {errors.type?.message && <ErrorText error={errors.type.message} />}
+                {errors.type?.message && (
+                  <ErrorText error={errors.type.message} />
+                )}
               </div>
             )}
           />
@@ -439,8 +572,17 @@ export default function NewVariantFormEntertainment({ onCancel }: Props) {
                 <div className="flex flex-col sm:flex-row gap-3">
                   {(
                     [
-                      { value: "allDay", label: "Celý den", description: "Varianta je dostupná po celý den" },
-                      { value: "selectedHours", label: "Vybrané hodiny", description: "Varianta je dostupná ve vybraném časovém rozsahu" },
+                      {
+                        value: "allDay",
+                        label: "Celý den",
+                        description: "Varianta je dostupná po celý den",
+                      },
+                      {
+                        value: "selectedHours",
+                        label: "Vybrané hodiny",
+                        description:
+                          "Varianta je dostupná ve vybraném časovém rozsahu",
+                      },
                     ] as const
                   ).map((option) => (
                     <button
@@ -451,13 +593,19 @@ export default function NewVariantFormEntertainment({ onCancel }: Props) {
                     >
                       <div className="flex items-center gap-2 mb-1">
                         <Clock className="w-4 h-4 text-variant shrink-0" />
-                        <span className="text-sm font-medium text-zinc-900">{option.label}</span>
+                        <span className="text-sm font-medium text-zinc-900">
+                          {option.label}
+                        </span>
                       </div>
-                      <p className="text-xs text-zinc-500">{option.description}</p>
+                      <p className="text-xs text-zinc-500">
+                        {option.description}
+                      </p>
                     </button>
                   ))}
                 </div>
-                {errors.availability?.message && <ErrorText error={errors.availability.message} />}
+                {errors.availability?.message && (
+                  <ErrorText error={errors.availability.message} />
+                )}
               </div>
             )}
           />
@@ -468,18 +616,27 @@ export default function NewVariantFormEntertainment({ onCancel }: Props) {
               onAppend={() => appendSelectedHour({ from: "", to: "" })}
               onRemove={removeSelectedHour}
               addButtonLabel="Přidat časový slot"
-              error={(errors.selectedHours as { root?: { message?: string } })?.root?.message}
+              error={
+                (errors.selectedHours as { root?: { message?: string } })?.root
+                  ?.message
+              }
               renderItem={(_, index) => (
                 <div className="grid grid-cols-2 gap-3">
                   <Input
                     label="Čas od"
-                    inputProps={{ ...register(`selectedHours.${index}.from`), type: "time" }}
+                    inputProps={{
+                      ...register(`selectedHours.${index}.from`),
+                      type: "time",
+                    }}
                     error={errors.selectedHours?.[index]?.from?.message}
                     isRequired
                   />
                   <Input
                     label="Čas do"
-                    inputProps={{ ...register(`selectedHours.${index}.to`), type: "time" }}
+                    inputProps={{
+                      ...register(`selectedHours.${index}.to`),
+                      type: "time",
+                    }}
                     error={errors.selectedHours?.[index]?.to?.message}
                     isRequired
                   />
@@ -501,13 +658,23 @@ export default function NewVariantFormEntertainment({ onCancel }: Props) {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Input
               label="Maximální kapacita (diváků)"
-              inputProps={{ ...register("capacity.max"), type: "number", min: 1, placeholder: "500" }}
+              inputProps={{
+                ...register("capacity.max"),
+                type: "number",
+                min: 1,
+                placeholder: "500",
+              }}
               error={errors.capacity?.max?.message}
               isRequired
             />
             <Input
               label="Minimální kapacita (diváků)"
-              inputProps={{ ...register("capacity.min"), type: "number", min: 1, placeholder: "20" }}
+              inputProps={{
+                ...register("capacity.min"),
+                type: "number",
+                min: 1,
+                placeholder: "20",
+              }}
               error={errors.capacity?.min?.message}
             />
           </div>
@@ -530,7 +697,10 @@ export default function NewVariantFormEntertainment({ onCancel }: Props) {
             renderItem={(_, i) => (
               <Input
                 label="Položka"
-                inputProps={{ ...register(`includes.${i}.item`), placeholder: "např. Ozvučení, Světla..." }}
+                inputProps={{
+                  ...register(`includes.${i}.item`),
+                  placeholder: "např. Ozvučení, Světla...",
+                }}
               />
             )}
           />
@@ -543,7 +713,10 @@ export default function NewVariantFormEntertainment({ onCancel }: Props) {
             renderItem={(_, i) => (
               <Input
                 label="Položka"
-                inputProps={{ ...register(`excludes.${i}.item`), placeholder: "např. Doprava, Ubytování..." }}
+                inputProps={{
+                  ...register(`excludes.${i}.item`),
+                  placeholder: "např. Doprava, Ubytování...",
+                }}
               />
             )}
           />
@@ -602,17 +775,32 @@ export default function NewVariantFormEntertainment({ onCancel }: Props) {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Input
               label="Délka vystoupení (min)"
-              inputProps={{ ...register("performanceDuration"), type: "number", min: 1, placeholder: "60" }}
+              inputProps={{
+                ...register("performanceDuration"),
+                type: "number",
+                min: 1,
+                placeholder: "60",
+              }}
               error={errors.performanceDuration?.message}
             />
             <Input
               label="Počet setů"
-              inputProps={{ ...register("numberOfSets"), type: "number", min: 1, placeholder: "2" }}
+              inputProps={{
+                ...register("numberOfSets"),
+                type: "number",
+                min: 1,
+                placeholder: "2",
+              }}
               error={errors.numberOfSets?.message}
             />
             <Input
               label="Délka přestávky (min)"
-              inputProps={{ ...register("breakDuration"), type: "number", min: 0, placeholder: "15" }}
+              inputProps={{
+                ...register("breakDuration"),
+                type: "number",
+                min: 0,
+                placeholder: "15",
+              }}
               error={errors.breakDuration?.message}
             />
           </div>
@@ -641,12 +829,22 @@ export default function NewVariantFormEntertainment({ onCancel }: Props) {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Input
               label="Čas přípravy (min)"
-              inputProps={{ ...register("setupTime"), type: "number", min: 0, placeholder: "60" }}
+              inputProps={{
+                ...register("setupTime"),
+                type: "number",
+                min: 0,
+                placeholder: "60",
+              }}
               error={errors.setupTime?.message}
             />
             <Input
               label="Čas úklidu (min)"
-              inputProps={{ ...register("teardownTime"), type: "number", min: 0, placeholder: "30" }}
+              inputProps={{
+                ...register("teardownTime"),
+                type: "number",
+                min: 0,
+                placeholder: "30",
+              }}
               error={errors.teardownTime?.message}
             />
           </div>
@@ -692,8 +890,17 @@ export default function NewVariantFormEntertainment({ onCancel }: Props) {
 
         {/* Submit */}
         <div className="flex justify-end gap-3 pt-2">
-          <Button htmlType="button" text="Zrušit" onClick={onCancel} version="plain" />
-          <Button text="Vytvořit variantu" version="variantFull" htmlType="submit" />
+          <Button
+            htmlType="button"
+            text="Zrušit"
+            onClick={onCancel}
+            version="plain"
+          />
+          <Button
+            text="Vytvořit variantu"
+            version="variantFull"
+            htmlType="submit"
+          />
         </div>
       </div>
       <FormToc

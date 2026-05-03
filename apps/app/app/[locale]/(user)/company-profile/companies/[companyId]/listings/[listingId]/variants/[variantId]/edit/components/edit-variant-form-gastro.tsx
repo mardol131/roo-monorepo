@@ -1,7 +1,10 @@
 "use client";
 
 import { FormSection } from "@/app/[locale]/(user)/components/form-section";
-import FormToc, { TocGroup } from "@/app/[locale]/(user)/components/form-toc";
+import FormToc, {
+  TocGroup,
+  TocSection,
+} from "@/app/[locale]/(user)/components/form-toc";
 import { useListing } from "@/app/react-query/listings/hooks";
 import Button from "@/app/components/ui/atoms/button";
 import InputLabel from "@/app/components/ui/atoms/input-label";
@@ -38,32 +41,32 @@ const COLOR = { text: "text-variant", surface: "bg-variant-surface" };
 
 // ── TOC ────────────────────────────────────────────────────────────────────────
 
-const S = {
-  basic: { id: "section-basic", title: "Základní informace", icon: Package },
-  price: { id: "section-price", title: "Cena", icon: Banknote },
-  images: { id: "section-images", title: "Obrázky", icon: Image },
-  eventTypes: { id: "section-event-types", title: "Typy akcí", icon: Tag },
+const S: Record<string, TocSection> = {
+  basic: { id: "section-basic", title: "Základní informace", icon: "Package" },
+  price: { id: "section-price", title: "Cena", icon: "Banknote" },
+  images: { id: "section-images", title: "Obrázky", icon: "Image" },
+  eventTypes: { id: "section-event-types", title: "Typy akcí", icon: "Tag" },
   availability: {
     id: "section-availability",
     title: "Dostupnost",
-    icon: Calendar,
+    icon: "Calendar",
   },
   capacity: {
     id: "section-capacity",
     title: "Kapacita a objednávky",
-    icon: Users,
+    icon: "Users",
   },
-  cuisine: { id: "section-cuisine", title: "Kuchyně a styl", icon: ChefHat },
-  extras: { id: "section-extras", title: "Doplňky", icon: Package },
+  cuisine: { id: "section-cuisine", title: "Kuchyně a styl", icon: "ChefHat" },
+  extras: { id: "section-extras", title: "Doplňky", icon: "Package" },
   personnel: {
     id: "section-personnel",
     title: "Personál a požadavky",
-    icon: UserCheck,
+    icon: "UserCheck",
   },
   includes: {
     id: "section-includes",
     title: "Zahrnuto / Nezahrnuto",
-    icon: ListChecks,
+    icon: "ListChecks",
   },
 };
 
@@ -178,7 +181,10 @@ function makeResolver(): ResolverFn {
       result.errors = {
         ...result.errors,
         selectedHours: {
-          root: { type: "required", message: "Přidejte alespoň jeden časový slot" },
+          root: {
+            type: "required",
+            message: "Přidejte alespoň jeden časový slot",
+          },
         },
       };
     }
@@ -210,12 +216,28 @@ export default function EditVariantFormGastro({
     typeof v === "string" ? { id: v, name: "" } : { id: v.id, name: v.name };
 
   const listingEventTypes = (listing?.eventTypes ?? []).map(toItem);
-  const listingCuisines = (gastroDetail?.blockType === "gastro" ? (gastroDetail.cuisines ?? []) : []).map(toItem);
-  const listingDishTypes = (gastroDetail?.blockType === "gastro" ? (gastroDetail.dishTypes ?? []) : []).map(toItem);
-  const listingFoodServiceStyles = (gastroDetail?.blockType === "gastro" ? (gastroDetail.foodServiceStyles ?? []) : []).map(toItem);
-  const listingDietaryOptions = (gastroDetail?.blockType === "gastro" ? (gastroDetail.dietaryOptions ?? []) : []).map(toItem);
-  const listingPersonnel = (gastroDetail?.blockType === "gastro" ? (gastroDetail.personnel ?? []) : []).map(toItem);
-  const listingNecessities = (gastroDetail?.blockType === "gastro" ? (gastroDetail.necessities ?? []) : []).map(toItem);
+  const listingCuisines = (
+    gastroDetail?.blockType === "gastro" ? (gastroDetail.cuisines ?? []) : []
+  ).map(toItem);
+  const listingDishTypes = (
+    gastroDetail?.blockType === "gastro" ? (gastroDetail.dishTypes ?? []) : []
+  ).map(toItem);
+  const listingFoodServiceStyles = (
+    gastroDetail?.blockType === "gastro"
+      ? (gastroDetail.foodServiceStyles ?? [])
+      : []
+  ).map(toItem);
+  const listingDietaryOptions = (
+    gastroDetail?.blockType === "gastro"
+      ? (gastroDetail.dietaryOptions ?? [])
+      : []
+  ).map(toItem);
+  const listingPersonnel = (
+    gastroDetail?.blockType === "gastro" ? (gastroDetail.personnel ?? []) : []
+  ).map(toItem);
+  const listingNecessities = (
+    gastroDetail?.blockType === "gastro" ? (gastroDetail.necessities ?? []) : []
+  ).map(toItem);
 
   const {
     control,
@@ -563,7 +585,10 @@ export default function EditVariantFormGastro({
               onAppend={() => appendSelectedHour({ from: "", to: "" })}
               onRemove={removeSelectedHour}
               addButtonLabel="Přidat časový slot"
-              error={(errors.selectedHours as { root?: { message?: string } })?.root?.message}
+              error={
+                (errors.selectedHours as { root?: { message?: string } })?.root
+                  ?.message
+              }
               renderItem={(_, index) => (
                 <div className="grid grid-cols-2 gap-3">
                   <Input

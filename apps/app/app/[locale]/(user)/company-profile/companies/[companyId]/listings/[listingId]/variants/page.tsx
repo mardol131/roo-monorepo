@@ -2,6 +2,7 @@
 
 import CardContainer from "@/app/[locale]/(user)/components/card-container";
 import EntityCard from "@/app/[locale]/(user)/components/entity-card";
+import Loader from "@/app/[locale]/(user)/components/loader";
 import PageHeading from "@/app/[locale]/(user)/components/page-heading";
 import { useVariantsByListing } from "@/app/react-query/variants/hooks";
 import { Variant } from "@roo/common";
@@ -13,7 +14,11 @@ export default function page() {
     listingId: string;
   }>();
 
-  const { data: variants } = useVariantsByListing(listingId);
+  const { data: variants, isPending } = useVariantsByListing(listingId);
+
+  if (isPending) return <Loader text="Stránka se načítá..." />;
+
+  console.log(variants);
 
   return (
     <main className="w-full">

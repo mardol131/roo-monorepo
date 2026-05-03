@@ -1,7 +1,10 @@
 "use client";
 
 import { FormSection } from "@/app/[locale]/(user)/components/form-section";
-import FormToc, { TocGroup } from "@/app/[locale]/(user)/components/form-toc";
+import FormToc, {
+  TocGroup,
+  TocSection,
+} from "@/app/[locale]/(user)/components/form-toc";
 import { useListing } from "@/app/react-query/listings/hooks";
 import Button from "@/app/components/ui/atoms/button";
 import InputLabel from "@/app/components/ui/atoms/input-label";
@@ -39,29 +42,37 @@ const COLOR = { text: "text-variant", surface: "bg-variant-surface" };
 
 // ── TOC ────────────────────────────────────────────────────────────────────────
 
-const S = {
-  basic: { id: "section-basic", title: "Základní informace", icon: Package },
-  price: { id: "section-price", title: "Cena", icon: Banknote },
-  images: { id: "section-images", title: "Obrázky", icon: Image },
-  eventTypes: { id: "section-event-types", title: "Typy akcí", icon: Tag },
+const S: Record<string, TocSection> = {
+  basic: { id: "section-basic", title: "Základní informace", icon: "Package" },
+  price: { id: "section-price", title: "Cena", icon: "Banknote" },
+  images: { id: "section-images", title: "Obrázky", icon: "Image" },
+  eventTypes: { id: "section-event-types", title: "Typy akcí", icon: "Tag" },
   availability: {
     id: "section-availability",
     title: "Dostupnost",
-    icon: Calendar,
+    icon: "Calendar",
   },
-  capacity: { id: "section-capacity", title: "Kapacita", icon: Users },
-  audience: { id: "section-audience", title: "Publikum", icon: Users },
-  performance: { id: "section-performance", title: "Vystoupení", icon: Music },
-  setup: { id: "section-setup", title: "Příprava a úklid", icon: Clapperboard },
+  capacity: { id: "section-capacity", title: "Kapacita", icon: "Users" },
+  audience: { id: "section-audience", title: "Publikum", icon: "Users" },
+  performance: {
+    id: "section-performance",
+    title: "Vystoupení",
+    icon: "Music",
+  },
+  setup: {
+    id: "section-setup",
+    title: "Příprava a úklid",
+    icon: "Clapperboard",
+  },
   personnel: {
     id: "section-personnel",
     title: "Personál a požadavky",
-    icon: UserCheck,
+    icon: "UserCheck",
   },
   includes: {
     id: "section-includes",
     title: "Zahrnuto / Nezahrnuto",
-    icon: ListChecks,
+    icon: "ListChecks",
   },
 };
 
@@ -172,7 +183,10 @@ function makeResolver(): ResolverFn {
       result.errors = {
         ...result.errors,
         selectedHours: {
-          root: { type: "required", message: "Přidejte alespoň jeden časový slot" },
+          root: {
+            type: "required",
+            message: "Přidejte alespoň jeden časový slot",
+          },
         },
       };
     }
@@ -556,7 +570,10 @@ export default function EditVariantFormEntertainment({
               onAppend={() => appendSelectedHour({ from: "", to: "" })}
               onRemove={removeSelectedHour}
               addButtonLabel="Přidat časový slot"
-              error={(errors.selectedHours as { root?: { message?: string } })?.root?.message}
+              error={
+                (errors.selectedHours as { root?: { message?: string } })?.root
+                  ?.message
+              }
               renderItem={(_, index) => (
                 <div className="grid grid-cols-2 gap-3">
                   <Input

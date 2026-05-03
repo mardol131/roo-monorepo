@@ -74,9 +74,9 @@ export const routing = defineRouting({
     "/company-profile/companies/[companyId]/listings/[listingId]/spaces": {
       cs: "/firemni-ucet/firmy/[companyId]/sluzby/[listingId]/prostory",
     },
-    "/company-profile/companies/[companyId]/listings/[listingId]/spaces/[spaceId]":
+    "/company-profile/companies/[companyId]/listings/[listingId]/spaces/[spaceId]/edit":
       {
-        cs: "/firemni-ucet/firmy/[companyId]/sluzby/[listingId]/prostory/[spaceId]",
+        cs: "/firemni-ucet/firmy/[companyId]/sluzby/[listingId]/prostory/[spaceId]/upravit",
       },
     "/company-profile/companies/[companyId]/listings/[listingId]/spaces/new": {
       cs: "/firemni-ucet/firmy/[companyId]/sluzby/[listingId]/prostory/novy-prostor",

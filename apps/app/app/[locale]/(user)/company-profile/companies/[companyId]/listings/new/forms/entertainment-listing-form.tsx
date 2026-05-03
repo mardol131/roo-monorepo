@@ -1,7 +1,10 @@
 "use client";
 
 import { FormSection } from "@/app/[locale]/(user)/components/form-section";
-import FormToc, { TocGroup } from "@/app/[locale]/(user)/components/form-toc";
+import FormToc, {
+  TocGroup,
+  TocSection,
+} from "@/app/[locale]/(user)/components/form-toc";
 import Button, { ButtonProps } from "@/app/components/ui/atoms/button";
 import InputLabel from "@/app/components/ui/atoms/input-label";
 import Checkbox from "@/app/components/ui/atoms/inputs/checkbox";
@@ -33,6 +36,8 @@ import { z } from "zod";
 import { useRouter } from "@/app/i18n/navigation";
 import { useEntertainmentTypes } from "@/app/react-query/filters/entertainment-types/hooks";
 import { useNecessities } from "@/app/react-query/specific/necessities/hooks";
+import { log } from "console";
+import { useEventTypes } from "@/app/react-query/filters/event-types/hooks";
 
 // ── Schema ─────────────────────────────────────────────────────────────────────
 
@@ -50,6 +55,7 @@ const schema = z.object({
     logo: z.string().optional(),
     gallery: z.array(z.string()).min(4, "Přidejte alespoň čtyři obrázky"),
   }),
+  eventTypes: z.array(itemSchema).default([]),
   price: z.object({
     startsAt: z.coerce
       .number({ message: "Zadejte číslo" })
@@ -77,53 +83,50 @@ type Inputs = z.infer<typeof schema>;
 
 // ── TOC ────────────────────────────────────────────────────────────────────────
 
-const SECTION_BASIC = {
-  id: "section-basic",
-  title: "Základní informace",
-  icon: Building2,
-};
-const SECTION_PRICE = { id: "section-price", title: "Cena", icon: Banknote };
-const SECTION_IMAGES = { id: "section-images", title: "Obrázky", icon: Image };
-const SECTION_LOCATION = {
-  id: "section-location",
-  title: "Místo působení",
-  icon: MapPin,
-};
-const SECTION_CAPACITY = {
-  id: "section-capacity",
-  title: "Kapacita",
-  icon: Users,
-};
-const SECTION_ENT_TYPES = {
-  id: "section-ent-types",
-  title: "Typ programu",
-  icon: Music,
-};
-const SECTION_REQUIREMENTS = {
-  id: "section-requirements",
-  title: "Provozní požadavky",
-  icon: ClipboardList,
-};
-const SECTION_LOGISTICS = {
-  id: "section-logistics",
-  title: "Logistika",
-  icon: Clock,
+const S: Record<string, TocSection> = {
+  basic: {
+    id: "section-basic",
+    title: "Základní informace",
+    icon: "Building2",
+  },
+  prices: { id: "section-price", title: "Cena", icon: "Banknote" },
+  images: { id: "section-images", title: "Obrázky", icon: "Image" },
+  location: {
+    id: "section-location",
+    title: "Místo působení",
+    icon: "MapPin",
+  },
+  capacity: {
+    id: "section-capacity",
+    title: "Kapacita",
+    icon: "Users",
+  },
+  eventTypes: {
+    id: "section-ent-types",
+    title: "Typ programu",
+    icon: "Music",
+  },
+  requirements: {
+    id: "section-requirements",
+    title: "Provozní požadavky",
+    icon: "ClipboardList",
+  },
+  logistics: {
+    id: "section-logistics",
+    title: "Logistika",
+    icon: "Clock",
+  },
 };
 
 const FORM_GROUPS: readonly TocGroup[] = [
   {
     label: "Základní",
-    sections: [SECTION_BASIC, SECTION_PRICE, SECTION_IMAGES],
+    sections: [S.basic, S.prices, S.images],
   },
-  { label: "Místo působení", sections: [SECTION_LOCATION] },
+  { label: "Místo působení", sections: [S.location] },
   {
     label: "Program",
-    sections: [
-      SECTION_CAPACITY,
-      SECTION_ENT_TYPES,
-      SECTION_REQUIREMENTS,
-      SECTION_LOGISTICS,
-    ],
+    sections: [S.capacity, S.eventTypes, S.requirements, S.logistics],
   },
 ];
 
@@ -166,6 +169,9 @@ export default function EntertainmentListingForm({ onCancel }: Props) {
   const { data: necessities } = useNecessities({
     limit: 15,
   });
+  const { data: eventTypes } = useEventTypes({
+    limit: 15,
+  });
 
   function onSubmit(data: Inputs) {
     const payload: CreateListingPayload = {
@@ -177,6 +183,8 @@ export default function EntertainmentListingForm({ onCancel }: Props) {
         gallery: data.images.gallery.map((url) => ({ url })),
       },
       price: { startsAt: data.price.startsAt },
+      eventTypes: data.eventTypes.map((i) => i.id),
+
       details: [
         {
           location: {
@@ -245,9 +253,10 @@ export default function EntertainmentListingForm({ onCancel }: Props) {
       <div className="flex w-full flex-col gap-4">
         {/* ── Základní informace ──────────────────────────────────────────────── */}
         <FormSection
-          id={SECTION_BASIC.id}
-          icon={SECTION_BASIC.icon}
-          title={SECTION_BASIC.title}
+          id={S.basic.id}
+          icon={S.basic.icon}
+          title={S.basic.title}
+          subtitle={S.basic.subTitle}
           surfaceColor={COLOR_SCHEME.surface}
           color={COLOR_SCHEME.text}
           error={!!errors.name}
@@ -264,9 +273,10 @@ export default function EntertainmentListingForm({ onCancel }: Props) {
 
         {/* ── Cena ────────────────────────────────────────────────────────────── */}
         <FormSection
-          id={SECTION_PRICE.id}
-          icon={SECTION_PRICE.icon}
-          title={SECTION_PRICE.title}
+          id={S.prices.id}
+          icon={S.prices.icon}
+          title={S.prices.title}
+          subtitle={S.prices.subTitle}
           surfaceColor={COLOR_SCHEME.surface}
           color={COLOR_SCHEME.text}
           error={!!errors.price?.startsAt}
@@ -287,10 +297,10 @@ export default function EntertainmentListingForm({ onCancel }: Props) {
 
         {/* ── Obrázky ─────────────────────────────────────────────────────────── */}
         <FormSection
-          id={SECTION_IMAGES.id}
-          icon={SECTION_IMAGES.icon}
-          title={SECTION_IMAGES.title}
-          subtitle="Podporované formáty: jpg, png, webp"
+          id={S.images.id}
+          icon={S.images.icon}
+          title={S.images.title}
+          subtitle={S.images.subTitle}
           surfaceColor={COLOR_SCHEME.surface}
           color={COLOR_SCHEME.text}
           error={!!(errors.images?.coverImage || errors.images?.gallery)}
@@ -343,9 +353,10 @@ export default function EntertainmentListingForm({ onCancel }: Props) {
 
         {/* ── Místo působení ──────────────────────────────────────────────────── */}
         <FormSection
-          id={SECTION_LOCATION.id}
-          icon={SECTION_LOCATION.icon}
-          title={SECTION_LOCATION.title}
+          id={S.location.id}
+          icon={S.location.icon}
+          title={S.location.title}
+          subtitle={S.location.subTitle}
           surfaceColor={COLOR_SCHEME.surface}
           color={COLOR_SCHEME.text}
           error={!!errors.location?.regions}
@@ -416,9 +427,10 @@ export default function EntertainmentListingForm({ onCancel }: Props) {
 
         {/* ── Kapacita ────────────────────────────────────────────────────────── */}
         <FormSection
-          id={SECTION_CAPACITY.id}
-          icon={SECTION_CAPACITY.icon}
-          title={SECTION_CAPACITY.title}
+          id={S.capacity.id}
+          icon={S.capacity.icon}
+          title={S.capacity.title}
+          subtitle={S.capacity.subTitle}
           surfaceColor={COLOR_SCHEME.surface}
           color={COLOR_SCHEME.text}
           error={!!errors.capacity}
@@ -447,11 +459,37 @@ export default function EntertainmentListingForm({ onCancel }: Props) {
           </div>
         </FormSection>
 
+        {/* ── Typy eventů ──────────────────────────────────────────────────── */}
+        <FormSection
+          id={S.eventTypes.id}
+          icon={S.eventTypes.icon}
+          title={S.eventTypes.title}
+          subtitle={S.eventTypes.subTitle}
+          surfaceColor={COLOR_SCHEME.surface}
+          color={COLOR_SCHEME.text}
+        >
+          <Controller
+            control={control}
+            name="eventTypes"
+            render={({ field }) => (
+              <CheckboxGroup
+                searchable
+                label="Typy eventů"
+                items={eventTypes?.docs ?? []}
+                value={field.value}
+                onChange={field.onChange}
+                checkColor={COLOR_SCHEME.text}
+              />
+            )}
+          />
+        </FormSection>
+
         {/* ── Typ programu ────────────────────────────────────────────────────── */}
         <FormSection
-          id={SECTION_ENT_TYPES.id}
-          icon={SECTION_ENT_TYPES.icon}
-          title={SECTION_ENT_TYPES.title}
+          id={S.entertainmentTypes.id}
+          icon={S.entertainmentTypes.icon}
+          title={S.entertainmentTypes.title}
+          subtitle={S.entertainmentTypes.subTitle}
           surfaceColor={COLOR_SCHEME.surface}
           color={COLOR_SCHEME.text}
         >
@@ -504,9 +542,10 @@ export default function EntertainmentListingForm({ onCancel }: Props) {
 
         {/* ── Provozní požadavky ──────────────────────────────────────────────── */}
         <FormSection
-          id={SECTION_REQUIREMENTS.id}
-          icon={SECTION_REQUIREMENTS.icon}
-          title={SECTION_REQUIREMENTS.title}
+          id={S.requirements.id}
+          icon={S.requirements.icon}
+          title={S.requirements.title}
+          subtitle={S.requirements.subTitle}
           surfaceColor={COLOR_SCHEME.surface}
           color={COLOR_SCHEME.text}
         >
@@ -528,9 +567,10 @@ export default function EntertainmentListingForm({ onCancel }: Props) {
 
         {/* ── Logistika ───────────────────────────────────────────────────────── */}
         <FormSection
-          id={SECTION_LOGISTICS.id}
-          icon={SECTION_LOGISTICS.icon}
-          title={SECTION_LOGISTICS.title}
+          id={S.logistics.id}
+          icon={S.logistics.icon}
+          title={S.logistics.title}
+          subtitle={S.logistics.subTitle}
           surfaceColor={COLOR_SCHEME.surface}
           color={COLOR_SCHEME.text}
         >

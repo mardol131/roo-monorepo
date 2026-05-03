@@ -16,6 +16,7 @@ import Loader from "../../../components/loader";
 import RowContainer from "../../../components/row-container";
 import { SummaryCard } from "../../../components/summary-card";
 import ListingStatusTag from "../../../components/tags/listing-status-tag";
+import { CompletionWidget } from "../../../components/completion-widget";
 
 export default function page() {
   const { companyId } = useParams<{ companyId: string }>();
@@ -73,6 +74,26 @@ export default function page() {
       />
 
       <div className="flex flex-col gap-5">
+        <CompletionWidget
+          groups={[
+            {
+              label: "Průvodce firmou",
+              weight: 1,
+              fields: [
+                {
+                  label: "Vytvořte svou první službu",
+                  filled: listings?.docs.length ? true : false,
+                  editHref: {
+                    pathname:
+                      "/company-profile/companies/[companyId]/listings/new",
+                    params: { companyId },
+                  },
+                },
+              ],
+            },
+          ]}
+          title="Dokončení firmy"
+        />
         {/* Summary cards */}
         <div className="grid grid-cols-3 gap-4">
           <SummaryCard

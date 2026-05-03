@@ -1,7 +1,10 @@
 "use client";
 
 import { FormSection } from "@/app/[locale]/(user)/components/form-section";
-import FormToc, { TocGroup } from "@/app/[locale]/(user)/components/form-toc";
+import FormToc, {
+  TocGroup,
+  TocSection,
+} from "@/app/[locale]/(user)/components/form-toc";
 import DateTimeInput from "@/app/components/ui/atoms/inputs/date-time-input";
 import GuestsInput from "@/app/components/ui/atoms/inputs/guests-input";
 import IconSelect from "@/app/components/ui/atoms/inputs/icon-select";
@@ -28,19 +31,22 @@ import { useCities } from "@/app/react-query/cities/hooks";
 
 // ── TOC ────────────────────────────────────────────────────────────────────────
 
+const S: Record<string, TocSection> = {
+  basic: { id: "section-basic", title: "Základní informace", icon: "Smile" },
+  dates: { id: "section-dates", title: "Termín konání", icon: "Calendar" },
+  guests: { id: "section-guests", title: "Hosté", icon: "Users" },
+  budget: { id: "section-budget", title: "Rozpočet", icon: "Banknote" },
+  location: { id: "section-location", title: "Místo konání", icon: "MapPin" },
+};
+
 const EVENT_FORM_GROUPS: readonly TocGroup[] = [
   {
     label: "Základní",
-    sections: [
-      { id: "section-basic", title: "Základní informace", icon: Smile },
-      { id: "section-dates", title: "Termín konání", icon: Calendar },
-      { id: "section-guests", title: "Hosté", icon: Users },
-      { id: "section-budget", title: "Rozpočet", icon: Banknote },
-    ],
+    sections: [S.basic, S.dates, S.guests, S.budget],
   },
   {
     label: "Lokalita",
-    sections: [{ id: "section-location", title: "Místo konání", icon: MapPin }],
+    sections: [S.location],
   },
 ];
 
@@ -127,9 +133,10 @@ export default function NewEventForm() {
       <div className="flex w-full flex-col gap-4">
         {/* ── 1. Základní informace ──────────────────────────────────────────── */}
         <FormSection
-          id="section-basic"
-          icon={Smile}
-          title="Základní informace"
+          id={S.basic.id}
+          icon={S.basic.icon}
+          title={S.basic.title}
+          subtitle={S.basic.subTitle}
           color="text-event"
           surfaceColor="bg-event-surface"
         >
@@ -197,9 +204,10 @@ export default function NewEventForm() {
 
         {/* ── 2. Termín konání ───────────────────────────────────────────────── */}
         <FormSection
-          id="section-dates"
-          icon={Calendar}
-          title="Termín konání"
+          id={S.dates.id}
+          icon={S.dates.icon}
+          title={S.dates.title}
+          subtitle={S.dates.subTitle}
           color="text-event"
           surfaceColor="bg-event-surface"
         >
@@ -234,9 +242,10 @@ export default function NewEventForm() {
 
         {/* ── 3. Hosté ───────────────────────────────────────────────────────── */}
         <FormSection
-          id="section-guests"
-          icon={Users}
-          title="Hosté"
+          id={S.guests.id}
+          icon={S.guests.icon}
+          title={S.guests.title}
+          subtitle={S.guests.subTitle}
           color="text-event"
           surfaceColor="bg-event-surface"
         >
@@ -256,9 +265,10 @@ export default function NewEventForm() {
 
         {/* ── 4. Rozpočet ────────────────────────────────────────────────────── */}
         <FormSection
-          id="section-budget"
-          icon={Banknote}
-          title="Rozpočet"
+          id={S.budget.id}
+          icon={S.budget.icon}
+          title={S.budget.title}
+          subtitle={S.budget.subTitle}
           color="text-event"
           surfaceColor="bg-event-surface"
         >
@@ -275,9 +285,10 @@ export default function NewEventForm() {
 
         {/* ── 5. Místo konání ────────────────────────────────────────────────── */}
         <FormSection
-          id="section-location"
-          icon={MapPin}
-          title="Místo konání"
+          id={S.location.id}
+          icon={S.location.icon}
+          title={S.location.title}
+          subtitle={S.location.subTitle}
           color="text-event"
           surfaceColor="bg-event-surface"
         >
