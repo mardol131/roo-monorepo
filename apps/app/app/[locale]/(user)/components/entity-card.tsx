@@ -1,6 +1,8 @@
 import Text from "@/app/components/ui/atoms/text";
+import { confirmActionModalEvents } from "@/app/components/ui/molecules/modals/confirm-action-modal";
 import { Link, IntlLink } from "@/app/i18n/navigation";
-import { ChevronRight, icons } from "lucide-react";
+import { de } from "date-fns/locale";
+import { ChevronRight, icons, Trash2 } from "lucide-react";
 import { ReactNode } from "react";
 
 type Item =
@@ -21,6 +23,7 @@ type Props = {
   rightComponent?: ReactNode;
   onClick?: () => void;
   hideLinkIcon?: boolean;
+  deleteEntityHandler?: (e: React.MouseEvent<HTMLButtonElement>) => void;
 };
 
 export default function EntityCard({
@@ -34,12 +37,13 @@ export default function EntityCard({
   rightComponent,
   hideLinkIcon = false,
   onClick,
+  deleteEntityHandler,
 }: Props) {
   const Icon = icons[icon];
 
   const content = (
     <div
-      className="group bg-white rounded-2xl border border-zinc-200 hover:border-zinc-300 hover:shadow-sm transition-all px-6 py-5 flex items-center gap-5"
+      className="group w-full bg-white rounded-2xl border border-zinc-200 hover:border-zinc-300 hover:shadow-sm transition-all px-6 py-5 flex items-center gap-5"
       onClick={onClick}
     >
       <div
@@ -86,11 +90,35 @@ export default function EntityCard({
 
   if (link) {
     return (
-      <Link href={link} className="block">
-        {content}
-      </Link>
+      <div className="flex gap-4">
+        <Link href={link} className="block w-full">
+          {content}
+        </Link>
+        {deleteEntityHandler && (
+          <button
+            type="button"
+            className="cursor-pointer"
+            onClick={deleteEntityHandler}
+          >
+            <Trash2 className="w-5 h-5 text-zinc-400 hover:text-danger smooth" />
+          </button>
+        )}
+      </div>
     );
   }
 
-  return content;
+  return (
+    <div className="flex gap-4">
+      {content}
+      {deleteEntityHandler && (
+        <button
+          type="button"
+          className="cursor-pointer"
+          onClick={deleteEntityHandler}
+        >
+          <Trash2 className="w-5 h-5 text-zinc-400 hover:text-danger smooth" />
+        </button>
+      )}
+    </div>
+  );
 }

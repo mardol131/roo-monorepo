@@ -375,7 +375,7 @@ export default function VenueListingForm({ onCancel }: Props) {
                     ? {
                         id: field.value,
                         name:
-                          venueCitiesData?.docs.find(
+                          venueCitiesData?.docs?.find(
                             (c) => c.id === field.value,
                           )?.name ?? "",
                       }

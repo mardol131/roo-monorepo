@@ -1,5 +1,6 @@
-import type { CollectionConfig, Field } from 'payload'
+import type { CollectionConfig, Field, Where } from 'payload'
 import { variantsCommonFields } from './common-fields/common-fields'
+import { getRecordStatuses } from '@roo/common'
 
 export const venueVariantDetails: Field[] = [
   {
@@ -262,11 +263,32 @@ export const Variants: CollectionConfig = {
     create: ({ req }) => {
       return !!req.user
     },
-    read: () => true,
+    read: ({ req }) => {
+      if (req.user?.collection === 'admins') return true
+      if (req.user) {
+        const query: Where = {
+          or: [
+            { status: { equals: 'active' } },
+            {
+              and: [
+                { 'listing.company.owner': { equals: req.user.id } },
+                { status: { in: getRecordStatuses(['active', 'inactive']) } },
+              ],
+            },
+          ],
+        }
+        return query
+      }
+      return { status: { equals: 'active' } }
+    },
     update: ({ req }) => {
       if (!req.user) return false
       if (req.user.collection === 'admins') return true
-      return { 'listing.company.owner': { equals: req.user.id } }
+
+      return {
+        'listing.company.owner': { equals: req.user.id },
+        status: { in: getRecordStatuses(['active', 'inactive']) },
+      }
     },
     delete: ({ req }) => req.user?.collection === 'admins',
   },

@@ -138,6 +138,7 @@ type FormInputs = z.infer<typeof schema>;
 type CreateProps = {
   mode: "create";
   spaceType: Space["type"];
+  parentId?: string;
   parentSpaceName?: string;
   listingId: string;
   companyId: string;
@@ -230,7 +231,7 @@ export function SpaceForm(props: SpaceFormProps) {
 
     if (props.mode === "create") {
       createSpace(
-        { ...payload, parent: undefined },
+        { ...payload, parent: props.parentId },
         { onSuccess: navigateToSpaces },
       );
     } else {
@@ -444,7 +445,7 @@ export function SpaceForm(props: SpaceFormProps) {
                               Vybavení pokoje
                             </span>
                             <div className="grid grid-cols-3 gap-1.5">
-                              {amenities?.docs.map((amenity) => (
+                              {amenities?.docs?.map((amenity) => (
                                 <Checkbox
                                   key={amenity.id}
                                   size="sm"
@@ -488,7 +489,7 @@ export function SpaceForm(props: SpaceFormProps) {
               name="spaceRuleIds"
               render={({ field }) => (
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                  {rules?.docs.map((rule) => (
+                  {rules?.docs?.map((rule) => (
                     <Checkbox
                       key={rule.id}
                       checked={field.value.includes(rule.id)}
@@ -517,11 +518,7 @@ export function SpaceForm(props: SpaceFormProps) {
               onClick={navigateToSpaces}
               version="plain"
             />
-            <Button
-              text={submitLabel}
-              version="spaceFull"
-              htmlType="submit"
-            />
+            <Button text={submitLabel} version="spaceFull" htmlType="submit" />
           </div>
         </div>
         <FormToc

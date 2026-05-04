@@ -4,22 +4,29 @@ import EntityCard from "@/app/[locale]/(user)/components/entity-card";
 import PageHeading from "@/app/[locale]/(user)/components/page-heading";
 import Text from "@/app/components/ui/atoms/text";
 import { useListing, useUpdateListing } from "@/app/react-query/listings/hooks";
-import { useSpacesByListing } from "@/app/react-query/spaces/hooks";
+import {
+  useDeleteSpace,
+  useSpacesByListing,
+  useUpdateSpace,
+} from "@/app/react-query/spaces/hooks";
 import { IntlLink, Link, useRouter } from "@/app/i18n/navigation";
 import { Listing, Space } from "@roo/common";
 import {
   AlertTriangle,
   Building2,
   CornerDownRight,
+  Delete,
   icons,
   LayoutDashboard,
   Plus,
+  Trash2,
   TreePine,
 } from "lucide-react";
 import { useParams } from "next/navigation";
 import { useState } from "react";
 import Button from "@/app/components/ui/atoms/button";
 import Input from "@/app/components/ui/atoms/inputs/input";
+import { confirmActionModalEvents } from "@/app/components/ui/molecules/modals/confirm-action-modal";
 
 const TYPE_ICON: Record<Space["type"], keyof typeof icons> = {
   building: "Building2",
@@ -141,6 +148,12 @@ function SpaceTree({
   const childType = ADD_CHILD_TYPE[space.type];
   const childLabel = ADD_CHILD_LABEL[space.type];
 
+  const { mutate: updateSpace } = useUpdateSpace(space.id, listingId);
+
+  async function handleDeleteConfirm() {
+    updateSpace({ status: "archived" });
+  }
+
   return (
     <div>
       <div className="flex flex-col gap-2">
@@ -148,31 +161,66 @@ function SpaceTree({
           {depth > 0 && (
             <CornerDownRight size={16} className="text-zinc-400 w-6 h-6" />
           )}
-          <div className="w-full">
-            <EntityCard
-              icon={TYPE_ICON[space.type]}
-              iconColor={iconColor}
-              iconBackgroundColor={iconBg}
-              label={space.name}
-              link={{
-                pathname:
-                  "/company-profile/companies/[companyId]/listings/[listingId]/spaces/[spaceId]/edit",
-                params: { companyId, listingId, spaceId: space.id },
-              }}
-              items={[
-                { icon: "Tag", content: TYPE_LABEL[space.type] },
-                space.capacity != null
-                  ? { icon: "Users", content: `${space.capacity} os.` }
-                  : undefined,
-                space.area != null
-                  ? { icon: "Maximize2", content: `${space.area} m²` }
-                  : undefined,
-              ]}
-            />
+          <div className="w-full flex items-center gap-3">
+            <div className="w-full">
+              <EntityCard
+                icon={TYPE_ICON[space.type]}
+                iconColor={iconColor}
+                iconBackgroundColor={iconBg}
+                label={space.name}
+                link={{
+                  pathname:
+                    "/company-profile/companies/[companyId]/listings/[listingId]/spaces/[spaceId]/edit",
+                  params: { companyId, listingId, spaceId: space.id },
+                }}
+                items={[
+                  { icon: "Tag", content: TYPE_LABEL[space.type] },
+                  space.capacity != null
+                    ? { icon: "Users", content: `${space.capacity} os.` }
+                    : undefined,
+                  space.area != null
+                    ? { icon: "Maximize2", content: `${space.area} m²` }
+                    : undefined,
+                ]}
+                deleteEntityHandler={(e) => {
+                  e.stopPropagation();
+                  e.preventDefault();
+                  confirmActionModalEvents.emit("open", {
+                    title: "Smazat prostor",
+                    description:
+                      "Tato akce je nevratná a trvale odstraní tento prostor z platformy.",
+                    Icon: Trash2,
+                    buttonText: "Smazat prostor",
+                    buttonVersion: "dangerFull",
+                    confirmPhrase: space.name,
+                    whatIsGoingToHappenText:
+                      "Opravdu chcete smazat tento prostor?",
+                    whatIsGoingToHappenTextColor: "danger",
+                    whatIsGoingToHappenList: [
+                      "Prostor zmizí z katalogu a nebude dohledatelný",
+                      "Prostory, které jsou v hierarchii pod tímto prostorem, budou smazány.",
+                      "Prostor bude odstraněn ze všech variant služby, které ho obsahují",
+                    ],
+                    bgColor: "bg-danger-surface",
+                    onConfirmClick: handleDeleteConfirm,
+                  });
+                }}
+              />
+            </div>
           </div>
         </div>
         {childType && childLabel && (
-          <div className="ml-10 flex flex-col gap-2">
+          <div className="ml-16 flex flex-col gap-2">
+            {children.map((child) => (
+              <SpaceTree
+                key={child.id}
+                space={child}
+                allSpaces={allSpaces}
+                companyId={companyId}
+                listingId={listingId}
+                depth={depth + 1}
+              />
+            ))}
             <div className="flex items-center gap-3">
               <CornerDownRight size={16} className="text-zinc-300 w-6 h-6" />
               <div className="w-full">
@@ -185,16 +233,6 @@ function SpaceTree({
                 />
               </div>
             </div>
-            {children.map((child) => (
-              <SpaceTree
-                key={child.id}
-                space={child}
-                allSpaces={allSpaces}
-                companyId={companyId}
-                listingId={listingId}
-                depth={depth + 1}
-              />
-            ))}
           </div>
         )}
       </div>
@@ -224,7 +262,7 @@ export default function SpacesPage() {
   const [pendingType, setPendingType] = useState<SpacesType | null>(null);
   const [confirmValue, setConfirmValue] = useState("");
 
-  const roots = spaces?.docs.filter(
+  const roots = spaces?.docs?.filter(
     (s) => !getParentId(s) && spacesType != null && s.type === spacesType,
   );
 
@@ -338,14 +376,19 @@ export default function SpacesPage() {
         {pendingType && (
           <div className="mt-4 p-4 rounded-xl border border-danger bg-danger-surface flex flex-col gap-3">
             <div className="flex items-start gap-2.5">
-              <AlertTriangle className="w-4 h-4 text-danger mt-0.5 shrink-0" />
               <div>
-                <Text variant="label-lg" className="font-semibold text-danger">
-                  Změna typu prostorů
-                </Text>
+                <div className="flex items-center gap-3">
+                  <Text
+                    variant="label-lg"
+                    className="font-semibold text-danger"
+                  >
+                    Pozor
+                  </Text>{" "}
+                  <AlertTriangle className="w-4 h-4 text-danger mt-0.5 shrink-0" />
+                </div>
                 <Text
                   variant="label"
-                  color="textLight"
+                  color="textDark"
                   as="p"
                   className="mt-0.5 text-danger"
                 >
@@ -396,7 +439,7 @@ export default function SpacesPage() {
           />
           {roots &&
             roots.map((root) => (
-              <div key={root.id} className="my-5">
+              <div key={root.id} className="my-5 border-t border-space/20 py-5">
                 <SpaceTree
                   key={root.id}
                   space={root}

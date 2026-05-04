@@ -5,7 +5,7 @@ import {
   UseMutationOptions,
 } from "@tanstack/react-query";
 import { Listing } from "@roo/common";
-import { listingKeys } from "../query-keys";
+import { listingKeys, spaceKeys } from "../query-keys";
 import {
   createListing,
   CreateListingPayload,
@@ -41,16 +41,25 @@ export function useListing(id: string) {
 
 export type UpdateListingData = Partial<Listing>;
 
-export function useUpdateListing(id: string, companyId: string) {
+export function useUpdateListing(
+  id: string,
+  companyId: string,
+  options?: UseMutationOptions<Listing, Error, UpdateListingData>,
+) {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: (data: UpdateListingData) => updateListing(id, data),
-    onSuccess: () => {
+    onSuccess: (...args) => {
       queryClient.invalidateQueries({ queryKey: listingKeys.byId(id) });
       queryClient.invalidateQueries({
         queryKey: listingKeys.byCompany(companyId),
       });
+      queryClient.invalidateQueries({ queryKey: spaceKeys.byListing(id) });
+      options?.onSuccess?.(...args);
+    },
+    onError: (...args) => {
+      options?.onError?.(...args);
     },
   });
 }
@@ -74,11 +83,16 @@ export function useCreateListing(
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (data: CreateListingPayload) => createListing(data),
+    mutationFn: (data: CreateListingPayload) =>
+      createListing(data).then((res) => res.doc),
     onSuccess: (...args) => {
       queryClient.invalidateQueries({ queryKey: listingKeys.all() });
       queryClient.invalidateQueries({
-        queryKey: listingKeys.byCompany(args[0].companyId),
+        queryKey: listingKeys.byCompany(
+          typeof args[0].company === "string"
+            ? args[0].company
+            : args[0].company.id,
+        ),
       });
       options?.onSuccess?.(...args);
     },

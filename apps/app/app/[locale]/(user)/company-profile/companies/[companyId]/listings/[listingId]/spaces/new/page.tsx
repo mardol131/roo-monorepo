@@ -22,6 +22,7 @@ export default function NewSpacePage() {
     <SpaceForm
       mode="create"
       spaceType={spaceType}
+      parentId={parentId}
       parentSpaceName={parentSpace?.name}
       listingId={listingId}
       companyId={companyId}

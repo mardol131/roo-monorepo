@@ -12,6 +12,7 @@ export async function fetchAllListings() {
     collection: "listings",
     sort: "-createdAt",
   });
+  console.log("Fetched listings:", res);
   if (!res) throw new Error("Failed to fetch listings");
   return res;
 }
@@ -19,9 +20,10 @@ export async function fetchAllListings() {
 export async function fetchListingsByCompany(companyId: string) {
   const res = await getCollection({
     collection: "listings",
-    query: { companyId: { equals: companyId } },
+    query: { company: { equals: companyId } },
     sort: "-createdAt",
   });
+  console.log(`Fetched listings for company ${companyId}:`, res);
   if (!res) throw new Error("Failed to fetch listings");
   return res;
 }

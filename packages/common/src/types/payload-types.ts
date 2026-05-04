@@ -831,6 +831,7 @@ export interface Activity {
  */
 export interface Space {
   id: string;
+  status: 'active' | 'disabled' | 'archived';
   name: string;
   type: 'area' | 'building' | 'room';
   parent?: (string | null) | Space;
@@ -1906,6 +1907,7 @@ export interface ListingsSelect<T extends boolean = true> {
  * via the `definition` "spaces_select".
  */
 export interface SpacesSelect<T extends boolean = true> {
+  status?: T;
   name?: T;
   type?: T;
   parent?: T;

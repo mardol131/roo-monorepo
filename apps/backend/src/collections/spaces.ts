@@ -1,3 +1,4 @@
+import { getRecordStatuses } from '@roo/common'
 import type { CollectionConfig } from 'payload'
 
 export const Spaces: CollectionConfig = {
@@ -6,18 +7,29 @@ export const Spaces: CollectionConfig = {
     useAsTitle: 'name',
   },
   access: {
-    create: ({ req }) => {
-      return !!req.user
+    create: ({ req }) => !!req.user,
+    read: ({ req }) => {
+      if (req.user?.collection === 'admins') return true
+      return { status: { equals: 'active' } }
     },
-    read: () => true,
     update: ({ req }) => {
       if (!req.user) return false
       if (req.user.collection === 'admins') return true
-      return { 'listing.company.owner': { equals: req.user.id } }
+      return {
+        status: { equals: 'active' },
+        'listing.company.owner': { equals: req.user.id },
+      }
     },
     delete: ({ req }) => req.user?.collection === 'admins',
   },
   fields: [
+    {
+      name: 'status',
+      type: 'select',
+      options: getRecordStatuses(),
+      defaultValue: 'active',
+      required: true,
+    },
     {
       name: 'name',
       type: 'text',
@@ -109,4 +121,18 @@ export const Spaces: CollectionConfig = {
       hasMany: true,
     },
   ],
+  hooks: {
+    afterChange: [
+      async ({ doc, previousDoc, req }) => {
+        if (doc.status === previousDoc?.status) return
+        if (doc.status === 'active') return
+
+        await req.payload.update({
+          collection: 'spaces',
+          where: { parent: { equals: doc.id } },
+          data: { status: 'disabled' },
+        })
+      },
+    ],
+  },
 }

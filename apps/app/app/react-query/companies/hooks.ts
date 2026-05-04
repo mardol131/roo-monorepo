@@ -47,7 +47,7 @@ export function useUpdateCompany(
 }
 
 export function useCreateCompany(
-  options?: UseMutationOptions<Company, Error, CreateCompanyPayload>,
+  options?: UseMutationOptions<{ doc: Company; message: string }, Error, CreateCompanyPayload>,
 ) {
   const queryClient = useQueryClient();
 

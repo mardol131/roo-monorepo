@@ -7,7 +7,7 @@ import { Inquiry, Listing } from "@roo/common";
 export async function fetchInquiriesByListing(listingId: string) {
   const res = await getCollection({
     collection: "inquiries",
-    query: { listingId: { equals: listingId } },
+    query: { listing: { equals: listingId } },
   });
   if (!res) throw new Error("Failed to fetch inquiries");
   return res;

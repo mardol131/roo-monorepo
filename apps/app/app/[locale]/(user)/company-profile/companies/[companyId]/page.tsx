@@ -82,7 +82,7 @@ export default function page() {
               fields: [
                 {
                   label: "Vytvořte svou první službu",
-                  filled: listings?.docs.length ? true : false,
+                  filled: listings?.docs?.length ? true : false,
                   editHref: {
                     pathname:
                       "/company-profile/companies/[companyId]/listings/new",
@@ -98,7 +98,7 @@ export default function page() {
         <div className="grid grid-cols-3 gap-4">
           <SummaryCard
             label="Aktivní služby"
-            value={String(listings?.docs.length || 0)}
+            value={String(listings?.docs?.length || 0)}
             icon={Tag}
             iconBg="bg-listing-surface"
             iconColor="text-listing"
@@ -141,7 +141,7 @@ export default function page() {
             />
           }
           rowComponents={
-            !listings?.docs.length
+            !listings?.docs?.length
               ? []
               : listings?.docs.map((listing) => (
                   <EntityRow

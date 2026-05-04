@@ -480,5 +480,19 @@ export const Listings: CollectionConfig = {
         }
       },
     ],
+    afterChange: [
+      async ({ doc, previousDoc, req }) => {
+        const newSpacesType = doc.details?.[0]?.spacesType
+        const prevSpacesType = previousDoc?.details?.[0]?.spacesType
+
+        if (!newSpacesType || newSpacesType === prevSpacesType) return
+
+        await req.payload.update({
+          collection: 'spaces',
+          where: { listing: { equals: doc.id } },
+          data: { status: 'disabled' },
+        })
+      },
+    ],
   },
 }

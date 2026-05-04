@@ -2,33 +2,40 @@ import { Config, PayloadResponse, Where } from "@roo/common";
 import { stringify } from "qs-esm";
 import { success } from "zod";
 
+export type GetCollectionOptions<T extends keyof Config["collections"]> = {
+  collection: T;
+  query?: Where;
+  limit?: number;
+  sort?: string;
+};
+
 export async function getCollection<T extends keyof Config["collections"]>({
   collection,
   query,
   limit,
   sort,
-}: {
-  collection: T;
-  query?: Where;
-  limit?: number;
-  sort?: string;
-}): Promise<PayloadResponse<Config["collections"][T]>> {
-  const url = new URL(
-    `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/${collection}`,
-  );
+}: GetCollectionOptions<T>): Promise<
+  PayloadResponse<Config["collections"][T]>
+> {
+  const url = `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/${collection}`;
   const stringifiedQuery = query
     ? stringify({ where: query }, { encodeValuesOnly: true })
     : undefined;
+  const limitQuery = limit ? `limit=${limit}` : undefined;
+  const sortQuery = sort ? `sort=${sort}` : undefined;
 
-  if (limit) url.searchParams.append("limit", limit.toString());
-  if (sort) url.searchParams.append("sort", sort);
+  const queryParams = [stringifiedQuery, limitQuery, sortQuery]
+    .filter(Boolean)
+    .join("&");
 
-  return await fetch(`${url.toString()}&${stringifiedQuery}`, {
+  const res = await fetch(`${url}?${queryParams}`, {
     headers: {
       "Content-Type": "application/json",
     },
     credentials: "include",
-  }).then((res) => res.json());
+  });
+  if (!res.ok) throw new Error(`Failed to fetch collection ${collection}`);
+  return res.json();
 }
 
 export async function getCollectionItem<T extends keyof Config["collections"]>({
@@ -42,12 +49,15 @@ export async function getCollectionItem<T extends keyof Config["collections"]>({
     `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/${collection}/${id}`,
   );
 
-  return await fetch(url.toString(), {
+  const res = await fetch(url.toString(), {
     headers: {
       "Content-Type": "application/json",
     },
     credentials: "include",
-  }).then((res) => res.json());
+  });
+
+  if (!res.ok) throw new Error(`Failed to fetch item from ${collection}`);
+  return res.json();
 }
 
 export async function patchCollectionItem<

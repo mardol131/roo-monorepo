@@ -20,6 +20,8 @@ export default function page() {
     return <Loader text="Seznam se načítá..." />;
   }
 
+  console.log("Listings in page component:", listings);
+
   return (
     <main className="w-full">
       <PageHeading
@@ -56,7 +58,7 @@ export default function page() {
         items={listings?.docs ?? []}
         renderItem={(item) => {
           const listing = item as Listing;
-          listings && listings.docs.length > 0;
+          listings && listings?.docs?.length;
           return (
             <EntityCard
               key={listing.id}

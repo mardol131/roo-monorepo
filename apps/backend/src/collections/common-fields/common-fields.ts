@@ -1,3 +1,4 @@
+import { getRecordStatuses } from '@roo/common'
 import { Field } from 'payload'
 
 export const priceField: Field = {
@@ -222,6 +223,13 @@ export const variantsCommonFields: Field[] = [
     relationTo: 'listings',
     required: true,
     hasMany: false,
+  },
+  {
+    name: 'status',
+    type: 'select',
+    options: getRecordStatuses(['active', 'archived', 'disabled', 'inactive']),
+    defaultValue: 'active',
+    required: true,
   },
   {
     name: 'name',

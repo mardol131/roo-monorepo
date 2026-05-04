@@ -1,4 +1,5 @@
 import {
+  deleteCollectionItem,
   getCollection,
   getCollectionItem,
   patchCollectionItem,
@@ -9,8 +10,9 @@ import { Space } from "@roo/common";
 export async function fetchSpacesByListing(listingId: string) {
   const res = await getCollection({
     collection: "spaces",
-    query: { listingId: { equals: listingId } },
+    query: { listing: { equals: listingId } },
     sort: "-createdAt",
+    limit: 1000,
   });
   if (!res) throw new Error("Failed to fetch spaces");
   return res;
@@ -43,5 +45,14 @@ export async function updateSpace(id: string, data: Partial<CreateSpaceInput>) {
     data,
   });
   if (!res) throw new Error("Failed to update space");
+  return res;
+}
+
+export async function deleteSpace(id: string) {
+  const res = await deleteCollectionItem({
+    collection: "spaces",
+    id,
+  });
+  if (!res) throw new Error("Failed to delete space");
   return res;
 }

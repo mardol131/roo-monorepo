@@ -1,5 +1,5 @@
 export type PayloadResponse<T> = {
-  docs: T[];
+  docs?: T[];
   hasNextPage: boolean;
   hasPrevPage: boolean;
   limit: number;

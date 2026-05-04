@@ -40,6 +40,7 @@ import EntityCard from "@/app/[locale]/(user)/components/entity-card";
 import EntityComponentTag from "@/app/[locale]/(user)/components/tags/entity-component-tag";
 import Button from "@/app/components/ui/atoms/button";
 import { useSpacesByListing } from "@/app/react-query/spaces/hooks";
+import { SpacesSection } from "./components/spaces-section";
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
@@ -168,7 +169,7 @@ export default function Page() {
           listing={listing}
           companyId={companyId}
           listingId={listingId}
-          spacesCount={spaces?.docs.length || 0}
+          spacesCount={spaces?.docs?.length || 0}
         />
         <ControlSection
           rows={[
@@ -283,6 +284,8 @@ export default function Page() {
             },
           }}
         />
+
+        <SpacesSection listingId={listingId} companyId={companyId} />
 
         {basicInfoItems.length > 0 && (
           <DashboardSection
@@ -511,12 +514,12 @@ export default function Page() {
                     ]}
                     rightComponent={
                       <EntityComponentTag
-                        text={item.active ? "Aktivní" : "Neaktivní"}
+                        text={item.status === "active" ? "Aktivní" : "Neaktivní"}
                         bgColor={
-                          item.active ? "bg-success-surface" : "bg-gray-200"
+                          item.status === "active" ? "bg-success-surface" : "bg-gray-200"
                         }
                         textColor={
-                          item.active ? "text-success" : "text-gray-500"
+                          item.status === "active" ? "text-success" : "text-gray-500"
                         }
                       />
                     }

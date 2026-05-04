@@ -22,7 +22,7 @@ export async function createCalendarEvent(
 export async function fetchCalendarEventsByListing(listingId: string) {
   const res = await getCollection({
     collection: "calendar-events",
-    query: { listingId: { equals: listingId } },
+    query: { listing: { equals: listingId } },
     sort: "-createdAt",
   });
   if (!res) throw new Error("Failed to fetch inquiries");

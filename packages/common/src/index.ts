@@ -14,3 +14,4 @@ export * from "./functions/company-utils";
 export * from "./functions/data-formating";
 
 export * from "./data/country-codes";
+export * from "./data/record-status";
