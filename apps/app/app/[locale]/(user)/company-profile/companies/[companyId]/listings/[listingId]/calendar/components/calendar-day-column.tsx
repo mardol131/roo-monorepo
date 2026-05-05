@@ -39,7 +39,7 @@ type Props = {
   day: Date;
   events: CalendarEvent[];
   onCreateRequest: (req: CreateRequest) => void;
-  onEditRequest: (event: CalendarEvent, x: number, y: number) => void;
+  onEditRequest: (event: CalendarEvent) => void;
   isCreating?: boolean;
 };
 
@@ -199,9 +199,7 @@ export default function CalendarDayColumn({
                   }
                 : undefined
             }
-            onEdit={
-              !event.inquiry ? (x, y) => onEditRequest(event, x, y) : undefined
-            }
+            onEdit={!event.inquiry ? () => onEditRequest(event) : undefined}
           />
         );
       })}
@@ -226,8 +224,8 @@ function NowIndicator() {
       className="absolute inset-x-0 z-10 pointer-events-none flex items-center"
       style={{ top }}
     >
-      <div className="w-2 h-2 rounded-full bg-calendar -ml-1 shrink-0" />
-      <div className="flex-1 h-px bg-calendar" />
+      <div className="w-2 h-2 rounded-full bg-pink-700 -ml-1 shrink-0" />
+      <div className="flex-1 h-1 bg-pink-700 rounded-r-full" />
     </div>
   );
 }

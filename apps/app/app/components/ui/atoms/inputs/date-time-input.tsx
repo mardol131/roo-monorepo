@@ -5,11 +5,12 @@ import { Calendar, ChevronLeft, ChevronRight } from "lucide-react";
 import Text from "@/app/components/ui/atoms/text";
 import { useClickOutside } from "@/app/hooks/use-click-outside";
 import ErrorText from "./error-text";
+import InputLabel from "../input-label";
 
 interface DateTimeInputProps {
   label: string;
-  value?: Date | null;
-  onChange?: (value: Date | null) => void;
+  value?: string | null;
+  onChange?: (value: string | null) => void;
   min?: Date;
   placeholder?: string;
   error?: string;
@@ -56,13 +57,15 @@ export default function DateTimeInput({
 }: DateTimeInputProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [openUpward, setOpenUpward] = useState(false);
-  const [currentMonth, setCurrentMonth] = useState<Date>(value ?? new Date());
-  const [selectedDateState, setSelectedDateState] = useState<Date | null>(
+  const [currentMonth, setCurrentMonth] = useState<Date>(
+    value ? new Date(value) : new Date(),
+  );
+  const [selectedDateState, setSelectedDateState] = useState<string | null>(
     value,
   );
   const [time, setTime] = useState<string>(
     value
-      ? value.toLocaleTimeString("cs-CZ", {
+      ? new Date(value).toLocaleTimeString("cs-CZ", {
           hour: "2-digit",
           minute: "2-digit",
         })
@@ -90,8 +93,11 @@ export default function DateTimeInput({
 
   // Emit změny ven
   useEffect(() => {
-    const dateObj = createDateTimeValue(selectedDateState, time);
-    onChange?.(dateObj);
+    const dateObj = createDateTimeValue(
+      selectedDateState ? new Date(selectedDateState) : null,
+      time,
+    );
+    onChange?.(dateObj ? dateObj.toISOString() : null);
   }, [selectedDateState, time]);
 
   const getDaysInMonth = (date: Date) =>
@@ -119,7 +125,9 @@ export default function DateTimeInput({
   };
 
   const isDateSelected = (date: Date) =>
-    selectedDateState?.toDateString() === date.toDateString();
+    selectedDateState
+      ? new Date(selectedDateState).toISOString() === date.toISOString()
+      : false;
 
   const isSameDay = (a: Date, b: Date) =>
     a.getFullYear() === b.getFullYear() &&
@@ -152,7 +160,7 @@ export default function DateTimeInput({
 
   const handleDateClick = (date: Date) => {
     if (!isDateDisabled(date)) {
-      setSelectedDateState(date);
+      setSelectedDateState(date.toISOString());
       if (
         min &&
         isSameDay(date, min) &&
@@ -168,7 +176,10 @@ export default function DateTimeInput({
     const formatted = formatTimeInput(rawValue);
     if (
       isValidTime(formatted) &&
-      isTimeBelowMin(formatted, selectedDateState)
+      isTimeBelowMin(
+        formatted,
+        selectedDateState ? new Date(selectedDateState) : null,
+      )
     ) {
       setTime(minTimeString!);
     } else {
@@ -178,16 +189,12 @@ export default function DateTimeInput({
 
   const displayText =
     selectedDateState && time
-      ? `${selectedDateState.toLocaleDateString("cs-CZ")} ${time}`
+      ? `${new Date(selectedDateState).toLocaleDateString("cs-CZ")} ${time}`
       : placeholder;
 
   return (
-    <div className="flex flex-col gap-2 w-full">
-      <label>
-        <Text variant="label" color="textDark" className="font-semibold">
-          {label}
-        </Text>
-      </label>
+    <div className="flex flex-col w-full">
+      <InputLabel label={label} />
 
       <div className="relative" ref={ref}>
         <button
@@ -199,14 +206,16 @@ export default function DateTimeInput({
             }
             setIsOpen((prev) => !prev);
           }}
-          className="w-full px-3 py-2.5 border border-zinc-200 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-rose-500 bg-white text-left flex items-center justify-between"
+          className={`w-full px-3 py-2.5 border ${error ? "border-rose-500" : "border-zinc-200"} rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-rose-500 bg-white text-left flex items-center justify-between`}
         >
           <span className="text-zinc-900">{displayText}</span>
           <Calendar className="w-4 h-4 text-zinc-400" />
         </button>
 
         {isOpen && (
-          <div className={`absolute left-0 bg-white border border-zinc-200 rounded-lg shadow-lg z-10 w-fit ${openUpward ? "bottom-full mb-2" : "top-full mt-2"}`}>
+          <div
+            className={`absolute left-0 bg-white border border-zinc-200 rounded-lg shadow-lg z-10 w-fit ${openUpward ? "bottom-full mb-2" : "top-full mt-2"}`}
+          >
             <div className="p-4">
               <div className="flex items-center justify-between mb-4">
                 <button

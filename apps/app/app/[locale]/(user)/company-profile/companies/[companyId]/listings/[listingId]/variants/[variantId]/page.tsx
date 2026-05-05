@@ -6,15 +6,17 @@ import { DashboardSection } from "@/app/[locale]/(user)/components/dashboard-sec
 import InfoSection from "@/app/[locale]/(user)/components/info-section";
 import { ItemListCard } from "@/app/[locale]/(user)/components/item-list-card";
 import Loader from "@/app/[locale]/(user)/components/loader";
+import ListingStatusTag from "@/app/[locale]/(user)/components/tags/listing-status-tag";
 import { VariantEntertainmentDetails } from "@/app/[locale]/(user)/components/variant-entertainment-details";
 import { VariantGastroDetails } from "@/app/[locale]/(user)/components/variant-gastro-details";
 import { VariantVenueDetails } from "@/app/[locale]/(user)/components/variant-venue-details";
 import Text from "@/app/components/ui/atoms/text";
 import { useRouter } from "@/app/i18n/navigation";
-import { useVariant } from "@/app/react-query/variants/hooks";
+import { useUpdateVariant, useVariant } from "@/app/react-query/variants/hooks";
 import { Variant } from "@roo/common";
-import { Banknote, Check, Package, X } from "lucide-react";
+import { Package } from "lucide-react";
 import { useParams } from "next/navigation";
+import { ControlSection } from "../../../../../../../components/control-section";
 
 const TYPE_LABELS: Record<Variant["type"], string> = {
   allYear: "Celoroční",
@@ -22,21 +24,26 @@ const TYPE_LABELS: Record<Variant["type"], string> = {
 };
 
 export default function Page() {
-  const { variantId } = useParams<{
+  const { companyId, listingId, variantId } = useParams<{
     companyId: string;
     listingId: string;
     variantId: string;
   }>();
   const { data: variant, isPending } = useVariant(variantId);
+  const { mutate: updateVariant, isPending: isUpdating } = useUpdateVariant();
   const router = useRouter();
-  const { companyId, listingId } = useParams<{
-    companyId: string;
-    listingId: string;
-    variantId: string;
-  }>();
 
   if (isPending) return <Loader text="Načítám variantu..." />;
   if (!variant) return router.back();
+
+  const isActive = variant.status === "active";
+
+  const handleToggleStatus = () => {
+    updateVariant({
+      id: variantId,
+      data: { status: isActive ? "inactive" : "active" },
+    });
+  };
 
   const firstBlock = variant.details[0];
   const capacityText = firstBlock
@@ -51,16 +58,41 @@ export default function Page() {
       : (variant.selectedHours?.map((h) => `${h.from}–${h.to}`).join(", ") ??
         "Vybrané hodiny");
 
-  const eventTypeNames = variant.eventTypes
-    ?.map((et) => (typeof et === "string" ? et : et.name))
-    .join(", ");
-
   const infoItems = [
     { icon: "Banknote", text: `${variant.price.generalPrice} Kč` },
     { icon: "CalendarClock", text: TYPE_LABELS[variant.type] },
     { icon: "Clock", text: availabilityText },
     ...(capacityText ? [{ icon: "Users", text: capacityText }] : []),
-    ...(eventTypeNames ? [{ icon: "Tag", text: eventTypeNames }] : []),
+  ];
+
+  const basicInfoItems = [
+    ...(variant.shortDescription
+      ? [
+          {
+            type: "text" as const,
+            label: "Krátký popis",
+            value: variant.shortDescription,
+          },
+        ]
+      : []),
+    ...(variant.description
+      ? [
+          {
+            type: "text" as const,
+            label: "Popis",
+            value: variant.description,
+          },
+        ]
+      : []),
+    ...(variant.eventTypes?.length
+      ? [
+          {
+            type: "tagList" as const,
+            label: "Typy akcí",
+            items: variant.eventTypes,
+          },
+        ]
+      : []),
   ];
 
   return (
@@ -71,6 +103,7 @@ export default function Page() {
         iconBg="bg-variant-surface"
         iconColor="text-variant"
         name={variant.name}
+        nameSideComponent={<ListingStatusTag status={variant.status} />}
         infoItems={infoItems}
         button={{
           text: "Upravit",
@@ -80,75 +113,72 @@ export default function Page() {
           link: {
             pathname:
               "/company-profile/companies/[companyId]/listings/[listingId]/variants/[variantId]/edit",
-            params: {
-              companyId: companyId,
-              listingId: listingId,
-              variantId: variantId,
-            },
+            params: { companyId, listingId, variantId },
           },
         }}
       />
 
       <div className="flex flex-col gap-4">
-        {(variant.shortDescription || variant.description) && (
+        <ControlSection
+          rows={[
+            {
+              icon: isActive ? "CircleMinus" : "CircleCheck",
+              iconColor: isActive ? "text-amber-500" : "text-success",
+              iconBgColor: isActive ? "bg-amber-50" : "bg-success-surface",
+              title: isActive ? "Deaktivovat variantu" : "Aktivovat variantu",
+              text: isActive
+                ? "Varianta přestane být dostupná pro nové poptávky."
+                : "Varianta bude opět dostupná pro nové poptávky.",
+              button: {
+                text: isActive ? "Deaktivovat" : "Aktivovat",
+                version: isActive ? "warningFull" : "successFull",
+                iconLeft: isActive ? "CircleMinus" : "CircleCheck",
+                size: "sm",
+                disabled: isUpdating,
+                onClick: handleToggleStatus,
+              },
+            },
+          ]}
+        />
+
+        {basicInfoItems.length > 0 && (
           <DashboardSection
-            title="Popis varianty"
-            icon={"Package"}
+            title="Základní informace"
+            icon="Package"
             iconBg="bg-variant-surface"
             iconColor="text-variant"
           >
-            <InfoSection
-              items={[
-                ...(variant.shortDescription
-                  ? [
-                      {
-                        type: "text" as const,
-                        label: "Krátký popis",
-                        value: variant.shortDescription,
-                      },
-                    ]
-                  : []),
-                ...(variant.description
-                  ? [
-                      {
-                        type: "text" as const,
-                        label: "Popis",
-                        value: variant.description,
-                      },
-                    ]
-                  : []),
-              ]}
-            />
+            <InfoSection items={basicInfoItems} />
           </DashboardSection>
         )}
-        {/* Includes / Excludes */}
-        {(variant.includes || variant.excludes) && (
+
+        {variant.includes?.length || variant.excludes?.length ? (
           <div className="grid grid-cols-2 gap-4">
-            {variant.includes ? (
+            {variant.includes?.length && (
               <ItemListCard
                 heading="V ceně zahrnuto"
                 items={variant.includes.flatMap((inc) => inc.item ?? [])}
-                icon={"Check"}
+                icon="Check"
                 iconColor="text-emerald-500"
                 iconBgColor="bg-emerald-50"
               />
-            ) : null}
-            {variant.excludes ? (
+            )}
+            {variant.excludes?.length && (
               <ItemListCard
                 heading="Není zahrnuto"
                 items={variant.excludes.flatMap((exc) => exc.item ?? [])}
-                icon={"X"}
+                icon="X"
                 iconColor="text-red-400"
                 iconBgColor="bg-red-50"
               />
-            ) : null}
+            )}
           </div>
-        )}
-        {/* Seasonal prices */}
+        ) : undefined}
+
         {variant.price.seasonalPrices?.length ? (
           <DashboardSection
             title="Sezónní ceny"
-            icon={"Banknote"}
+            icon="Banknote"
             iconBg="bg-amber-100"
             iconColor="text-amber-500"
           >
@@ -176,18 +206,16 @@ export default function Page() {
             </div>
           </DashboardSection>
         ) : null}
-        {/* Detail blocks */}
-        <div className="flex flex-col gap-4">
-          {variant.details.map((block, i) => {
-            if (block.blockType === "venue")
-              return <VariantVenueDetails key={i} block={block} />;
-            if (block.blockType === "gastro")
-              return <VariantGastroDetails key={i} block={block} />;
-            if (block.blockType === "entertainment")
-              return <VariantEntertainmentDetails key={i} block={block} />;
-            return null;
-          })}
-        </div>
+
+        {variant.details.map((block, i) => {
+          if (block.blockType === "venue")
+            return <VariantVenueDetails key={i} block={block} />;
+          if (block.blockType === "gastro")
+            return <VariantGastroDetails key={i} block={block} />;
+          if (block.blockType === "entertainment")
+            return <VariantEntertainmentDetails key={i} block={block} />;
+          return null;
+        })}
       </div>
     </main>
   );

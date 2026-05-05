@@ -17,18 +17,21 @@ import {
 } from "date-fns";
 import { useParams } from "next/navigation";
 import { useState } from "react";
-import CalendarCreatePopover from "./components/calendar-create-popover";
 import { CreateRequest } from "./components/calendar-day-column";
-import CalendarEditPopover from "./components/calendar-edit-popover";
+import CalendarEventModal, {
+  EventFormData,
+} from "./components/calendar-event-modal";
 import CalendarTimetable from "./components/calendar-timetable";
 import CalendarToolbar from "./components/calendar-toolbar";
 import CalendarWeekView from "./components/calendar-week-view";
 
-type PendingEdit = {
-  event: CalendarEvent;
-  x: number;
-  y: number;
-};
+// ── Types ─────────────────────────────────────────────────────────────────────
+
+type ModalState =
+  | { mode: "create"; startsAt?: Date; endsAt?: Date }
+  | { mode: "edit"; event: CalendarEvent };
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
 
 function hasOverlap(
   startsAt: Date,
@@ -46,9 +49,12 @@ function hasOverlap(
   });
 }
 
+// ── Page ──────────────────────────────────────────────────────────────────────
+
 export default function CalendarPage() {
   const { listingId } = useParams<{ listingId: string }>();
-  const { data: events = [] } = useCalendarEventsByListing(listingId);
+  const { data: eventsData } = useCalendarEventsByListing(listingId);
+  const events: CalendarEvent[] = eventsData?.docs ?? [];
   const { mutate: createEvent, isPending: isCreating } =
     useCreateCalendarEvent(listingId);
   const { mutate: updateEvent, isPending: isUpdating } =
@@ -59,81 +65,71 @@ export default function CalendarPage() {
   const [weekStart, setWeekStart] = useState(() =>
     startOfWeek(new Date(), { weekStartsOn: 1 }),
   );
-  const [pendingCreate, setPendingCreate] = useState<CreateRequest | null>(
-    null,
-  );
-  const [pendingEdit, setPendingEdit] = useState<PendingEdit | null>(null);
-  const [createError, setCreateError] = useState<string | undefined>();
-  const [editError, setEditError] = useState<string | undefined>();
+  const [modal, setModal] = useState<ModalState | null>(null);
+  const [modalError, setModalError] = useState<string | undefined>();
 
-  function handleCreateRequest(req: CreateRequest) {
-    setCreateError(undefined);
-    setPendingCreate(req);
-  }
-
-  function handleCreateSubmit(name: string, status: CalendarEvent["status"]) {
-    if (!pendingCreate) return;
-    if (hasOverlap(pendingCreate.startsAt, pendingCreate.endsAt, events)) {
-      setCreateError("Tento termín se překrývá s jinou událostí.");
-      return;
-    }
-    createEvent(
-      {
-        listingId,
-        name,
-        startsAt: pendingCreate.startsAt,
-        endsAt: pendingCreate.endsAt,
-        allDay: false,
-        status,
-      },
-      {
-        onSuccess: () => {
-          setPendingCreate(null);
-          setCreateError(undefined);
-        },
-      },
+  function openCreate(req?: CreateRequest) {
+    setModalError(undefined);
+    setModal(
+      req
+        ? { mode: "create", startsAt: req.startsAt, endsAt: req.endsAt }
+        : { mode: "create" },
     );
   }
 
-  function handleEditSave(name: string, status: CalendarEvent["status"]) {
-    if (!pendingEdit) return;
-    if (
-      hasOverlap(
-        parseISO(pendingEdit.event.startsAt),
-        parseISO(pendingEdit.event.endsAt),
-        events,
-        pendingEdit.event.id,
-      )
-    ) {
-      setEditError("Tento termín se překrývá s jinou událostí.");
-      return;
-    }
-    updateEvent(
-      { id: pendingEdit.event.id, name, status },
-      {
-        onSuccess: () => {
-          setPendingEdit(null);
-          setEditError(undefined);
-        },
-      },
-    );
+  function closeModal() {
+    setModal(null);
+    setModalError(undefined);
   }
 
-  function handleEditDelete() {
-    if (!pendingEdit) return;
-    deleteEvent(pendingEdit.event.id, {
-      onSuccess: () => {
-        setPendingEdit(null);
-        setEditError(undefined);
-      },
-    });
+  function handleSubmit(data: EventFormData) {
+    if (!modal) return;
+
+    const startsAt = data.startsAt ? parseISO(data.startsAt) : new Date();
+    const endsAt = data.endsAt ? parseISO(data.endsAt) : new Date();
+    const excludeId = modal.mode === "edit" ? modal.event.id : undefined;
+
+    if (hasOverlap(startsAt, endsAt, events, excludeId)) {
+      setModalError("Tento termín se překrývá s jinou událostí.");
+      return;
+    }
+
+    if (modal.mode === "create") {
+      createEvent(
+        {
+          listing: listingId,
+          source: "manual",
+          allDay: false,
+          ...data,
+        },
+        { onSuccess: closeModal },
+      );
+    } else {
+      updateEvent(
+        { id: modal.event.id, ...data },
+        { onSuccess: closeModal },
+      );
+    }
   }
+
+  function handleDelete() {
+    if (modal?.mode !== "edit") return;
+    deleteEvent(modal.event.id, { onSuccess: closeModal });
+  }
+
+  const isPending = isCreating || isUpdating || isDeleting;
 
   return (
     <main className="w-full">
       <PageHeading
         heading="Kalendář"
         description="Přehled rezervací, blokací a poptávek pro tuto službu."
+        button={{
+          text: "Vytvořit událost",
+          version: "calendar",
+          size: "sm",
+          onClick: () => openCreate(),
+        }}
       />
 
       <div className="mt-8">
@@ -147,45 +143,41 @@ export default function CalendarPage() {
         />
         <CalendarWeekView
           weekStart={weekStart}
-          onCreateRequest={handleCreateRequest}
-          onEditRequest={(event, x, y) => {
-            setEditError(undefined);
-            setPendingEdit({ event, x, y });
+          onCreateRequest={openCreate}
+          onEditRequest={(event) => {
+            setModalError(undefined);
+            setModal({ mode: "edit", event });
           }}
-          isCreating={pendingCreate !== null}
+          isCreating={modal?.mode === "create"}
         />
-        <CalendarTimetable />
+        <CalendarTimetable
+          onEditRequest={(event) => {
+            setModalError(undefined);
+            setModal({ mode: "edit", event });
+          }}
+        />
       </div>
 
-      {pendingCreate && (
-        <CalendarCreatePopover
-          startsAt={pendingCreate.startsAt}
-          endsAt={pendingCreate.endsAt}
-          position={{ x: pendingCreate.x, y: pendingCreate.y }}
-          onSubmit={handleCreateSubmit}
-          onClose={() => {
-            setPendingCreate(null);
-            setCreateError(undefined);
-          }}
-          isPending={isCreating}
-          error={createError}
-        />
-      )}
-
-      {pendingEdit && (
-        <CalendarEditPopover
-          event={pendingEdit.event}
-          position={{ x: pendingEdit.x, y: pendingEdit.y }}
-          onSave={handleEditSave}
-          onDelete={handleEditDelete}
-          onClose={() => {
-            setPendingEdit(null);
-            setEditError(undefined);
-          }}
-          isPending={isUpdating || isDeleting}
-          error={editError}
-        />
-      )}
+      <CalendarEventModal
+        key={
+          modal
+            ? modal.mode === "edit"
+              ? modal.event.id
+              : `create-${modal.startsAt?.toISOString() ?? "new"}`
+            : "closed"
+        }
+        isOpen={modal !== null}
+        mode={modal?.mode ?? "create"}
+        event={modal?.mode === "edit" ? modal.event : undefined}
+        initialStartsAt={modal?.mode === "create" ? modal.startsAt : undefined}
+        initialEndsAt={modal?.mode === "create" ? modal.endsAt : undefined}
+        listingId={listingId}
+        onSubmit={handleSubmit}
+        onDelete={modal?.mode === "edit" ? handleDelete : undefined}
+        onClose={closeModal}
+        isPending={isPending}
+        error={modalError}
+      />
     </main>
   );
 }

@@ -6,8 +6,9 @@
   "listings": {
     "status": {
       "active": "Aktivní",
-      "draft": "Neaktivní",
-      "archived": "Archivované"
+      "inactive": "Neaktivní",
+      "archived": "Archivované",
+      "disabled": "Smazané"
     },
     "type": {
       "gastro": "Gastro",

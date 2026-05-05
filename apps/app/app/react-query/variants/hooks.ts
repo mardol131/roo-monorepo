@@ -1,3 +1,4 @@
+import { Variant } from "@roo/common";
 import {
   useMutation,
   UseMutationOptions,
@@ -10,9 +11,8 @@ import {
   CreateVariantPayload,
   fetchVariant,
   fetchVariantsByListing,
+  patchVariant,
 } from "./fetch";
-import { Variant } from "@roo/common";
-import { CreateListingPayload } from "../listings/fetch";
 
 export function useVariantsByListing(listingId: string) {
   return useQuery({
@@ -38,6 +38,34 @@ export function useCreateVariant(
   return useMutation({
     mutationFn: (data: CreateVariantPayload) => createVariant(data),
     onSuccess: (...args) => {
+      queryClient.invalidateQueries({
+        queryKey: variantKeys.byListing(
+          typeof args[0].listing === "string"
+            ? args[0].listing
+            : args[0].listing.id,
+        ),
+      });
+      options?.onSuccess?.(...args);
+    },
+  });
+}
+
+export function useUpdateVariant(
+  options?: UseMutationOptions<
+    Variant,
+    Error,
+    { id: string; data: Partial<Variant> }
+  >,
+) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ id, data }: { id: string; data: Partial<Variant> }) =>
+      patchVariant(id, data),
+    onSuccess: (...args) => {
+      queryClient.invalidateQueries({
+        queryKey: variantKeys.byId(args[0].id),
+      });
       queryClient.invalidateQueries({
         queryKey: variantKeys.byListing(
           typeof args[0].listing === "string"

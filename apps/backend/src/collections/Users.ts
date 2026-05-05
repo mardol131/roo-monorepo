@@ -58,5 +58,19 @@ export const Users: CollectionConfig = {
       name: 'marketingConsent',
       type: 'checkbox',
     },
+    {
+      name: 'loginToken',
+      type: 'text',
+      admin: {
+        disabled: true,
+      },
+    },
+    {
+      name: 'loginTokenExpiration',
+      type: 'date',
+      admin: {
+        disabled: true,
+      },
+    },
   ],
 }

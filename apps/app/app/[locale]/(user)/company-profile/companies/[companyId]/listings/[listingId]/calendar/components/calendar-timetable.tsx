@@ -1,18 +1,12 @@
 "use client";
 
 import Text from "@/app/components/ui/atoms/text";
-import {
-  useCalendarEventsByListing,
-  useDeleteCalendarEvent,
-  useUpdateCalendarEvent,
-} from "@/app/react-query/calendar-events/hooks";
+import { useCalendarEventsByListing } from "@/app/react-query/calendar-events/hooks";
 import { CalendarEvent } from "@roo/common";
 import { format, isToday, isTomorrow, parseISO, startOfDay } from "date-fns";
 import { cs } from "date-fns/locale";
 import { LinkIcon, MessageSquare, Pencil, PenLine } from "lucide-react";
 import { useParams } from "next/navigation";
-import { useState } from "react";
-import CalendarEditPopover from "./calendar-edit-popover";
 import { Link } from "@/app/i18n/navigation";
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -84,118 +78,62 @@ function groupByDay(events: CalendarEvent[]): DayGroup[] {
   }));
 }
 
-// ── Types ─────────────────────────────────────────────────────────────────────
-
-type PendingEdit = {
-  event: CalendarEvent;
-  x: number;
-  y: number;
-};
-
 // ── Component ─────────────────────────────────────────────────────────────────
 
-export default function CalendarTimetable() {
+type Props = {
+  onEditRequest: (event: CalendarEvent) => void;
+};
+
+export default function CalendarTimetable({ onEditRequest }: Props) {
   const { listingId } = useParams<{ listingId: string }>();
-  const { data: events = [] } = useCalendarEventsByListing(listingId);
-  const { mutate: updateEvent, isPending: isUpdating } =
-    useUpdateCalendarEvent(listingId);
-  const { mutate: deleteEvent, isPending: isDeleting } =
-    useDeleteCalendarEvent(listingId);
+  const { data: events } = useCalendarEventsByListing(listingId);
 
-  const [pendingEdit, setPendingEdit] = useState<PendingEdit | null>(null);
-  const [editError, setEditError] = useState<string | undefined>();
-
-  function handleEditSave(name: string, status: CalendarEvent["status"]) {
-    if (!pendingEdit) return;
-    updateEvent(
-      { id: pendingEdit.event.id, name, status },
-      {
-        onSuccess: () => {
-          setPendingEdit(null);
-          setEditError(undefined);
-        },
-      },
-    );
-  }
-
-  function handleEditDelete() {
-    if (!pendingEdit) return;
-    deleteEvent(pendingEdit.event.id, {
-      onSuccess: () => {
-        setPendingEdit(null);
-        setEditError(undefined);
-      },
-    });
-  }
-
-  const groups = groupByDay(events);
+  const groups = groupByDay(events?.docs ?? []);
 
   return (
-    <>
-      <div className="mt-6 flex flex-col gap-3">
-        <Text variant="h4" color="textDark">
-          Nadcházející události
-        </Text>
+    <div className="mt-6 flex flex-col gap-3">
+      <Text variant="h4" color="textDark">
+        Nadcházející události
+      </Text>
 
-        {groups.length === 0 ? (
-          <div className="bg-white rounded-2xl border border-zinc-300 px-6 py-10 text-center">
-            <Text variant="label-lg" color="textLight">
-              Žádné nadcházející události
-            </Text>
-          </div>
-        ) : (
-          <div className="flex flex-col gap-2">
-            {groups.map(({ day, events: dayEvents }) => (
-              <div
-                key={day.toISOString()}
-                className="bg-white rounded-2xl border border-zinc-200 overflow-hidden"
-              >
-                {/* Day header */}
-                <div className="flex items-center justify-between py-3 px-5 border-b border-zinc-300 bg-zinc-50">
-                  <Text variant="label-lg" color="textDark">
-                    {formatDayHeading(day)}
-                  </Text>
-                  <Text variant="caption" color="textLight" as="span">
-                    {dayEvents.length === 1
-                      ? "1 událost"
-                      : `${dayEvents.length} události`}
-                  </Text>
-                </div>
-
-                {/* Events */}
-                <div className="divide-y divide-zinc-100">
-                  {dayEvents.map((event) => (
-                    <EventRow
-                      key={event.id}
-                      event={event}
-                      onEditClick={(e, x, y) => {
-                        setEditError(undefined);
-                        setPendingEdit({ event: e, x, y });
-                      }}
-                    />
-                  ))}
-                </div>
+      {groups.length === 0 ? (
+        <div className="bg-white rounded-2xl border border-zinc-300 px-6 py-10 text-center">
+          <Text variant="label-lg" color="textLight">
+            Žádné nadcházející události
+          </Text>
+        </div>
+      ) : (
+        <div className="flex flex-col gap-2">
+          {groups.map(({ day, events: dayEvents }) => (
+            <div
+              key={day.toISOString()}
+              className="bg-white rounded-2xl border border-zinc-200 overflow-hidden"
+            >
+              {/* Day header */}
+              <div className="flex items-center justify-between py-3 px-5 border-b border-zinc-300 bg-zinc-50">
+                <Text variant="label-lg" color="textDark">
+                  {formatDayHeading(day)}
+                </Text>
+                <Text variant="caption" color="textLight" as="span">
+                  {`Události: ${dayEvents.length}`}
+                </Text>
               </div>
-            ))}
-          </div>
-        )}
-      </div>
 
-      {pendingEdit && (
-        <CalendarEditPopover
-          event={pendingEdit.event}
-          position={{ x: pendingEdit.x, y: pendingEdit.y }}
-          onSave={handleEditSave}
-          onDelete={handleEditDelete}
-          onClose={() => {
-            setPendingEdit(null);
-            setEditError(undefined);
-          }}
-          isPending={isUpdating || isDeleting}
-          error={editError}
-        />
+              {/* Events */}
+              <div className="divide-y divide-zinc-100">
+                {dayEvents.map((event) => (
+                  <EventRow
+                    key={event.id}
+                    event={event}
+                    onEdit={() => onEditRequest(event)}
+                  />
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
       )}
-    </>
+    </div>
   );
 }
 
@@ -203,10 +141,10 @@ export default function CalendarTimetable() {
 
 type EventRowProps = {
   event: CalendarEvent;
-  onEditClick: (event: CalendarEvent, x: number, y: number) => void;
+  onEdit: () => void;
 };
 
-function EventRow({ event, onEditClick }: EventRowProps) {
+function EventRow({ event, onEdit }: EventRowProps) {
   const isInquiry = !!event.inquiry;
 
   const { companyId, listingId } = useParams<{
@@ -247,16 +185,25 @@ function EventRow({ event, onEditClick }: EventRowProps) {
         >
           {event.name}
         </Text>
+        <div>
+          {event.description && (
+            <Text
+              variant="caption"
+              color="textDark"
+              as="span"
+              className={`truncate block ${event.status === "cancelled" ? "line-through opacity-50" : ""}`}
+            >
+              {event.description}
+            </Text>
+          )}
+        </div>
       </div>
 
       {/* Status badge + edit button */}
       <div className="shrink-0 flex items-center gap-2">
         {event.source === "manual" && (
           <button
-            onClick={(e) => {
-              const rect = e.currentTarget.getBoundingClientRect();
-              onEditClick(event, rect.left, rect.bottom + 4);
-            }}
+            onClick={onEdit}
             className="p-1.5 rounded-lg text-zinc-400 hover:text-zinc-600 hover:bg-zinc-100 transition-colors"
             title="Upravit událost"
           >

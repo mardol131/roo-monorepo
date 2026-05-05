@@ -5,8 +5,14 @@ import EntityCard from "@/app/[locale]/(user)/components/entity-card";
 import Loader from "@/app/[locale]/(user)/components/loader";
 import PageHeading from "@/app/[locale]/(user)/components/page-heading";
 import ListingStatusTag from "@/app/[locale]/(user)/components/tags/listing-status-tag";
-import { useListingsByCompany } from "@/app/react-query/listings/hooks";
+import { confirmActionModalEvents } from "@/app/components/ui/molecules/modals/confirm-action-modal";
+import {
+  useDeleteListing,
+  useListingsByCompany,
+  useUpdateListing,
+} from "@/app/react-query/listings/hooks";
 import { Listing } from "@roo/common";
+import { Trash2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useParams } from "next/navigation";
 
@@ -15,12 +21,15 @@ export default function page() {
   const t = useTranslations();
 
   const { data: listings, isLoading } = useListingsByCompany(companyId);
+  const { mutate: updateListing } = useUpdateListing(companyId);
 
   if (isLoading) {
     return <Loader text="Seznam se načítá..." />;
   }
 
-  console.log("Listings in page component:", listings);
+  const handleDeleteConfirm = async (listingId: string) => {
+    updateListing({ id: listingId, data: { status: "archived" } });
+  };
 
   return (
     <main className="w-full">
@@ -89,6 +98,28 @@ export default function page() {
                 params: { companyId, listingId: listing.id },
               }}
               rightComponent={<ListingStatusTag status={listing.status} />}
+              deleteEntityHandler={(e) => {
+                e.stopPropagation();
+                e.preventDefault();
+                confirmActionModalEvents.emit("open", {
+                  title: "Smazat službu",
+                  description:
+                    "Tato akce je nevratná a trvale odstraní tuto službu z platformy.",
+                  Icon: Trash2,
+                  buttonText: "Smazat službu",
+                  buttonVersion: "dangerFull",
+                  confirmPhrase: listing.name,
+                  whatIsGoingToHappenText: "Opravdu chcete smazat tuto službu?",
+                  whatIsGoingToHappenTextColor: "danger",
+                  whatIsGoingToHappenList: [
+                    "Služba zmizí z katalogu a nebude dohledatelná",
+                    "Varianty a prostory, které jsou pod touto službou, budou smazány.",
+                    "Změna je nevratná",
+                  ],
+                  bgColor: "bg-danger-surface",
+                  onConfirmClick: () => handleDeleteConfirm(listing.id),
+                });
+              }}
             />
           );
         }}

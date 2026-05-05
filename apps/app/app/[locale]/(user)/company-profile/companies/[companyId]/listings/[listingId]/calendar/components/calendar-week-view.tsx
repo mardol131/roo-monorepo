@@ -41,7 +41,7 @@ const ALL_DAY_STYLES: Record<CalendarEvent["status"], string> = {
 type Props = {
   weekStart: Date;
   onCreateRequest: (req: CreateRequest) => void;
-  onEditRequest: (event: CalendarEvent, x: number, y: number) => void;
+  onEditRequest: (event: CalendarEvent) => void;
   isCreating?: boolean;
 };
 
@@ -55,7 +55,7 @@ export default function CalendarWeekView({
 }: Props) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const { listingId } = useParams<{ listingId: string }>();
-  const { data: events = [] } = useCalendarEventsByListing(listingId);
+  const { data: events } = useCalendarEventsByListing(listingId);
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -64,7 +64,7 @@ export default function CalendarWeekView({
   }, []);
 
   const days = Array.from({ length: DAYS }, (_, i) => addDays(weekStart, i));
-  const allDayEvents = events.filter((e) => e.allDay);
+  const allDayEvents = events?.docs?.filter((e) => e.allDay) ?? [];
   const hasAllDay = allDayEvents.length > 0;
 
   return (
@@ -77,7 +77,7 @@ export default function CalendarWeekView({
       >
         <div>
           {/* ── Sticky header (day labels + all-day strip) ─────────────────── */}
-          <div className="sticky top-0 z-10 bg-white border-b border-zinc-200">
+          <div className="sticky top-0 z-50 bg-white border-b border-zinc-200">
             {/* Day header row */}
             <div className="flex">
               <div className="shrink-0" style={{ width: TIME_COL_W }} />
@@ -152,10 +152,7 @@ export default function CalendarWeekView({
           {/* ── Time grid ──────────────────────────────────────────────────── */}
           <div className="flex relative" style={{ height: TOTAL_HEIGHT }}>
             {/* Time gutter */}
-            <div
-              style={{ width: TIME_COL_W }}
-              className="relative shrink-0"
-            >
+            <div style={{ width: TIME_COL_W }} className="relative shrink-0">
               {HOURS.map((h) => (
                 <div
                   key={h}
@@ -176,7 +173,7 @@ export default function CalendarWeekView({
               <CalendarDayColumn
                 key={day.toISOString()}
                 day={day}
-                events={events}
+                events={events?.docs ?? []}
                 onCreateRequest={onCreateRequest}
                 onEditRequest={onEditRequest}
                 isCreating={isCreating}

@@ -36,6 +36,6 @@
   --color-space: var(--color-blue-600);
   --color-space-surface: var(--color-blue-100);
 
-  --color-calendar: var(--color-blue-500);
-  --color-calendar-surface: var(--color-blue-50);
+  --color-calendar: var(--color-sky-700);
+  --color-calendar-surface: var(--color-sky-100);
 }

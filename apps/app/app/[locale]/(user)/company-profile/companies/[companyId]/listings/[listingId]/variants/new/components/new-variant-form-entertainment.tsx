@@ -9,6 +9,7 @@ import Button from "@/app/components/ui/atoms/button";
 import InputLabel from "@/app/components/ui/atoms/input-label";
 import Checkbox from "@/app/components/ui/atoms/inputs/checkbox";
 import CheckboxGroup from "@/app/components/ui/atoms/inputs/checkbox-group";
+import DateTimeInput from "@/app/components/ui/atoms/inputs/date-time-input";
 import ErrorText from "@/app/components/ui/atoms/inputs/error-text";
 import GalleryInput from "@/app/components/ui/atoms/inputs/images/gallery-input";
 import ImageInput from "@/app/components/ui/atoms/inputs/images/image-input";
@@ -131,8 +132,8 @@ const schema = z.object({
             .number({ message: "Zadejte číslo" })
             .positive("Cena musí být kladná"),
           description: z.string().optional(),
-          from: z.string().min(1, "Datum od je povinné"),
-          to: z.string().min(1, "Datum do je povinné"),
+          from: z.string("Datum je povinné").min(1, "Datum od je povinné"),
+          to: z.string("Datum je povinné").min(1, "Datum do je povinné"),
         }),
       )
       .default([]),
@@ -422,23 +423,33 @@ export default function NewVariantFormEntertainment({ onCancel }: Props) {
                   />
                 </div>
                 <div className="grid grid-cols-2 gap-3">
-                  <Input
-                    label="Od"
-                    inputProps={{
-                      ...register(`price.seasonalPrices.${index}.from`),
-                      type: "date",
-                    }}
-                    error={errors.price?.seasonalPrices?.[index]?.from?.message}
-                    isRequired
+                  <Controller
+                    name={`price.seasonalPrices.${index}.from`}
+                    control={control}
+                    render={({ field }) => (
+                      <DateTimeInput
+                        error={
+                          errors.price?.seasonalPrices?.[index]?.from?.message
+                        }
+                        label="Od"
+                        value={field.value}
+                        onChange={field.onChange}
+                      />
+                    )}
                   />
-                  <Input
-                    label="Do"
-                    inputProps={{
-                      ...register(`price.seasonalPrices.${index}.to`),
-                      type: "date",
-                    }}
-                    error={errors.price?.seasonalPrices?.[index]?.to?.message}
-                    isRequired
+                  <Controller
+                    name={`price.seasonalPrices.${index}.to`}
+                    control={control}
+                    render={({ field }) => (
+                      <DateTimeInput
+                        error={
+                          errors.price?.seasonalPrices?.[index]?.to?.message
+                        }
+                        label="Do"
+                        value={field.value}
+                        onChange={field.onChange}
+                      />
+                    )}
                   />
                 </div>
               </>

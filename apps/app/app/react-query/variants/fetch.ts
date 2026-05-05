@@ -1,6 +1,7 @@
 import {
   getCollection,
   getCollectionItem,
+  patchCollectionItem,
   postCollectionItem,
 } from "@/app/functions/api/general";
 import { PayloadResponse, Variant } from "@roo/common";
@@ -28,7 +29,7 @@ export async function fetchVariant(id: string) {
 
 export type CreateVariantPayload = Omit<
   Variant,
-  "id" | "createdAt" | "updatedAt"
+  "id" | "createdAt" | "updatedAt" | "status"
 >;
 
 export async function createVariant(data: CreateVariantPayload) {
@@ -39,4 +40,14 @@ export async function createVariant(data: CreateVariantPayload) {
   console.log("Created variant:", res);
   if (!res) throw new Error("Failed to create variant");
   return res.doc;
+}
+
+export async function patchVariant(id: string, data: Partial<Variant>) {
+  const res = await patchCollectionItem({
+    collection: "variants",
+    id,
+    data,
+  });
+  if (!res) throw new Error("Failed to update variant");
+  return res;
 }

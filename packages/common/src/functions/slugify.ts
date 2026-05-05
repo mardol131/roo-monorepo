@@ -1,5 +1,5 @@
-export function slugify(text: string): string {
-  return text
+export function slugify(text: string, withCode: boolean): string {
+  let slug = text
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
     .toLowerCase()
@@ -8,4 +8,11 @@ export function slugify(text: string): string {
     .replace(/[\s_]+/g, "-")
     .replace(/-+/g, "-")
     .replace(/^-|-$/g, "");
+
+  if (withCode) {
+    const code = Math.random().toString(36).substring(2, 8);
+    slug += `-${code}`;
+  }
+
+  return slug;
 }

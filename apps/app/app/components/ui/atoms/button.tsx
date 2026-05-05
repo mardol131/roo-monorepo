@@ -28,7 +28,9 @@ type ButtonVersion =
   | "successFull"
   | "success"
   | "warning"
-  | "warningFull";
+  | "warningFull"
+  | "calendar"
+  | "calendarFull";
 
 type ButtonSize = "2xl" | "xl" | "lg" | "md" | "sm" | "xs";
 type ButtonRounding = "none" | "sm" | "md" | "lg" | "xl" | "2xl" | "full";
@@ -100,6 +102,8 @@ const getVersionClass = (
     success: "bg-transparent text-success hover:bg-success-surface",
     warning: "bg-transparent text-warning hover:bg-warning-surface",
     warningFull: "bg-warning text-white shadow hover:shadow-md",
+    calendar: "bg-calendar text-white shadow hover:shadow-md",
+    calendarFull: "bg-calendar text-white shadow hover:shadow-md",
   };
   return versionClasses[version];
 };

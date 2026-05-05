@@ -302,6 +302,8 @@ export interface User {
   gdprConsent: boolean;
   termsOfUseConsent: boolean;
   marketingConsent?: boolean | null;
+  loginToken?: string | null;
+  loginTokenExpiration?: string | null;
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -371,6 +373,7 @@ export interface Media {
 export interface Variant {
   id: string;
   listing: string | Listing;
+  status: 'active' | 'inactive' | 'disabled' | 'archived';
   name: string;
   shortDescription: string;
   description?: string | null;
@@ -513,7 +516,7 @@ export interface Listing {
   id: string;
   name: string;
   slug: string;
-  status: 'draft' | 'active' | 'archived';
+  status: 'active' | 'inactive' | 'disabled' | 'archived';
   company: string | Company;
   description?: string | null;
   shortDescription?: string | null;
@@ -831,7 +834,7 @@ export interface Activity {
  */
 export interface Space {
   id: string;
-  status: 'active' | 'disabled' | 'archived';
+  status: 'active' | 'inactive' | 'disabled' | 'archived' | 'unavailable';
   name: string;
   type: 'area' | 'building' | 'room';
   parent?: (string | null) | Space;
@@ -1005,12 +1008,12 @@ export interface Inquiry {
     relationTo: 'listings';
     value: string | Listing;
   };
-  event: string | Event;
-  listingType: 'venue' | 'gastro' | 'entertainment';
   variant?: {
     relationTo: 'variants';
     value: string | Variant;
   } | null;
+  event: string | Event;
+  listingType: 'venue' | 'gastro' | 'entertainment';
   request?: {
     note?: string | null;
     requirements?:
@@ -1023,6 +1026,8 @@ export interface Inquiry {
   status: {
     company: 'pending' | 'confirmed' | 'cancelled';
     user: 'pending' | 'confirmed' | 'cancelled';
+    listing: 'active' | 'unavailable';
+    variant: 'active' | 'unavailable';
   };
   pricing: {
     mode: 'fixed' | 'open';
@@ -1066,7 +1071,7 @@ export interface Inquiry {
 export interface CalendarEvent {
   id: string;
   listing: string | Listing;
-  space?: (string | null) | Space;
+  spaces?: (string | Space)[] | null;
   inquiry?: (string | null) | Inquiry;
   startsAt: string;
   endsAt: string;
@@ -1470,6 +1475,8 @@ export interface UsersSelect<T extends boolean = true> {
   gdprConsent?: T;
   termsOfUseConsent?: T;
   marketingConsent?: T;
+  loginToken?: T;
+  loginTokenExpiration?: T;
   updatedAt?: T;
   createdAt?: T;
   email?: T;
@@ -1534,6 +1541,7 @@ export interface MediaSelect<T extends boolean = true> {
  */
 export interface VariantsSelect<T extends boolean = true> {
   listing?: T;
+  status?: T;
   name?: T;
   shortDescription?: T;
   description?: T;
@@ -2166,9 +2174,9 @@ export interface ChatMessagesSelect<T extends boolean = true> {
 export interface InquiriesSelect<T extends boolean = true> {
   user?: T;
   listing?: T;
+  variant?: T;
   event?: T;
   listingType?: T;
-  variant?: T;
   request?:
     | T
     | {
@@ -2185,6 +2193,8 @@ export interface InquiriesSelect<T extends boolean = true> {
     | {
         company?: T;
         user?: T;
+        listing?: T;
+        variant?: T;
       };
   pricing?:
     | T
@@ -2217,7 +2227,7 @@ export interface InquiriesSelect<T extends boolean = true> {
  */
 export interface CalendarEventsSelect<T extends boolean = true> {
   listing?: T;
-  space?: T;
+  spaces?: T;
   inquiry?: T;
   startsAt?: T;
   endsAt?: T;

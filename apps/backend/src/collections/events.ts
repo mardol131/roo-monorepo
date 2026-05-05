@@ -87,6 +87,7 @@ export const Events: CollectionConfig = {
       name: 'location',
       type: 'blocks',
       maxRows: 1,
+      minRows: 1,
       blocks: [
         {
           slug: 'venue',

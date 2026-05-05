@@ -5,11 +5,14 @@ import {
   patchCollectionItem,
   postCollectionItem,
 } from "@/app/functions/api/general";
-import { CalendarEvent, Listing } from "@roo/common";
+import { CalendarEvent } from "@roo/common";
 
-export async function createCalendarEvent(
-  input: Omit<CalendarEvent, "id" | "updatedAt" | "createdAt">,
-) {
+export type CreateCalendarEventInput = Omit<
+  CalendarEvent,
+  "id" | "updatedAt" | "createdAt"
+>;
+
+export async function createCalendarEvent(input: CreateCalendarEventInput) {
   const res = await postCollectionItem({
     collection: "calendar-events",
     data: input,
@@ -42,6 +45,11 @@ export type UpdateCalendarEventInput = {
   id: string;
   name?: string;
   status?: CalendarEvent["status"];
+  startsAt?: string;
+  endsAt?: string;
+  description?: string;
+  spaces?: string[];
+  inquiry?: string | null;
 };
 
 export async function updateCalendarEvent({

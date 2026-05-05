@@ -1,4 +1,4 @@
-import type { CollectionConfig, Field } from 'payload'
+import type { CollectionConfig, Field, Where } from 'payload'
 import { listingsCommonFields } from './common-fields/common-fields'
 import { slugify } from '@roo/common'
 
@@ -439,7 +439,24 @@ export const Listings: CollectionConfig = {
     create: ({ req }) => {
       return !!req.user
     },
-    read: () => true,
+    read: ({ req }) => {
+      if (req.user?.collection === 'admins') return true
+      if (!req.user) {
+        return { status: { equals: 'active' } }
+      }
+      const query: Where = {
+        or: [
+          {
+            and: [
+              { 'company.owner': { equals: req.user.id } },
+              { status: { in: ['active', 'inactive'] } },
+            ],
+          },
+          { status: { equals: 'active' } },
+        ],
+      }
+      return query
+    },
     update: ({ req }) => {
       if (!req.user) return false
       if (req.user.collection === 'admins') return true
@@ -474,7 +491,6 @@ export const Listings: CollectionConfig = {
     beforeValidate: [
       ({ data }) => {
         if (!data) return
-
         if (!data.slug) {
           data.slug = slugify(data.name)
         }
@@ -492,6 +508,50 @@ export const Listings: CollectionConfig = {
           where: { listing: { equals: doc.id } },
           data: { status: 'disabled' },
         })
+      },
+      async ({ doc, previousDoc, req }) => {
+        if (doc.status === previousDoc?.status) return
+        if (doc.status === 'active') return
+
+        const listingFilter = { listing: { equals: doc.id } }
+
+        if (doc.status === 'inactive' || doc.status === 'archived' || doc.status === 'disabled') {
+          await req.payload.update({
+            collection: 'inquiries',
+            where: {
+              and: [
+                listingFilter,
+                {
+                  or: [
+                    { 'status.company': { not_equals: 'confirmed' } },
+                    { 'status.user': { not_equals: 'confirmed' } },
+                  ],
+                },
+              ],
+            },
+            data: { status: { listing: 'unavailable' } },
+          })
+        }
+
+        if (doc.status === 'archived' || doc.status === 'disabled') {
+          await Promise.all([
+            req.payload.update({
+              collection: 'variants',
+              where: listingFilter,
+              data: { status: 'disabled' },
+            }),
+            req.payload.update({
+              collection: 'spaces',
+              where: listingFilter,
+              data: { status: 'disabled' },
+            }),
+            req.payload.update({
+              collection: 'calendar-events',
+              where: listingFilter,
+              data: { status: 'cancelled' },
+            }),
+          ])
+        }
       },
     ],
   },

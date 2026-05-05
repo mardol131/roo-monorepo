@@ -53,9 +53,9 @@ export const listingsCommonFields: Field[] = [
   {
     name: 'status',
     type: 'select',
-    options: ['draft', 'active', 'archived'],
+    options: getRecordStatuses(['active', 'archived', 'inactive', 'disabled']),
     required: true,
-    defaultValue: 'draft',
+    defaultValue: 'inactive',
   },
   {
     name: 'company',

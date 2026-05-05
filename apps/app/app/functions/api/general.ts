@@ -85,7 +85,8 @@ export async function patchCollectionItem<
   });
 
   if (!res.ok) throw new Error(`Failed to patch item in ${collection}`);
-  return res.json();
+  const json = await res.json();
+  return json.doc ?? json;
 }
 
 export async function postCollectionItem<

@@ -1,3 +1,4 @@
+import { getRecordStatuses } from '@roo/common'
 import type { CollectionConfig } from 'payload'
 
 const INQUIRY_STATUS = ['pending', 'confirmed', 'cancelled']
@@ -60,6 +61,11 @@ export const Inquiries: CollectionConfig = {
       required: true,
     },
     {
+      name: 'variant',
+      type: 'relationship',
+      relationTo: ['variants'],
+    },
+    {
       name: 'event',
       type: 'relationship',
       relationTo: 'events',
@@ -71,11 +77,7 @@ export const Inquiries: CollectionConfig = {
       required: true,
       options: ['venue', 'gastro', 'entertainment'],
     },
-    {
-      name: 'variant',
-      type: 'relationship',
-      relationTo: ['variants'],
-    },
+
     // ── Request ─────────────────────────────────────────────────────────────────
     {
       name: 'request',
@@ -115,6 +117,20 @@ export const Inquiries: CollectionConfig = {
           required: true,
           defaultValue: 'pending',
           options: INQUIRY_STATUS,
+        },
+        {
+          name: 'listing',
+          type: 'select',
+          required: true,
+          defaultValue: 'active',
+          options: getRecordStatuses(['active', 'unavailable']),
+        },
+        {
+          name: 'variant',
+          type: 'select',
+          required: true,
+          defaultValue: 'active',
+          options: getRecordStatuses(['active', 'unavailable']),
         },
       ],
     },

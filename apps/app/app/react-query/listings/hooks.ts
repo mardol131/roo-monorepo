@@ -31,31 +31,33 @@ export function useListingsByCompany(companyId: string) {
   });
 }
 
-export function useListing(id: string) {
+export function useListing(id: string | undefined) {
   return useQuery({
-    queryKey: listingKeys.byId(id),
-    queryFn: () => fetchListing(id),
+    queryKey: listingKeys.byId(id ?? ""),
+    queryFn: () => fetchListing(id!),
     enabled: !!id,
   });
 }
 
 export type UpdateListingData = Partial<Listing>;
+export type UpdateListingVars = { id: string; data: UpdateListingData };
 
 export function useUpdateListing(
-  id: string,
   companyId: string,
-  options?: UseMutationOptions<Listing, Error, UpdateListingData>,
+  options?: UseMutationOptions<Listing, Error, UpdateListingVars>,
 ) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (data: UpdateListingData) => updateListing(id, data),
+    mutationFn: ({ id, data }: UpdateListingVars) => updateListing(id, data),
     onSuccess: (...args) => {
-      queryClient.invalidateQueries({ queryKey: listingKeys.byId(id) });
+      queryClient.invalidateQueries({ queryKey: listingKeys.byId(args[1].id) });
       queryClient.invalidateQueries({
         queryKey: listingKeys.byCompany(companyId),
       });
-      queryClient.invalidateQueries({ queryKey: spaceKeys.byListing(id) });
+      queryClient.invalidateQueries({
+        queryKey: spaceKeys.byListing(args[0].id),
+      });
       options?.onSuccess?.(...args);
     },
     onError: (...args) => {
@@ -64,11 +66,11 @@ export function useUpdateListing(
   });
 }
 
-export function useDeleteListing(id: string, companyId: string) {
+export function useDeleteListing(companyId: string) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: () => deleteListing(id),
+    mutationFn: (id: string) => deleteListing(id),
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: listingKeys.byCompany(companyId),

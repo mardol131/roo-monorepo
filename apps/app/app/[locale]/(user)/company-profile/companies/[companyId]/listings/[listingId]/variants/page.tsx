@@ -4,8 +4,13 @@ import CardContainer from "@/app/[locale]/(user)/components/card-container";
 import EntityCard from "@/app/[locale]/(user)/components/entity-card";
 import Loader from "@/app/[locale]/(user)/components/loader";
 import PageHeading from "@/app/[locale]/(user)/components/page-heading";
-import { useVariantsByListing } from "@/app/react-query/variants/hooks";
+import { confirmActionModalEvents } from "@/app/components/ui/molecules/modals/confirm-action-modal";
+import {
+  useUpdateVariant,
+  useVariantsByListing,
+} from "@/app/react-query/variants/hooks";
 import { Variant } from "@roo/common";
+import { Trash2 } from "lucide-react";
 import { useParams } from "next/navigation";
 
 export default function page() {
@@ -15,10 +20,18 @@ export default function page() {
   }>();
 
   const { data: variants, isPending } = useVariantsByListing(listingId);
+  const { mutate: updateVariant } = useUpdateVariant();
 
   if (isPending) return <Loader text="Stránka se načítá..." />;
 
-  console.log(variants);
+  const handleDeleteConfirm = async (variantId: string) => {
+    updateVariant({
+      id: variantId,
+      data: {
+        status: "archived",
+      },
+    });
+  };
 
   return (
     <main className="w-full">
@@ -87,6 +100,28 @@ export default function page() {
                 },
                 { icon: "CheckCheck", content: variant.availability },
               ]}
+              deleteEntityHandler={(e) => {
+                e.stopPropagation();
+                e.preventDefault();
+                confirmActionModalEvents.emit("open", {
+                  title: "Smazat službu",
+                  description:
+                    "Tato akce je nevratná a trvale odstraní tuto službu z platformy.",
+                  Icon: Trash2,
+                  buttonText: "Smazat službu",
+                  buttonVersion: "dangerFull",
+                  confirmPhrase: variant.name,
+                  whatIsGoingToHappenText: "Opravdu chcete smazat tuto službu?",
+                  whatIsGoingToHappenTextColor: "danger",
+                  whatIsGoingToHappenList: [
+                    "Služba zmizí z katalogu a nebude dohledatelná",
+                    "Varianty a prostory, které jsou pod touto službou, budou smazány.",
+                    "Změna je nevratná",
+                  ],
+                  bgColor: "bg-danger-surface",
+                  onConfirmClick: () => handleDeleteConfirm(variant.id),
+                });
+              }}
             />
           );
         }}

@@ -11,8 +11,8 @@ type Props = {
   height: number;
   /** Provided for inquiry events — clicking navigates here */
   link?: IntlLink;
-  /** Provided for manual events — clicking opens the edit popover */
-  onEdit?: (x: number, y: number) => void;
+  /** Provided for manual events — clicking opens the edit modal */
+  onEdit?: () => void;
 };
 
 const STATUS_STYLES: Record<
@@ -45,10 +45,14 @@ export default function CalendarEventBlock({
   const colorClass = STATUS_STYLES[event.source][event.status];
   const isShort = height < 26;
 
-  const spaceName =
-    event.space != null && typeof event.space === "object"
-      ? event.space.name
-      : null;
+  const spaceName = (() => {
+    if (!event.spaces || event.spaces.length === 0) return null;
+    if (event.spaces?.length > 1) {
+      return `Prostory: ${event.spaces.length}`;
+    } else if (typeof event.spaces[0] !== "string") {
+      return event.spaces[0].name;
+    }
+  })();
 
   const sharedClassName = `absolute left-0.5 right-0.5 rounded-lg overflow-hidden px-1.5 py-1 transition-all ${colorClass} cursor-pointer hover:brightness-95`;
   const sharedStyle = { top, height: Math.max(height, 14) };
@@ -101,10 +105,7 @@ export default function CalendarEventBlock({
       style={sharedStyle}
       onClick={(e) => {
         e.stopPropagation();
-        if (onEdit) {
-          const rect = e.currentTarget.getBoundingClientRect();
-          onEdit(rect.right, rect.top + rect.height / 2);
-        }
+        onEdit?.();
       }}
     >
       {inner}

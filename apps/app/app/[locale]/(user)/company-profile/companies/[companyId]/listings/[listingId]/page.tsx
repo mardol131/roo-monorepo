@@ -55,24 +55,25 @@ export default function Page() {
   const router = useRouter();
   const { data: listing, isPending } = useListing(listingId);
   const { data: variants } = useVariantsByListing(listingId);
-  const { mutate: updateListing, isPending: isUpdating } = useUpdateListing(
-    listingId,
-    companyId,
-  );
+  const { mutate: updateListing, isPending: isUpdating } =
+    useUpdateListing(companyId);
   const { data: spaces } = useSpacesByListing(listingId);
-  const { mutate: deleteListing } = useDeleteListing(listingId, companyId);
+  const { mutate: deleteListing } = useDeleteListing(companyId);
   if (isPending) return <Loader text="Načítám službu..." />;
   if (!listing) return router.back();
 
   const isActive = listing.status === "active";
 
   const handleToggleStatus = () => {
-    updateListing({ status: isActive ? "draft" : "active" });
+    updateListing({
+      id: listingId,
+      data: { status: isActive ? "inactive" : "active" },
+    });
   };
 
   const handleDeleteConfirm = async () => {
     await new Promise<void>((resolve, reject) => {
-      deleteListing(undefined, { onSuccess: () => resolve(), onError: reject });
+      deleteListing(listingId, { onSuccess: () => resolve(), onError: reject });
     });
     router.back();
   };
@@ -514,12 +515,12 @@ export default function Page() {
                     ]}
                     rightComponent={
                       <EntityComponentTag
-                        text={item.status === "active" ? "Aktivní" : "Neaktivní"}
+                        text={item.active ? "Aktivní" : "Neaktivní"}
                         bgColor={
-                          item.status === "active" ? "bg-success-surface" : "bg-gray-200"
+                          item.active ? "bg-success-surface" : "bg-gray-200"
                         }
                         textColor={
-                          item.status === "active" ? "text-success" : "text-gray-500"
+                          item.active ? "text-success" : "text-gray-500"
                         }
                       />
                     }

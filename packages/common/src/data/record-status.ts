@@ -3,6 +3,7 @@ export const RECORD_STATUSES = [
   "inactive",
   "disabled",
   "archived",
+  "unavailable",
 ] as const;
 
 export type RecordStatus = (typeof RECORD_STATUSES)[number];
@@ -11,6 +12,7 @@ export type RecordStatus = (typeof RECORD_STATUSES)[number];
 // inactive — neaktivní, není viditelný pro veřejnost
 // disabled — systém ho vypnul automaticky (např. změna spacesType na listingu)
 // archived — uživatel ho soft-smazal, data zůstávají v DB
+// unavailable — systém ho vypnul automaticky, protože se na něj odkazuje neexistující entita (např. listing, který odkazuje na neexistující firmu)
 
 export function getRecordStatuses(include?: RecordStatus[]): RecordStatus[] {
   if (!include) return [...RECORD_STATUSES];

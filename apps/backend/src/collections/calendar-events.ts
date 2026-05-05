@@ -5,6 +5,34 @@ export const CalendarEvents: CollectionConfig = {
   admin: {
     useAsTitle: 'name',
   },
+  access: {
+    create: ({ req }) => !!req.user,
+    read: ({ req }) => {
+      if (!req.user) return false
+      if (req.user.collection === 'admins') return true
+      return { 'listing.company.owner': { equals: req.user.id } }
+    },
+    update: ({ req }) => {
+      if (!req.user) return false
+      if (req.user.collection === 'admins') return true
+      return { 'listing.company.owner': { equals: req.user.id } }
+    },
+    delete: ({ req }) => {
+      if (!req.user) return false
+      if (req.user.collection === 'admins') return true
+      return { 'listing.company.owner': { equals: req.user.id } }
+    },
+  },
+  hooks: {
+    beforeChange: [
+      ({ data, originalDoc, operation }) => {
+        if (originalDoc?.source && operation === 'update') {
+          data.source = originalDoc.source
+        }
+        return data
+      },
+    ],
+  },
   fields: [
     {
       name: 'listing',
@@ -13,9 +41,10 @@ export const CalendarEvents: CollectionConfig = {
       required: true,
     },
     {
-      name: 'space',
+      name: 'spaces',
       type: 'relationship',
       relationTo: 'spaces',
+      hasMany: true,
     },
     {
       name: 'inquiry',
