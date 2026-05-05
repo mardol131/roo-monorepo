@@ -4,6 +4,8 @@
     "description": "Roo - Vše pro vaše domácí mazlíčky na jednom místě"
   },
   "listings": {
+    "singular": "Služba",
+    "plural": "Služby",
     "status": {
       "active": "Aktivní",
       "inactive": "Neaktivní",
@@ -26,13 +28,33 @@
     }
   },
   "inquiries": {
+    "singular": "Poptávka",
+    "plural": "Poptávky",
     "status": {
       "pending": "Čekající",
       "confirmed": "Potvrzené",
       "cancelled": "Odmítnuté"
     }
   },
-  "event": {
+  "companies": {
+    "singular": "Firma",
+    "plural": "Firmy",
+    "status": {
+      "active": "Aktivní",
+      "inactive": "Neaktivní"
+    }
+  },
+  "variants": {
+    "singular": "Varianta",
+    "plural": "Varianty",
+    "type": {
+      "allYear": "Celoroční",
+      "seasonal": "Sezónní"
+    }
+  },
+  "events": {
+    "singular": "Událost",
+    "plural": "Události",
     "status": {
       "deactivated": "Zrušené",
       "planning": "Plánované",
@@ -51,11 +73,57 @@
   },
   "breadcrumbs": {
     "company-profile": "Firemní účet",
-    "listings": "Služby",
-    "inquiries": "Poptávky",
-    "events": "Události",
-    "variants": "Varianty",
-    "edit": "Upravit",
-    "create": "Vytvořit"
+    "create": "Vytvořit",
+    "edit": "Upravit"
+  },
+  "weekdays": {
+    "short": {
+      "monday": "Po",
+      "tuesday": "Út",
+      "wednesday": "St",
+      "thursday": "Čt",
+      "friday": "Pá",
+      "saturday": "So",
+      "sunday": "Ne"
+    },
+    "long": {
+      "monday": "Pondělí",
+      "tuesday": "Úterý",
+      "wednesday": "Středa",
+      "thursday": "Čtvrtek",
+      "friday": "Pátek",
+      "saturday": "Sobota",
+      "sunday": "Neděle"
+    }
+  },
+  "months": {
+    "short": {
+      "january": "Led",
+      "february": "Ún",
+      "march": "Bře",
+      "april": "Dub",
+      "may": "Kvě",
+      "june": "Čer",
+      "july": "Čvc",
+      "august": "Srp",
+      "september": "Zář",
+      "october": "Říj",
+      "november": "Lis",
+      "december": "Pro"
+    },
+    "long": {
+      "january": "Leden",
+      "february": "Únor",
+      "march": "Březen",
+      "april": "Duben",
+      "may": "Květen",
+      "june": "Červen",
+      "july": "Červenec",
+      "august": "Srpen",
+      "september": "Září",
+      "october": "Říjen",
+      "november": "Listopad",
+      "december": "Prosinec"
+    }
   }
 }

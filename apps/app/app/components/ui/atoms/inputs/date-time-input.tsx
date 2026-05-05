@@ -1,17 +1,16 @@
 "use client";
 
-import React, { useState, useRef, useEffect } from "react";
-import { Calendar, ChevronLeft, ChevronRight } from "lucide-react";
-import Text from "@/app/components/ui/atoms/text";
 import { useClickOutside } from "@/app/hooks/use-click-outside";
-import ErrorText from "./error-text";
+import { Calendar, ChevronLeft, ChevronRight } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import InputLabel from "../input-label";
+import ErrorText from "./error-text";
 
 interface DateTimeInputProps {
   label: string;
   value?: string | null;
   onChange?: (value: string | null) => void;
-  min?: Date;
+  min?: string;
   placeholder?: string;
   error?: string;
 }
@@ -73,6 +72,7 @@ export default function DateTimeInput({
   );
 
   const ref = useRef<HTMLDivElement>(null);
+  const isMounted = useRef(false);
 
   useClickOutside(ref, () => {
     setIsOpen(false);
@@ -91,8 +91,12 @@ export default function DateTimeInput({
     return newDate;
   };
 
-  // Emit změny ven
+  // Emit změny ven — přeskočí mount, aby onChange nevolal null při inicializaci
   useEffect(() => {
+    if (!isMounted.current) {
+      isMounted.current = true;
+      return;
+    }
     const dateObj = createDateTimeValue(
       selectedDateState ? new Date(selectedDateState) : null,
       time,
@@ -125,9 +129,7 @@ export default function DateTimeInput({
   };
 
   const isDateSelected = (date: Date) =>
-    selectedDateState
-      ? new Date(selectedDateState).toISOString() === date.toISOString()
-      : false;
+    selectedDateState ? isSameDay(new Date(selectedDateState), date) : false;
 
   const isSameDay = (a: Date, b: Date) =>
     a.getFullYear() === b.getFullYear() &&
@@ -135,27 +137,35 @@ export default function DateTimeInput({
     a.getDate() === b.getDate();
 
   const minTimeString = min
-    ? `${String(min.getHours()).padStart(2, "0")}:${String(min.getMinutes()).padStart(2, "0")}`
+    ? `${String(new Date(min).getHours()).padStart(2, "0")}:${String(new Date(min).getMinutes()).padStart(2, "0")}`
     : null;
 
   const isTimeBelowMin = (timeStr: string, date: Date | null): boolean => {
-    if (!min || !date || !minTimeString || !isSameDay(date, min)) return false;
+    if (!min || !date || !minTimeString || !isSameDay(date, new Date(min)))
+      return false;
     if (!isValidTime(timeStr)) return false;
     const [h, m] = timeStr.split(":").map(Number);
-    return h < min.getHours() || (h === min.getHours() && m < min.getMinutes());
+    const minDate = new Date(min);
+    return (
+      h < minDate.getHours() ||
+      (h === minDate.getHours() && m < minDate.getMinutes())
+    );
   };
 
   const isDateDisabled = (date: Date) => {
     if (!min) return false;
-
-    const minDate = new Date(min.getFullYear(), min.getMonth(), min.getDate());
+    const minDate = new Date(min);
+    const minDateOnly = new Date(
+      minDate.getFullYear(),
+      minDate.getMonth(),
+      minDate.getDate(),
+    );
     const checkDate = new Date(
       date.getFullYear(),
       date.getMonth(),
       date.getDate(),
     );
-
-    return checkDate < minDate;
+    return checkDate < minDateOnly;
   };
 
   const handleDateClick = (date: Date) => {
@@ -163,7 +173,7 @@ export default function DateTimeInput({
       setSelectedDateState(date.toISOString());
       if (
         min &&
-        isSameDay(date, min) &&
+        isSameDay(date, new Date(min)) &&
         isValidTime(time) &&
         isTimeBelowMin(time, date)
       ) {
@@ -274,7 +284,7 @@ export default function DateTimeInput({
                         disabled={isDateDisabled(date)}
                         className={`w-full h-full rounded text-xs font-medium ${
                           isDateDisabled(date)
-                            ? "text-zinc-300 cursor-not-allowed"
+                            ? "text-text-light cursor-not-allowed line-through"
                             : isDateSelected(date)
                               ? "bg-rose-500 text-white"
                               : "hover:bg-zinc-100 text-zinc-900"

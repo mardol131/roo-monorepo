@@ -322,6 +322,8 @@ export default function NewVariantFormEntertainment({ onCancel }: Props) {
     });
   };
 
+  const seasonalPrices = watch("price.seasonalPrices");
+
   return (
     <form onSubmit={rhfHandleSubmit(handleSubmit)} className="flex gap-6">
       <div className="flex w-full flex-col gap-4">
@@ -448,6 +450,7 @@ export default function NewVariantFormEntertainment({ onCancel }: Props) {
                         label="Do"
                         value={field.value}
                         onChange={field.onChange}
+                        min={seasonalPrices[index]?.from || undefined}
                       />
                     )}
                   />

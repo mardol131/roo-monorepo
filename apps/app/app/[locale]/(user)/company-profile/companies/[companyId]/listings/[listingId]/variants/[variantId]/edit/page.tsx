@@ -2,6 +2,7 @@
 
 import PageHeading from "@/app/[locale]/(user)/components/page-heading";
 import { useRouter } from "@/app/i18n/navigation";
+import { useUpdateVariant } from "@/app/react-query/variants/hooks";
 import { useVariant } from "@/app/react-query/variants/hooks";
 import { Variant } from "@roo/common";
 import { useParams } from "next/navigation";
@@ -20,6 +21,60 @@ import EditVariantFormVenue, {
 const toItem = <T extends { id: string; name: string }>(v: string | T) =>
   typeof v === "string" ? { id: v, name: "" } : { id: v.id, name: v.name };
 
+const toIds = (arr: { id: string; name: string }[]): string[] =>
+  arr.map((x) => x.id);
+
+type CommonFields = {
+  name: string;
+  shortDescription: string;
+  description?: string;
+  type: "allYear" | "seasonal";
+  availability: "allDay" | "selectedHours";
+  selectedHours: { from: string; to: string }[];
+  price: {
+    generalPrice: number;
+    seasonalPrices: {
+      price: number;
+      description?: string;
+      from: string;
+      to: string;
+    }[];
+  };
+  images: { mainImage: string; gallery: string[] };
+  eventTypes: { id: string; name: string }[];
+  includes: { item: string }[];
+  excludes: { item: string }[];
+};
+
+function commonPayload(_variant: Variant, data: CommonFields) {
+  return {
+    name: data.name,
+    shortDescription: data.shortDescription,
+    description: data.description ?? null,
+    type: data.type,
+    availability: data.availability,
+    selectedHours: data.selectedHours,
+    price: {
+      generalPrice: data.price.generalPrice,
+      seasonalPrices: data.price.seasonalPrices.map(
+        ({ price, description, from, to }) => ({
+          price,
+          description: description ?? null,
+          from,
+          to,
+        }),
+      ),
+    },
+    images: {
+      mainImage: data.images.mainImage,
+      gallery: data.images.gallery.map((image) => ({ image })),
+    },
+    eventTypes: toIds(data.eventTypes),
+    includes: data.includes,
+    excludes: data.excludes,
+  };
+}
+
 function commonDefaults(v: Variant) {
   return {
     name: v.name,
@@ -27,7 +82,10 @@ function commonDefaults(v: Variant) {
     description: v.description ?? undefined,
     type: v.type,
     availability: v.availability,
-    selectedHours: (v.selectedHours ?? []).map(({ from, to }) => ({ from, to })),
+    selectedHours: (v.selectedHours ?? []).map(({ from, to }) => ({
+      from,
+      to,
+    })),
     price: {
       generalPrice: v.price.generalPrice,
       seasonalPrices: (v.price.seasonalPrices ?? []).map(
@@ -67,10 +125,14 @@ function venueDefaults(v: Variant): Partial<VenueFormInputs> {
     hasParking: d.parking?.included != null || d.parking?.spots != null,
     parkingIncluded: d.parking?.included ?? false,
     parkingSpots: d.parking?.spots ?? undefined,
-    hasAccommodation: d.accommodation?.included != null || d.accommodation?.capacity != null,
+    hasAccommodation:
+      d.accommodation?.included != null || d.accommodation?.capacity != null,
     accommodationIncluded: d.accommodation?.included ?? false,
     accommodationCapacity: d.accommodation?.capacity ?? undefined,
-    hasBreakfast: d.breakfast?.included != null || d.breakfast?.price != null || d.breakfast?.loweredPrice != null,
+    hasBreakfast:
+      d.breakfast?.included != null ||
+      d.breakfast?.price != null ||
+      d.breakfast?.loweredPrice != null,
     breakfastIncluded: d.breakfast?.included ?? false,
     breakfastPrice: d.breakfast?.price ?? undefined,
     breakfastLoweredPrice: d.breakfast?.loweredPrice ?? undefined,
@@ -114,12 +176,126 @@ function entertainmentDefaults(v: Variant): Partial<EntertainmentFormInputs> {
   };
 }
 
+// ── Transform form → Partial<Variant> ────────────────────────────────────────
+
+function venuePayload(
+  variant: Variant,
+  data: VenueFormInputs,
+): Partial<Variant> {
+  const d = variant.details[0];
+  const detailId = d.blockType === "venue" ? d.id : undefined;
+  return {
+    ...commonPayload(variant, data),
+    details: [
+      {
+        blockType: "venue",
+        id: detailId ?? undefined,
+        capacity: data.capacity,
+        canBeBookedAsWhole: data.canBeBookedAsWhole,
+        includedSpaces: toIds(data.includedSpaces ?? []),
+        amenities: toIds(data.amenities ?? []),
+        technology: toIds(data.technology ?? []),
+        services: toIds(data.services ?? []),
+        activities: toIds(data.activities ?? []),
+        personnel: toIds(data.personnel ?? []),
+        parking: data.hasParking
+          ? { included: data.parkingIncluded, spots: data.parkingSpots ?? null }
+          : undefined,
+        accommodation: data.hasAccommodation
+          ? {
+              included: data.accommodationIncluded,
+              capacity: data.accommodationCapacity ?? null,
+            }
+          : undefined,
+        breakfast: data.hasBreakfast
+          ? {
+              included: data.breakfastIncluded,
+              price: data.breakfastPrice ?? null,
+              loweredPrice: data.breakfastLoweredPrice ?? null,
+            }
+          : undefined,
+      },
+    ],
+  };
+}
+
+function gastroPayload(
+  variant: Variant,
+  data: GastroFormInputs,
+): Partial<Variant> {
+  const d = variant.details[0];
+  const detailId = d.blockType === "gastro" ? d.id : undefined;
+  return {
+    ...commonPayload(variant, data),
+    details: [
+      {
+        blockType: "gastro",
+        id: detailId ?? undefined,
+        capacity: data.capacity,
+        pricePerPerson: data.pricePerPerson ?? null,
+        minimumOrderCount: data.minimumOrderCount ?? null,
+        cuisines: toIds(data.cuisines ?? []),
+        dishTypes: toIds(data.dishTypes ?? []),
+        dietaryOptions: toIds(data.dietaryOptions ?? []),
+        foodServiceStyle: toIds(data.foodServiceStyle ?? []),
+        kidsMenu: data.kidsMenu,
+        alcoholIncluded: data.alcoholIncluded,
+        personnel: toIds(data.personnel ?? []),
+        necessities: toIds(data.necessities ?? []),
+      },
+    ],
+  };
+}
+
+function entertainmentPayload(
+  variant: Variant,
+  data: EntertainmentFormInputs,
+): Partial<Variant> {
+  const d = variant.details[0];
+  const detailId = d.blockType === "entertainment" ? d.id : undefined;
+  return {
+    ...commonPayload(variant, data),
+    details: [
+      {
+        blockType: "entertainment",
+        id: detailId ?? undefined,
+        capacity: data.capacity,
+        audience: data.audience,
+        performanceDuration: data.performanceDuration ?? null,
+        numberOfSets: data.numberOfSets ?? null,
+        breakDuration: data.breakDuration ?? null,
+        setupAndTeardown: data.setupAndTeardownIncluded
+          ? {
+              included: true,
+              setupTime: data.setupTime ?? null,
+              teardownTime: data.teardownTime ?? null,
+            }
+          : undefined,
+        personnel: toIds(data.personnel ?? []),
+        necessities: toIds(data.necessities ?? []),
+      },
+    ],
+  };
+}
+
 // ── Page ──────────────────────────────────────────────────────────────────────
 
-export default function page() {
-  const { variantId, listingId } = useParams<{ variantId: string; listingId: string }>();
+export default function EditVariantPage() {
+  const { variantId, listingId, companyId } = useParams<{
+    variantId: string;
+    listingId: string;
+    companyId: string;
+  }>();
   const { data: variant } = useVariant(variantId);
   const router = useRouter();
+  const { mutate: updateVariant } = useUpdateVariant({
+    onSuccess: () =>
+      router.push({
+        pathname:
+          "/company-profile/companies/[companyId]/listings/[listingId]/variants/[variantId]",
+        params: { companyId, listingId, variantId },
+      }),
+  });
 
   const blockType = variant?.details[0]?.blockType;
 
@@ -134,9 +310,9 @@ export default function page() {
         <EditVariantFormVenue
           listingId={listingId}
           defaultValues={venueDefaults(variant)}
-          onSubmit={(data) => {
-            console.log("submit", data);
-          }}
+          onSubmit={(data) =>
+            updateVariant({ id: variantId, data: venuePayload(variant, data) })
+          }
           onCancel={() => router.back()}
         />
       )}
@@ -144,9 +320,9 @@ export default function page() {
         <EditVariantFormGastro
           listingId={listingId}
           defaultValues={gastroDefaults(variant)}
-          onSubmit={(data) => {
-            console.log("submit", data);
-          }}
+          onSubmit={(data) =>
+            updateVariant({ id: variantId, data: gastroPayload(variant, data) })
+          }
           onCancel={() => router.back()}
         />
       )}
@@ -154,9 +330,12 @@ export default function page() {
         <EditVariantFormEntertainment
           listingId={listingId}
           defaultValues={entertainmentDefaults(variant)}
-          onSubmit={(data) => {
-            console.log("submit", data);
-          }}
+          onSubmit={(data) =>
+            updateVariant({
+              id: variantId,
+              data: entertainmentPayload(variant, data),
+            })
+          }
           onCancel={() => router.back()}
         />
       )}

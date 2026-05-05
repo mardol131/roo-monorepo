@@ -6,6 +6,8 @@ import { Link as IntlLink } from "@/app/i18n/navigation";
 import { ChevronRight, Home, Signpost, SignpostBig } from "lucide-react";
 import { useListing } from "@/app/react-query/listings/hooks";
 import { useCompany } from "@/app/react-query/companies/hooks";
+import { useVariant } from "@/app/react-query/variants/hooks";
+import { useTranslations } from "next-intl";
 
 type BreadcrumbItem = {
   label: string;
@@ -19,8 +21,9 @@ type Props = {
 export default function Breadcrumbs({ items }: Props) {
   const pathname = usePathname();
   const i18nPathname = useI18nPathname();
+  const t = useTranslations();
 
-  const { listingId, companyId, eventId, inquiryId } = useParams();
+  const { listingId, companyId, eventId, inquiryId, variantId } = useParams();
 
   const { data: listings } = useListing(
     typeof listingId === "string" ? listingId : "",
@@ -34,11 +37,33 @@ export default function Breadcrumbs({ items }: Props) {
   const { data: inquiries } = useListing(
     typeof inquiryId === "string" ? inquiryId : "",
   );
+  const { data: variant } = useVariant(
+    typeof variantId === "string" ? variantId : "",
+  );
   function formatSegment(segment: string): string {
     if (companyId && segment === companyId) return company?.name ?? segment;
     if (listingId && segment === listingId) return listings?.name ?? segment;
     if (eventId && segment === eventId) return events?.name ?? segment;
     if (inquiryId && segment === inquiryId) return inquiries?.name ?? segment;
+    if (variantId && segment === variantId) return variant?.name ?? segment;
+
+    if (segment === "company-profile") return t("companies.singular");
+    if (segment === "companies") return t("companies.plural");
+    if (segment === "listings") return t("listings.plural");
+    if (segment === "events") return t("events.plural");
+    if (segment === "inquiries") return t("inquiries.plural");
+    if (segment === "variants") return t("variants.plural");
+    if (segment === "edit") return t("breadcrumbs.edit");
+
+    if (segment === "[companyId]")
+      return company?.name ?? t("companies.singular");
+    if (segment === "[listingId]")
+      return listings?.name ?? t("listings.singular");
+    if (segment === "[eventId]") return events?.name ?? t("events.singular");
+    if (segment === "[inquiryId]")
+      return inquiries?.name ?? t("inquiries.singular");
+    if (segment === "[variantId]")
+      return variant?.name ?? t("variants.singular");
 
     return segment.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
   }
@@ -46,9 +71,10 @@ export default function Breadcrumbs({ items }: Props) {
   const crumbs: BreadcrumbItem[] =
     items ??
     (() => {
+      const i18nSegments = i18nPathname.split("/").filter(Boolean);
       const segments = pathname.split("/").filter(Boolean);
       return segments.map((segment, index) => ({
-        label: formatSegment(segment),
+        label: formatSegment(i18nSegments[index]),
         href: "/" + segments.slice(0, index + 1).join("/"),
       }));
     })();

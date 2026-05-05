@@ -14,14 +14,13 @@ import Text from "@/app/components/ui/atoms/text";
 import { useRouter } from "@/app/i18n/navigation";
 import { useUpdateVariant, useVariant } from "@/app/react-query/variants/hooks";
 import { Variant } from "@roo/common";
-import { Package } from "lucide-react";
+import { Package, Trash2 } from "lucide-react";
 import { useParams } from "next/navigation";
+import { useEffect } from "react";
 import { ControlSection } from "../../../../../../../components/control-section";
-
-const TYPE_LABELS: Record<Variant["type"], string> = {
-  allYear: "Celoroční",
-  seasonal: "Sezónní",
-};
+import { confirmActionModalEvents } from "@/app/components/ui/molecules/modals/confirm-action-modal";
+import { useTranslations } from "next-intl";
+import { format } from "date-fns";
 
 export default function Page() {
   const { companyId, listingId, variantId } = useParams<{
@@ -32,6 +31,7 @@ export default function Page() {
   const { data: variant, isPending } = useVariant(variantId);
   const { mutate: updateVariant, isPending: isUpdating } = useUpdateVariant();
   const router = useRouter();
+  const t = useTranslations("variants");
 
   if (isPending) return <Loader text="Načítám variantu..." />;
   if (!variant) return router.back();
@@ -43,6 +43,25 @@ export default function Page() {
       id: variantId,
       data: { status: isActive ? "inactive" : "active" },
     });
+  };
+
+  const handleDelete = () => {
+    updateVariant(
+      {
+        id: variantId,
+        data: { status: "archived" },
+      },
+      {
+        onSuccess: () => {
+          console.log("Variant archived successfully");
+          router.push({
+            pathname:
+              "/company-profile/companies/[companyId]/listings/[listingId]/variants",
+            params: { companyId, listingId },
+          });
+        },
+      },
+    );
   };
 
   const firstBlock = variant.details[0];
@@ -60,7 +79,7 @@ export default function Page() {
 
   const infoItems = [
     { icon: "Banknote", text: `${variant.price.generalPrice} Kč` },
-    { icon: "CalendarClock", text: TYPE_LABELS[variant.type] },
+    { icon: "CalendarClock", text: t(`type.${variant.type}`) },
     { icon: "Clock", text: availabilityText },
     ...(capacityText ? [{ icon: "Users", text: capacityText }] : []),
   ];
@@ -138,6 +157,41 @@ export default function Page() {
                 onClick: handleToggleStatus,
               },
             },
+            {
+              icon: "Trash",
+              iconColor: "text-red-500",
+              iconBgColor: "bg-red-50",
+              title: "Smazat variantu",
+              text: "Varianta bude nenávratně smazána. Tuto akci nelze vrátit zpět.",
+              button: {
+                text: "Smazat",
+                version: "dangerFull",
+                iconLeft: "Trash",
+                size: "sm",
+                disabled: isUpdating,
+                onClick: () => {
+                  confirmActionModalEvents.emit("open", {
+                    title: "Smazat variantu",
+                    description:
+                      "Tato akce je nevratná a trvale odstraní tuto variantu z platformy.",
+                    Icon: Trash2,
+                    buttonText: "Smazat variantu",
+                    buttonVersion: "dangerFull",
+                    confirmPhrase: variant.name,
+                    whatIsGoingToHappenText:
+                      "Opravdu chcete smazat tuto variantu?",
+                    whatIsGoingToHappenTextColor: "danger",
+                    whatIsGoingToHappenList: [
+                      "Varianta zmizí z katalogu a nebude dohledatelná",
+                      "Varianta bude u nepotvrzených poptávek označena jako smazaná",
+                      "Změna je nevratná",
+                    ],
+                    bgColor: "bg-danger-surface",
+                    onConfirmClick: async () => handleDelete(),
+                  });
+                },
+              },
+            },
           ]}
         />
 
@@ -194,8 +248,9 @@ export default function Page() {
                         {sp.description}
                       </Text>
                     )}
-                    <Text variant="body-sm" color="textLight">
-                      {sp.from} – {sp.to}
+                    <Text variant="body-sm" color="textDark">
+                      {format(new Date(sp.from), "dd.MM.yyyy")} –{" "}
+                      {format(new Date(sp.to), "dd.MM.yyyy")}
                     </Text>
                   </div>
                   <Text variant="label-lg" color="textDark">

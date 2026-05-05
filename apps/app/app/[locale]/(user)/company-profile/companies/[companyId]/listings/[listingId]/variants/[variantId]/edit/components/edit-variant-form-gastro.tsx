@@ -14,6 +14,7 @@ import ErrorText from "@/app/components/ui/atoms/inputs/error-text";
 import GalleryInput from "@/app/components/ui/atoms/inputs/images/gallery-input";
 import ImageInput from "@/app/components/ui/atoms/inputs/images/image-input";
 import Input from "@/app/components/ui/atoms/inputs/input";
+import DateTimeInput from "@/app/components/ui/atoms/inputs/date-time-input";
 import RepeaterField from "@/app/components/ui/atoms/inputs/repeater-field";
 import { Textarea } from "@/app/components/ui/atoms/inputs/textarea";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -290,6 +291,8 @@ export default function EditVariantFormGastro({
     remove: removeExclude,
   } = useFieldArray({ control, name: "excludes" });
 
+  const seasonalPrices = watch("price.seasonalPrices");
+
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="flex gap-6">
       <div className="flex w-full flex-col gap-4">
@@ -391,23 +394,34 @@ export default function EditVariantFormGastro({
                   />
                 </div>
                 <div className="grid grid-cols-2 gap-3">
-                  <Input
-                    label="Od"
-                    inputProps={{
-                      ...register(`price.seasonalPrices.${index}.from`),
-                      type: "date",
-                    }}
-                    error={errors.price?.seasonalPrices?.[index]?.from?.message}
-                    isRequired
+                  <Controller
+                    control={control}
+                    name={`price.seasonalPrices.${index}.from`}
+                    render={({ field }) => (
+                      <DateTimeInput
+                        label="Od"
+                        value={field.value || null}
+                        onChange={(v) => field.onChange(v ?? "")}
+                        error={
+                          errors.price?.seasonalPrices?.[index]?.from?.message
+                        }
+                      />
+                    )}
                   />
-                  <Input
-                    label="Do"
-                    inputProps={{
-                      ...register(`price.seasonalPrices.${index}.to`),
-                      type: "date",
-                    }}
-                    error={errors.price?.seasonalPrices?.[index]?.to?.message}
-                    isRequired
+                  <Controller
+                    control={control}
+                    name={`price.seasonalPrices.${index}.to`}
+                    render={({ field }) => (
+                      <DateTimeInput
+                        label="Do"
+                        value={field.value || null}
+                        onChange={(v) => field.onChange(v ?? "")}
+                        error={
+                          errors.price?.seasonalPrices?.[index]?.to?.message
+                        }
+                        min={seasonalPrices[index]?.from || undefined}
+                      />
+                    )}
                   />
                 </div>
               </>
