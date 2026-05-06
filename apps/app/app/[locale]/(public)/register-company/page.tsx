@@ -166,7 +166,9 @@ export default function RegisterCompanyPage() {
                   href="/login"
                   className="text-sm font-medium text-zinc-900 hover:underline"
                 >
-                  Přihlaste se
+                  <Text variant="body-sm" color="textDark" as="span">
+                    Přihlaste se
+                  </Text>
                 </Link>
               </div>
 
@@ -178,28 +180,10 @@ export default function RegisterCompanyPage() {
                   href="/register"
                   className="text-sm font-medium text-zinc-900 hover:underline"
                 >
-                  Osobní registrace
+                  <Text variant="body-sm" color="textDark" as="span">
+                    Osobní registrace
+                  </Text>
                 </Link>
-              </div>
-
-              <div className="mt-8">
-                <Text variant="caption" color="textLight">
-                  Registrací souhlasíte s{" "}
-                  <Link
-                    href="/homepage"
-                    className="underline hover:text-zinc-700"
-                  >
-                    podmínkami použití
-                  </Link>{" "}
-                  a{" "}
-                  <Link
-                    href="/homepage"
-                    className="underline hover:text-zinc-700"
-                  >
-                    zásadami ochrany osobních údajů
-                  </Link>
-                  .
-                </Text>
               </div>
             </>
           )}

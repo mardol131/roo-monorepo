@@ -1,9 +1,13 @@
 {
-  "homepage": {
-    "title": "Domů",
-    "description": "Roo - Vše pro vaše domácí mazlíčky na jednom místě"
+  "Root": {
+    "appName": "Roo"
   },
   "pages": {
+    "public": {
+      "homepage": {
+        "title": "Naplánujte celý event na jednom místě"
+      }
+    },
     "user": {
       "companyProfile": {
         "page": {},

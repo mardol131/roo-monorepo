@@ -1,6 +1,4 @@
 import { defineRouting } from "next-intl/routing";
-import { getPathname, Link } from "./navigation";
-import { ComponentProps } from "react";
 
 export const routing = defineRouting({
   locales: ["cs"],

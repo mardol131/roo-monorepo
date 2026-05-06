@@ -6,8 +6,16 @@ import ListingTypeBanner from "./components/listing-type-banner";
 import Banner from "@/app/components/ui/molecules/banner";
 import CardsSection from "./components/cards-section";
 import BubbleMasonrySection from "./components/bubble-masonry-section";
+import { getTranslations } from "next-intl/server";
 
 type Props = {};
+
+export async function generateMetadata() {
+  const t = await getTranslations("pages.public.homepage");
+  return {
+    title: t("title"), // výsledek: "Název stránky | AppName"
+  };
+}
 
 export default function page({}: Props) {
   return (
