@@ -5,6 +5,7 @@ import { Calendar, ChevronLeft, ChevronRight } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import InputLabel from "../input-label";
 import ErrorText from "./error-text";
+import TimeInput from "./time-input";
 
 interface DateTimeInputProps {
   label: string;
@@ -31,15 +32,6 @@ const MONTHS = [
   "Listopad",
   "Prosinec",
 ];
-
-const formatTimeInput = (value: string): string => {
-  const digits = value.replace(/\D/g, "");
-
-  if (digits.length === 0) return "";
-  if (digits.length <= 2) return digits;
-  if (digits.length === 3) return `${digits.slice(0, 2)}:${digits[2]}`;
-  return `${digits.slice(0, 2)}:${digits.slice(2, 4)}`;
-};
 
 const isValidTime = (value: string): boolean => {
   const timeRegex = /^([0-1][0-9]|2[0-3]):[0-5][0-9]$/;
@@ -182,20 +174,18 @@ export default function DateTimeInput({
     }
   };
 
-  const handleTimeChange = (rawValue: string) => {
-    const formatted = formatTimeInput(rawValue);
-    if (
-      isValidTime(formatted) &&
-      isTimeBelowMin(
-        formatted,
-        selectedDateState ? new Date(selectedDateState) : null,
-      )
-    ) {
+  const handleTimeChange = (value: string) => {
+    if (isTimeBelowMin(value, selectedDateState ? new Date(selectedDateState) : null)) {
       setTime(minTimeString!);
     } else {
-      setTime(formatted);
+      setTime(value);
     }
   };
+
+  const timeMin =
+    selectedDateState && min && isSameDay(new Date(selectedDateState), new Date(min))
+      ? minTimeString ?? undefined
+      : undefined;
 
   const displayText =
     selectedDateState && time
@@ -297,15 +287,12 @@ export default function DateTimeInput({
                 ))}
               </div>
 
-              <div className="border-t flex gap-2 items-center border-zinc-100 pt-4">
-                <label className="text-xs font-medium text-zinc-900">Čas</label>
-                <input
-                  type="text"
-                  placeholder="09:00"
+              <div className="border-t border-zinc-100 pt-4">
+                <TimeInput
+                  label="Čas"
                   value={time}
-                  onChange={(e) => handleTimeChange(e.target.value)}
-                  maxLength={5}
-                  className="px-2 py-1.5 border border-zinc-200 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-rose-500"
+                  onChange={handleTimeChange}
+                  min={timeMin}
                 />
               </div>
             </div>

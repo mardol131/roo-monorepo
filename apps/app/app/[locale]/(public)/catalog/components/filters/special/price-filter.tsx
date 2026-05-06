@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import Text from "@/app/components/ui/atoms/text";
 
 interface PriceFilterProps {
@@ -25,6 +25,11 @@ export default function PriceFilter({
 }: PriceFilterProps) {
   const [localMinPrice, setLocalMinPrice] = useState(minPrice);
   const [localMaxPrice, setLocalMaxPrice] = useState(maxPrice);
+
+  useEffect(() => {
+    setLocalMinPrice(minPrice);
+    setLocalMaxPrice(maxPrice);
+  }, [minPrice, maxPrice]);
 
   const handleMinChange = (value: number) => {
     const newMin = Math.min(value, localMaxPrice);

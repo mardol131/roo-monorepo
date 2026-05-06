@@ -1,11 +1,12 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Calendar, ChevronLeft, ChevronRight } from "lucide-react";
-import Text from "@/app/components/ui/atoms/text";
+import TimeInput from "@/app/components/ui/atoms/inputs/time-input";
 
 interface DateFilterProps {
-  value?: string;
-  onChange: (value: string) => void;
-  fullWidth?: boolean;
+  startValue?: string;
+  endValue?: string;
+  onStartChange?: (value: string) => void;
+  onEndChange?: (value: string) => void;
   startDateInput?: React.InputHTMLAttributes<HTMLInputElement>;
   endDateInput?: React.InputHTMLAttributes<HTMLInputElement>;
 }
@@ -26,38 +27,40 @@ const MONTHS = [
   "Prosinec",
 ];
 
-const formatTimeInput = (value: string): string => {
-  // Remove all non-digit characters
-  const digits = value.replace(/\D/g, "");
 
-  // Limit to 4 digits (HHMM)
-  if (digits.length === 0) return "";
-  if (digits.length <= 2) return digits;
-  if (digits.length === 3) return `${digits.slice(0, 2)}:${digits[2]}`;
-  return `${digits.slice(0, 2)}:${digits.slice(2, 4)}`;
-};
+function parseDate(iso?: string): Date | null {
+  if (!iso) return null;
+  const d = new Date(iso);
+  return isNaN(d.getTime()) ? null : d;
+}
 
-const isValidTime = (value: string): boolean => {
-  const timeRegex = /^([0-1][0-9]|2[0-3]):[0-5][0-9]$/;
-  return timeRegex.test(value);
-};
+function parseTime(iso?: string): string {
+  if (!iso) return "";
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) return "";
+  return `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
+}
 
 export default function DateFilter({
-  value,
-  onChange,
-  fullWidth,
+  startValue,
+  endValue,
+  onStartChange,
+  onEndChange,
   startDateInput,
   endDateInput,
 }: DateFilterProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const [currentMonth, setCurrentMonth] = useState(new Date());
-  const [startDate, setStartDate] = useState<Date | null>(null);
-  const [endDate, setEndDate] = useState<Date | null>(null);
-  const [startTime, setStartTime] = useState("09:00");
-  const [endTime, setEndTime] = useState("17:00");
+  const [currentMonth, setCurrentMonth] = useState(
+    parseDate(startValue) ?? new Date(),
+  );
+  const [startDate, setStartDate] = useState<Date | null>(parseDate(startValue));
+  const [endDate, setEndDate] = useState<Date | null>(parseDate(endValue));
+  const [startTime, setStartTime] = useState(parseTime(startValue) || "09:00");
+  const [endTime, setEndTime] = useState(parseTime(endValue) || "17:00");
   const ref = useRef<HTMLDivElement>(null);
+  const isMounted = useRef(false);
 
-  // Format datetime strings for hidden inputs
+  // Format datetime strings for hidden inputs and callbacks
   const getDateTimeString = (date: Date | null, time: string): string => {
     if (!date) return "";
     const [hours, minutes] = time.split(":").map(Number);
@@ -73,6 +76,18 @@ export default function DateFilter({
 
   const startDateTimeString = getDateTimeString(startDate, startTime);
   const endDateTimeString = getDateTimeString(endDate, endTime);
+
+  useEffect(() => {
+    if (!isMounted.current) {
+      isMounted.current = true;
+      return;
+    }
+    onStartChange?.(startDateTimeString);
+  }, [startDate, startTime]);
+
+  useEffect(() => {
+    if (endDate) onEndChange?.(endDateTimeString);
+  }, [endDate, endTime]);
 
   // Handle click outside
   useEffect(() => {
@@ -299,46 +314,17 @@ export default function DateFilter({
 
             {/* Times */}
             <div className="border-t border-zinc-100 p-4 grid grid-cols-2 gap-3">
-              <div className="flex flex-col gap-1">
-                <label className="text-xs font-medium text-zinc-900">
-                  Začátek
-                </label>
-                <input
-                  type="text"
-                  placeholder="09:00"
-                  value={startTime}
-                  onChange={(e) => {
-                    const formatted = formatTimeInput(e.target.value);
-                    setStartTime(formatted);
-                  }}
-                  maxLength={5}
-                  className={`px-2 py-1.5 border rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-rose-500 ${
-                    isValidTime(startTime) || startTime === ""
-                      ? "border-zinc-200"
-                      : "border-red-500"
-                  }`}
-                />
-              </div>
-              <div className="flex flex-col gap-1">
-                <label className="text-xs font-medium text-zinc-900">
-                  Konec
-                </label>
-                <input
-                  type="text"
-                  placeholder="17:00"
-                  value={endTime}
-                  onChange={(e) => {
-                    const formatted = formatTimeInput(e.target.value);
-                    setEndTime(formatted);
-                  }}
-                  maxLength={5}
-                  className={`px-2 py-1.5 border rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-rose-500 ${
-                    isValidTime(endTime) || endTime === ""
-                      ? "border-zinc-200"
-                      : "border-red-500"
-                  }`}
-                />
-              </div>
+              <TimeInput
+                label="Začátek"
+                value={startTime}
+                onChange={setStartTime}
+              />
+              <TimeInput
+                label="Konec"
+                value={endTime}
+                onChange={setEndTime}
+                min={startTime}
+              />
             </div>
           </div>
         )}

@@ -1,13 +1,25 @@
 "use client";
 
 import ListingCard from "@/app/components/ui/molecules/listing-card";
-import { useRouter } from "next/dist/client/components/navigation";
+import {
+  useRouter,
+  useSearchParams,
+} from "next/dist/client/components/navigation";
 import React, { useCallback } from "react";
-import CatalogFilters from "./catalog-filters";
+import CatalogFilters from "./filters/catalog-filters";
 import CatalogTypeSelection from "./catalog-type-selection";
-import GeneralFilters from "./general-filters";
+import GeneralFilters from "./filters/general-filters";
+import ActiveFilterTags from "./filters/active-filter-tags";
+import {
+  entertainmentFiltersFromParams,
+  gastroFiltersFromParams,
+  generalFiltersFromParams,
+  venueFiltersFromParams,
+} from "./filters/filter-params";
 
-type Props = {};
+type Props = {
+  type: "venue" | "gastro" | "entertainment";
+};
 
 const mockListings = [
   {
@@ -60,9 +72,10 @@ const mockListings = [
   },
 ];
 
-export default function Catalog({}: Props) {
+export default function Catalog({ type }: Props) {
   const router = useRouter();
   const [mapView, setMapView] = React.useState(false);
+  const searchParams = useSearchParams();
 
   const switchMapViewHandler = useCallback(() => {
     setMapView(!mapView);
@@ -73,6 +86,7 @@ export default function Catalog({}: Props) {
       <div className="max-w-content w-full flex flex-col gap-10">
         <CatalogTypeSelection />
         <GeneralFilters />
+        <ActiveFilterTags type={type} />
       </div>
       <div className={`flex items-start w-full max-w-content  gap-6`}>
         <div
@@ -81,9 +95,10 @@ export default function Catalog({}: Props) {
           <CatalogFilters
             switchMapViewHandler={switchMapViewHandler}
             mapViewIsActive={mapView}
+            type={type}
           />
         </div>
-        <div className="w-full grid grid-cols-[repeat(auto-fill,minmax(230px,1fr))] content-start gap-5">
+        <div className="w-full grid grid-cols-[repeat(auto-fill,minmax(300px,1fr))] content-start gap-5">
           {mockListings.map((listing) => (
             <ListingCard
               key={listing.title}

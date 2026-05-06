@@ -56,7 +56,14 @@ export default function HeroSection({}: HeroSectionProps) {
             sami.
           </Text>
         </div>
-        <Button text="Přejít do katalogu" size="2xl" className="mt-10" />
+        <Button
+          text="Přejít do katalogu"
+          size="2xl"
+          className="mt-10"
+          link={{
+            pathname: "/catalog",
+          }}
+        />
       </div>
     </div>
   );

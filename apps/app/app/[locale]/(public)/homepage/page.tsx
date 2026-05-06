@@ -37,19 +37,19 @@ export default function page({}: Props) {
             imageUrl="https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f"
             title="Místa"
             text="Objevuj zajímavá místa a lokace pro své zážitky"
-            link={{ pathname: "/catalog/[type]", params: { type: "mista" } }}
+            link={{ pathname: "/catalog/venue" }}
           />
           <ListingTypeBanner
             imageUrl="https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f"
             title="Gastro"
             text="Objevuj nejlepší gastronomické zážitky ve tvém okolí"
-            link={{ pathname: "/catalog/[type]", params: { type: "gastro" } }}
+            link={{ pathname: "/catalog/gastro" }}
           />
           <ListingTypeBanner
             imageUrl="https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f"
             title="Zábava"
             text="Najdi zábavné aktivity a události pro volný čas"
-            link={{ pathname: "/catalog/[type]", params: { type: "zabava" } }}
+            link={{ pathname: "/catalog/entertainment" }}
           />
         </div>
       </LandingSectionWrapper>

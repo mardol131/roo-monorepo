@@ -1,47 +1,51 @@
 "use client";
 
-import Button from "@/app/components/ui/atoms/button";
 import Text from "@/app/components/ui/atoms/text";
-import { useParams, useRouter } from "next/dist/client/components/navigation";
-import Image from "next/image";
-import Link from "next/link";
-import React, { useRef, useState } from "react";
-import { ChevronDown } from "lucide-react";
+import { CatalogType } from "@/app/data/catalog";
 import { useClickOutside } from "@/app/hooks/use-click-outside";
+import { usePathname, useRouter } from "@/app/i18n/navigation";
+import { ChevronDown } from "lucide-react";
+import { useMemo, useRef, useState } from "react";
 
 type Props = {};
 
-const catalogTypes = [
-  {
-    value: "gastro",
-    label: "Gastro",
-    imageUrl:
-      "https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=400&q=80",
-  },
-  {
-    value: "misto",
-    label: "Místo",
-    imageUrl:
-      "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=400&q=80",
-  },
-  {
-    value: "zabava",
-    label: "Zábavu",
-    imageUrl:
-      "https://images.unsplash.com/photo-1519125323398-675f0ddb6308?auto=format&fit=crop&w=400&q=80",
-  },
-];
+const catalogTypes: { value: CatalogType; label: string; imageUrl: string }[] =
+  [
+    {
+      value: "gastro",
+      label: "Gastro",
+      imageUrl:
+        "https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=400&q=80",
+    },
+    {
+      value: "venue",
+      label: "Místo",
+      imageUrl:
+        "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=400&q=80",
+    },
+    {
+      value: "entertainment",
+      label: "Zábavu",
+      imageUrl:
+        "https://images.unsplash.com/photo-1519125323398-675f0ddb6308?auto=format&fit=crop&w=400&q=80",
+    },
+  ];
 
 export default function CatalogTypeSelection({}: Props) {
-  const params = useParams();
   const router = useRouter();
+  const pathname = usePathname();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const currentType = params.type as string;
+  const currentType: CatalogType = useMemo(() => {
+    if (pathname === "/catalog/entertainment") return "entertainment";
+    if (pathname === "/catalog/gastro") return "gastro";
+    return "venue";
+  }, [pathname]);
+
   const currentLabel =
     catalogTypes.find((t) => t.value === currentType)?.label || "Vyberte";
 
-  const handleTypeSelect = (value: string) => {
-    router.push(`/katalog/${value}`);
+  const handleTypeSelect = (value: CatalogType) => {
+    router.push({ pathname: `/catalog/${value}` });
     setIsDropdownOpen(false);
   };
 

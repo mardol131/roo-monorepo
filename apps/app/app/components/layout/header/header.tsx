@@ -14,17 +14,17 @@ const NAV_ITEMS: { label: string; href: IntlLink; icon: React.ElementType }[] =
     {
       label: "Místa",
       icon: MapPin,
-      href: { pathname: "/catalog/[type]", params: { type: "misto" } },
+      href: { pathname: "/catalog/venue" },
     },
     {
       label: "Gastro",
       icon: UtensilsCrossed,
-      href: { pathname: "/catalog/[type]", params: { type: "gastro" } },
+      href: { pathname: "/catalog/gastro" },
     },
     {
       label: "Zábava",
       icon: Gamepad2,
-      href: { pathname: "/catalog/[type]", params: { type: "zabava" } },
+      href: { pathname: "/catalog/entertainment" },
     },
   ];
 
@@ -35,8 +35,8 @@ export default function Header() {
   const userIsNotLoggedInOrDoesNotHaveCompany =
     !auth.user || auth.user.type === "user";
   return (
-    <header className="sticky top-0 z-50 w-full bg-white/95 backdrop-blur-sm border-b border-zinc-100">
-      <div className="max-w-content mx-auto px-6 flex items-center justify-between h-16">
+    <header className="sticky top-0 z-50 px-6 w-full bg-white/95 backdrop-blur-sm border-b border-zinc-100">
+      <div className="max-w-content mx-auto flex items-center justify-between h-16">
         {/* Logo + nav */}
         <div className="flex items-center gap-8">
           <Link href="/homepage" className="flex items-center gap-2 shrink-0">

@@ -3,7 +3,7 @@ import Text from "../text";
 import { MdCheckBox, MdCheckBoxOutlineBlank } from "react-icons/md";
 import ErrorText from "./error-text";
 
-interface CheckboxProps {
+export interface CheckboxProps {
   checked: boolean;
   onChange: (checked: boolean) => void;
   label: React.ReactNode;

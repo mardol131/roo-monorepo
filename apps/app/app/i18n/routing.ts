@@ -8,7 +8,9 @@ export const routing = defineRouting({
     "/homepage": { cs: "/" },
     "/login-required": { cs: "/prihlaseni" },
     "/catalog": { cs: "/katalog" },
-    "/catalog/[type]": { cs: "/katalog/[type]" },
+    "/catalog/gastro": { cs: "/katalog/gastro" },
+    "/catalog/venue": { cs: "/katalog/misto" },
+    "/catalog/entertainment": { cs: "/katalog/zabava" },
     "/listing/[listingId]": { cs: "/inzerat/[listingId]" },
     "/listing/[listingId]/inquiry": { cs: "/inzerat/[listingId]/poptavka" },
 

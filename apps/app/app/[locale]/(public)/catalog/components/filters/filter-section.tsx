@@ -1,11 +1,11 @@
-import React from "react";
-import Text from "../../../../../components/ui/atoms/text";
-import Checkbox from "../../../../../components/ui/atoms/inputs/checkbox";
-import Button from "@/app/components/ui/atoms/button";
+import Checkbox, {
+  CheckboxProps,
+} from "@/app/components/ui/atoms/inputs/checkbox";
+import Text from "@/app/components/ui/atoms/text";
 
 interface FilterOption {
   id: string;
-  label: string;
+  name: string;
 }
 
 interface FilterSectionProps {
@@ -13,6 +13,7 @@ interface FilterSectionProps {
   options: FilterOption[];
   selectedIds: string[];
   onSelectionChange: (ids: string[]) => void;
+  size?: CheckboxProps["size"];
 }
 
 export default function FilterSection({
@@ -20,6 +21,7 @@ export default function FilterSection({
   options,
   selectedIds,
   onSelectionChange,
+  size,
 }: FilterSectionProps) {
   const handleCheckboxChange = (optionId: string, checked: boolean) => {
     if (checked) {
@@ -31,7 +33,10 @@ export default function FilterSection({
 
   return (
     <div className=" ">
-      <Text variant="label-lg" className="mb-3 block text-zinc-900 font-semibold">
+      <Text
+        variant="label-lg"
+        className="mb-3 block text-zinc-900 font-semibold"
+      >
         {title}
       </Text>
 
@@ -40,9 +45,10 @@ export default function FilterSection({
           <Checkbox
             key={option.id}
             id={option.id}
-            label={option.label}
+            label={option.name}
             checked={selectedIds.includes(option.id)}
             onChange={(checked) => handleCheckboxChange(option.id, checked)}
+            size={size || "md"}
           />
         ))}
       </div>

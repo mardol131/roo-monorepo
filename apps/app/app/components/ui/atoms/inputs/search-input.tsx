@@ -9,6 +9,7 @@ import ErrorText from "./error-text";
 export interface SearchOption {
   id: string;
   name: string;
+  info?: string;
 }
 
 interface SearchInputProps {
@@ -117,6 +118,11 @@ export default function SearchInput({
               className="w-full px-3 py-2.5 text-left hover:bg-zinc-50 text-sm text-zinc-900 transition-colors"
             >
               {option.name}
+              {option.info && (
+                <span className="text-xs text-zinc-500 ml-2">
+                  {option.info}
+                </span>
+              )}
             </button>
           ))}
         </div>
@@ -152,7 +158,7 @@ export default function SearchInput({
         {...rest}
         value={selected?.id ?? ""}
       />
-      <InputLabel label={label} isRequired={isRequired} />
+      {label && <InputLabel label={label} isRequired={isRequired} />}
 
       {type === "fixed" ? (
         <div className="flex flex-col gap-2">
@@ -177,7 +183,14 @@ export default function SearchInput({
           </div>
           {selected && !searchQuery && (
             <div className="flex items-center gap-2 px-3 py-2 bg-zinc-50 border border-zinc-200 rounded-lg text-sm text-zinc-900">
-              <span className="flex-1">{selected.name}</span>
+              <div className="flex">
+                <span className="flex-1">{selected.name}</span>
+                {selected.info && (
+                  <span className="text-xs text-zinc-500 ml-2">
+                    {selected.info}
+                  </span>
+                )}
+              </div>
               <button
                 type="button"
                 onClick={handleClear}
@@ -201,9 +214,18 @@ export default function SearchInput({
             }}
             className={`w-full px-3 py-2.5 border ${error ? "border-rose-500" : "border-zinc-200"} rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-rose-500 bg-white text-left flex items-center justify-between`}
           >
-            <span className={`text-sm ${selected ? "text-zinc-900" : "text-zinc-400"}`}>
-              {selected ? selected.name : placeholder}
-            </span>
+            <div className="flex items-center">
+              <span
+                className={`text-sm ${selected ? "text-zinc-900" : "text-zinc-400"}`}
+              >
+                {selected ? selected.name : placeholder}
+              </span>
+              {selected && selected.info && (
+                <span className="text-xs text-zinc-500 ml-2">
+                  {selected.info}
+                </span>
+              )}
+            </div>
             {selected ? (
               <button
                 type="button"
