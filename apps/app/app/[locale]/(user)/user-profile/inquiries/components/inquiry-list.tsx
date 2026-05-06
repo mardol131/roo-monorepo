@@ -12,9 +12,9 @@ import {
 import { format } from "date-fns";
 import { MessageSquare } from "lucide-react";
 import { useState } from "react";
-import EntityRow from "../../../../components/entity-row";
-import RowContainer from "../../../../components/row-container";
-import TabFilter from "../../../../components/tab-filter";
+import EntityRow from "../../../components/entity-row";
+import RowContainer from "../../../components/row-container";
+import TabFilter from "../../../components/tab-filter";
 import { EmptyState } from "@/app/[locale]/(user)/components/empty-state";
 
 // ── Config ─────────────────────────────────────────────────────────────────────

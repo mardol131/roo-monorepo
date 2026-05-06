@@ -58,7 +58,7 @@ const schema = z.object({
   }),
   location: z.object({
     address: z.string().min(1, "Adresa je povinná"),
-    city: z.string().min(1, "Město je povinné"),
+    city: z.object({ id: z.string(), name: z.string() }, "Vyberte město"),
   }),
   capacity: z.coerce
     .number({ message: "Zadejte číslo" })
@@ -174,7 +174,7 @@ export default function VenueListingForm({ onCancel }: Props) {
         {
           location: {
             address: data.location.address,
-            city: data.location.city,
+            city: data.location.city.id,
           },
           spacesType: data.spaceType,
           capacity: data.capacity,
@@ -370,19 +370,12 @@ export default function VenueListingForm({ onCancel }: Props) {
                 onSearchQueryChange={setVenueCitySearch}
                 options={venueCitiesData?.docs ?? []}
                 type="dropdown"
-                value={
-                  field.value
-                    ? {
-                        id: field.value,
-                        name:
-                          venueCitiesData?.docs?.find(
-                            (c) => c.id === field.value,
-                          )?.name ?? "",
-                      }
-                    : undefined
-                }
-                onSelect={(o) => field.onChange(o.id)}
-                onClear={() => field.onChange("")}
+                selectedOption={field.value ?? undefined}
+                onSelect={field.onChange}
+                onClear={() => field.onChange(null)}
+                ref={field.ref}
+                name={field.name}
+                onBlur={field.onBlur}
                 error={errors.location?.city?.message}
               />
             )}

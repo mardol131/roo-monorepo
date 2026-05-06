@@ -30,24 +30,34 @@ export function useCompany(id: string | undefined) {
 }
 
 export function useUpdateCompany(
-  id: string,
-  options?: UseMutationOptions<Company, Error, CreateCompanyPayload>,
+  options?: UseMutationOptions<
+    Company,
+    Error,
+    { id: string; data: Partial<Company> }
+  >,
 ) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (data: CreateCompanyPayload) => updateCompany(id, data),
-    onSuccess: (...args) => {
-      queryClient.invalidateQueries({ queryKey: companyKeys.byId(id) });
+    mutationFn: ({ id, data }: { id: string; data: Partial<Company> }) =>
+      updateCompany(id, data),
+    onSuccess: (company, variables, ...rest) => {
+      queryClient.invalidateQueries({
+        queryKey: companyKeys.byId(variables.id),
+      });
       queryClient.invalidateQueries({ queryKey: companyKeys.all() });
-      options?.onSuccess?.(...args);
+      options?.onSuccess?.(company, variables, ...rest);
     },
     onError: options?.onError,
   });
 }
 
 export function useCreateCompany(
-  options?: UseMutationOptions<{ doc: Company; message: string }, Error, CreateCompanyPayload>,
+  options?: UseMutationOptions<
+    { doc: Company; message: string },
+    Error,
+    CreateCompanyPayload
+  >,
 ) {
   const queryClient = useQueryClient();
 

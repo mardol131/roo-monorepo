@@ -8,6 +8,7 @@ import { useListing } from "@/app/react-query/listings/hooks";
 import { useCompany } from "@/app/react-query/companies/hooks";
 import { useVariant } from "@/app/react-query/variants/hooks";
 import { useTranslations } from "next-intl";
+import { useSpace } from "@/app/react-query/spaces/hooks";
 
 type BreadcrumbItem = {
   label: string;
@@ -23,7 +24,8 @@ export default function Breadcrumbs({ items }: Props) {
   const i18nPathname = useI18nPathname();
   const t = useTranslations();
 
-  const { listingId, companyId, eventId, inquiryId, variantId } = useParams();
+  const { listingId, companyId, eventId, inquiryId, variantId, spaceId } =
+    useParams();
 
   const { data: listings } = useListing(
     typeof listingId === "string" ? listingId : "",
@@ -40,12 +42,15 @@ export default function Breadcrumbs({ items }: Props) {
   const { data: variant } = useVariant(
     typeof variantId === "string" ? variantId : "",
   );
+
+  const { data: space } = useSpace(typeof spaceId === "string" ? spaceId : "");
   function formatSegment(segment: string): string {
     if (companyId && segment === companyId) return company?.name ?? segment;
     if (listingId && segment === listingId) return listings?.name ?? segment;
     if (eventId && segment === eventId) return events?.name ?? segment;
     if (inquiryId && segment === inquiryId) return inquiries?.name ?? segment;
     if (variantId && segment === variantId) return variant?.name ?? segment;
+    if (spaceId && segment === spaceId) return space?.name ?? segment;
 
     if (segment === "company-profile") return t("companies.singular");
     if (segment === "companies") return t("companies.plural");
@@ -53,6 +58,7 @@ export default function Breadcrumbs({ items }: Props) {
     if (segment === "events") return t("events.plural");
     if (segment === "inquiries") return t("inquiries.plural");
     if (segment === "variants") return t("variants.plural");
+    if (segment === "spaces") return t("spaces.plural");
     if (segment === "edit") return t("breadcrumbs.edit");
 
     if (segment === "[companyId]")
@@ -64,6 +70,7 @@ export default function Breadcrumbs({ items }: Props) {
       return inquiries?.name ?? t("inquiries.singular");
     if (segment === "[variantId]")
       return variant?.name ?? t("variants.singular");
+    if (segment === "[spaceId]") return space?.name ?? t("spaces.singular");
 
     return segment.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
   }

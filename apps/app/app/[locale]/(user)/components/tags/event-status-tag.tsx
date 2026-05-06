@@ -35,7 +35,7 @@ const icon = ({ eventStatus }: Props) => {
 };
 
 export default function EventStatusTag({ eventStatus }: Props) {
-  const t = useTranslations("event.status");
+  const t = useTranslations("events.status");
 
   const { bgColor, textColor } = color({ eventStatus });
 

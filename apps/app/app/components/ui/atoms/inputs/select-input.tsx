@@ -2,7 +2,7 @@
 
 import React, { useRef, useState, useEffect } from "react";
 import Text from "./../text";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, Search } from "lucide-react";
 import InputLabel from "../input-label";
 
 export type SelectOption = {
@@ -15,15 +15,23 @@ type Props = React.InputHTMLAttributes<HTMLSelectElement> & {
   items: SelectOption[];
   placeholder?: string;
   error?: string;
+  searchable?: boolean;
 };
 
 const SelectInput = React.forwardRef<HTMLSelectElement, Props>(
   (
-    { label, items, placeholder, id, value, onChange, error, ...props },
+    { label, items, placeholder, id, value, onChange, error, searchable, ...props },
     ref,
   ) => {
     const [isOpen, setIsOpen] = useState(false);
+    const [searchQuery, setSearchQuery] = useState("");
     const containerRef = useRef<HTMLDivElement>(null);
+
+    const filteredItems = searchable && searchQuery
+      ? items.filter((item) =>
+          item.label.toLowerCase().includes(searchQuery.toLowerCase()),
+        )
+      : items;
 
     const selectedItem = items.find((item) => item.value === value);
     const displayValue =
@@ -42,8 +50,10 @@ const SelectInput = React.forwardRef<HTMLSelectElement, Props>(
 
       if (isOpen) {
         document.addEventListener("mousedown", handleClickOutside);
-        return () =>
+        return () => {
           document.removeEventListener("mousedown", handleClickOutside);
+          setSearchQuery("");
+        };
       }
     }, [isOpen]);
 
@@ -95,9 +105,22 @@ const SelectInput = React.forwardRef<HTMLSelectElement, Props>(
         {/* Dropdown menu */}
         {isOpen && (
           <div className="absolute z-50 w-full mt-1 bg-white border border-zinc-200 rounded-lg shadow-md p-1">
-            {items.length > 0 ? (
+            {searchable && (
+              <div className="relative flex items-center mb-1 px-1 pt-1">
+                <Search className="absolute left-4 w-4 h-4 text-zinc-400" />
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  autoFocus
+                  placeholder="Hledat..."
+                  className="w-full pl-9 pr-3 py-2 border border-zinc-200 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-rose-500"
+                />
+              </div>
+            )}
+            {filteredItems.length > 0 ? (
               <ul className="max-h-60 overflow-y-auto flex flex-col gap-0.5">
-                {items.map((item) => (
+                {filteredItems.map((item) => (
                   <li key={item.value}>
                     <button
                       type="button"
@@ -114,7 +137,9 @@ const SelectInput = React.forwardRef<HTMLSelectElement, Props>(
                 ))}
               </ul>
             ) : (
-              <p className="px-3 py-2 text-xs text-zinc-400">Žádné položky</p>
+              <p className="px-3 py-2 text-xs text-zinc-400">
+                {searchable && searchQuery ? "Žádné výsledky" : "Žádné položky"}
+              </p>
             )}
           </div>
         )}

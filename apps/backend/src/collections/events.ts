@@ -109,6 +109,7 @@ export const Events: CollectionConfig = {
               name: 'city',
               type: 'relationship',
               relationTo: 'cities',
+              required: true,
             },
             {
               name: 'address',
@@ -118,26 +119,14 @@ export const Events: CollectionConfig = {
               },
             },
             {
-              name: 'buildingType',
-              type: 'select',
-              options: [
-                { label: 'Hotel', value: 'hotel' },
-                { label: 'Restaurace', value: 'restaurant' },
-                { label: 'Konferenční centrum', value: 'conference_center' },
-                { label: 'Venkovní prostory', value: 'outdoor' },
-                { label: 'Soukromé prostory', value: 'private' },
-                { label: 'Jiné', value: 'other' },
-              ],
-              admin: {
-                description: 'Nepovinné.',
-              },
+              name: 'spaceType',
+              type: 'relationship',
+              relationTo: 'space-types',
+              required: true,
             },
             {
               name: 'description',
               type: 'text',
-              admin: {
-                description: 'Nepovinný popis místa (např. „Zahrada u rodinného domu").',
-              },
             },
           ],
         },
@@ -178,4 +167,20 @@ export const Events: CollectionConfig = {
       required: true,
     },
   ],
+  hooks: {
+    beforeChange: [
+      async ({ req, operation }) => {
+        if (operation === 'update') {
+          return
+        }
+        if (!req.user || !req.data) {
+          return
+        }
+        const { user } = req
+        if (user) {
+          req.data.owner = user.id
+        }
+      },
+    ],
+  },
 }

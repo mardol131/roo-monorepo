@@ -1,5 +1,6 @@
 import type { CollectionConfig } from 'payload'
 import { getPhoneField } from './common-fields/phone'
+import { getRecordStatuses } from '@roo/common'
 
 export const Companies: CollectionConfig = {
   slug: 'companies',
@@ -7,13 +8,17 @@ export const Companies: CollectionConfig = {
     useAsTitle: 'name',
   },
   access: {
-    create: ({ req }) => {
-      console.log('THIS IS IT')
-      console.log('Create company access check, user:', req.user)
-      return !!req.user
+    create: ({ req }) => !!req.user,
+    read: ({ req }) => {
+      if (!req.user) return false
+      if (req.user.collection === 'admins') return true
+      return { status: { equals: 'active' } }
     },
-    read: ({ req }) => !!req.user,
-    update: ({ req }) => !!req.user,
+    update: ({ req }) => {
+      if (!req.user) return false
+      if (req.user.collection === 'admins') return true
+      return { status: { equals: 'active' } }
+    },
     delete: ({ req }) => req.user?.collection === 'admins',
   },
   fields: [
@@ -21,6 +26,13 @@ export const Companies: CollectionConfig = {
     {
       name: 'name',
       type: 'text',
+      required: true,
+    },
+    {
+      name: 'status',
+      type: 'select',
+      options: getRecordStatuses(['active', 'archived', 'disabled']),
+      defaultValue: 'active',
       required: true,
     },
     {

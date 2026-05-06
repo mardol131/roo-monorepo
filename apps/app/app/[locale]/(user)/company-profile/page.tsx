@@ -25,14 +25,14 @@ export default function page() {
       <div className="grid grid-cols-3 gap-4 mb-6">
         <SummaryCard
           label="Registrované firmy"
-          value={String(companies?.docs.length ?? 0)}
+          value={String(companies?.docs?.length ?? 0)}
           icon={Building2}
           iconBg="bg-company-surface"
           iconColor="text-company"
         />
         <SummaryCard
           label="Celkem služeb"
-          value={String(listings?.length ?? 0)}
+          value={String(listings?.docs?.length ?? 0)}
           icon={Tag}
           iconBg="bg-listing-surface"
           iconColor="text-listing"

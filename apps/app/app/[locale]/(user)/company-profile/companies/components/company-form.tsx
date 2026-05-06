@@ -62,11 +62,11 @@ const schema = z.object({
   vatId: z.string().optional().nullable(),
 });
 
-type FormInputs = CreateCompanyPayload;
+export type CreateCompanyFormInputs = z.infer<typeof schema>;
 
 type Props = {
-  defaultValues?: Partial<FormInputs>;
-  onSubmit: (data: FormInputs) => void;
+  defaultValues?: Partial<CreateCompanyFormInputs>;
+  onSubmit: (data: CreateCompanyFormInputs) => void;
   onBackClick: () => void;
   submitLabel: string;
   cancelLabel: string;
@@ -84,7 +84,7 @@ export default function CompanyForm({
     handleSubmit,
     control,
     formState: { errors },
-  } = useForm<FormInputs>({
+  } = useForm<CreateCompanyFormInputs>({
     resolver: zodResolver(schema),
     defaultValues: {
       ...defaultValues,
@@ -94,10 +94,6 @@ export default function CompanyForm({
       },
     },
   });
-
-  console.log("Form errors:", errors);
-
-  const t = useTranslations();
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="flex gap-6">

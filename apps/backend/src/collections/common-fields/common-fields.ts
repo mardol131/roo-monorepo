@@ -254,6 +254,22 @@ export const variantsCommonFields: Field[] = [
     required: true,
   },
   {
+    name: 'selectedSeasons',
+    type: 'array',
+    fields: [
+      {
+        name: 'from',
+        type: 'text',
+        required: true,
+      },
+      {
+        name: 'to',
+        type: 'text',
+        required: true,
+      },
+    ],
+  },
+  {
     name: 'availability',
     type: 'select',
     options: ['allDay', 'selectedHours'],

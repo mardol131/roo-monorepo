@@ -85,8 +85,7 @@ export const dietaryOptionsKeys = {
 };
 
 export const dishTypesKeys = {
-  all: (query?: Where, limit?: number) =>
-    ["dish-types", query, limit] as const,
+  all: (query?: Where, limit?: number) => ["dish-types", query, limit] as const,
 };
 
 export const entertainmentTypesKeys = {
@@ -105,8 +104,7 @@ export const foodServiceStylesKeys = {
 };
 
 export const personnelKeys = {
-  all: (query?: Where, limit?: number) =>
-    ["personnel", query, limit] as const,
+  all: (query?: Where, limit?: number) => ["personnel", query, limit] as const,
 };
 
 export const placeTypesKeys = {
@@ -133,6 +131,11 @@ export const necessitiesKeys = {
 export const roomAmenitiesKeys = {
   all: (query?: Where, limit?: number) =>
     ["room-amenities", query, limit] as const,
+};
+
+export const spaceTypesKeys = {
+  all: (query?: Where, limit?: number) =>
+    ["space-types", query, limit] as const,
 };
 
 export const rulesKeys = {

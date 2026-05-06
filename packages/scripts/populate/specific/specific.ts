@@ -4,7 +4,7 @@ import { config } from "../config";
 
 const CSV_PATH = path.join(import.meta.dirname, "specific.csv");
 
-const COLLECTIONS = ["necessities", "room-amenities", "rules"] as const;
+const COLLECTIONS = ["necessities", "room-amenities", "rules", "space-types"] as const;
 
 type Collection = (typeof COLLECTIONS)[number];
 

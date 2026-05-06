@@ -1,6 +1,8 @@
 import {
   getCollection,
+  getCollectionItem,
   patchCollectionItem,
+  postCollectionItem,
 } from "@/app/functions/api/general";
 import type { Event } from "@roo/common";
 
@@ -14,15 +16,26 @@ export async function fetchEvents() {
 }
 
 export async function fetchEventById(id: string) {
-  const res = await getCollection({
+  const res = await getCollectionItem({
     collection: "events",
-    query: { id: { equals: id } },
+    id,
   });
   if (!res) throw new Error("Failed to fetch event");
   return res;
 }
 
-async function patchEvent(
+type CreateEventData = Omit<Event, "id" | "owner" | "updatedAt" | "createdAt">;
+
+export async function createEvent(data: CreateEventData) {
+  const res = await postCollectionItem({
+    collection: "events",
+    data,
+  });
+  if (!res) throw new Error("Failed to create event");
+  return res;
+}
+
+export async function patchEvent(
   eventId: string,
   body: Partial<Event>,
 ): Promise<Event> {

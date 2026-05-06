@@ -39,6 +39,7 @@ import { CalendarEvents } from './collections/calendar-events'
 import { FavouriteListings } from './collections/favourite-listings'
 import { Users } from './collections/Users'
 import { Media } from './collections/Media'
+import { SpaceTypes } from './collections/specific/space-types'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -96,6 +97,7 @@ export default buildConfig({
     Inquiries,
     CalendarEvents,
     FavouriteListings,
+    SpaceTypes,
   ],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || '',

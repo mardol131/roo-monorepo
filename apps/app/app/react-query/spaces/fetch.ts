@@ -27,7 +27,10 @@ export async function fetchSpace(id: string) {
   return res;
 }
 
-export type CreateSpaceInput = Omit<Space, "id" | "createdAt" | "updatedAt">;
+export type CreateSpaceInput = Omit<
+  Space,
+  "id" | "createdAt" | "updatedAt" | "status"
+>;
 
 export async function createSpace(input: CreateSpaceInput) {
   const res = await postCollectionItem({

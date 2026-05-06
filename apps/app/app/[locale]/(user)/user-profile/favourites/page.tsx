@@ -1,11 +1,11 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import PageHeading from "../../../components/page-heading";
+import PageHeading from "../../components/page-heading";
 import { useFavouriteListings } from "@/app/react-query/favourite-listings/hooks";
 import { useListings } from "@/app/react-query/listings/hooks";
-import Loader from "../../../components/loader";
-import { EmptyState } from "../../../components/empty-state";
+import Loader from "../../components/loader";
+import { EmptyState } from "../../components/empty-state";
 import ListingCard from "@/app/components/ui/molecules/listing-card";
 
 const PAGE_SIZE = 10;
@@ -20,7 +20,7 @@ export default function FavoritesPage() {
   const favouriteIds = useMemo(
     () =>
       new Set(
-        favourites?.map((f) =>
+        favourites?.docs?.map((f) =>
           typeof f.listing === "string" ? f.listing : f.listing.id,
         ),
       ),
@@ -28,7 +28,7 @@ export default function FavoritesPage() {
   );
 
   const filteredListings = useMemo(
-    () => allListings?.filter((l) => favouriteIds.has(l.id)) ?? [],
+    () => allListings?.docs?.filter((l) => favouriteIds.has(l.id)) ?? [],
     [allListings, favouriteIds],
   );
 

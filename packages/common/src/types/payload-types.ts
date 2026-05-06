@@ -98,6 +98,7 @@ export interface Config {
     inquiries: Inquiry;
     'calendar-events': CalendarEvent;
     'favourite-listings': FavouriteListing;
+    'space-types': SpaceType;
     'payload-kv': PayloadKv;
     'payload-jobs': PayloadJob;
     'payload-locked-documents': PayloadLockedDocument;
@@ -136,6 +137,7 @@ export interface Config {
     inquiries: InquiriesSelect<false> | InquiriesSelect<true>;
     'calendar-events': CalendarEventsSelect<false> | CalendarEventsSelect<true>;
     'favourite-listings': FavouriteListingsSelect<false> | FavouriteListingsSelect<true>;
+    'space-types': SpaceTypesSelect<false> | SpaceTypesSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-jobs': PayloadJobsSelect<false> | PayloadJobsSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -695,6 +697,7 @@ export interface Listing {
 export interface Company {
   id: string;
   name: string;
+  status: 'active' | 'disabled' | 'archived';
   ico: string;
   description?: string | null;
   logo?: string | null;
@@ -939,15 +942,9 @@ export interface Event {
             blockType: 'venue';
           }
         | {
-            city?: (string | null) | City;
+            city: string | City;
             address?: string | null;
-            /**
-             * Nepovinné.
-             */
-            buildingType?: ('hotel' | 'restaurant' | 'conference_center' | 'outdoor' | 'private' | 'other') | null;
-            /**
-             * Nepovinný popis místa (např. „Zahrada u rodinného domu").
-             */
+            spaceType: string | SpaceType;
             description?: string | null;
             id?: string | null;
             blockName?: string | null;
@@ -962,6 +959,17 @@ export interface Event {
     pets?: boolean | null;
   };
   owner: string | User;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "space-types".
+ */
+export interface SpaceType {
+  id: string;
+  name: string;
+  slug: string;
   updatedAt: string;
   createdAt: string;
 }
@@ -1330,6 +1338,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'favourite-listings';
         value: string | FavouriteListing;
+      } | null)
+    | ({
+        relationTo: 'space-types';
+        value: string | SpaceType;
       } | null);
   globalSlug?: string | null;
   user:
@@ -1960,6 +1972,7 @@ export interface PersonnelSelect<T extends boolean = true> {
  */
 export interface CompaniesSelect<T extends boolean = true> {
   name?: T;
+  status?: T;
   ico?: T;
   description?: T;
   logo?: T;
@@ -2116,7 +2129,7 @@ export interface EventsSelect<T extends boolean = true> {
           | {
               city?: T;
               address?: T;
-              buildingType?: T;
+              spaceType?: T;
               description?: T;
               id?: T;
               blockName?: T;
@@ -2247,6 +2260,16 @@ export interface FavouriteListingsSelect<T extends boolean = true> {
   user?: T;
   listing?: T;
   addedAt?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "space-types_select".
+ */
+export interface SpaceTypesSelect<T extends boolean = true> {
+  name?: T;
+  slug?: T;
   updatedAt?: T;
   createdAt?: T;
 }

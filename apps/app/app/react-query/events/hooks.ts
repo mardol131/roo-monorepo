@@ -1,7 +1,18 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  useMutation,
+  UseMutationOptions,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 import type { Event } from "@roo/common";
 import { eventKeys } from "../query-keys";
-import { addNoteToEvent, fetchEventById, fetchEvents, updateChecklist } from "./fetch";
+import {
+  addNoteToEvent,
+  createEvent,
+  fetchEventById,
+  fetchEvents,
+  updateChecklist,
+} from "./fetch";
 
 export function useEvents() {
   return useQuery({
@@ -14,6 +25,24 @@ export function useEvent(id: string) {
   return useQuery({
     queryKey: eventKeys.byId(id),
     queryFn: () => fetchEventById(id),
+  });
+}
+
+type CreateEventData = Parameters<typeof createEvent>[0];
+
+export function useCreateEvent(
+  options?: UseMutationOptions<{ doc: Event; message: string }, Error, CreateEventData>,
+) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (data: CreateEventData) => {
+      return createEvent(data);
+    },
+    onSuccess: (...arg) => {
+      queryClient.invalidateQueries({ queryKey: eventKeys.all() });
+      options?.onSuccess?.(...arg);
+    },
   });
 }
 

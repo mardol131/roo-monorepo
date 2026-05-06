@@ -1,3 +1,5 @@
+"use client";
+
 import { Link } from "@/app/i18n/navigation";
 import { useInquiries } from "@/app/react-query/inquiries/hooks";
 import {
@@ -7,11 +9,11 @@ import {
 } from "@roo/common";
 import { format } from "date-fns";
 import { cs } from "date-fns/locale";
-import { EmptyState } from "../../../components/empty-state";
-import EntityRow from "../../../components/entity-row";
-import PageHeading from "../../../components/page-heading";
-import RowContainer from "../../../components/row-container";
-import EntityComponentTag from "../../../components/tags/entity-component-tag";
+import { EmptyState } from "../../components/empty-state";
+import EntityRow from "../../components/entity-row";
+import PageHeading from "../../components/page-heading";
+import RowContainer from "../../components/row-container";
+import EntityComponentTag from "../../components/tags/entity-component-tag";
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
 
@@ -39,7 +41,7 @@ function groupByEvent(
 export default function MessagesPage() {
   const { data: inquiries } = useInquiries();
 
-  const unread = inquiries?.docs.filter((inquiry) => {
+  const unread = inquiries?.docs?.filter((inquiry) => {
     if (!inquiry.activity.lastCompanyMessageSentAt) return false;
     if (!inquiry.activity.lastUserSeenAt) return true;
     return (

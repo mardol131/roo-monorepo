@@ -3,7 +3,9 @@
 import React, { useCallback } from "react";
 import { useRouter } from "next/navigation";
 import PageHeading from "../../../components/page-heading";
-import CompanyForm from "../components/company-form";
+import CompanyForm, {
+  CreateCompanyFormInputs,
+} from "../components/company-form";
 import { useCreateCompany } from "@/app/react-query/companies/hooks";
 import { Company } from "@roo/common";
 import { CreateCompanyPayload } from "@/app/react-query/companies/fetch";

@@ -41,21 +41,46 @@ import { z } from "zod";
 // ── TOC ───────────────────────────────────────────────────────────────────────
 
 const S: Record<string, TocSection> = {
-  basic: { id: "section-basic", title: "Základní informace", icon: "Building2" },
+  basic: {
+    id: "section-basic",
+    title: "Základní informace",
+    icon: "Building2",
+  },
   price: { id: "section-price", title: "Cena", icon: "Banknote" },
-  images: { id: "section-images", title: "Obrázky", icon: "Image", subTitle: "Podporované formáty: jpg, png, webp" },
+  images: {
+    id: "section-images",
+    title: "Obrázky",
+    icon: "Image",
+    subTitle: "Podporované formáty: jpg, png, webp",
+  },
   location: { id: "section-location", title: "Místo působení", icon: "MapPin" },
-  capacity: { id: "section-capacity", title: "Kapacita a objednávky", icon: "Users" },
+  capacity: {
+    id: "section-capacity",
+    title: "Kapacita a objednávky",
+    icon: "Users",
+  },
   cuisines: { id: "section-cuisines", title: "Kuchyně", icon: "ChefHat" },
   offer: { id: "section-offer", title: "Nabídka", icon: "Utensils" },
   extras: { id: "section-extras", title: "Doplňky", icon: "Star" },
-  eventTypes: { id: "section-event-types", title: "Typy akcí", icon: "Calendar" },
+  eventTypes: {
+    id: "section-event-types",
+    title: "Typy akcí",
+    icon: "Calendar",
+  },
   personnel: { id: "section-personnel", title: "Personál", icon: "UserCheck" },
-  necessities: { id: "section-necessities", title: "Nezbytnosti", icon: "Package" },
+  necessities: {
+    id: "section-necessities",
+    title: "Nezbytnosti",
+    icon: "Package",
+  },
   rules: { id: "section-rules", title: "Pravidla", icon: "ScrollText" },
   employees: { id: "section-employees", title: "Zaměstnanci", icon: "Users" },
   faq: { id: "section-faq", title: "FAQ", icon: "CircleHelp" },
-  references: { id: "section-references", title: "Reference", icon: "BookOpen" },
+  references: {
+    id: "section-references",
+    title: "Reference",
+    icon: "BookOpen",
+  },
 };
 
 export const GASTRO_FORM_GROUPS: readonly TocGroup[] = [
@@ -178,7 +203,7 @@ export default function EditGastroListingForm({
     companyId: string;
   }>();
   const { data: listing } = useListing(listingId);
-  const { mutate } = useUpdateListing(listingId, companyId);
+  const { mutate } = useUpdateListing(companyId);
   const router = useRouter();
 
   function onSubmit(data: GastroFormInputs) {
@@ -188,42 +213,45 @@ export default function EditGastroListingForm({
     );
     mutate(
       {
-        name: data.name,
-        shortDescription: data.shortDescription,
-        description: data.description,
-        eventTypes: data.eventTypes.map((i) => i.id),
-        images: {
-          ...data.images,
-          gallery: data.images.gallery.map((url) => ({ url })),
-        },
-        price: data.price,
-        rules: data.rules.map((i) => i.id),
-        employees: data.employees,
-        faq: data.faq,
-        references: data.references,
-        details: [
-          {
-            ...existingDetail,
-            blockType: "gastro",
-            location: {
-              region: data.location.regions.map((i) => i.id),
-              district: data.location.districts.map((i) => i.id),
-              city: data.location.cities.map((i) => i.id),
-              address: data.location.address,
-            },
-            capacity: data.capacity,
-            minimumCapacity: data.minimumCapacity,
-            cuisines: data.cuisines.map((i) => i.id),
-            dishTypes: data.dishTypes.map((i) => i.id),
-            dietaryOptions: data.dietaryOptions.map((i) => i.id),
-            foodServiceStyles: data.foodServiceStyles.map((i) => i.id),
-            kidsMenu: data.kidsMenu,
-            hasAlcoholLicense: data.hasAlcoholLicense,
-            foodAndDrinkRules: data.foodAndDrinkRules.map((i) => i.id),
-            personnel: data.personnel.map((i) => i.id),
-            necessities: data.necessities.map((i) => i.id),
+        id: listingId,
+        data: {
+          name: data.name,
+          shortDescription: data.shortDescription,
+          description: data.description,
+          eventTypes: data.eventTypes.map((i) => i.id),
+          images: {
+            ...data.images,
+            gallery: data.images.gallery.map((url) => ({ url })),
           },
-        ],
+          price: data.price,
+          rules: data.rules.map((i) => i.id),
+          employees: data.employees,
+          faq: data.faq,
+          references: data.references,
+          details: [
+            {
+              ...existingDetail,
+              blockType: "gastro",
+              location: {
+                region: data.location.regions.map((i) => i.id),
+                district: data.location.districts.map((i) => i.id),
+                city: data.location.cities.map((i) => i.id),
+                address: data.location.address,
+              },
+              capacity: data.capacity,
+              minimumCapacity: data.minimumCapacity,
+              cuisines: data.cuisines.map((i) => i.id),
+              dishTypes: data.dishTypes.map((i) => i.id),
+              dietaryOptions: data.dietaryOptions.map((i) => i.id),
+              foodServiceStyles: data.foodServiceStyles.map((i) => i.id),
+              kidsMenu: data.kidsMenu,
+              hasAlcoholLicense: data.hasAlcoholLicense,
+              foodAndDrinkRules: data.foodAndDrinkRules.map((i) => i.id),
+              personnel: data.personnel.map((i) => i.id),
+              necessities: data.necessities.map((i) => i.id),
+            },
+          ],
+        },
       },
       {
         onSuccess: () => router.back(),
@@ -1042,22 +1070,14 @@ export default function EditGastroListingForm({
                   name={`references.${index}.eventType`}
                   render={({ field }) => (
                     <SearchInput
-                      ref={field.ref}
                       label="Typ akce"
                       placeholder="Vyberte typ akce..."
-                      options={
-                        eventTypes?.docs.map((et) => ({
-                          id: et.id,
-                          name: et.name,
-                        })) ?? []
-                      }
-                      value={{
-                        id: field.value ?? "",
-                        name:
-                          eventTypes?.docs.find((et) => et.id === field.value)
-                            ?.name ?? "",
-                      }}
-                      onSelect={(option) => field.onChange(option.id)}
+                      options={eventTypes?.docs ?? []}
+                      onSelect={field.onChange}
+                      onClear={() => field.onChange(null)}
+                      ref={field.ref}
+                      name={field.name}
+                      onBlur={field.onBlur}
                     />
                   )}
                 />

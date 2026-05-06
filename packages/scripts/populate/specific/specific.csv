@@ -59,3 +59,10 @@ rules;Placené parkoviste;placene-parkoviste
 rules;Zákaz konfet a serpentýn;zakaz-konfet
 rules;Zákaz pyrotechniky;zakaz-pyrotechniky
 rules;Povinná vratná záloha;povinna-zaloha
+space-types;Venkovní prostory;outdoor
+space-types;Hotel;hotel
+space-types;Restaurace;restaurant
+space-types;Soukromé prostory;private
+space-types;Jiné;other
+space-types;Konferenční centrum;conference_center
+space-types;Venue;venue

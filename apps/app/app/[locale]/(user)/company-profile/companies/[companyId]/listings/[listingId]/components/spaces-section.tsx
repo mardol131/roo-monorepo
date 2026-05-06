@@ -45,7 +45,10 @@ function SpaceTreeNode({
     <div className="flex flex-col gap-2">
       <div className="flex items-center gap-3">
         {depth > 0 && (
-          <CornerDownRight size={16} className="text-zinc-400 w-6 h-6 shrink-0" />
+          <CornerDownRight
+            size={16}
+            className="text-zinc-400 w-6 h-6 shrink-0"
+          />
         )}
         <div className="w-full">
           <EntityCard
@@ -53,6 +56,7 @@ function SpaceTreeNode({
             iconColor="text-space"
             iconBackgroundColor="bg-space-surface"
             label={space.name}
+            plain
             link={{
               pathname:
                 "/company-profile/companies/[companyId]/listings/[listingId]/spaces/[spaceId]/edit",
@@ -99,6 +103,27 @@ export function SpacesSection({
   const allSpaces = spaces?.docs ?? [];
   const roots = allSpaces.filter((s) => !getParentId(s));
 
+  if (!spaces?.docs?.length) {
+    return (
+      <EmptyState
+        text="Žádné prostory"
+        subtext="Pro tuto službu zatím nejsou nastaveny žádné prostory."
+        icon="LayoutDashboard"
+        button={{
+          text: "Přidat prostory",
+          version: "spaceFull",
+          size: "sm",
+          iconLeft: "Plus",
+          link: {
+            pathname:
+              "/company-profile/companies/[companyId]/listings/[listingId]/spaces",
+            params: { companyId, listingId },
+          },
+        }}
+      />
+    );
+  }
+
   return (
     <DashboardSection
       title="Prostory"
@@ -118,36 +143,17 @@ export function SpacesSection({
         />
       }
     >
-      {roots.length > 0 ? (
-        <div className="flex flex-col gap-4">
-          {roots.map((root) => (
-            <SpaceTreeNode
-              key={root.id}
-              space={root}
-              allSpaces={allSpaces}
-              companyId={companyId}
-              listingId={listingId}
-            />
-          ))}
-        </div>
-      ) : (
-        <EmptyState
-          text="Žádné prostory"
-          subtext="Pro tuto službu zatím nejsou nastaveny žádné prostory."
-          icon="LayoutDashboard"
-          button={{
-            text: "Přidat prostory",
-            version: "spaceFull",
-            size: "sm",
-            iconLeft: "Plus",
-            link: {
-              pathname:
-                "/company-profile/companies/[companyId]/listings/[listingId]/spaces",
-              params: { companyId, listingId },
-            },
-          }}
-        />
-      )}
+      <div className="flex flex-col gap-4">
+        {roots.map((root) => (
+          <SpaceTreeNode
+            key={root.id}
+            space={root}
+            allSpaces={allSpaces}
+            companyId={companyId}
+            listingId={listingId}
+          />
+        ))}
+      </div>
     </DashboardSection>
   );
 }

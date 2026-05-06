@@ -27,11 +27,11 @@ import {
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import DashboardHeader from "../../../../components/dashboard-header";
-import EntityRow from "../../../../components/entity-row";
-import RowContainer from "../../../../components/row-container";
-import { SummaryCard } from "../../../../components/summary-card";
-import InquiryStatusTag from "../../../../components/tags/inquiry-status-tag";
+import DashboardHeader from "../../../components/dashboard-header";
+import EntityRow from "../../../components/entity-row";
+import RowContainer from "../../../components/row-container";
+import { SummaryCard } from "../../../components/summary-card";
+import InquiryStatusTag from "../../../components/tags/inquiry-status-tag";
 import EventChecklistSection from "./components/event-checklist-section";
 import EventNotesSection from "./components/event-notes-section";
 
@@ -55,11 +55,11 @@ export default function page() {
     (lucideIcons[event.icon as keyof typeof lucideIcons] as LucideIcon) ??
     Calendar;
 
-  const confirmed = inquiries?.filter(
-    (i) => aggregateInquiryStatus(i) === "confirmed",
+  const confirmed = inquiries?.docs?.filter(
+    (i) => aggregateInquiryStatus(i.status) === "confirmed",
   );
-  const pending = inquiries?.filter(
-    (i) => aggregateInquiryStatus(i) === "pending",
+  const pending = inquiries?.docs?.filter(
+    (i) => aggregateInquiryStatus(i.status) === "pending",
   );
   const totalCost = confirmed
     ? confirmed
@@ -110,7 +110,7 @@ export default function page() {
         <div className="grid grid-cols-3 gap-4">
           <SummaryCard
             label="Celkem poptávek"
-            value={String(inquiries?.length || 0)}
+            value={String(inquiries?.docs?.length || 0)}
             icon={MessageSquare}
             iconBg="bg-blue-50"
             iconColor="text-blue-500"
@@ -137,16 +137,15 @@ export default function page() {
           iconColor="text-inquiry"
           icon="MessageSquare"
           label="Poptávky dodavatelů"
-          subLabel={`${inquiries?.length || 0} celkem, ${pending?.length || 0} čekají na odpověď`}
+          subLabel={`${inquiries?.docs?.length || 0} celkem, ${pending?.length || 0} čekají na odpověď`}
           headerRightComponent={
             <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-amber-100 text-amber-700">
               {pending?.length || 0} čekají na odpověď
             </span>
           }
           rowComponents={
-            !inquiries
-              ? []
-              : inquiries?.map((inquiry) => (
+            inquiries && inquiries.docs?.length
+              ? inquiries?.docs?.map((inquiry) => (
                   <EntityRow
                     key={inquiry.id}
                     label={
@@ -170,10 +169,7 @@ export default function page() {
                       },
                     ]}
                     rightComponent={
-                      <InquiryStatusTag
-                        userStatus={inquiry.status.user}
-                        companyStatus={inquiry.status.company}
-                      />
+                      <InquiryStatusTag status={inquiry.status} />
                     }
                     link={{
                       pathname: "/user-profile/events/[eventId]/[inquiryId]",
@@ -184,6 +180,7 @@ export default function page() {
                     }}
                   />
                 ))
+              : []
           }
           emptyState={{
             text: "Zatím žádné poptávky",

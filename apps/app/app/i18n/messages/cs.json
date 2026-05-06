@@ -3,6 +3,16 @@
     "title": "Domů",
     "description": "Roo - Vše pro vaše domácí mazlíčky na jednom místě"
   },
+  "pages": {
+    "user": {
+      "companyProfile": {
+        "page": {},
+        "contentWrapper": {},
+        "companies": {},
+        "profileSettings": {}
+      }
+    }
+  },
   "listings": {
     "singular": "Služba",
     "plural": "Služby",
@@ -34,6 +44,14 @@
       "pending": "Čekající",
       "confirmed": "Potvrzené",
       "cancelled": "Odmítnuté"
+    }
+  },
+  "spaces": {
+    "singular": "Prostor",
+    "plural": "Prostory",
+    "status": {
+      "available": "Dostupný",
+      "unavailable": "Nedostupný"
     }
   },
   "companies": {

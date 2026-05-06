@@ -171,9 +171,9 @@ const schema = z
     activityAddons: z
       .array(
         z.object({
-          activity: z.string().min(1, "Vyberte aktivitu"),
+          activity: itemSchema.nullable().optional(),
           price: z.coerce.number({ message: "Zadejte číslo" }).min(0),
-          space: z.string().optional(),
+          space: itemSchema.nullable().optional(),
           type: z.enum(["indoor", "outdoor"]),
         }),
       )
@@ -252,7 +252,7 @@ const schema = z
           image: z.string().optional(),
           eventName: z.string().min(1, "Název akce je povinný"),
           clientName: z.string().optional(),
-          eventType: z.string().optional(),
+          eventType: itemSchema.nullable().optional(),
           description: z.string().optional(),
         }),
       )
@@ -293,7 +293,7 @@ export default function EditVenueListingForm({
     companyId: string;
   }>();
   const { data: listing } = useListing(listingId);
-  const { mutate } = useUpdateListing(listingId, companyId);
+  const { mutate } = useUpdateListing(companyId);
   const router = useRouter();
 
   const [citySearch, setCitySearch] = useState("");
@@ -307,59 +307,72 @@ export default function EditVenueListingForm({
     if (venueDetail?.blockType !== "venue") return;
     mutate(
       {
-        name: data.name,
-        shortDescription: data.shortDescription,
-        description: data.description,
-        indoor: data.indoor,
-        outdoor: data.outdoor,
-        eventTypes: data.eventTypes.map((i) => i.id),
-        rules: data.rules.map((i) => i.id),
-        employees: data.employees,
-        faq: data.faq,
-        references: data.references,
-        images: {
-          ...data.images,
-          gallery: data.images.gallery.map((url) => ({ url })),
-        },
-        price: data.price,
-        details: [
-          {
-            blockType: "venue",
-            spacesType: venueDetail?.spacesType ?? "area",
-            location: {
-              address: data.location.address,
-              city: data.location.city.id,
-            },
-            capacity: data.capacity,
-            area: data.area,
-            canBeBookedAsWhole: data.canBeBookedAsWhole,
-            hasAccommodation: data.hasAccommodation,
-            accommodationCapacity: data.accommodationCapacity,
-            activities: data.activities.map((i) => i.id),
-            activityAddons: data.activityAddons,
-            services: data.services.map((i) => i.id),
-            personnel: data.personnel.map((i) => i.id),
-            amenities: data.amenities.map((i) => i.id),
-            technology: data.technology.map((i) => i.id),
-            placeTypes: data.placeTypes.map((i) => i.id),
-            foodAndDrinkRules: data.foodAndDrinkRules.map((i) => i.id),
-            venueRules: data.venueRules.map((i) => i.id),
-            storage: data.storage,
-            access: data.access
-              ? {
-                  ...data.access,
-                  vehicleTypes: data.access.vehicleTypes as (
-                    | "car"
-                    | "truck"
-                    | "van"
-                    | "bus"
-                  )[],
-                }
-              : undefined,
-            parking: data.parking,
-            breakfast: data.breakfast,
+        id: listingId,
+        data: {
+          name: data.name,
+          shortDescription: data.shortDescription,
+          description: data.description,
+          indoor: data.indoor,
+          outdoor: data.outdoor,
+          eventTypes: data.eventTypes.map((i) => i.id),
+          rules: data.rules.map((i) => i.id),
+          employees: data.employees,
+          faq: data.faq,
+          references: data.references.map((r) => ({
+                  ...r,
+                  eventType: r.eventType?.id ?? undefined,
+                })),
+          images: {
+            ...data.images,
+            gallery: data.images.gallery.map((url) => ({ url })),
           },
-        ],
+          price: data.price,
+          details: [
+            {
+              blockType: "venue",
+              spacesType: venueDetail?.spacesType ?? "area",
+              location: {
+                address: data.location.address,
+                city: data.location.city.id,
+              },
+              capacity: data.capacity,
+              area: data.area,
+              canBeBookedAsWhole: data.canBeBookedAsWhole,
+              hasAccommodation: data.hasAccommodation,
+              accommodationCapacity: data.accommodationCapacity,
+              activities: data.activities.map((i) => i.id),
+              activityAddons: data.activityAddons
+                .filter((a) => a.activity != null)
+                .map((a) => ({
+                  activity: a.activity!.id,
+                  price: a.price,
+                  type: a.type,
+                  ...(a.space ? { space: a.space.id } : {}),
+                })),
+              services: data.services.map((i) => i.id),
+              personnel: data.personnel.map((i) => i.id),
+              amenities: data.amenities.map((i) => i.id),
+              technology: data.technology.map((i) => i.id),
+              placeTypes: data.placeTypes.map((i) => i.id),
+              foodAndDrinkRules: data.foodAndDrinkRules.map((i) => i.id),
+              venueRules: data.venueRules.map((i) => i.id),
+              storage: data.storage,
+              access: data.access
+                ? {
+                    ...data.access,
+                    vehicleTypes: data.access.vehicleTypes as (
+                      | "car"
+                      | "truck"
+                      | "van"
+                      | "bus"
+                    )[],
+                  }
+                : undefined,
+              parking: data.parking,
+              breakfast: data.breakfast,
+            },
+          ],
+        },
       },
       {
         onSuccess: () =>
@@ -498,9 +511,9 @@ export default function EditVenueListingForm({
       activities: d.activities?.map(toItem) ?? [],
       activityAddons:
         d.activityAddons?.map((a) => ({
-          activity: id(a.activity),
+          activity: toItem(a.activity),
           price: a.price,
-          space: a.space ? id(a.space as string | { id: string }) : undefined,
+          space: a.space ? toItem(a.space as string | { id: string; name: string }) : null,
           type: a.type,
         })) ?? [],
       services: d.services?.map(toItem) ?? [],
@@ -561,8 +574,8 @@ export default function EditVenueListingForm({
           description: r.description ?? undefined,
           clientName: r.clientName ?? undefined,
           eventType: r.eventType
-            ? id(r.eventType as string | { id: string })
-            : undefined,
+            ? toItem(r.eventType as string | { id: string; name: string })
+            : null,
         })) ?? [],
     });
   }, [listing, reset]);
@@ -751,14 +764,8 @@ export default function EditVenueListingForm({
                   placeholder="Vyberte město..."
                   options={citiesData?.docs ?? []}
                   onSearchQueryChange={setCitySearch}
-                  value={
-                    field.value?.id
-                      ? { id: field.value.id, name: field.value.name }
-                      : undefined
-                  }
-                  onSelect={(option) =>
-                    field.onChange({ id: option.id, name: option.name })
-                  }
+                  selectedOption={field.value}
+                  onSelect={field.onChange}
                   onClear={() => field.onChange({ id: "", name: "" })}
                   error={errors.location?.city?.id?.message}
                 />
@@ -924,9 +931,9 @@ export default function EditVenueListingForm({
             fields={activityAddonsFieldArray.fields}
             onAppend={() =>
               activityAddonsFieldArray.append({
-                activity: "",
+                activity: null,
                 price: 0,
-                space: "",
+                space: null,
                 type: "indoor",
               })
             }
@@ -943,19 +950,12 @@ export default function EditVenueListingForm({
                         ref={field.ref}
                         label="Aktivita"
                         placeholder="Vyberte aktivitu..."
-                        options={
-                          activities?.docs.map((a) => ({
-                            id: a.id,
-                            name: a.name,
-                          })) ?? []
-                        }
-                        value={{
-                          id: field.value ?? "",
-                          name:
-                            activities?.docs.find((a) => a.id === field.value)
-                              ?.name ?? "",
-                        }}
-                        onSelect={(option) => field.onChange(option.id)}
+                        options={activities?.docs ?? []}
+                        onSelect={field.onChange}
+                        onClear={() => field.onChange(null)}
+                        name={field.name}
+                        onBlur={field.onBlur}
+                        selectedOption={field.value ?? undefined}
                         error={
                           errors.activityAddons?.[index]?.activity?.message
                         }
@@ -1603,7 +1603,7 @@ export default function EditVenueListingForm({
                 eventName: "",
                 description: "",
                 clientName: "",
-                eventType: "",
+                eventType: null,
               })
             }
             onRemove={referencesFieldArray.remove}
@@ -1655,19 +1655,13 @@ export default function EditVenueListingForm({
                     <SearchInput
                       label="Typ akce"
                       placeholder="Vyberte typ akce..."
-                      options={
-                        eventTypes?.docs.map((et) => ({
-                          id: et.id,
-                          name: et.name,
-                        })) ?? []
-                      }
-                      value={{
-                        id: field.value ?? "",
-                        name:
-                          eventTypes?.docs.find((et) => et.id === field.value)
-                            ?.name ?? "",
-                      }}
-                      onSelect={(option) => field.onChange(option.id)}
+                      options={eventTypes?.docs ?? []}
+                      selectedOption={field.value ?? undefined}
+                      onSelect={field.onChange}
+                      onClear={() => field.onChange(null)}
+                      ref={field.ref}
+                      name={field.name}
+                      onBlur={field.onBlur}
                     />
                   )}
                 />

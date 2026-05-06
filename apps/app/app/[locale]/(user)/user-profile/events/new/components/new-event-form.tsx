@@ -10,8 +10,8 @@ import GuestsInput from "@/app/components/ui/atoms/inputs/guests-input";
 import IconSelect from "@/app/components/ui/atoms/inputs/icon-select";
 import Input from "@/app/components/ui/atoms/inputs/input";
 import SearchInput from "@/app/components/ui/atoms/inputs/search-input";
+import SelectInput from "@/app/components/ui/atoms/inputs/select-input";
 
-import { zodResolver } from "@hookform/resolvers/zod";
 import ErrorText from "@/app/components/ui/atoms/inputs/error-text";
 import InputLabel from "@/app/components/ui/atoms/input-label";
 import {
@@ -22,12 +22,14 @@ import {
   Smile,
   Users,
 } from "lucide-react";
-import { Controller, useForm } from "react-hook-form";
-import { z } from "zod";
+import { Controller, FieldErrors, Resolver, useForm } from "react-hook-form";
+import { useState } from "react";
 import Button from "@/app/components/ui/atoms/button";
 import { useRouter } from "@/app/i18n/navigation";
 import { useEventTypes } from "@/app/react-query/filters/event-types/hooks";
 import { useCities } from "@/app/react-query/cities/hooks";
+import { useCreateEvent } from "@/app/react-query/events/hooks";
+import { useSpaceTypes } from "@/app/react-query/specific/space-types/hooks";
 
 // ── TOC ────────────────────────────────────────────────────────────────────────
 
@@ -52,50 +54,58 @@ const EVENT_FORM_GROUPS: readonly TocGroup[] = [
 
 // ── Schema ─────────────────────────────────────────────────────────────────────
 
-const schema = z
-  .object({
-    name: z.string().min(1, "Název události je povinný"),
-    icon: z.string().min(1, "Ikona události je povinná"),
-    eventType: z.object({ id: z.string(), name: z.string() }),
-    budget: z.coerce.number().optional(),
-    startDate: z.date(),
-    endDate: z.date(),
-    guests: z.object({
-      adults: z.number().min(1, "Počet dospělých musí být alespoň 1"),
-      children: z.number().min(0),
-      ztp: z.boolean(),
-      pets: z.boolean(),
-    }),
-    locationType: z.enum(["custom", "venue"]),
-    locationCity: z
-      .object({ id: z.string(), name: z.string() })
-      .optional()
-      .nullable(),
-    locationAddress: z.string().optional(),
-    locationBuildingType: z.string().optional(),
-    locationDescription: z.string().optional(),
-  })
-  .refine((d) => d.endDate >= d.startDate, {
-    message: "Datum konce musí být po datu začátku",
-    path: ["endDate"],
-  })
-  .refine((d) => d.locationType !== "custom" || !!d.locationCity, {
-    message: "Vyberte město",
-    path: ["locationCity"],
-  });
+type FormInputs = {
+  name: string;
+  icon: string;
+  eventType: { id: string; name: string };
+  budget?: number;
+  startDate: string;
+  endDate: string;
+  guests: { adults: number; children: number; ztp: boolean; pets: boolean };
+  locationType: "custom" | "venue";
+  locationCity?: { id: string; name: string } | null;
+  locationAddress?: string;
+  locationSpaceType?: { id: string; name: string } | null;
+  locationDescription?: string;
+};
 
-type FormInputs = z.infer<typeof schema>;
+function validate(values: Partial<FormInputs>): FieldErrors<FormInputs> {
+  const e: FieldErrors<FormInputs> = {};
 
-// ── Options ────────────────────────────────────────────────────────────────────
+  if (!values.name)
+    e.name = { type: "required", message: "Název události je povinný" };
+  if (!values.icon)
+    e.icon = { type: "required", message: "Ikona události je povinná" };
+  if (!values.eventType)
+    e.eventType = { type: "required", message: "Musíte vybrat typ události" };
+  if (!values.startDate)
+    e.startDate = { type: "required", message: "Datum začátku je povinný" };
+  if (!values.endDate)
+    e.endDate = { type: "required", message: "Datum konce je povinný" };
+  if (values.startDate && values.endDate && values.endDate < values.startDate)
+    e.endDate = {
+      type: "custom",
+      message: "Datum konce musí být po datu začátku",
+    };
+  if (!values.guests?.adults || values.guests.adults < 1)
+    e.guests = {
+      adults: { type: "min", message: "Počet dospělých musí být alespoň 1" },
+    };
+  if (values.locationType === "custom" && !values.locationCity)
+    e.locationCity = { type: "required", message: "Vyberte město" };
+  if (values.locationType === "custom" && !values.locationSpaceType)
+    e.locationSpaceType = { type: "required", message: "Vyberte typ prostoru" };
 
-const BUILDING_TYPE_OPTIONS = [
-  { id: "hotel", label: "Hotel" },
-  { id: "restaurant", label: "Restaurace" },
-  { id: "conference_center", label: "Konferenční centrum" },
-  { id: "outdoor", label: "Venkovní prostory" },
-  { id: "private", label: "Soukromé prostory" },
-  { id: "other", label: "Jiné" },
-];
+  return e;
+}
+
+const resolver: Resolver<FormInputs> = (values) => {
+  const errors = validate(values);
+  return {
+    values: Object.keys(errors).length === 0 ? values : {},
+    errors,
+  };
+};
 
 // ── Form ───────────────────────────────────────────────────────────────────────
 
@@ -109,8 +119,7 @@ export default function NewEventForm() {
     watch,
     formState: { errors },
   } = useForm<FormInputs>({
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    resolver: zodResolver(schema) as any,
+    resolver,
     defaultValues: {
       icon: "Calendar",
       locationType: "custom",
@@ -118,21 +127,76 @@ export default function NewEventForm() {
     },
   });
 
-  const { data: eventTypes } = useEventTypes({ limit: 15 });
-  const { data: cities } = useCities({ limit: 15 });
+  const [eventTypeQuery, setEventTypeQuery] = useState("");
+  const [cityQuery, setCityQuery] = useState("");
+
+  const { data: eventTypes } = useEventTypes({
+    limit: 15,
+    query: {
+      name: { contains: eventTypeQuery },
+    },
+  });
+  const { data: cities } = useCities({
+    limit: 15,
+    query: cityQuery ? { name: { contains: cityQuery } } : undefined,
+  });
+
+  const { data: spaceTypes } = useSpaceTypes({
+    limit: 15,
+    query: cityQuery ? { name: { contains: cityQuery } } : undefined,
+  });
+
+  const { mutate: createEvent } = useCreateEvent();
 
   const startDate = watch("startDate");
   const locationType = watch("locationType");
 
   const onSubmit = (data: FormInputs) => {
-    console.log("New event:", data);
+    createEvent(
+      {
+        name: data.name,
+        icon: data.icon,
+        eventType: data.eventType.id,
+        budget: data.budget,
+        date: { start: data.startDate, end: data.endDate },
+        guests: data.guests,
+        location:
+          data.locationType === "custom"
+            ? [
+                {
+                  blockType: "custom",
+                  city: data.locationCity!.id,
+                  address: data.locationAddress,
+                  spaceType: data.locationSpaceType?.id ?? "other",
+                  description: data.locationDescription,
+                },
+              ]
+            : [{ blockType: "venue" }],
+        status: "planning",
+      },
+      {
+        onSuccess: ({ doc }) => {
+          router.push({
+            pathname: "/user-profile/events/[eventId]",
+            params: { eventId: doc.id },
+          });
+        },
+      },
+    );
   };
+
+  console.log("errors", errors);
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="flex gap-6">
       <div className="flex w-full flex-col gap-4">
         {/* ── 1. Základní informace ──────────────────────────────────────────── */}
         <FormSection
+          error={
+            !!errors.name?.message ||
+            !!errors.icon?.message ||
+            !!errors.eventType?.message
+          }
           id={S.basic.id}
           icon={S.basic.icon}
           title={S.basic.title}
@@ -191,11 +255,15 @@ export default function NewEventForm() {
                   label="Typ události"
                   isRequired
                   options={eventTypes?.docs ?? []}
-                  value={field.value}
+                  selectedOption={field.value}
                   onSelect={field.onChange}
                   onClear={() => field.onChange(null)}
+                  onSearchQueryChange={setEventTypeQuery}
                   error={errors.eventType?.message}
                   type="dropdown"
+                  ref={field.ref}
+                  name={field.name}
+                  onBlur={field.onBlur}
                 />
               )}
             />
@@ -204,6 +272,7 @@ export default function NewEventForm() {
 
         {/* ── 2. Termín konání ───────────────────────────────────────────────── */}
         <FormSection
+          error={!!errors.startDate?.message || !!errors.endDate?.message}
           id={S.dates.id}
           icon={S.dates.icon}
           title={S.dates.title}
@@ -232,7 +301,7 @@ export default function NewEventForm() {
                   label="Konec události"
                   value={field.value}
                   onChange={field.onChange}
-                  min={startDate ? new Date(startDate) : undefined}
+                  min={startDate}
                   error={errors.endDate?.message}
                 />
               )}
@@ -242,6 +311,7 @@ export default function NewEventForm() {
 
         {/* ── 3. Hosté ───────────────────────────────────────────────────────── */}
         <FormSection
+          error={!!errors.guests?.message}
           id={S.guests.id}
           icon={S.guests.icon}
           title={S.guests.title}
@@ -265,6 +335,7 @@ export default function NewEventForm() {
 
         {/* ── 4. Rozpočet ────────────────────────────────────────────────────── */}
         <FormSection
+          error={!!errors.budget?.message}
           id={S.budget.id}
           icon={S.budget.icon}
           title={S.budget.title}
@@ -285,6 +356,13 @@ export default function NewEventForm() {
 
         {/* ── 5. Místo konání ────────────────────────────────────────────────── */}
         <FormSection
+          error={
+            !!(
+              errors.locationCity?.root?.message ?? errors.locationCity?.message
+            ) ||
+            !!errors.locationSpaceType?.message ||
+            !!errors.locationType?.message
+          }
           id={S.location.id}
           icon={S.location.icon}
           title={S.location.title}
@@ -353,12 +431,20 @@ export default function NewEventForm() {
                     <SearchInput
                       label="Město"
                       isRequired
+                      placeholder="Vyberte město"
                       options={cities?.docs ?? []}
-                      value={field.value ?? undefined}
+                      selectedOption={field.value ?? undefined}
                       onSelect={field.onChange}
                       onClear={() => field.onChange(null)}
-                      error={errors.locationCity?.message}
+                      error={
+                        errors.locationCity?.root?.message ??
+                        errors.locationCity?.message
+                      }
+                      onSearchQueryChange={setCityQuery}
                       type="dropdown"
+                      ref={field.ref}
+                      name={field.name}
+                      onBlur={field.onBlur}
                     />
                   )}
                 />
@@ -371,7 +457,28 @@ export default function NewEventForm() {
                   error={errors.locationAddress?.message}
                 />
               </div>
-              <div className="grid grid-cols-1 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <Controller
+                  name="locationSpaceType"
+                  control={control}
+                  render={({ field }) => (
+                    <SearchInput
+                      label="Typ prostoru"
+                      isRequired
+                      placeholder="Vyberte typ prostoru"
+                      options={spaceTypes?.docs ?? []}
+                      selectedOption={field.value ?? undefined}
+                      error={errors.locationSpaceType?.message}
+                      type="dropdown"
+                      onSelect={field.onChange}
+                      onClear={() => field.onChange(null)}
+                      ref={field.ref}
+                      name={field.name}
+                      onBlur={field.onBlur}
+                    />
+                  )}
+                />
+
                 <Input
                   label="Popis místa"
                   inputProps={{

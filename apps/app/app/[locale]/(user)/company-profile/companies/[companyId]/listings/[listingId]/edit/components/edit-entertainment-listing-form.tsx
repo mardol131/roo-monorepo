@@ -41,7 +41,12 @@ const S: Record<string, TocSection> = {
     icon: "Building2",
   },
   price: { id: "section-price", title: "Cena", icon: "Banknote" },
-  images: { id: "section-images", title: "Obrázky", icon: "Image", subTitle: "Podporované formáty: jpg, png, webp" },
+  images: {
+    id: "section-images",
+    title: "Obrázky",
+    icon: "Image",
+    subTitle: "Podporované formáty: jpg, png, webp",
+  },
   location: { id: "section-location", title: "Místo působení", icon: "MapPin" },
   capacity: { id: "section-capacity", title: "Kapacita", icon: "Users" },
   entertainmentTypes: {
@@ -193,7 +198,7 @@ export default function EditEntertainmentListingForm({
     companyId: string;
   }>();
   const { data: listing } = useListing(listingId);
-  const { mutate } = useUpdateListing(listingId, companyId);
+  const { mutate } = useUpdateListing(companyId);
   const router = useRouter();
 
   function onSubmit(data: EntertainmentFormInputs) {
@@ -205,8 +210,9 @@ export default function EditEntertainmentListingForm({
         { blockType: "entertainment" }
       > => d.blockType === "entertainment",
     );
-    mutate(
-      {
+    mutate({
+      id: listingId,
+      data: {
         name: data.name,
         shortDescription: data.shortDescription,
         description: data.description,
@@ -240,8 +246,7 @@ export default function EditEntertainmentListingForm({
           },
         ],
       },
-      { onSuccess: () => router.back() },
-    );
+    });
   }
 
   const {
@@ -1018,22 +1023,15 @@ export default function EditEntertainmentListingForm({
                   name={`references.${index}.eventType`}
                   render={({ field }) => (
                     <SearchInput
-                      ref={field.ref}
                       label="Typ akce"
                       placeholder="Vyberte typ akce..."
-                      options={
-                        eventTypes?.docs.map((et) => ({
-                          id: et.id,
-                          name: et.name,
-                        })) ?? []
-                      }
-                      value={{
-                        id: field.value ?? "",
-                        name:
-                          eventTypes?.docs.find((et) => et.id === field.value)
-                            ?.name ?? "",
-                      }}
-                      onSelect={(option) => field.onChange(option.id)}
+                      options={eventTypes?.docs ?? []}
+                      value={field.value}
+                      onSelect={field.onChange}
+                      onClear={() => field.onChange(null)}
+                      ref={field.ref}
+                      name={field.name}
+                      onBlur={field.onBlur}
                     />
                   )}
                 />

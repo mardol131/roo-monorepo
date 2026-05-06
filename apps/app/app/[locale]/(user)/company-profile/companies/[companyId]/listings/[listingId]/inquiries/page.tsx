@@ -36,7 +36,7 @@ export default function page() {
           { label: t("inquiries.status.cancelled"), value: "cancelled" },
         ]}
         defaultFilter="all"
-        items={inquiries ?? []}
+        items={inquiries?.docs ?? []}
         filterFn={(item, filter) => (item as Inquiry).status.user === filter}
         renderItem={(item) => {
           const inquiry = item as Inquiry;
@@ -48,12 +48,7 @@ export default function page() {
                   ? inquiry.listing.value.name
                   : "Poptávka"
               }
-              rightComponent={
-                <InquiryStatusTag
-                  userStatus={inquiry.status.user}
-                  companyStatus={inquiry.status.company}
-                />
-              }
+              rightComponent={<InquiryStatusTag status={inquiry.status} />}
               icon="MessageSquare"
               iconBackgroundColor="bg-inquiry-surface"
               iconColor="text-inquiry"

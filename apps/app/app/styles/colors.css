@@ -12,8 +12,8 @@
   --color-company: var(--color-primary);
   --color-company-surface: var(--color-primary-surface);
 
-  --color-event: var(--color-green-500);
-  --color-event-surface: var(--color-green-50);
+  --color-event: var(--color-green-600);
+  --color-event-surface: var(--color-green-100);
 
   --color-listing-surface: var(--color-indigo-50);
   --color-listing: var(--color-indigo-600);

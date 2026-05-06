@@ -24,6 +24,7 @@ type Props = {
   onClick?: () => void;
   hideLinkIcon?: boolean;
   deleteEntityHandler?: (e: React.MouseEvent<HTMLButtonElement>) => void;
+  plain?: boolean;
 };
 
 export default function EntityCard({
@@ -38,12 +39,13 @@ export default function EntityCard({
   hideLinkIcon = false,
   onClick,
   deleteEntityHandler,
+  plain = false,
 }: Props) {
   const Icon = icons[icon];
 
   const content = (
     <div
-      className="group w-full bg-white rounded-2xl border border-zinc-200 hover:border-zinc-300 hover:shadow-sm transition-all px-6 py-5 flex items-center gap-5"
+      className={`group w-full bg-white rounded-2xl ${plain ? "p-1 hover:bg-zinc-50" : "border-zinc-200 border hover:border-zinc-300 px-6 py-5 hover:shadow-sm"}  transition-all flex items-center gap-5`}
       onClick={onClick}
     >
       <div

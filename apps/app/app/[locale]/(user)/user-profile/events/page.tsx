@@ -2,13 +2,14 @@
 
 import { useEvents } from "@/app/react-query/events/hooks";
 import { Event, formatEventAddress } from "@roo/common";
-import CardContainer from "../../../components/card-container";
-import EntityCard from "../../../components/entity-card";
-import PageHeading from "../../../components/page-heading";
-import EntityComponentTag from "../../../components/tags/entity-component-tag";
+import CardContainer from "../../components/card-container";
+import EntityCard from "../../components/entity-card";
+import PageHeading from "../../components/page-heading";
+import EntityComponentTag from "../../components/tags/entity-component-tag";
 import { useTranslations } from "next-intl";
-import EventStatusTag from "../../../components/tags/event-status-tag";
+import EventStatusTag from "../../components/tags/event-status-tag";
 import { format } from "date-fns";
+import Loader from "../../components/loader";
 
 const TABS: { label: string; value: Event["status"] | "all" }[] = [
   { label: "Všechny", value: "all" },
@@ -18,8 +19,10 @@ const TABS: { label: string; value: Event["status"] | "all" }[] = [
 ];
 
 export default function page() {
-  const { data: events } = useEvents();
-  const t = useTranslations("event");
+  const { data: events, isPending } = useEvents();
+  const t = useTranslations("events");
+
+  if (isPending) return <Loader text="Vaše události se načítají..." />;
 
   return (
     <main className="w-full">
@@ -39,7 +42,7 @@ export default function page() {
       <CardContainer
         filters={TABS}
         defaultFilter="all"
-        items={events ?? []}
+        items={events?.docs ?? []}
         filterFn={(item, filter) => (item as Event).status === filter}
         renderItem={(item) => {
           const event = item as Event;

@@ -1,4 +1,4 @@
-export function slugify(text: string, withCode: boolean): string {
+export function slugify(text: string, withCode?: boolean): string {
   let slug = text
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")

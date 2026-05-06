@@ -1,15 +1,37 @@
 "use client";
 
-import { useCompanies } from "@/app/react-query/companies/hooks";
+import {
+  useCompanies,
+  useUpdateCompany,
+} from "@/app/react-query/companies/hooks";
 import EntityCard from "../../components/entity-card";
 import PageHeading from "../../components/page-heading";
 import EntityComponentTag from "../../components/tags/entity-component-tag";
 import { EmptyState } from "../../components/empty-state";
 import CardContainer from "../../components/card-container";
 import { Company } from "@roo/common";
+import { confirmActionModalEvents } from "@/app/components/ui/molecules/modals/confirm-action-modal";
+import { Trash2 } from "lucide-react";
+import { useRouter } from "@/app/i18n/navigation";
+import Loader from "../../components/loader";
 
 export default function page() {
-  const { data: companies } = useCompanies();
+  const { data: companies, isLoading } = useCompanies();
+  const { mutate: updateCompany } = useUpdateCompany();
+  const router = useRouter();
+
+  if (isLoading) return <Loader text="Načítají se firmy..." />;
+
+  function deleteCompanyHandler(companyId: string) {
+    updateCompany(
+      { id: companyId, data: { status: "archived" } },
+      {
+        onSuccess: () => {
+          router.push("/company-profile/companies");
+        },
+      },
+    );
+  }
   return (
     <main className="w-full">
       <PageHeading
@@ -63,6 +85,28 @@ export default function page() {
                   textColor="text-on-dark"
                 />
               }
+              deleteEntityHandler={(e) => {
+                e.stopPropagation();
+                e.preventDefault();
+                confirmActionModalEvents.emit("open", {
+                  title: "Smazat společnost",
+                  description:
+                    "Tato akce je nevratná a trvale odstraní tuto společnost z platformy.",
+                  Icon: Trash2,
+                  buttonText: "Smazat společnost",
+                  buttonVersion: "dangerFull",
+                  confirmPhrase: company.name,
+                  whatIsGoingToHappenText:
+                    "Opravdu chcete smazat tuto společnost?",
+                  whatIsGoingToHappenTextColor: "danger",
+                  whatIsGoingToHappenList: [
+                    "Všechny záznamy spojené s touto společností budou nenávratně smazány",
+                    "Všechny poptávky budou zrušeny",
+                  ],
+                  bgColor: "bg-danger-surface",
+                  onConfirmClick: async () => deleteCompanyHandler(company.id),
+                });
+              }}
             />
           );
         }}
