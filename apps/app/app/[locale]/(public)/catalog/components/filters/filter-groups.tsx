@@ -26,56 +26,179 @@ export interface FilterGroup<TFilters> {
 // ─── Filter states ──────────────────────────────────────────────────────────────
 
 export interface GastroFilterState {
-  locations: string[];
   cuisines: string[];
   dishTypes: string[];
   dietaryOptions: string[];
   foodServiceStyles: string[];
-  minPrice?: number;
-  maxPrice?: number;
 }
 
 export interface VenueFilterState {
-  locations: string[];
   placeTypes: string[];
-  eventTypes: string[];
   amenities: string[];
-  minPrice?: number;
-  maxPrice?: number;
+  activities: string[];
 }
 
 export interface EntertainmentFilterState {
-  locations: string[];
   activities: string[];
-  minPrice?: number;
-  maxPrice?: number;
 }
 
+export interface CommonFilterState {
+  minPrice?: number;
+  maxPrice?: number;
+  eventTypes: string[];
+}
+
+export interface GeneralFilterState {
+  city: string;
+  dateFrom: string;
+  dateTo: string;
+  adults: number;
+  children: number;
+  accessibility: boolean;
+  pets: boolean;
+  bbox?: string[];
+}
+
+// ─── Keys ─────────────────────────────────────────────────────────────
+
+export const GENERAL_PARAM_KEYS: Record<keyof GeneralFilterState, string> = {
+  city: "mesto",
+  dateFrom: "datumOd",
+  dateTo: "datumDo",
+  adults: "dospeli",
+  children: "deti",
+  accessibility: "ztp",
+  pets: "zvirata",
+  bbox: "bbox",
+};
+
+export const GASTRO_PARAM_KEYS: Record<keyof GastroFilterState, string> = {
+  cuisines: "kuchyne",
+  dishTypes: "jidlo",
+  dietaryOptions: "dieta",
+  foodServiceStyles: "obsluha",
+};
+
+export const VENUE_PARAM_KEYS: Record<keyof VenueFilterState, string> = {
+  placeTypes: "prostor",
+  amenities: "vybaveni",
+  activities: "aktivity",
+};
+
+export const ENTERTAINMENT_PARAM_KEYS: Record<
+  keyof EntertainmentFilterState,
+  string
+> = {
+  activities: "aktivity",
+};
+
+export const COMMON_PARAM_KEYS: Record<keyof CommonFilterState, string> = {
+  minPrice: "priceFrom",
+  maxPrice: "priceTo",
+  eventTypes: "akce",
+};
+
+// ─── Empty states ───────────────────────────────────────────────────────────────────
+
+export const EMPTY_GENERAL_FILTERS: GeneralFilterState = {
+  city: "",
+  dateFrom: "",
+  dateTo: "",
+  adults: 1,
+  children: 0,
+  accessibility: false,
+  pets: false,
+  bbox: undefined,
+};
+
 export const EMPTY_GASTRO_FILTERS: GastroFilterState = {
-  locations: [],
   cuisines: [],
   dishTypes: [],
   dietaryOptions: [],
   foodServiceStyles: [],
-  minPrice: 0,
-  maxPrice: 100000,
 };
 
 export const EMPTY_VENUE_FILTERS: VenueFilterState = {
-  locations: [],
   placeTypes: [],
-  eventTypes: [],
   amenities: [],
-  minPrice: 0,
-  maxPrice: 100000,
+  activities: [],
 };
 
 export const EMPTY_ENTERTAINMENT_FILTERS: EntertainmentFilterState = {
-  locations: [],
   activities: [],
+};
+
+export const EMPTY_COMMON_FILTERS: CommonFilterState = {
   minPrice: 0,
   maxPrice: 100000,
+  eventTypes: [],
 };
+
+// ─── Common groups ───────────────────────────────────────────────────────────────
+
+export const COMMON_GROUPS: FilterGroup<CommonFilterState>[] = [
+  createPriceGroup(),
+  createEventTypesGroup(),
+];
+
+// ─── Gastro groups ───────────────────────────────────────────────────────────────
+
+export const GASTRO_GROUPS: FilterGroup<GastroFilterState>[] = [
+  createCuisinesGroup(),
+  createDishTypesGroup(),
+  createFoodServiceStylesGroup(),
+];
+
+// ─── Venue groups ───────────────────────────────────────────────────────────────
+
+export const VENUE_GROUPS: FilterGroup<VenueFilterState>[] = [
+  createPlaceTypesGroup(),
+  createAmenitiesGroup(),
+  createActivitiesGroup(),
+];
+
+// ─── Entertainment groups ───────────────────────────────────────────────────────
+
+export const ENTERTAINMENT_GROUPS: FilterGroup<EntertainmentFilterState>[] = [
+  createActivitiesGroup(),
+];
+
+// ─── Sidebar group subsets (exclude price — handled separately) ─────────────────
+
+export const GASTRO_SIDEBAR_GROUPS = GASTRO_GROUPS;
+export const VENUE_SIDEBAR_GROUPS = VENUE_GROUPS;
+export const ENTERTAINMENT_SIDEBAR_GROUPS = ENTERTAINMENT_GROUPS;
+export const COMMON_SIDEBAR_GROUPS = COMMON_GROUPS;
+
+// ─── Modal groups (combined common + type-specific, typed for the merged state) ─
+
+export const GASTRO_MODAL_GROUPS: FilterGroup<
+  GastroFilterState & CommonFilterState
+>[] = [
+  createPriceGroup<GastroFilterState & CommonFilterState>(),
+  createEventTypesGroup<GastroFilterState & CommonFilterState>(),
+  createCuisinesGroup<GastroFilterState & CommonFilterState>(),
+  createDishTypesGroup<GastroFilterState & CommonFilterState>(),
+  createFoodServiceStylesGroup<GastroFilterState & CommonFilterState>(),
+];
+
+export const VENUE_MODAL_GROUPS: FilterGroup<
+  VenueFilterState & CommonFilterState
+>[] = [
+  createPriceGroup<VenueFilterState & CommonFilterState>(),
+  createEventTypesGroup<VenueFilterState & CommonFilterState>(),
+  createPlaceTypesGroup<VenueFilterState & CommonFilterState>(),
+  createAmenitiesGroup<VenueFilterState & CommonFilterState>(),
+  createActivitiesGroup<VenueFilterState & CommonFilterState>(),
+];
+
+export const ENTERTAINMENT_MODAL_GROUPS: FilterGroup<
+  EntertainmentFilterState & CommonFilterState
+>[] = [
+  createPriceGroup<EntertainmentFilterState & CommonFilterState>(),
+  createEventTypesGroup<EntertainmentFilterState & CommonFilterState>(),
+  createActivitiesGroup<EntertainmentFilterState & CommonFilterState>(),
+];
 
 // ─── Shared group factories ─────────────────────────────────────────────────────
 
@@ -121,12 +244,10 @@ export function createPriceGroup<
   };
 }
 
-// ─── Gastro groups ──────────────────────────────────────────────────────────────
-
-export const GASTRO_GROUPS: FilterGroup<GastroFilterState>[] = [
-  createLocationsGroup(),
-  createPriceGroup(),
-  {
+export function createCuisinesGroup<
+  TFilters extends { cuisines: string[] },
+>(): FilterGroup<TFilters> {
+  return {
     key: "cuisines",
     label: "Kuchyně",
     count: (f) => f.cuisines.length,
@@ -141,8 +262,13 @@ export const GASTRO_GROUPS: FilterGroup<GastroFilterState>[] = [
         />
       );
     },
-  },
-  {
+  };
+}
+
+export function createDishTypesGroup<
+  TFilters extends { dishTypes: string[] },
+>(): FilterGroup<TFilters> {
+  return {
     key: "dishTypes",
     label: "Typ jídla",
     count: (f) => f.dishTypes.length,
@@ -157,8 +283,13 @@ export const GASTRO_GROUPS: FilterGroup<GastroFilterState>[] = [
         />
       );
     },
-  },
-  {
+  };
+}
+
+export function createDietaryOptionsGroup<
+  TFilters extends { dietaryOptions: string[] },
+>(): FilterGroup<TFilters> {
+  return {
     key: "dietaryOptions",
     label: "Dietní možnosti",
     count: (f) => f.dietaryOptions.length,
@@ -175,8 +306,13 @@ export const GASTRO_GROUPS: FilterGroup<GastroFilterState>[] = [
         />
       );
     },
-  },
-  {
+  };
+}
+
+export function createFoodServiceStylesGroup<
+  TFilters extends { foodServiceStyles: string[] },
+>(): FilterGroup<TFilters> {
+  return {
     key: "foodServiceStyles",
     label: "Styl obsluhy",
     count: (f) => f.foodServiceStyles.length,
@@ -193,15 +329,13 @@ export const GASTRO_GROUPS: FilterGroup<GastroFilterState>[] = [
         />
       );
     },
-  },
-];
+  };
+}
 
-// ─── Venue groups ───────────────────────────────────────────────────────────────
-
-export const VENUE_GROUPS: FilterGroup<VenueFilterState>[] = [
-  createLocationsGroup(),
-  createPriceGroup(),
-  {
+export function createPlaceTypesGroup<
+  TFilters extends { placeTypes: string[] },
+>(): FilterGroup<TFilters> {
+  return {
     key: "placeTypes",
     label: "Typ prostoru",
     count: (f) => f.placeTypes.length,
@@ -216,8 +350,13 @@ export const VENUE_GROUPS: FilterGroup<VenueFilterState>[] = [
         />
       );
     },
-  },
-  {
+  };
+}
+
+export function createEventTypesGroup<
+  TFilters extends { eventTypes: string[] },
+>(): FilterGroup<TFilters> {
+  return {
     key: "eventTypes",
     label: "Typ akce",
     count: (f) => f.eventTypes.length,
@@ -232,8 +371,13 @@ export const VENUE_GROUPS: FilterGroup<VenueFilterState>[] = [
         />
       );
     },
-  },
-  {
+  };
+}
+
+export function createAmenitiesGroup<
+  TFilters extends { amenities: string[] },
+>(): FilterGroup<TFilters> {
+  return {
     key: "amenities",
     label: "Vybavení",
     count: (f) => f.amenities.length,
@@ -248,20 +392,19 @@ export const VENUE_GROUPS: FilterGroup<VenueFilterState>[] = [
         />
       );
     },
-  },
-];
+  };
+}
 
-// ─── Entertainment groups ───────────────────────────────────────────────────────
-
-export const ENTERTAINMENT_GROUPS: FilterGroup<EntertainmentFilterState>[] = [
-  createLocationsGroup(),
-  createPriceGroup(),
-  {
+export function createActivitiesGroup<
+  TFilters extends { activities: string[] },
+>(): FilterGroup<TFilters> {
+  return {
     key: "activities",
     label: "Aktivity",
-    count: (f) => f.activities.length,
+    count: (f) => f.activities.length || 0,
     Content: ({ filters, onChange }) => {
-      const { data } = useActivities({ limit: 50 });
+      const { data } = useActivities();
+      console.log("Activities data:", data);
       return (
         <FilterSection
           title="Aktivity"
@@ -271,30 +414,6 @@ export const ENTERTAINMENT_GROUPS: FilterGroup<EntertainmentFilterState>[] = [
         />
       );
     },
-  },
-];
-
-// ─── Sidebar group subsets (exclude price — handled separately) ─────────────────
-
-const SIDEBAR_KEYS: {
-  gastro: (keyof GastroFilterState)[];
-  venue: (keyof VenueFilterState)[];
-  entertainment: (keyof EntertainmentFilterState)[];
-} = {
-  gastro: ["cuisines", "dishTypes", "foodServiceStyles"],
-  venue: ["locations", "eventTypes"],
-  entertainment: ["locations", "activities"],
-} as const;
-
-export const GASTRO_SIDEBAR_GROUPS = GASTRO_GROUPS.filter(
-  (g: FilterGroup<GastroFilterState>) =>
-    SIDEBAR_KEYS.gastro.some((k) => k === g.key),
-);
-export const VENUE_SIDEBAR_GROUPS = VENUE_GROUPS.filter(
-  (g: FilterGroup<VenueFilterState>) =>
-    SIDEBAR_KEYS.venue.some((k) => k === g.key),
-);
-export const ENTERTAINMENT_SIDEBAR_GROUPS = ENTERTAINMENT_GROUPS.filter(
-  (g: FilterGroup<EntertainmentFilterState>) =>
-    SIDEBAR_KEYS.entertainment.some((k) => k === g.key),
-);
+  };
+}
+// ─── Gastro groups ──────────────────────────────────────────────────────────────

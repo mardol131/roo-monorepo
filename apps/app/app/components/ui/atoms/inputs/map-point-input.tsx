@@ -15,8 +15,8 @@ import InputLabel from "../input-label";
 import ErrorText from "./error-text";
 import Text from "../text";
 
-type Coordinates = { latitude: number; longitude: number };
-type Bbox = [number, number, number, number]; // [minLon, minLat, maxLon, maxLat]
+export type Coordinates = { latitude: number; longitude: number };
+export type Bbox = [number, number, number, number]; // [minLon, minLat, maxLon, maxLat]
 
 type Props = {
   value?: Coordinates;
@@ -79,7 +79,7 @@ function buildRoundedHole(bbox: Bbox, steps = 10): number[][] {
   return pts;
 }
 
-function buildOverlayGeoJSON(bbox: Bbox) {
+export function buildOverlayGeoJSON(bbox: Bbox) {
   return {
     type: "FeatureCollection" as const,
     features: [

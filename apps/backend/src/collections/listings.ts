@@ -21,10 +21,12 @@ export const venueListingDetails: Field[] = [
       {
         name: 'latitude',
         type: 'number',
+        required: true,
       },
       {
         name: 'longitude',
         type: 'number',
+        required: true,
       },
     ],
   },

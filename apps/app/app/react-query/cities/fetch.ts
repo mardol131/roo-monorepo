@@ -1,8 +1,5 @@
 import { getCollection } from "@/app/functions/api/general";
 import { PayloadResponse, City, Where } from "@roo/common";
-import { stringify } from "qs-esm";
-
-const baseUrl = `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/cities`;
 
 export type FetchCitiesOptions = {
   query?: Where;

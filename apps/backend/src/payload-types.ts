@@ -580,8 +580,8 @@ export interface Listing {
         location: {
           address: string;
           city: string | City;
-          latitude?: number | null;
-          longitude?: number | null;
+          latitude: number;
+          longitude: number;
         };
         placeTypes?: (string | PlaceType)[] | null;
         spacesType: 'area' | 'building' | 'room';
@@ -780,12 +780,12 @@ export interface City {
   code: string;
   district: string | District;
   country: 'cz';
-  latitude?: number | null;
-  longitude?: number | null;
-  bboxMinLon?: number | null;
-  bboxMinLat?: number | null;
-  bboxMaxLon?: number | null;
-  bboxMaxLat?: number | null;
+  latitude: number;
+  longitude: number;
+  bboxMinLon: number;
+  bboxMinLat: number;
+  bboxMaxLon: number;
+  bboxMaxLat: number;
   updatedAt: string;
   createdAt: string;
 }

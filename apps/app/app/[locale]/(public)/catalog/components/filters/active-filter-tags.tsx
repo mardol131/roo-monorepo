@@ -13,6 +13,8 @@ import {
   venueFiltersFromParams,
   entertainmentFiltersToParams,
   entertainmentFiltersFromParams,
+  commonFiltersFromParams,
+  commonFiltersToParams,
 } from "./filter-params";
 import {
   GastroFilterState,
@@ -21,8 +23,8 @@ import {
   EMPTY_GASTRO_FILTERS,
   EMPTY_VENUE_FILTERS,
   EMPTY_ENTERTAINMENT_FILTERS,
+  EMPTY_GENERAL_FILTERS,
 } from "./filter-groups";
-import { EMPTY_GENERAL_FILTERS } from "./filter-params";
 import { useCities } from "@/app/react-query/cities/hooks";
 import { useCuisines } from "@/app/react-query/filters/cuisines/hooks";
 import { useDishTypes } from "@/app/react-query/filters/dish-types/hooks";
@@ -32,6 +34,7 @@ import { usePlaceTypes } from "@/app/react-query/filters/place-types/hooks";
 import { useEventTypes } from "@/app/react-query/filters/event-types/hooks";
 import { useAmenities } from "@/app/react-query/filters/amenities/hooks";
 import { useActivities } from "@/app/react-query/filters/activities/hooks";
+import Text from "@/app/components/ui/atoms/text";
 
 // ─── Primitives ──────────────────────────────────────────────────────────────
 
@@ -48,7 +51,7 @@ function FilterTag({
       onClick={onRemove}
       className="inline-flex items-center gap-1 px-2.5 py-1 bg-zinc-100 hover:bg-rose-50 hover:text-rose-600 rounded-full text-xs text-zinc-700 transition-colors"
     >
-      {label}
+      <Text variant="caption">{label}</Text>
       <X className="w-3 h-3 shrink-0" />
     </button>
   );
@@ -63,9 +66,7 @@ function TagGroup({
 }) {
   return (
     <div className="flex flex-col gap-1.5">
-      <span className="text-xs font-semibold text-zinc-400 uppercase tracking-wide">
-        {label}
-      </span>
+      <Text variant="h4">{label}</Text>
       <div className="flex flex-wrap gap-1.5">{children}</div>
     </div>
   );
@@ -324,6 +325,8 @@ export default function ActiveFilterTags({ type }: { type: CatalogType }) {
     router.replace(`?${params}`, { scroll: false });
   };
 
+  // _______ Filters __________________________
+
   const general = generalFiltersFromParams(searchParams);
   const gastro =
     type === "gastro" ? gastroFiltersFromParams(searchParams) : null;
@@ -332,9 +335,15 @@ export default function ActiveFilterTags({ type }: { type: CatalogType }) {
     type === "entertainment"
       ? entertainmentFiltersFromParams(searchParams)
       : null;
+  const common = commonFiltersFromParams(searchParams);
+
+  // _______ Updaters __________________________
 
   const updateGeneral = (update: Partial<typeof general>) =>
     replaceParams((p) => generalFiltersToParams({ ...general, ...update }, p));
+
+  const updateCommon = (update: Partial<typeof common>) =>
+    replaceParams((p) => commonFiltersToParams({ ...common, ...update }, p));
 
   const updateGastro = (update: Partial<GastroFilterState>) => {
     if (!gastro) return;
@@ -357,7 +366,8 @@ export default function ActiveFilterTags({ type }: { type: CatalogType }) {
     isFilterActive(general, EMPTY_GENERAL_FILTERS) ||
     (gastro && isFilterActive(gastro, EMPTY_GASTRO_FILTERS)) ||
     (venue && isFilterActive(venue, EMPTY_VENUE_FILTERS)) ||
-    (entertainment && isFilterActive(entertainment, EMPTY_ENTERTAINMENT_FILTERS));
+    (entertainment &&
+      isFilterActive(entertainment, EMPTY_ENTERTAINMENT_FILTERS));
 
   if (!hasAnyFilter) return null;
 
@@ -386,6 +396,14 @@ export default function ActiveFilterTags({ type }: { type: CatalogType }) {
               onRemove={() => updateGeneral({ dateTo: "" })}
             />
           )}
+        </TagGroup>
+      )}
+      {general.bbox && general.bbox.length === 4 && (
+        <TagGroup label="Podle mapy">
+          <FilterTag
+            label={`Aktivní`}
+            onRemove={() => updateGeneral({ bbox: undefined })}
+          />
         </TagGroup>
       )}
 
@@ -421,18 +439,30 @@ export default function ActiveFilterTags({ type }: { type: CatalogType }) {
         </TagGroup>
       )}
 
-      {/* ── Gastro ── */}
-      {gastro && gastro.locations.length > 0 && (
-        <CityTagGroup
-          label="Místo konání"
-          ids={gastro.locations}
+      {/* ── Common ── */}
+
+      {common.minPrice !== undefined || common.maxPrice !== undefined ? (
+        <PriceTagGroup
+          minPrice={common.minPrice}
+          maxPrice={common.maxPrice}
+          onRemove={() =>
+            updateCommon({ minPrice: undefined, maxPrice: undefined })
+          }
+        />
+      ) : null}
+      {common.eventTypes.length > 0 && (
+        <EventTypeTagGroup
+          ids={common.eventTypes}
           onRemove={(id) =>
-            updateGastro({
-              locations: gastro.locations.filter((l) => l !== id),
+            updateCommon({
+              eventTypes: common.eventTypes.filter((e) => e !== id),
             })
           }
         />
       )}
+
+      {/* ── Gastro ── */}
+
       {gastro && gastro.cuisines.length > 0 && (
         <CuisineTagGroup
           ids={gastro.cuisines}
@@ -473,24 +503,9 @@ export default function ActiveFilterTags({ type }: { type: CatalogType }) {
           }
         />
       )}
-      {gastro && (
-        <PriceTagGroup
-          minPrice={gastro.minPrice}
-          maxPrice={gastro.maxPrice}
-          onRemove={() => updateGastro({ minPrice: 0, maxPrice: 100000 })}
-        />
-      )}
 
       {/* ── Venue ── */}
-      {venue && venue.locations.length > 0 && (
-        <CityTagGroup
-          label="Místo konání"
-          ids={venue.locations}
-          onRemove={(id) =>
-            updateVenue({ locations: venue.locations.filter((l) => l !== id) })
-          }
-        />
-      )}
+
       {venue && venue.placeTypes.length > 0 && (
         <PlaceTypeTagGroup
           ids={venue.placeTypes}
@@ -501,16 +516,7 @@ export default function ActiveFilterTags({ type }: { type: CatalogType }) {
           }
         />
       )}
-      {venue && venue.eventTypes.length > 0 && (
-        <EventTypeTagGroup
-          ids={venue.eventTypes}
-          onRemove={(id) =>
-            updateVenue({
-              eventTypes: venue.eventTypes.filter((e) => e !== id),
-            })
-          }
-        />
-      )}
+
       {venue && venue.amenities.length > 0 && (
         <AmenityTagGroup
           ids={venue.amenities}
@@ -519,26 +525,9 @@ export default function ActiveFilterTags({ type }: { type: CatalogType }) {
           }
         />
       )}
-      {venue && (
-        <PriceTagGroup
-          minPrice={venue.minPrice}
-          maxPrice={venue.maxPrice}
-          onRemove={() => updateVenue({ minPrice: 0, maxPrice: 100000 })}
-        />
-      )}
 
       {/* ── Entertainment ── */}
-      {entertainment && entertainment.locations.length > 0 && (
-        <CityTagGroup
-          label="Místo konání"
-          ids={entertainment.locations}
-          onRemove={(id) =>
-            updateEntertainment({
-              locations: entertainment.locations.filter((l) => l !== id),
-            })
-          }
-        />
-      )}
+
       {entertainment && entertainment.activities.length > 0 && (
         <ActivityTagGroup
           ids={entertainment.activities}
@@ -546,15 +535,6 @@ export default function ActiveFilterTags({ type }: { type: CatalogType }) {
             updateEntertainment({
               activities: entertainment.activities.filter((a) => a !== id),
             })
-          }
-        />
-      )}
-      {entertainment && (
-        <PriceTagGroup
-          minPrice={entertainment.minPrice}
-          maxPrice={entertainment.maxPrice}
-          onRemove={() =>
-            updateEntertainment({ minPrice: 0, maxPrice: 100000 })
           }
         />
       )}

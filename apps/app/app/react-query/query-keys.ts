@@ -3,7 +3,7 @@ import { Where } from "@roo/common";
 // Entities
 
 export const listingKeys = {
-  all: () => ["listings"] as const,
+  all: (query?: Where, limit?: number) => ["listings", query, limit] as const,
   byId: (id: string) => ["listings", id] as const,
   byCompany: (companyId: string) => ["listings", "company", companyId] as const,
 };

@@ -13,7 +13,7 @@ export type FetchActivitiesOptions = {
 export async function fetchActivities(
   options?: FetchActivitiesOptions,
 ): Promise<PayloadResponse<Activity>> {
-  const { query, limit = 10, sortBy = "name" } = options || {};
+  const { query, limit, sortBy = "name" } = options || {};
   const res = await getCollection({
     collection: "activities",
     query,

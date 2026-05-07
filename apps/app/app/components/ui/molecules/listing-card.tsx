@@ -10,7 +10,7 @@ import { Link } from "@/app/i18n/navigation";
 type Props = {
   imageUrl: string;
   title: string;
-  price: string;
+  price: number;
   imageAlt?: string;
   liked?: boolean;
 };

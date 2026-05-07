@@ -13,13 +13,16 @@ import {
   fetchAllListings,
   fetchListing,
   fetchListingsByCompany,
+  FetchListingsOptions,
   updateListing,
 } from "./fetch";
 
-export function useListings() {
+export function useListings({
+  options,
+}: { options?: FetchListingsOptions } = {}) {
   return useQuery({
-    queryKey: listingKeys.all(),
-    queryFn: fetchAllListings,
+    queryKey: listingKeys.all(options?.query, options?.limit),
+    queryFn: () => fetchAllListings(options),
   });
 }
 

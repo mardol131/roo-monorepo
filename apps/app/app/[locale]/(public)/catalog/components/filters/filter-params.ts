@@ -5,87 +5,14 @@ import {
   EMPTY_GASTRO_FILTERS,
   EMPTY_VENUE_FILTERS,
   EMPTY_ENTERTAINMENT_FILTERS,
+  CommonFilterState,
+  GENERAL_PARAM_KEYS,
+  GeneralFilterState,
+  COMMON_PARAM_KEYS,
+  GASTRO_PARAM_KEYS,
+  VENUE_PARAM_KEYS,
+  ENTERTAINMENT_PARAM_KEYS,
 } from "./filter-groups";
-
-export const GENERAL_PARAM_KEYS = {
-  city: "lokace",
-  dateFrom: "datumOd",
-  dateTo: "datumDo",
-  adults: "dospeli",
-  children: "deti",
-  accessibility: "ztp",
-  pets: "zvirata",
-} as const;
-
-export interface GeneralFilterState {
-  city: string;
-  dateFrom: string;
-  dateTo: string;
-  adults: number;
-  children: number;
-  accessibility: boolean;
-  pets: boolean;
-}
-
-const G = GENERAL_PARAM_KEYS;
-
-export const EMPTY_GENERAL_FILTERS: GeneralFilterState = {
-  city: "",
-  dateFrom: "",
-  dateTo: "",
-  adults: 1,
-  children: 0,
-  accessibility: false,
-  pets: false,
-};
-
-export function generalFiltersFromParams(p: URLSearchParams): GeneralFilterState {
-  return {
-    city: p.get(G.city) ?? "",
-    dateFrom: p.get(G.dateFrom) ?? "",
-    dateTo: p.get(G.dateTo) ?? "",
-    adults: Number(p.get(G.adults)) || 1,
-    children: Number(p.get(G.children)) || 0,
-    accessibility: p.get(G.accessibility) === "1",
-    pets: p.get(G.pets) === "1",
-  };
-}
-
-export function generalFiltersToParams(
-  f: GeneralFilterState,
-  params: URLSearchParams,
-) {
-  if (f.city) params.set(G.city, f.city);
-  else params.delete(G.city);
-  if (f.dateFrom) params.set(G.dateFrom, f.dateFrom);
-  else params.delete(G.dateFrom);
-  if (f.dateTo) params.set(G.dateTo, f.dateTo);
-  else params.delete(G.dateTo);
-  if (f.adults !== 1) params.set(G.adults, String(f.adults));
-  else params.delete(G.adults);
-  if (f.children > 0) params.set(G.children, String(f.children));
-  else params.delete(G.children);
-  if (f.accessibility) params.set(G.accessibility, "1");
-  else params.delete(G.accessibility);
-  if (f.pets) params.set(G.pets, "1");
-  else params.delete(G.pets);
-}
-
-export const FILTER_PARAM_KEYS = {
-  locations: "misto",
-  cuisines: "kuchyne",
-  dishTypes: "jidlo",
-  dietaryOptions: "dieta",
-  foodServiceStyles: "obsluha",
-  placeTypes: "prostor",
-  eventTypes: "akce",
-  amenities: "vybaveni",
-  activities: "aktivita",
-  minPrice: "cenaOd",
-  maxPrice: "cenaDo",
-} as const;
-
-const K = FILTER_PARAM_KEYS;
 
 // ─── Helpers ────────────────────────────────────────────────────────────────────
 
@@ -99,10 +26,58 @@ function readArray(params: URLSearchParams, key: string): string[] {
 }
 
 function writePrice(params: URLSearchParams, min?: number, max?: number) {
-  if (min && min > 0) params.set(K.minPrice, String(min));
-  else params.delete(K.minPrice);
-  if (max && max < 100000) params.set(K.maxPrice, String(max));
-  else params.delete(K.maxPrice);
+  if (min && min > 0) params.set(COMMON_PARAM_KEYS.minPrice, String(min));
+  else params.delete(COMMON_PARAM_KEYS.minPrice);
+  if (max && max < 100000) params.set(COMMON_PARAM_KEYS.maxPrice, String(max));
+  else params.delete(COMMON_PARAM_KEYS.maxPrice);
+}
+
+function writeString(params: URLSearchParams, key: string, value: string) {
+  if (value) params.set(key, value);
+  else params.delete(key);
+}
+
+function readString(params: URLSearchParams, key: string): string {
+  return params.get(key) ?? "";
+}
+
+// ─── General ──────────────────────────────────────────────────────────────────
+
+export function generalFiltersFromParams(
+  p: URLSearchParams,
+): GeneralFilterState {
+  return {
+    city: p.get(GENERAL_PARAM_KEYS.city) ?? "",
+    dateFrom: p.get(GENERAL_PARAM_KEYS.dateFrom) ?? "",
+    dateTo: p.get(GENERAL_PARAM_KEYS.dateTo) ?? "",
+    adults: Number(p.get(GENERAL_PARAM_KEYS.adults)) || 1,
+    children: Number(p.get(GENERAL_PARAM_KEYS.children)) || 0,
+    accessibility: p.get(GENERAL_PARAM_KEYS.accessibility) === "1",
+    pets: p.get(GENERAL_PARAM_KEYS.pets) === "1",
+    bbox: readArray(p, GENERAL_PARAM_KEYS.bbox),
+  };
+}
+
+export function generalFiltersToParams(
+  f: GeneralFilterState,
+  params: URLSearchParams,
+) {
+  if (f.city) params.set(GENERAL_PARAM_KEYS.city, f.city);
+  else params.delete(GENERAL_PARAM_KEYS.city);
+  if (f.dateFrom) params.set(GENERAL_PARAM_KEYS.dateFrom, f.dateFrom);
+  else params.delete(GENERAL_PARAM_KEYS.dateFrom);
+  if (f.dateTo) params.set(GENERAL_PARAM_KEYS.dateTo, f.dateTo);
+  else params.delete(GENERAL_PARAM_KEYS.dateTo);
+  if (f.adults !== 1) params.set(GENERAL_PARAM_KEYS.adults, String(f.adults));
+  else params.delete(GENERAL_PARAM_KEYS.adults);
+  if (f.children > 0)
+    params.set(GENERAL_PARAM_KEYS.children, String(f.children));
+  else params.delete(GENERAL_PARAM_KEYS.children);
+  if (f.accessibility) params.set(GENERAL_PARAM_KEYS.accessibility, "1");
+  else params.delete(GENERAL_PARAM_KEYS.accessibility);
+  if (f.pets) params.set(GENERAL_PARAM_KEYS.pets, "1");
+  else params.delete(GENERAL_PARAM_KEYS.pets);
+  writeArray(params, GENERAL_PARAM_KEYS.bbox, f.bbox ?? []);
 }
 
 // ─── Gastro ─────────────────────────────────────────────────────────────────────
@@ -111,23 +86,31 @@ export function gastroFiltersToParams(
   f: GastroFilterState,
   params: URLSearchParams,
 ) {
-  writeArray(params, K.locations, f.locations);
-  writeArray(params, K.cuisines, f.cuisines);
-  writeArray(params, K.dishTypes, f.dishTypes);
-  writeArray(params, K.dietaryOptions, f.dietaryOptions);
-  writeArray(params, K.foodServiceStyles, f.foodServiceStyles);
-  writePrice(params, f.minPrice, f.maxPrice);
+  const functions: Record<
+    keyof GastroFilterState,
+    (params: URLSearchParams, value: any) => void
+  > = {
+    cuisines: (params, value) =>
+      writeArray(params, GASTRO_PARAM_KEYS.cuisines, value),
+    dishTypes: (params, value) =>
+      writeArray(params, GASTRO_PARAM_KEYS.dishTypes, value),
+    dietaryOptions: (params, value) =>
+      writeArray(params, GASTRO_PARAM_KEYS.dietaryOptions, value),
+    foodServiceStyles: (params, value) =>
+      writeArray(params, GASTRO_PARAM_KEYS.foodServiceStyles, value),
+  };
+  Object.entries(functions).forEach(([key, fn]) => {
+    const value = f[key as keyof GastroFilterState];
+    fn(params, value);
+  });
 }
 
 export function gastroFiltersFromParams(p: URLSearchParams): GastroFilterState {
   return {
-    locations: readArray(p, K.locations),
-    cuisines: readArray(p, K.cuisines),
-    dishTypes: readArray(p, K.dishTypes),
-    dietaryOptions: readArray(p, K.dietaryOptions),
-    foodServiceStyles: readArray(p, K.foodServiceStyles),
-    minPrice: Number(p.get(K.minPrice)) || EMPTY_GASTRO_FILTERS.minPrice,
-    maxPrice: Number(p.get(K.maxPrice)) || EMPTY_GASTRO_FILTERS.maxPrice,
+    cuisines: readArray(p, GASTRO_PARAM_KEYS.cuisines),
+    dishTypes: readArray(p, GASTRO_PARAM_KEYS.dishTypes),
+    dietaryOptions: readArray(p, GASTRO_PARAM_KEYS.dietaryOptions),
+    foodServiceStyles: readArray(p, GASTRO_PARAM_KEYS.foodServiceStyles),
   };
 }
 
@@ -137,21 +120,28 @@ export function venueFiltersToParams(
   f: VenueFilterState,
   params: URLSearchParams,
 ) {
-  writeArray(params, K.locations, f.locations);
-  writeArray(params, K.placeTypes, f.placeTypes);
-  writeArray(params, K.eventTypes, f.eventTypes);
-  writeArray(params, K.amenities, f.amenities);
-  writePrice(params, f.minPrice, f.maxPrice);
+  const functions: Record<
+    keyof VenueFilterState,
+    (params: URLSearchParams, value: any) => void
+  > = {
+    placeTypes: (params, value) =>
+      writeArray(params, VENUE_PARAM_KEYS.placeTypes, value),
+    amenities: (params, value) =>
+      writeArray(params, VENUE_PARAM_KEYS.amenities, value),
+    activities: (params, value) =>
+      writeArray(params, VENUE_PARAM_KEYS.activities, value),
+  };
+  Object.entries(functions).forEach(([key, fn]) => {
+    const value = f[key as keyof VenueFilterState];
+    fn(params, value);
+  });
 }
 
 export function venueFiltersFromParams(p: URLSearchParams): VenueFilterState {
   return {
-    locations: readArray(p, K.locations),
-    placeTypes: readArray(p, K.placeTypes),
-    eventTypes: readArray(p, K.eventTypes),
-    amenities: readArray(p, K.amenities),
-    minPrice: Number(p.get(K.minPrice)) || EMPTY_VENUE_FILTERS.minPrice,
-    maxPrice: Number(p.get(K.maxPrice)) || EMPTY_VENUE_FILTERS.maxPrice,
+    placeTypes: readArray(p, VENUE_PARAM_KEYS.placeTypes),
+    amenities: readArray(p, VENUE_PARAM_KEYS.amenities),
+    activities: readArray(p, VENUE_PARAM_KEYS.activities),
   };
 }
 
@@ -161,18 +151,53 @@ export function entertainmentFiltersToParams(
   f: EntertainmentFilterState,
   params: URLSearchParams,
 ) {
-  writeArray(params, K.locations, f.locations);
-  writeArray(params, K.activities, f.activities);
-  writePrice(params, f.minPrice, f.maxPrice);
+  const functions: Record<
+    keyof EntertainmentFilterState,
+    (params: URLSearchParams, value: any) => void
+  > = {
+    activities: (params, value) =>
+      writeArray(params, ENTERTAINMENT_PARAM_KEYS.activities, value),
+  };
+  Object.entries(functions).forEach(([key, fn]) => {
+    const value = f[key as keyof EntertainmentFilterState];
+    fn(params, value);
+  });
 }
 
 export function entertainmentFiltersFromParams(
   p: URLSearchParams,
 ): EntertainmentFilterState {
   return {
-    locations: readArray(p, K.locations),
-    activities: readArray(p, K.activities),
-    minPrice: Number(p.get(K.minPrice)) || EMPTY_ENTERTAINMENT_FILTERS.minPrice,
-    maxPrice: Number(p.get(K.maxPrice)) || EMPTY_ENTERTAINMENT_FILTERS.maxPrice,
+    activities: readArray(p, ENTERTAINMENT_PARAM_KEYS.activities),
+  };
+}
+
+// ─── Common ─────────────────────────────────────────────────────────────────────
+
+export function commonFiltersToParams(
+  f: CommonFilterState,
+  params: URLSearchParams,
+) {
+  const functions: Record<
+    keyof CommonFilterState,
+    (params: URLSearchParams, value: any) => void
+  > = {
+    minPrice: (params, value) => writePrice(params, value, f.maxPrice),
+    maxPrice: (params, value) => writePrice(params, f.minPrice, value),
+    eventTypes: (params, value) =>
+      writeArray(params, COMMON_PARAM_KEYS.eventTypes, value),
+  };
+
+  Object.entries(functions).forEach(([key, fn]) => {
+    const value = f[key as keyof CommonFilterState];
+    fn(params, value);
+  });
+}
+
+export function commonFiltersFromParams(p: URLSearchParams): CommonFilterState {
+  return {
+    minPrice: Number(p.get(COMMON_PARAM_KEYS.minPrice)) || undefined,
+    maxPrice: Number(p.get(COMMON_PARAM_KEYS.maxPrice)) || undefined,
+    eventTypes: readArray(p, COMMON_PARAM_KEYS.eventTypes),
   };
 }

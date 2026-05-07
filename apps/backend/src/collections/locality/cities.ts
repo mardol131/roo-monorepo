@@ -42,12 +42,12 @@ export const Cities: CollectionConfig = {
       options: COUNTRIES,
       required: true,
     },
-    { name: 'latitude', type: 'number' },
-    { name: 'longitude', type: 'number' },
-    { name: 'bboxMinLon', type: 'number' },
-    { name: 'bboxMinLat', type: 'number' },
-    { name: 'bboxMaxLon', type: 'number' },
-    { name: 'bboxMaxLat', type: 'number' },
+    { name: 'latitude', type: 'number', required: true },
+    { name: 'longitude', type: 'number', required: true },
+    { name: 'bboxMinLon', type: 'number', required: true },
+    { name: 'bboxMinLat', type: 'number', required: true },
+    { name: 'bboxMaxLon', type: 'number', required: true },
+    { name: 'bboxMaxLat', type: 'number', required: true },
   ],
   hooks: {
     beforeValidate: [

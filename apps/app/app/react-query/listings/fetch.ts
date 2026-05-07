@@ -5,19 +5,31 @@ import {
   patchCollectionItem,
   postCollectionItem,
 } from "@/app/functions/api/general";
-import { Listing } from "@roo/common";
+import { Listing, Where } from "@roo/common";
 
-export async function fetchAllListings() {
+export type FetchListingsOptions = {
+  query?: Where;
+  limit?: number;
+  sortBy?: string;
+};
+
+export async function fetchAllListings(options?: FetchListingsOptions) {
+  const { query, limit, sortBy = "-createdAt" } = options || {};
   const res = await getCollection({
     collection: "listings",
-    sort: "-createdAt",
+    query,
+    limit,
+    sort: sortBy,
   });
   console.log("Fetched listings:", res);
   if (!res) throw new Error("Failed to fetch listings");
   return res;
 }
 
-export async function fetchListingsByCompany(companyId: string, headers?: Record<string, string>) {
+export async function fetchListingsByCompany(
+  companyId: string,
+  headers?: Record<string, string>,
+) {
   const res = await getCollection({
     collection: "listings",
     query: { company: { equals: companyId } },
