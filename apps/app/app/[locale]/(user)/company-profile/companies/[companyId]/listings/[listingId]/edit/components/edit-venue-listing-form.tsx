@@ -35,6 +35,7 @@ import { useServices } from "@/app/react-query/filters/services/hooks";
 import { useRules } from "@/app/react-query/specific/rules/hooks";
 import { usePlaceTypes } from "@/app/react-query/filters/place-types/hooks";
 import { usePersonnel } from "@/app/react-query/filters/personnel/hooks";
+import MapPointInput from "@/app/components/ui/atoms/inputs/map-point-input";
 
 // ── TOC groups (exported for page sidebar) ────────────────────────────────────
 
@@ -156,6 +157,10 @@ const schema = z
         id: z.string().min(1, "Město je povinné"),
         name: z.string(),
       }),
+      coordinates: z.object(
+        { latitude: z.number(), longitude: z.number() },
+        "Vyberte přesnou polohu",
+      ),
     }),
     capacity: z.coerce
       .number({ message: "Zadejte číslo" })
@@ -297,9 +302,9 @@ export default function EditVenueListingForm({
   const router = useRouter();
 
   const [citySearch, setCitySearch] = useState("");
-  const { data: citiesData } = useCities({
-    query: citySearch ? { name: { contains: citySearch } } : undefined,
-  });
+  const [cityBbox, setCityBbox] = useState<
+    [number, number, number, number] | undefined
+  >();
 
   function onSubmit(data: FormInputs) {
     const venueDetail = listing?.details[0];
@@ -319,9 +324,9 @@ export default function EditVenueListingForm({
           employees: data.employees,
           faq: data.faq,
           references: data.references.map((r) => ({
-                  ...r,
-                  eventType: r.eventType?.id ?? undefined,
-                })),
+            ...r,
+            eventType: r.eventType?.id ?? undefined,
+          })),
           images: {
             ...data.images,
             gallery: data.images.gallery.map((url) => ({ url })),
@@ -334,6 +339,8 @@ export default function EditVenueListingForm({
               location: {
                 address: data.location.address,
                 city: data.location.city.id,
+                latitude: data.location.coordinates.latitude,
+                longitude: data.location.coordinates.longitude,
               },
               capacity: data.capacity,
               area: data.area,
@@ -479,6 +486,18 @@ export default function EditVenueListingForm({
     ): { id: string; name: string } =>
       typeof v === "string" ? { id: v, name: "" } : { id: v.id, name: v.name };
 
+    if (typeof d.location.city === "object" && d.location.city !== null) {
+      const c = d.location.city as {
+        bboxMinLon?: number;
+        bboxMinLat?: number;
+        bboxMaxLon?: number;
+        bboxMaxLat?: number;
+      };
+      if (c.bboxMinLon && c.bboxMinLat && c.bboxMaxLon && c.bboxMaxLat) {
+        setCityBbox([c.bboxMinLon, c.bboxMinLat, c.bboxMaxLon, c.bboxMaxLat]);
+      }
+    }
+
     reset({
       name: listing.name,
       shortDescription: listing.shortDescription ?? undefined,
@@ -502,6 +521,10 @@ export default function EditVenueListingForm({
               ? (d.location.city as { name: string }).name
               : "",
         },
+        coordinates: {
+          latitude: d.location.latitude || undefined,
+          longitude: d.location.longitude || undefined,
+        },
       },
       capacity: d.capacity,
       area: d.area,
@@ -513,7 +536,9 @@ export default function EditVenueListingForm({
         d.activityAddons?.map((a) => ({
           activity: toItem(a.activity),
           price: a.price,
-          space: a.space ? toItem(a.space as string | { id: string; name: string }) : null,
+          space: a.space
+            ? toItem(a.space as string | { id: string; name: string })
+            : null,
           type: a.type,
         })) ?? [],
       services: d.services?.map(toItem) ?? [],
@@ -593,6 +618,12 @@ export default function EditVenueListingForm({
   const hasParking = watch("parking.hasParking");
   const breakfastIncluded = watch("breakfast.included");
   const parkingIsIncludedInPrice = watch("parking.parkingIsIncludedInPrice");
+
+  const selectedCity = watch("location.city");
+
+  const { data: cities } = useCities({
+    query: citySearch ? { name: { contains: citySearch } } : undefined,
+  });
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="flex gap-6">
@@ -753,25 +784,87 @@ export default function EditVenueListingForm({
             }}
             error={errors.location?.address?.message}
           />
-          <div>
-            <Controller
-              control={control}
-              name="location.city"
-              render={({ field }) => (
-                <SearchInput
-                  ref={field.ref}
-                  label="Město"
-                  placeholder="Vyberte město..."
-                  options={citiesData?.docs ?? []}
-                  onSearchQueryChange={setCitySearch}
-                  selectedOption={field.value}
-                  onSelect={field.onChange}
-                  onClear={() => field.onChange({ id: "", name: "" })}
-                  error={errors.location?.city?.id?.message}
-                />
-              )}
-            />
-          </div>
+          <Controller
+            control={control}
+            name="location.city"
+            render={({ field }) => (
+              <SearchInput
+                ref={field.ref}
+                label="Město"
+                placeholder="Vyberte město..."
+                options={
+                  cities?.docs?.map((doc) => ({
+                    id: doc.id,
+                    name: doc.name,
+                    info:
+                      typeof doc.district === "object"
+                        ? doc.district.name
+                        : undefined,
+                  })) ?? []
+                }
+                onSearchQueryChange={setCitySearch}
+                selectedOption={
+                  field.value
+                    ? {
+                        id: field.value.id,
+                        name: field.value.name,
+                        info: (() => {
+                          const district = cities?.docs?.find(
+                            (c) => c.id === field.value?.id,
+                          )?.district;
+                          if (typeof district === "object") {
+                            return district.name;
+                          }
+                          return undefined;
+                        })(),
+                      }
+                    : undefined
+                }
+                onSelect={(option) => {
+                  field.onChange(option);
+                  const fullCity = cities?.docs?.find(
+                    (c) => c.id === option.id,
+                  );
+                  if (
+                    fullCity?.bboxMinLon &&
+                    fullCity?.bboxMinLat &&
+                    fullCity?.bboxMaxLon &&
+                    fullCity?.bboxMaxLat
+                  ) {
+                    setCityBbox([
+                      fullCity.bboxMinLon,
+                      fullCity.bboxMinLat,
+                      fullCity.bboxMaxLon,
+                      fullCity.bboxMaxLat,
+                    ]);
+                  } else {
+                    setCityBbox(undefined);
+                  }
+                }}
+                onClear={() => {
+                  field.onChange({ id: "", name: "" });
+                  setCityBbox(undefined);
+                }}
+                error={errors.location?.city?.id?.message}
+              />
+            )}
+          />
+          <Controller
+            control={control}
+            name="location.coordinates"
+            render={({ field }) => (
+              <MapPointInput
+                inputProps={{ ref: field.ref }}
+                label="Kde přesně se Váš prostor nachází?"
+                mapDisabled={!selectedCity?.id}
+                value={field.value}
+                onChange={field.onChange}
+                onBlur={field.onBlur}
+                error={errors.location?.coordinates?.message}
+                externalBbox={cityBbox}
+              />
+            )}
+          />
         </FormSection>
 
         {/* ── 5. Kapacita a prostor ─────────────────────────────────────────────── */}
@@ -837,7 +930,6 @@ export default function EditVenueListingForm({
               inputProps={{
                 ...register("accommodationCapacity"),
                 type: "number",
-                min: 1,
                 disabled: !hasAccommodation,
               }}
               error={errors.accommodationCapacity?.message}

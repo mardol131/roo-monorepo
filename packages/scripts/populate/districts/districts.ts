@@ -1,21 +1,22 @@
-import { District, PayloadResponse, Region } from "@roo/common";
-import fs from "fs";
-import path from "path";
+import { PayloadResponse, Region } from "@roo/common";
 import { config } from "../config";
 
-const CSV_PATH = path.join(import.meta.dirname, "okresy.csv");
+const CUZK_URL = "https://ags.cuzk.cz/arcgis/rest/services/RUIAN/MapServer/15/query";
 
-function parseCSV(content: string) {
-  return content
-    .trim()
-    .split("\n")
-    .slice(1)
-    .filter((l) => l.trim())
-    .map((line) => {
-      const [kod, nazev, vuscKod, , , platiDo] = line.split(";");
-      return { kod: kod.trim(), name: nazev.trim(), vuscKod: vuscKod.trim(), platiDo: platiDo.trim() };
-    })
-    .filter((row) => !row.platiDo);
+type CuzkDistrict = { kod: number; nazev: string; vusc: number };
+
+async function fetchDistrictsFromCuzk(): Promise<CuzkDistrict[]> {
+  const params = new URLSearchParams({
+    where: "platido IS NULL",
+    outFields: "kod,nazev,vusc",
+    returnGeometry: "false",
+    f: "json",
+  });
+  const res = await fetch(`${CUZK_URL}?${params}`);
+  if (!res.ok) throw new Error(`ČÚZK request failed: ${res.status}`);
+  const data = await res.json() as { features?: { attributes: CuzkDistrict }[] };
+  if (!data.features?.length) throw new Error("No features returned — check layer ID");
+  return data.features.map((f) => f.attributes);
 }
 
 async function login(): Promise<string> {
@@ -24,25 +25,25 @@ async function login(): Promise<string> {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ email: config.email, password: config.password }),
   });
-  if (!res.ok)
-    throw new Error(`Login failed: ${res.status} ${await res.text()}`);
+  if (!res.ok) throw new Error(`Login failed: ${res.status} ${await res.text()}`);
   return ((await res.json()) as { token: string }).token;
 }
 
-async function fetchRegions(token: string): Promise<PayloadResponse<Region>> {
+async function fetchRegions(token: string): Promise<{ byCode: Map<string, string>; byName: Map<string, string> }> {
   const res = await fetch(`${config.backendUrl}/api/regions?limit=100`, {
-    headers: { Authorization: `JWT ${token}`, "Content-Type": "application/json" },
+    headers: { Authorization: `JWT ${token}` },
   });
-  if (!res.ok)
-    throw new Error(`Failed to fetch regions: ${res.status} ${await res.text()}`);
-  return res.json();
+  if (!res.ok) throw new Error(`Failed to fetch regions: ${res.status}`);
+  const data = (await res.json()) as PayloadResponse<Region & { code: string; name: string }>;
+  return {
+    byCode: new Map((data.docs ?? []).map((r) => [r.code, r.id])),
+    byName: new Map((data.docs ?? []).map((r) => [r.name, r.id])),
+  };
 }
-
-type DistrictPayload = Omit<District, "id" | "createdAt" | "updatedAt" | "slug">;
 
 async function upsertDistrict(
   token: string,
-  district: DistrictPayload & { code: string },
+  district: { name: string; code: string; region: string; country: string },
 ): Promise<"created" | "updated"> {
   const headers = { "Content-Type": "application/json", Authorization: `JWT ${token}` };
 
@@ -67,35 +68,59 @@ async function upsertDistrict(
 }
 
 async function main() {
-  const rows = parseCSV(fs.readFileSync(CSV_PATH, "utf-8"));
+  console.log("Fetching districts from ČÚZK...");
+  const rows = await fetchDistrictsFromCuzk();
+  console.log(`Found ${rows.length} districts.\n`);
 
   console.log(`Logging in as ${config.email}...`);
   const token = await login();
 
-  console.log("Fetching regions...");
-  const regionResponse = await fetchRegions(token);
-  console.log(`Found ${regionResponse.docs.length} regions.\n`);
-  console.log(`Upserting ${rows.length} districts...\n`);
+  console.log("Fetching regions from Payload...");
+  const regionMap = await fetchRegions(token);
+  console.log(`Found ${regionMap.byCode.size} regions.\n`);
 
   let created = 0, updated = 0, skipped = 0;
   const failures: { name: string; error: string }[] = [];
 
   for (const row of rows) {
-    const regionId = regionResponse.docs.find((r) => r.code === row.vuscKod)?.id;
+    const regionId = regionMap.byCode.get(String(row.vusc));
     if (!regionId) {
-      console.log(`  ⚠ ${row.name} — no region for VUSC_KOD=${row.vuscKod} [skipped]`);
+      console.log(`  ⚠ ${row.nazev} — no region for vusc=${row.vusc} [skipped]`);
       skipped++;
       continue;
     }
-    const district: DistrictPayload = { name: row.name, code: row.kod, region: regionId, country: "cz" };
     try {
-      const action = await upsertDistrict(token, district);
+      const action = await upsertDistrict(token, {
+        name: row.nazev,
+        code: String(row.kod),
+        region: regionId,
+        country: "cz",
+      });
       action === "created" ? created++ : updated++;
-      console.log(`  ${action === "created" ? "✓" : "↺"} ${district.name} [${action}]`);
+      console.log(`  ${action === "created" ? "✓" : "↺"} ${row.nazev} [${action}]`);
     } catch (err) {
-      failures.push({ name: row.name, error: String(err) });
-      console.log(`  ✗ ${row.name} [failed]`);
+      failures.push({ name: row.nazev, error: String(err) });
+      console.log(`  ✗ ${row.nazev} [failed]`);
     }
+  }
+
+  const prahaRegionId = regionMap.byName.get("Hlavní město Praha");
+  if (prahaRegionId) {
+    try {
+      const action = await upsertDistrict(token, {
+        name: "Hlavní město Praha",
+        code: "Praha",
+        region: prahaRegionId,
+        country: "cz",
+      });
+      action === "created" ? created++ : updated++;
+      console.log(`  ${action === "created" ? "✓" : "↺"} Hlavní město Praha (synthetic) [${action}]`);
+    } catch (err) {
+      failures.push({ name: "Hlavní město Praha", error: String(err) });
+      console.log(`  ✗ Hlavní město Praha [failed]`);
+    }
+  } else {
+    console.log(`  ⚠ Region "Hlavní město Praha" not found — skipping synthetic district`);
   }
 
   console.log(`\n─────────────────────────────────────`);

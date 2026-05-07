@@ -780,6 +780,12 @@ export interface City {
   code: string;
   district: string | District;
   country: 'cz';
+  latitude?: number | null;
+  longitude?: number | null;
+  bboxMinLon?: number | null;
+  bboxMinLat?: number | null;
+  bboxMaxLon?: number | null;
+  bboxMaxLat?: number | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -2034,6 +2040,12 @@ export interface CitiesSelect<T extends boolean = true> {
   code?: T;
   district?: T;
   country?: T;
+  latitude?: T;
+  longitude?: T;
+  bboxMinLon?: T;
+  bboxMinLat?: T;
+  bboxMaxLon?: T;
+  bboxMaxLat?: T;
   updatedAt?: T;
   createdAt?: T;
 }

@@ -61,7 +61,7 @@ export default function HeroSection({}: HeroSectionProps) {
           size="2xl"
           className="mt-10"
           link={{
-            pathname: "/catalog",
+            pathname: "/catalog/gastro",
           }}
         />
       </div>

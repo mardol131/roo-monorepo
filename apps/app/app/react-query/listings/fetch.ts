@@ -17,13 +17,13 @@ export async function fetchAllListings() {
   return res;
 }
 
-export async function fetchListingsByCompany(companyId: string) {
+export async function fetchListingsByCompany(companyId: string, headers?: Record<string, string>) {
   const res = await getCollection({
     collection: "listings",
     query: { company: { equals: companyId } },
     sort: "-createdAt",
+    headers,
   });
-  console.log(`Fetched listings for company ${companyId}:`, res);
   if (!res) throw new Error("Failed to fetch listings");
   return res;
 }

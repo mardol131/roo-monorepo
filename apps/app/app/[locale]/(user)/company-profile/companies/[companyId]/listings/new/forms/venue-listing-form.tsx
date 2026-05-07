@@ -34,6 +34,7 @@ import IconCard from "../components/icon-card";
 import { useRouter } from "@/app/i18n/navigation";
 import { useEventTypes } from "@/app/react-query/filters/event-types/hooks";
 import CheckboxGroup from "@/app/components/ui/atoms/inputs/checkbox-group";
+import MapPointInput from "@/app/components/ui/atoms/inputs/map-point-input";
 
 // ── Schema ─────────────────────────────────────────────────────────────────────
 
@@ -59,6 +60,10 @@ const schema = z.object({
   location: z.object({
     address: z.string().min(1, "Adresa je povinná"),
     city: z.object({ id: z.string(), name: z.string() }, "Vyberte město"),
+    coordinates: z.object(
+      { latitude: z.number(), longitude: z.number() },
+      "Vyberte přesnou polohu",
+    ),
   }),
   capacity: z.coerce
     .number({ message: "Zadejte číslo" })
@@ -142,6 +147,7 @@ export default function VenueListingForm({ onCancel }: Props) {
     register,
     handleSubmit,
     formState: { errors },
+    watch,
   } = useForm<Inputs>({
     resolver: zodResolver(schema) as Resolver<Inputs>,
     defaultValues: {
@@ -175,6 +181,8 @@ export default function VenueListingForm({ onCancel }: Props) {
           location: {
             address: data.location.address,
             city: data.location.city.id,
+            latitude: data.location.coordinates.latitude,
+            longitude: data.location.coordinates.longitude,
           },
           spacesType: data.spaceType,
           capacity: data.capacity,
@@ -194,9 +202,20 @@ export default function VenueListingForm({ onCancel }: Props) {
   }
 
   const [venueCitySearch, setVenueCitySearch] = useState("");
-  const { data: venueCitiesData } = useCities({
+  const [cityBbox, setCityBbox] = useState<
+    [number, number, number, number] | undefined
+  >();
+
+  const selectedCity = watch("location.city");
+
+  const { data: cities, isFetching } = useCities({
     query: venueCitySearch
-      ? { name: { contains: venueCitySearch } }
+      ? {
+          or: [
+            { name: { contains: venueCitySearch } },
+            ...(selectedCity?.id ? [{ id: { equals: selectedCity.id } }] : []),
+          ],
+        }
       : undefined,
   });
 
@@ -368,15 +387,79 @@ export default function VenueListingForm({ onCancel }: Props) {
                 label="Město *"
                 placeholder="Vyberte město..."
                 onSearchQueryChange={setVenueCitySearch}
-                options={venueCitiesData?.docs ?? []}
+                searching={isFetching}
+                options={
+                  cities?.docs?.map((doc) => ({
+                    id: doc.id,
+                    name: doc.name,
+                    info:
+                      typeof doc.district === "object"
+                        ? doc.district.name
+                        : undefined,
+                  })) ?? []
+                }
                 type="dropdown"
-                selectedOption={field.value ?? undefined}
-                onSelect={field.onChange}
-                onClear={() => field.onChange(null)}
+                selectedOption={
+                  field.value
+                    ? {
+                        id: field.value.id,
+                        name: field.value.name,
+                        info: (() => {
+                          const district = cities?.docs?.find(
+                            (c) => c.id === field.value?.id,
+                          )?.district;
+                          if (typeof district === "object") {
+                            return district.name;
+                          }
+                          return undefined;
+                        })(),
+                      }
+                    : undefined
+                }
+                onSelect={(option) => {
+                  field.onChange(option);
+                  const fullCity = cities?.docs?.find(
+                    (c) => c.id === option.id,
+                  );
+                  if (
+                    fullCity?.bboxMinLon &&
+                    fullCity?.bboxMinLat &&
+                    fullCity?.bboxMaxLon &&
+                    fullCity?.bboxMaxLat
+                  ) {
+                    setCityBbox([
+                      fullCity.bboxMinLon,
+                      fullCity.bboxMinLat,
+                      fullCity.bboxMaxLon,
+                      fullCity.bboxMaxLat,
+                    ]);
+                  } else {
+                    setCityBbox(undefined);
+                  }
+                }}
+                onClear={() => {
+                  field.onChange(null);
+                  setCityBbox(undefined);
+                }}
                 ref={field.ref}
                 name={field.name}
                 onBlur={field.onBlur}
                 error={errors.location?.city?.message}
+              />
+            )}
+          />
+          <Controller
+            control={control}
+            name="location.coordinates"
+            render={({ field }) => (
+              <MapPointInput
+                label="Kde přesně se Váš prostor nachází?"
+                mapDisabled={!selectedCity}
+                value={field.value}
+                onChange={field.onChange}
+                onBlur={field.onBlur}
+                error={errors.location?.coordinates?.message}
+                externalBbox={cityBbox}
               />
             )}
           />

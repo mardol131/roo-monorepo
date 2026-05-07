@@ -1,6 +1,7 @@
 @import "tailwindcss";
 @import "./colors.css";
 @import "./spacing.css";
+@import "maplibre-gl/dist/maplibre-gl.css";
 
 @font-face {
   font-family: Oswald;

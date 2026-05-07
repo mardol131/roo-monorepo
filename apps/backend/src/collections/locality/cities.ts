@@ -18,6 +18,7 @@ export const Cities: CollectionConfig = {
       name: 'name',
       type: 'text',
       required: true,
+      index: true,
     },
     {
       name: 'slug',
@@ -41,6 +42,12 @@ export const Cities: CollectionConfig = {
       options: COUNTRIES,
       required: true,
     },
+    { name: 'latitude', type: 'number' },
+    { name: 'longitude', type: 'number' },
+    { name: 'bboxMinLon', type: 'number' },
+    { name: 'bboxMinLat', type: 'number' },
+    { name: 'bboxMaxLon', type: 'number' },
+    { name: 'bboxMaxLat', type: 'number' },
   ],
   hooks: {
     beforeValidate: [

@@ -7,6 +7,10 @@
     "noEmit": true,
     "strictNullChecks": true
   },
-  "include": ["**/*.ts", "**/*.tsx"],
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+    "../../apps/app/app/hooks/use-debounce.tsx"
+  ],
   "exclude": ["node_modules", ".email-builder"]
 }

@@ -1,12 +1,12 @@
 import { Config, PayloadResponse, Where } from "@roo/common";
 import { stringify } from "qs-esm";
-import { success } from "zod";
 
 export type GetCollectionOptions<T extends keyof Config["collections"]> = {
   collection: T;
   query?: Where;
   limit?: number;
   sort?: string;
+  headers?: Record<string, string>;
 };
 
 export async function getCollection<T extends keyof Config["collections"]>({
@@ -14,6 +14,7 @@ export async function getCollection<T extends keyof Config["collections"]>({
   query,
   limit,
   sort,
+  headers,
 }: GetCollectionOptions<T>): Promise<
   PayloadResponse<Config["collections"][T]>
 > {
@@ -31,6 +32,7 @@ export async function getCollection<T extends keyof Config["collections"]>({
   const res = await fetch(`${url}?${queryParams}`, {
     headers: {
       "Content-Type": "application/json",
+      ...headers,
     },
     credentials: "include",
   });
@@ -41,9 +43,11 @@ export async function getCollection<T extends keyof Config["collections"]>({
 export async function getCollectionItem<T extends keyof Config["collections"]>({
   collection,
   id,
+  headers,
 }: {
   collection: T;
   id: string;
+  headers?: Record<string, string>;
 }): Promise<Config["collections"][T]> {
   const url = new URL(
     `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/${collection}/${id}`,
@@ -52,6 +56,7 @@ export async function getCollectionItem<T extends keyof Config["collections"]>({
   const res = await fetch(url.toString(), {
     headers: {
       "Content-Type": "application/json",
+      ...headers,
     },
     credentials: "include",
   });

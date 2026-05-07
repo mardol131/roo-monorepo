@@ -1,20 +1,21 @@
-import { Region } from "@roo/common";
-import fs from "fs";
-import path from "path";
 import { config } from "../config";
 
-const CSV_PATH = path.join(import.meta.dirname, "kraje.csv");
+const CUZK_URL = "https://ags.cuzk.cz/arcgis/rest/services/RUIAN/MapServer/17/query";
 
-function parseCSV(content: string) {
-  return content
-    .trim()
-    .split("\n")
-    .slice(1)
-    .filter((l) => l.trim())
-    .map((line) => {
-      const [kod, nazev] = line.split(";");
-      return { kod: kod.trim(), name: nazev.trim() };
-    });
+type CuzkRegion = { kod: number; nazev: string };
+
+async function fetchRegionsFromCuzk(): Promise<CuzkRegion[]> {
+  const params = new URLSearchParams({
+    where: "platido IS NULL",
+    outFields: "kod,nazev",
+    returnGeometry: "false",
+    f: "json",
+  });
+  const res = await fetch(`${CUZK_URL}?${params}`);
+  if (!res.ok) throw new Error(`ČÚZK request failed: ${res.status}`);
+  const data = await res.json() as { features?: { attributes: CuzkRegion }[] };
+  if (!data.features?.length) throw new Error("No features returned — check layer ID");
+  return data.features.map((f) => f.attributes);
 }
 
 async function login(): Promise<string> {
@@ -23,14 +24,14 @@ async function login(): Promise<string> {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ email: config.email, password: config.password }),
   });
-  if (!res.ok)
-    throw new Error(`Login failed: ${res.status} ${await res.text()}`);
+  if (!res.ok) throw new Error(`Login failed: ${res.status} ${await res.text()}`);
   return ((await res.json()) as { token: string }).token;
 }
 
-type RegionPayload = Omit<Region, "id" | "createdAt" | "updatedAt" | "slug">;
-
-async function upsertRegion(token: string, region: RegionPayload): Promise<"created" | "updated"> {
+async function upsertRegion(
+  token: string,
+  region: { name: string; code: string; country: string },
+): Promise<"created" | "updated"> {
   const headers = { "Content-Type": "application/json", Authorization: `JWT ${token}` };
 
   const existing = (await fetch(
@@ -54,7 +55,9 @@ async function upsertRegion(token: string, region: RegionPayload): Promise<"crea
 }
 
 async function main() {
-  const rows = parseCSV(fs.readFileSync(CSV_PATH, "utf-8"));
+  console.log("Fetching regions from ČÚZK...");
+  const rows = await fetchRegionsFromCuzk();
+  console.log(`Found ${rows.length} regions.\n`);
 
   console.log(`Logging in as ${config.email}...`);
   const token = await login();
@@ -64,14 +67,17 @@ async function main() {
   const failures: { name: string; error: string }[] = [];
 
   for (const row of rows) {
-    const region: RegionPayload = { name: row.name, code: row.kod, country: "cz" };
     try {
-      const action = await upsertRegion(token, region);
+      const action = await upsertRegion(token, {
+        name: row.nazev,
+        code: String(row.kod),
+        country: "cz",
+      });
       action === "created" ? created++ : updated++;
-      console.log(`  ${action === "created" ? "✓" : "↺"} ${region.name} [${action}]`);
+      console.log(`  ${action === "created" ? "✓" : "↺"} ${row.nazev} [${action}]`);
     } catch (err) {
-      failures.push({ name: row.name, error: String(err) });
-      console.log(`  ✗ ${region.name} [failed]`);
+      failures.push({ name: row.nazev, error: String(err) });
+      console.log(`  ✗ ${row.nazev} [failed]`);
     }
   }
 

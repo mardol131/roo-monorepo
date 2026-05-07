@@ -1,24 +1,85 @@
-import { City, District, PayloadResponse } from "@roo/common";
-import fs from "fs";
-import path from "path";
+import { PayloadResponse } from "@roo/common";
 import { config } from "../config";
 
-const CSV_PATH = path.join(import.meta.dirname, "obce.csv");
+const CUZK_URL = "https://ags.cuzk.cz/arcgis/rest/services/RUIAN/MapServer/12/query";
 const BATCH_SIZE = 10;
+const PAGE_SIZE = 1000;
 
-type ObecRow = { kod: string; name: string; okresKod: string };
+type CuzkCity = {
+  kod: number;
+  nazev: string;
+  okres: number;
+  geometry: { rings: number[][][] };
+};
 
-function parseCSV(content: string): ObecRow[] {
-  return content
-    .trim()
-    .split("\n")
-    .slice(1)
-    .filter((l) => l.trim())
-    .map((line) => {
-      const [kod, nazev, , , okresKod, , , , platiDo] = line.split(";");
-      return { kod: kod.trim(), name: nazev.trim(), okresKod: okresKod.trim(), platiDo: platiDo.trim() };
-    })
-    .filter((r) => !r.platiDo);
+type CityPayload = {
+  name: string;
+  code: string;
+  district: string;
+  country: string;
+  latitude: number;
+  longitude: number;
+  bboxMinLon: number;
+  bboxMinLat: number;
+  bboxMaxLon: number;
+  bboxMaxLat: number;
+};
+
+async function fetchCitiesFromCuzk(): Promise<CuzkCity[]> {
+  const cities: CuzkCity[] = [];
+  let offset = 0;
+
+  while (true) {
+    const params = new URLSearchParams({
+      where: "platido IS NULL",
+      outFields: "kod,nazev,okres",
+      returnGeometry: "true",
+      outSR: "4326",
+      resultOffset: String(offset),
+      resultRecordCount: String(PAGE_SIZE),
+      f: "json",
+    });
+
+    const res = await fetch(`${CUZK_URL}?${params}`);
+    if (!res.ok) throw new Error(`ČÚZK request failed: ${res.status}`);
+    const data = await res.json() as {
+      features?: { attributes: Omit<CuzkCity, "geometry">; geometry: CuzkCity["geometry"] }[];
+      exceededTransferLimit?: boolean;
+    };
+
+    if (!data.features?.length) break;
+    cities.push(...data.features.map((f) => ({ ...f.attributes, geometry: f.geometry })));
+
+    if (!data.exceededTransferLimit) break;
+    offset += PAGE_SIZE;
+    process.stdout.write(`\r  Fetching from ČÚZK: ${cities.length} municipalities...`);
+  }
+
+  console.log(`\r  Fetched ${cities.length} municipalities from ČÚZK.     `);
+  return cities;
+}
+
+function calcGeodata(rings: number[][][]) {
+  let minLon = Infinity, maxLon = -Infinity;
+  let minLat = Infinity, maxLat = -Infinity;
+
+  for (const ring of rings) {
+    for (const [lon, lat] of ring) {
+      if (lon < minLon) minLon = lon;
+      if (lon > maxLon) maxLon = lon;
+      if (lat < minLat) minLat = lat;
+      if (lat > maxLat) maxLat = lat;
+    }
+  }
+
+  return {
+    longitude: (minLon + maxLon) / 2,
+    latitude: (minLat + maxLat) / 2,
+    bboxMinLon: minLon,
+    bboxMinLat: minLat,
+    bboxMaxLon: maxLon,
+    bboxMaxLat: maxLat,
+  };
 }
 
 async function login(): Promise<string> {
@@ -27,25 +88,33 @@ async function login(): Promise<string> {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ email: config.email, password: config.password }),
   });
-  if (!res.ok)
-    throw new Error(`Login failed: ${res.status} ${await res.text()}`);
+  if (!res.ok) throw new Error(`Login failed: ${res.status} ${await res.text()}`);
   return ((await res.json()) as { token: string }).token;
 }
 
-async function fetchDistricts(token: string): Promise<Map<string, string>> {
-  const res = await fetch(`${config.backendUrl}/api/districts?limit=200`, {
-    headers: { Authorization: `JWT ${token}` },
-  });
-  if (!res.ok)
-    throw new Error(`Failed to fetch districts: ${res.status} ${await res.text()}`);
-  const data = (await res.json()) as PayloadResponse<District & { code: string }>;
-  return new Map(data.docs.map((d) => [d.code, d.id]));
-}
-
-type CityPayload = Omit<City, "id" | "createdAt" | "updatedAt" | "slug"> & {
-  country: string;
-  code: string;
+type DistrictMaps = {
+  byCode: Map<string, string>;
+  byName: Map<string, string>;
 };
+
+async function fetchDistrictMap(token: string): Promise<DistrictMaps> {
+  const districts: { id: string; code: string; name: string }[] = [];
+  let page = 1;
+  while (true) {
+    const res = await fetch(`${config.backendUrl}/api/districts?limit=500&page=${page}`, {
+      headers: { Authorization: `JWT ${token}` },
+    });
+    if (!res.ok) throw new Error(`Failed to fetch districts: ${res.status}`);
+    const data = (await res.json()) as PayloadResponse<{ id: string; code: string; name: string }>;
+    if (data.docs) districts.push(...data.docs);
+    if (page >= data.totalPages) break;
+    page++;
+  }
+  return {
+    byCode: new Map(districts.map((d) => [d.code, d.id])),
+    byName: new Map(districts.map((d) => [d.name.toLowerCase(), d.id])),
+  };
+}
 
 async function upsertCity(token: string, city: CityPayload): Promise<"created" | "updated"> {
   const headers = { "Content-Type": "application/json", Authorization: `JWT ${token}` };
@@ -71,62 +140,74 @@ async function upsertCity(token: string, city: CityPayload): Promise<"created" |
 }
 
 async function main() {
-  const rows = parseCSV(fs.readFileSync(CSV_PATH, "utf-8"));
+  console.log("Fetching municipalities from ČÚZK...");
+  const rows = await fetchCitiesFromCuzk();
 
   console.log(`Logging in as ${config.email}...`);
   const token = await login();
 
-  console.log("Fetching districts...");
-  const districtMap = await fetchDistricts(token);
-  console.log(`Found ${districtMap.size} districts.\n`);
+  console.log("Fetching districts from Payload...");
+  const districtMap = await fetchDistrictMap(token);
+  console.log(`Found ${districtMap.byCode.size} districts.\n`);
 
-  const cities: CityPayload[] = [];
-  let skippedNoDistrict = 0;
-
-  for (const row of rows) {
-    const districtId = districtMap.get(row.okresKod);
-    if (!districtId) {
-      skippedNoDistrict++;
-      continue;
-    }
-    cities.push({ name: row.name, code: row.kod, district: districtId, country: "cz" });
-  }
-
-  if (skippedNoDistrict > 0)
-    console.log(`⚠ Skipped ${skippedNoDistrict} rows with unknown OKRES_KOD.\n`);
-
-  console.log(`Upserting ${cities.length} cities in batches of ${BATCH_SIZE}...`);
-
-  let created = 0, updated = 0;
+  let created = 0, updated = 0, skippedNoDistrict = 0;
   const failures: { name: string; error: string }[] = [];
+  const skipped: { name: string; kod: number; okres: number }[] = [];
 
-  for (let i = 0; i < cities.length; i += BATCH_SIZE) {
-    const batch = cities.slice(i, i + BATCH_SIZE);
-    const results = await Promise.allSettled(batch.map((c) => upsertCity(token, c)));
+  for (let i = 0; i < rows.length; i += BATCH_SIZE) {
+    const batch = rows.slice(i, i + BATCH_SIZE);
+    const results = await Promise.allSettled(
+      batch.map((row) => {
+        const districtId =
+          districtMap.byCode.get(String(row.okres)) ??
+          (row.okres === null ? districtMap.byName.get("hlavní město praha") : undefined);
+        if (!districtId) {
+          skippedNoDistrict++;
+          skipped.push({ name: row.nazev, kod: row.kod, okres: row.okres });
+          return Promise.resolve("skipped" as const);
+        }
+        return upsertCity(token, {
+          name: row.nazev,
+          code: String(row.kod),
+          district: districtId,
+          country: "cz",
+          ...calcGeodata(row.geometry.rings),
+        });
+      }),
+    );
 
     for (let j = 0; j < results.length; j++) {
       const result = results[j];
       if (result.status === "fulfilled") {
-        result.value === "created" ? created++ : updated++;
+        if (result.value === "created") created++;
+        else if (result.value === "updated") updated++;
       } else {
-        failures.push({ name: batch[j].name, error: result.reason?.message ?? String(result.reason) });
+        failures.push({
+          name: batch[j].nazev,
+          error: result.reason?.message ?? String(result.reason),
+        });
       }
     }
 
-    const progress = Math.min(i + BATCH_SIZE, cities.length);
+    const progress = Math.min(i + BATCH_SIZE, rows.length);
     process.stdout.write(
-      `\r  ${progress}/${cities.length} — ✓ ${created} created  ↺ ${updated} updated  ✗ ${failures.length} failed`,
+      `\r  ${progress}/${rows.length} — ✓ ${created} created  ↺ ${updated} updated  ✗ ${failures.length} failed`,
     );
   }
 
   console.log(`\n\n─────────────────────────────────────`);
-  console.log(`  ✓ created : ${created}`);
-  console.log(`  ↺ updated : ${updated}`);
-  console.log(`  ⚠ skipped : ${skippedNoDistrict}`);
-  console.log(`  ✗ failed  : ${failures.length}`);
+  console.log(`  ✓ created  : ${created}`);
+  console.log(`  ↺ updated  : ${updated}`);
+  console.log(`  ⚠ skipped  : ${skippedNoDistrict} (no matching district)`);
+  console.log(`  ✗ failed   : ${failures.length}`);
+  if (skipped.length > 0) {
+    console.log(`\nSkipped (no matching district):`);
+    skipped.forEach((s) => console.log(`  • ${s.name} (kod=${s.kod}, okres=${s.okres})`));
+  }
   if (failures.length > 0) {
     console.log(`\nFailed records:`);
-    failures.forEach((f) => console.log(`  • ${f.name}: ${f.error}`));
+    failures.slice(0, 20).forEach((f) => console.log(`  • ${f.name}: ${f.error}`));
+    if (failures.length > 20) console.log(`  ... and ${failures.length - 20} more`);
   }
   console.log(`─────────────────────────────────────`);
 

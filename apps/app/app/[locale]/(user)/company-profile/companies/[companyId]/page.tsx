@@ -24,6 +24,7 @@ export default function page() {
   const { data: company, isLoading: isCompanyLoading } = useCompany(companyId);
   const { data: listings, isLoading: isListingsLoading } =
     useListingsByCompany(companyId);
+  console.log(listings);
 
   if (isCompanyLoading || isListingsLoading) {
     return <Loader text="Stránka se načítá..." />;

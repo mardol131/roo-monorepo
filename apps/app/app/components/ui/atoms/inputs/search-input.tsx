@@ -5,6 +5,8 @@ import { Search, ChevronDown, X } from "lucide-react";
 import Text from "@/app/components/ui/atoms/text";
 import InputLabel from "../input-label";
 import ErrorText from "./error-text";
+import { useDebounce } from "@/app/hooks/use-debounce";
+import { useClickOutside } from "@/app/hooks/use-click-outside";
 
 export interface SearchOption {
   id: string;
@@ -16,7 +18,6 @@ interface SearchInputProps {
   label: string;
   placeholder?: string;
   options: SearchOption[];
-  isLoading?: boolean;
   selectedOption?: SearchOption | null;
   onSelect?: (option: SearchOption) => void;
   onClear?: () => void;
@@ -31,7 +32,6 @@ export default function SearchInput({
   label,
   placeholder = "Vyhledávání...",
   options,
-  isLoading = false,
   selectedOption,
   onSelect,
   onClear,
@@ -42,7 +42,7 @@ export default function SearchInput({
   type = "dropdown",
   // rest = register() spread: name, ref, onChange, onBlur, value
   ...rest
-}: SearchInputProps & React.ComponentPropsWithRef<"input">) {
+}: SearchInputProps & Omit<React.ComponentPropsWithRef<"input">, "onSelect">) {
   const [isOpen, setIsOpen] = useState(false);
   const [openUpward, setOpenUpward] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -57,29 +57,15 @@ export default function SearchInput({
   const selected: SearchOption | undefined =
     selectedOption ?? selectedFromOptions ?? undefined;
 
-  useEffect(() => {
-    if (debounceTimeoutRef.current) clearTimeout(debounceTimeoutRef.current);
-    if (!searchQuery.trim()) return;
-    debounceTimeoutRef.current = setTimeout(() => {
+  useDebounce(
+    () => {
       onSearchQueryChange?.(searchQuery);
-    }, 2000);
-    return () => {
-      if (debounceTimeoutRef.current) clearTimeout(debounceTimeoutRef.current);
-    };
-  }, [searchQuery, onSearchQueryChange]);
+    },
+    [searchQuery],
+    500,
+  );
 
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        containerRef.current &&
-        !containerRef.current.contains(event.target as Node)
-      ) {
-        setIsOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
+  useClickOutside(containerRef, () => setIsOpen(false));
 
   const handleSelect = (option: SearchOption) => {
     setSearchQuery("");
@@ -102,7 +88,7 @@ export default function SearchInput({
     <div
       className={`overflow-y-auto ${type === "fixed" ? "border border-zinc-200 rounded-lg h-50" : "max-h-60"}`}
     >
-      {isLoading || searching ? (
+      {searching ? (
         <div className="p-4 text-center">
           <Text variant="label" color="secondary">
             Hledání...

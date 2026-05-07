@@ -21,6 +21,7 @@ export default function page() {
   const t = useTranslations();
 
   const { data: listings, isLoading } = useListingsByCompany(companyId);
+
   const { mutate: updateListing } = useUpdateListing(companyId);
 
   if (isLoading) {

@@ -442,9 +442,10 @@ export const Listings: CollectionConfig = {
     read: ({ req }) => {
       if (req.user?.collection === 'admins') return true
       if (!req.user) {
-        return { status: { equals: 'active' } }
+        const query: Where = { status: { equals: 'active' } }
+        return query
       }
-      const query: Where = {
+      return {
         or: [
           {
             and: [
@@ -452,10 +453,14 @@ export const Listings: CollectionConfig = {
               { status: { in: ['active', 'inactive'] } },
             ],
           },
-          { status: { equals: 'active' } },
+          {
+            and: [
+              { 'company.owner': { not_equals: req.user.id } },
+              { status: { equals: 'active' } },
+            ],
+          },
         ],
       }
-      return query
     },
     update: ({ req }) => {
       if (!req.user) return false

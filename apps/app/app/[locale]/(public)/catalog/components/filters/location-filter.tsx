@@ -41,7 +41,7 @@ export default function LocationFilter({
             typeof city.district === "string" ? undefined : city.district?.name,
         })) ?? []
       }
-      isLoading={isLoading}
+      searching={isLoading}
       selectedOption={
         selectedOption
           ? {
