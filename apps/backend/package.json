@@ -19,9 +19,14 @@
     "test:int": "cross-env NODE_OPTIONS=--no-deprecation vitest run --config ./vitest.config.mts"
   },
   "dependencies": {
+    "@payloadcms/db-mongodb": "3.69.0",
     "@payloadcms/next": "3.69.0",
     "@payloadcms/richtext-lexical": "3.69.0",
     "@payloadcms/ui": "3.69.0",
+    "@roo/common": "workspace:*",
+    "@roo/email-builder": "workspace:*",
+    "@supabase/ssr": "^0.10.3",
+    "@supabase/supabase-js": "^2.105.4",
     "cross-env": "^7.0.3",
     "dotenv": "16.4.7",
     "graphql": "^16.8.1",
@@ -29,10 +34,7 @@
     "payload": "3.69.0",
     "react": "19.2.1",
     "react-dom": "19.2.1",
-    "@roo/email-builder": "workspace:*",
-    "sharp": "0.34.2",
-    "@payloadcms/db-mongodb": "3.69.0",
-    "@roo/common": "workspace:*"
+    "sharp": "0.34.2"
   },
   "devDependencies": {
     "@playwright/test": "1.56.1",

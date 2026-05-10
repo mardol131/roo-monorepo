@@ -12,6 +12,7 @@ import {
   fetchCompanies,
   fetchCompany,
   updateCompany,
+  UpdateCompanyPayload,
 } from "./fetch";
 
 export function useCompanies() {
@@ -33,13 +34,13 @@ export function useUpdateCompany(
   options?: UseMutationOptions<
     Company,
     Error,
-    { id: string; data: Partial<Company> }
+    { id: string; data: UpdateCompanyPayload }
   >,
 ) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, data }: { id: string; data: Partial<Company> }) =>
+    mutationFn: ({ id, data }: { id: string; data: UpdateCompanyPayload }) =>
       updateCompany(id, data),
     onSuccess: (company, variables, ...rest) => {
       queryClient.invalidateQueries({

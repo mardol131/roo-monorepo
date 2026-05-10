@@ -10,7 +10,8 @@
   "include": [
     "**/*.ts",
     "**/*.tsx",
-    "../../apps/app/app/hooks/use-debounce.tsx"
+    "../../apps/app/app/hooks/use-debounce.tsx",
+    "../../apps/app/app/functions/upload-file-to-cloud.ts"
   ],
   "exclude": ["node_modules", ".email-builder"]
 }

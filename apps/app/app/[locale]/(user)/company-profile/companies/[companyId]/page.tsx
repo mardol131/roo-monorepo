@@ -24,7 +24,6 @@ export default function page() {
   const { data: company, isLoading: isCompanyLoading } = useCompany(companyId);
   const { data: listings, isLoading: isListingsLoading } =
     useListingsByCompany(companyId);
-  console.log(listings);
 
   if (isCompanyLoading || isListingsLoading) {
     return <Loader text="Stránka se načítá..." />;
@@ -196,22 +195,34 @@ export default function page() {
                 label: "IČO",
                 value: company.ico,
               },
-              {
-                type: "text",
-                label: "Webová stránka",
-                value: company.website,
-              },
+              ...(company.website
+                ? [
+                    {
+                      type: "text",
+                      label: "Webové stránky",
+                      value: company.website,
+                    } as const,
+                  ]
+                : []),
 
-              {
-                type: "text",
-                label: "DIČ",
-                value: company.vatId,
-              },
-              {
-                type: "text",
-                label: "Popisek",
-                value: company.description,
-              },
+              ...(company.vatId
+                ? [
+                    {
+                      type: "text",
+                      label: "DIČ",
+                      value: company.vatId,
+                    } as const,
+                  ]
+                : []),
+              ...(company.description
+                ? [
+                    {
+                      type: "text",
+                      label: "Popis",
+                      value: company.description,
+                    } as const,
+                  ]
+                : []),
               {
                 type: "text",
                 label: "Adresa",

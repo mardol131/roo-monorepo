@@ -37,9 +37,11 @@ import { DietaryOptions } from './collections/filters/dietary-options'
 import { FoodServiceStyle } from './collections/filters/food-service-style'
 import { CalendarEvents } from './collections/calendar-events'
 import { FavouriteListings } from './collections/favourite-listings'
-import { Users } from './collections/Users'
-import { Media } from './collections/Media'
+
 import { SpaceTypes } from './collections/specific/space-types'
+import { uploadFileToCloud } from './endpoints/upload-file-to-cloud/upload-file-to-cloud'
+import { Users } from './collections/users'
+import { Media } from './collections/media'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -107,6 +109,7 @@ export default buildConfig({
   db: mongooseAdapter({
     url: process.env.DATABASE_URL || '',
   }),
+  endpoints: [uploadFileToCloud],
   plugins: [],
   cors: ['http://localhost:3000', process.env.NEXT_PUBLIC_WEBSITE_URL || ''],
   csrf: ['http://localhost:3000', process.env.NEXT_PUBLIC_WEBSITE_URL || ''],

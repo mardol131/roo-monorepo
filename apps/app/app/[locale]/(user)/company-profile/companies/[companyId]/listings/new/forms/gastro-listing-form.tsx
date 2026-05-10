@@ -11,75 +11,42 @@ import CheckboxGroup from "@/app/components/ui/atoms/inputs/checkbox-group";
 import GalleryInput from "@/app/components/ui/atoms/inputs/images/gallery-input";
 import ImageInput from "@/app/components/ui/atoms/inputs/images/image-input";
 import Input from "@/app/components/ui/atoms/inputs/input";
+import { uploadFileToCloud } from "@/app/functions/upload-file-to-cloud";
+import { useRouter } from "@/app/i18n/navigation";
 import { useCities } from "@/app/react-query/cities/hooks";
 import { useDistricts } from "@/app/react-query/districts/hooks";
-import { useRegions } from "@/app/react-query/regions/hooks";
-import { zodResolver } from "@hookform/resolvers/zod";
+import { useCuisines } from "@/app/react-query/filters/cuisines/hooks";
+import { useDietaryOptions } from "@/app/react-query/filters/dietary-options/hooks";
+import { useDishTypes } from "@/app/react-query/filters/dish-types/hooks";
+import { useEventTypes } from "@/app/react-query/filters/event-types/hooks";
+import { useFoodServiceStyles } from "@/app/react-query/filters/food-service-styles/hooks";
 import { CreateListingPayload } from "@/app/react-query/listings/fetch";
 import { useCreateListing } from "@/app/react-query/listings/hooks";
-import { uploadFileToCloud } from "@roo/common";
+import { useRegions } from "@/app/react-query/regions/hooks";
+import { useNecessities } from "@/app/react-query/specific/necessities/hooks";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useParams } from "next/navigation";
-import {
-  Banknote,
-  Building2,
-  ClipboardList,
-  Image,
-  MapPin,
-  Package,
-  Users,
-  UtensilsCrossed,
-} from "lucide-react";
 import { useState } from "react";
 import { Controller, Resolver, useForm } from "react-hook-form";
 import { z } from "zod";
-import { useRouter } from "@/app/i18n/navigation";
-import { useCuisines } from "@/app/react-query/filters/cuisines/hooks";
-import { useDishTypes } from "@/app/react-query/filters/dish-types/hooks";
-import { useDietaryOptions } from "@/app/react-query/filters/dietary-options/hooks";
-import { useFoodServiceStyles } from "@/app/react-query/filters/food-service-styles/hooks";
-import { useNecessities } from "@/app/react-query/specific/necessities/hooks";
-import { useEventTypes } from "@/app/react-query/filters/event-types/hooks";
+import {
+  commonListingFieldsSchema,
+  gastroAndEntertainmentCommonFieldsSchema,
+} from "./common-schema";
+import { relationshipItemSchema } from "@/app/validation/schema/relationship-item-schema";
 
 // ── Schema ─────────────────────────────────────────────────────────────────────
 
-const itemSchema = z.object({ id: z.string(), name: z.string() });
-
-const optionalPositiveNumber = z.preprocess(
-  (val) => (val === "" || val === undefined || val === null ? undefined : val),
-  z.coerce.number().positive("Musí být kladné číslo").optional(),
-);
-
 const schema = z.object({
-  name: z.string().min(1, "Název je povinný"),
-  images: z.object({
-    coverImage: z.string().min(1, "Titulní obrázek je povinný"),
-    logo: z.string().optional(),
-    gallery: z.array(z.string()).min(4, "Přidejte alespoň čtyři obrázky"),
-  }),
-  price: z.object({
-    startsAt: z.coerce
-      .number({ message: "Zadejte číslo" })
-      .positive("Cena musí být kladná"),
-  }),
-  location: z.object({
-    regions: z.array(itemSchema).min(1, "Vyberte alespoň jeden kraj"),
-    districts: z.array(itemSchema).default([]),
-    cities: z.array(itemSchema).default([]),
-    address: z.string().optional(),
-  }),
-  capacity: z.coerce
-    .number({ message: "Zadejte číslo" })
-    .positive("Kapacita musí být kladná")
-    .int("Zadejte celé číslo"),
-  minimumCapacity: optionalPositiveNumber,
-  cuisines: z.array(itemSchema).default([]),
-  dishTypes: z.array(itemSchema).default([]),
-  dietaryOptions: z.array(itemSchema).default([]),
-  foodServiceStyles: z.array(itemSchema).default([]),
+  ...commonListingFieldsSchema,
+  ...gastroAndEntertainmentCommonFieldsSchema,
+  cuisines: z.array(relationshipItemSchema).default([]),
+  dishTypes: z.array(relationshipItemSchema).default([]),
+  dietaryOptions: z.array(relationshipItemSchema).default([]),
+  foodServiceStyles: z.array(relationshipItemSchema).default([]),
   hasAlcoholLicense: z.boolean().default(false),
   kidsMenu: z.boolean().default(false),
-  necessities: z.array(itemSchema).default([]),
-  eventTypes: z.array(itemSchema).default([]),
+  necessities: z.array(relationshipItemSchema).default([]),
 });
 
 type Inputs = z.infer<typeof schema>;
@@ -163,7 +130,8 @@ export default function GastroListingForm({ onCancel }: Props) {
     resolver: zodResolver(schema) as Resolver<Inputs>,
     defaultValues: {
       location: { regions: [], districts: [], cities: [] },
-      images: { gallery: [] },
+      images: { gallery: [], logo: {} },
+      eventTypes: [],
       cuisines: [],
       dishTypes: [],
       dietaryOptions: [],
@@ -200,7 +168,7 @@ export default function GastroListingForm({ onCancel }: Props) {
       images: {
         coverImage: data.images.coverImage,
         logo: data.images.logo,
-        gallery: data.images.gallery.map((url) => ({ url })),
+        gallery: data.images.gallery,
       },
       price: { startsAt: data.price.startsAt },
       eventTypes: data.eventTypes.map((i) => i.id),
@@ -267,6 +235,8 @@ export default function GastroListingForm({ onCancel }: Props) {
         : undefined,
   });
 
+  console.log("errors", errors);
+
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="flex gap-6">
       <div className="flex w-full flex-col gap-4">
@@ -287,6 +257,7 @@ export default function GastroListingForm({ onCancel }: Props) {
               placeholder: "Catering Praha s.r.o.",
             }}
             error={errors.name?.message}
+            isRequired
           />
         </FormSection>
 
@@ -309,6 +280,7 @@ export default function GastroListingForm({ onCancel }: Props) {
                 min: 0,
                 placeholder: "9900",
               }}
+              isRequired
               error={errors.price?.startsAt?.message}
             />
           </div>
@@ -365,6 +337,7 @@ export default function GastroListingForm({ onCancel }: Props) {
                   errors.images?.gallery?.root?.message ??
                   errors.images?.gallery?.message
                 }
+                isRequired
               />
             )}
           />
@@ -385,6 +358,7 @@ export default function GastroListingForm({ onCancel }: Props) {
             name="location.regions"
             render={({ field }) => (
               <CheckboxGroup
+                isRequired
                 label="Kraj"
                 items={regionsData?.docs ?? []}
                 value={field.value}
@@ -430,7 +404,7 @@ export default function GastroListingForm({ onCancel }: Props) {
           />
           <Input
             label="Adresa"
-            subLabel={
+            sublabel={
               !citiesValue?.length
                 ? "Nejprve vyplňte předchozí pole"
                 : undefined
@@ -463,6 +437,7 @@ export default function GastroListingForm({ onCancel }: Props) {
                 min: 1,
                 placeholder: "200",
               }}
+              isRequired
               error={errors.capacity?.message}
             />
             <Input
@@ -486,6 +461,7 @@ export default function GastroListingForm({ onCancel }: Props) {
           subtitle={S.eventTypes.subTitle}
           surfaceColor={COLOR_SCHEME.surface}
           color={COLOR_SCHEME.text}
+          error={!!errors.eventTypes}
         >
           <Controller
             control={control}
@@ -497,6 +473,7 @@ export default function GastroListingForm({ onCancel }: Props) {
                 items={eventTypes?.docs ?? []}
                 value={field.value || undefined}
                 onChange={field.onChange}
+                error={errors.eventTypes?.message}
                 checkColor={COLOR_SCHEME.text}
               />
             )}

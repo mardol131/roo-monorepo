@@ -30,11 +30,15 @@ import { useRegions } from "@/app/react-query/regions/hooks";
 import { useNecessities } from "@/app/react-query/specific/necessities/hooks";
 import { useRules } from "@/app/react-query/specific/rules/hooks";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Listing, uploadFileToCloud } from "@roo/common";
+import { Listing, undefinedToNull } from "@roo/common";
+import { uploadFileToCloud } from "@/app/functions/upload-file-to-cloud";
+
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Controller, useFieldArray, useForm } from "react-hook-form";
 import { z } from "zod";
+import { commonEditListingFieldsSchema } from "./common-schema";
+import { toItem } from "./utils";
 
 // ── TOC groups ────────────────────────────────────────────────────────────────
 
@@ -74,6 +78,11 @@ const S: Record<string, TocSection> = {
     icon: "Package",
   },
   rules: { id: "section-rules", title: "Pravidla", icon: "ScrollText" },
+  foodAndDrinkRules: {
+    id: "section-food-and-drink-rules",
+    title: "Pravidla pro jídlo a pití",
+    icon: "Coffee",
+  },
   employees: { id: "section-employees", title: "Zaměstnanci", icon: "Users" },
   faq: { id: "section-faq", title: "FAQ", icon: "CircleHelp" },
   references: {
@@ -98,7 +107,7 @@ export const GASTRO_FORM_GROUPS: readonly TocGroup[] = [
   },
   {
     label: "Program a vybavení",
-    sections: [S.eventTypes, S.personnel, S.necessities],
+    sections: [S.eventTypes, S.personnel, S.necessities, S.foodAndDrinkRules],
   },
   {
     label: "Prezentace",
@@ -111,74 +120,22 @@ export const GASTRO_FORM_GROUPS: readonly TocGroup[] = [
 const itemSchema = z.object({ id: z.string(), name: z.string() });
 
 const schema = z.object({
-  name: z.string().min(1, "Název je povinný"),
-  shortDescription: z.string().optional(),
-  description: z.string().optional(),
-  eventTypes: z.array(itemSchema).min(1, "Vyberte alespoň jeden typ akce"),
-  images: z.object({
-    coverImage: z.string().min(1, "Titulní obrázek je povinný"),
-    logo: z.string().optional(),
-    gallery: z.array(z.string()).default([]),
-  }),
-  price: z.object({
-    startsAt: z.coerce
-      .number({ message: "Zadejte číslo" })
-      .positive("Cena musí být kladná"),
-  }),
+  ...commonEditListingFieldsSchema,
   location: z.object({
     regions: z.array(itemSchema).min(1, "Vyberte alespoň jeden kraj"),
     districts: z.array(itemSchema).default([]),
     cities: z.array(itemSchema).default([]),
     address: z.string().optional(),
   }),
-  capacity: z.coerce
-    .number({ message: "Zadejte číslo" })
-    .positive("Kapacita musí být kladná")
-    .int("Zadejte celé číslo"),
-  minimumCapacity: z.coerce.number().nullable().optional(),
+
   cuisines: z.array(itemSchema).default([]),
   dishTypes: z.array(itemSchema).default([]),
   dietaryOptions: z.array(itemSchema).default([]),
   foodServiceStyles: z.array(itemSchema).default([]),
-  personnel: z.array(itemSchema).default([]),
-  necessities: z.array(itemSchema).default([]),
+
   kidsMenu: z.boolean().default(false),
   hasAlcoholLicense: z.boolean().default(false),
   foodAndDrinkRules: z.array(itemSchema).default([]),
-  rules: z.array(itemSchema).default([]),
-  employees: z
-    .array(
-      z.object({
-        name: z.string().min(1, "Jméno je povinné"),
-        role: z.string().min(1, "Role je povinná"),
-        description: z.string().optional(),
-        image: z.string().optional(),
-      }),
-    )
-    .default([]),
-  faq: z
-    .array(
-      z.object({
-        active: z.boolean().default(true),
-        question: z.string().min(1, "Otázka je povinná"),
-        answer: z.string().min(1, "Odpověď je povinná"),
-        groupedBy: z
-          .enum(["general", "booking", "cancellation", "payment", "other"])
-          .default("general"),
-      }),
-    )
-    .default([]),
-  references: z
-    .array(
-      z.object({
-        image: z.string().optional(),
-        eventName: z.string().min(1, "Název akce je povinný"),
-        description: z.string().optional(),
-        clientName: z.string().optional(),
-        eventType: z.string().optional(),
-      }),
-    )
-    .default([]),
 });
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -211,47 +168,51 @@ export default function EditGastroListingForm({
       (d): d is Extract<Listing["details"][number], { blockType: "gastro" }> =>
         d.blockType === "gastro",
     );
+
+    const payload: Partial<Listing> = {
+      name: data.name,
+      shortDescription: data.shortDescription,
+      description: data.description,
+      eventTypes: data.eventTypes.map((i) => i.id),
+      images: data.images,
+      price: data.price,
+      rules: data.rules.map((i) => i.id),
+      employees: data.employees,
+      faq: data.faq,
+      references: data.references.map((r) => ({
+        ...r,
+        eventType: r.eventType ? r.eventType.id : undefined,
+      })),
+      details: [
+        {
+          ...existingDetail,
+          blockType: "gastro",
+          location: {
+            region: data.location.regions.map((i) => i.id),
+            district: data.location.districts.map((i) => i.id),
+            city: data.location.cities.map((i) => i.id),
+            address: data.location.address,
+          },
+          capacity: data.capacity,
+          minimumCapacity: data.minimumCapacity,
+          cuisines: data.cuisines.map((i) => i.id),
+          dishTypes: data.dishTypes.map((i) => i.id),
+          dietaryOptions: data.dietaryOptions.map((i) => i.id),
+          foodServiceStyles: data.foodServiceStyles.map((i) => i.id),
+          kidsMenu: data.kidsMenu,
+          hasAlcoholLicense: data.hasAlcoholLicense,
+          foodAndDrinkRules: data.foodAndDrinkRules.map((i) => i.id),
+          personnel: data.personnel.map((i) => i.id),
+          necessities: data.necessities.map((i) => i.id),
+        },
+      ],
+    };
+
+    const finalPayload = undefinedToNull(payload);
     mutate(
       {
         id: listingId,
-        data: {
-          name: data.name,
-          shortDescription: data.shortDescription,
-          description: data.description,
-          eventTypes: data.eventTypes.map((i) => i.id),
-          images: {
-            ...data.images,
-            gallery: data.images.gallery.map((url) => ({ url })),
-          },
-          price: data.price,
-          rules: data.rules.map((i) => i.id),
-          employees: data.employees,
-          faq: data.faq,
-          references: data.references,
-          details: [
-            {
-              ...existingDetail,
-              blockType: "gastro",
-              location: {
-                region: data.location.regions.map((i) => i.id),
-                district: data.location.districts.map((i) => i.id),
-                city: data.location.cities.map((i) => i.id),
-                address: data.location.address,
-              },
-              capacity: data.capacity,
-              minimumCapacity: data.minimumCapacity,
-              cuisines: data.cuisines.map((i) => i.id),
-              dishTypes: data.dishTypes.map((i) => i.id),
-              dietaryOptions: data.dietaryOptions.map((i) => i.id),
-              foodServiceStyles: data.foodServiceStyles.map((i) => i.id),
-              kidsMenu: data.kidsMenu,
-              hasAlcoholLicense: data.hasAlcoholLicense,
-              foodAndDrinkRules: data.foodAndDrinkRules.map((i) => i.id),
-              personnel: data.personnel.map((i) => i.id),
-              necessities: data.necessities.map((i) => i.id),
-            },
-          ],
-        },
+        data: finalPayload,
       },
       {
         onSuccess: () => router.back(),
@@ -323,22 +284,12 @@ export default function EditGastroListingForm({
     const id = <T extends string | { id: string }>(v: T) =>
       typeof v === "string" ? v : v.id;
 
-    const toItem = <T extends { id: string; name: string }>(
-      v: string | T,
-    ): { id: string; name: string } =>
-      typeof v === "string" ? { id: v, name: "" } : { id: v.id, name: v.name };
-
     reset({
       name: listing.name,
       shortDescription: listing.shortDescription ?? undefined,
       description: listing.description ?? undefined,
       eventTypes: listing.eventTypes?.map(toItem) ?? [],
-      images: {
-        coverImage: listing.images.coverImage,
-        logo: listing.images.logo ?? undefined,
-        gallery:
-          listing.images.gallery?.map((g) => g.url ?? "").filter(Boolean) ?? [],
-      },
+      images: listing.images,
       price: { startsAt: listing.price.startsAt },
       location: {
         regions: d.location?.region?.map(toItem) ?? [],
@@ -363,7 +314,7 @@ export default function EditGastroListingForm({
           name: e.name,
           role: e.role,
           description: e.description ?? undefined,
-          image: e.image ? id(e.image as string | { id: string }) : undefined,
+          image: e.image,
         })) ?? [],
       faq:
         listing.faq?.map((f) => ({
@@ -374,13 +325,11 @@ export default function EditGastroListingForm({
         })) ?? [],
       references:
         listing.references?.map((r) => ({
-          image: r.image ? id(r.image as string | { id: string }) : undefined,
+          image: r.image,
           eventName: r.eventName ?? undefined,
           description: r.description ?? undefined,
           clientName: r.clientName ?? undefined,
-          eventType: r.eventType
-            ? id(r.eventType as string | { id: string })
-            : undefined,
+          eventType: r.eventType ? toItem(r.eventType) : undefined,
         })) ?? [],
     });
   }, [listing, reset]);
@@ -438,6 +387,7 @@ export default function EditGastroListingForm({
               placeholder: "Novák Catering",
             }}
             error={errors.name?.message}
+            isRequired
           />
           <Input
             label="Krátký popis"
@@ -477,6 +427,7 @@ export default function EditGastroListingForm({
                 placeholder: "4900",
               }}
               error={errors.price?.startsAt?.message}
+              isRequired
             />
           </div>
         </FormSection>
@@ -489,6 +440,7 @@ export default function EditGastroListingForm({
           subtitle={S.images.subTitle}
           color="text-listing"
           surfaceColor="bg-listing-surface"
+          error={!!errors.images}
         >
           <Controller
             control={control}
@@ -527,6 +479,8 @@ export default function EditGastroListingForm({
                 onChange={field.onChange}
                 onUpload={uploadFileToCloud}
                 maxImages={20}
+                isRequired
+                error={errors.images?.gallery?.message}
               />
             )}
           />
@@ -553,6 +507,7 @@ export default function EditGastroListingForm({
                 onChange={field.onChange}
                 checkColor="text-listing"
                 searchable
+                isRequired
               />
             )}
           />
@@ -592,7 +547,7 @@ export default function EditGastroListingForm({
           />
           <Input
             label="Adresa"
-            subLabel={
+            sublabel={
               !citiesValue?.length
                 ? "Nejprve vyplňte předchozí pole"
                 : undefined
@@ -617,16 +572,6 @@ export default function EditGastroListingForm({
         >
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Input
-              label="Min. kapacita (osob)"
-              inputProps={{
-                ...register("minimumCapacity"),
-                type: "number",
-                min: 1,
-                placeholder: "10",
-              }}
-              error={errors.minimumCapacity?.message}
-            />
-            <Input
               label="Max. kapacita (osob)"
               inputProps={{
                 ...register("capacity"),
@@ -635,6 +580,17 @@ export default function EditGastroListingForm({
                 placeholder: "200",
               }}
               error={errors.capacity?.message}
+              isRequired
+            />
+            <Input
+              label="Min. kapacita (osob)"
+              inputProps={{
+                ...register("minimumCapacity"),
+                type: "number",
+                min: 1,
+                placeholder: "10",
+              }}
+              error={errors.minimumCapacity?.message}
             />
           </div>
         </FormSection>
@@ -852,6 +808,30 @@ export default function EditGastroListingForm({
           />
         </FormSection>
 
+        {/* ── 11. Pravidla pro jídlo a pití ───────────────────────────────────────────── */}
+        <FormSection
+          id={S.foodAndDrinkRules.id}
+          icon={S.foodAndDrinkRules.icon}
+          title={S.foodAndDrinkRules.title}
+          subtitle={S.foodAndDrinkRules.subTitle}
+          color="text-listing"
+          surfaceColor="bg-listing-surface"
+        >
+          <Controller
+            control={control}
+            name="foodAndDrinkRules"
+            render={({ field }) => (
+              <CheckboxGroup
+                items={rules?.docs ?? []}
+                value={field.value ?? []}
+                onChange={field.onChange}
+                checkColor="text-listing"
+                searchable
+              />
+            )}
+          />
+        </FormSection>
+
         {/* ── 12. Zaměstnanci ───────────────────────────────────────────────────── */}
         <FormSection
           id={S.employees.id}
@@ -869,7 +849,7 @@ export default function EditGastroListingForm({
                 name: "",
                 role: "",
                 description: "",
-                image: "",
+                image: {},
               })
             }
             onRemove={employeesFieldArray.remove}
@@ -1010,17 +990,18 @@ export default function EditGastroListingForm({
           subtitle={S.references.subTitle}
           color="text-listing"
           surfaceColor="bg-listing-surface"
+          error={!!errors.references}
         >
           <RepeaterField
             label="Reference"
             fields={referencesFieldArray.fields}
             onAppend={() =>
               referencesFieldArray.append({
-                image: "",
+                image: {},
                 eventName: "",
                 description: "",
                 clientName: "",
-                eventType: "",
+                eventType: undefined,
               })
             }
             onRemove={referencesFieldArray.remove}
@@ -1078,6 +1059,11 @@ export default function EditGastroListingForm({
                       ref={field.ref}
                       name={field.name}
                       onBlur={field.onBlur}
+                      selectedOption={
+                        eventTypes?.docs?.find(
+                          (et) => et.id === field.value?.id,
+                        ) ?? undefined
+                      }
                     />
                   )}
                 />

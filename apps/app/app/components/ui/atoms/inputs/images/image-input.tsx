@@ -7,30 +7,50 @@ import Text from "../../text";
 import ErrorText from "../error-text";
 import { convertAndUploadImage, useFileDragDrop, useFileInput } from "./utils";
 import InputLabel from "../../input-label";
+import { generateMediaUrl } from "@/app/functions/generate-media-url";
+import { MediaSchema } from "@roo/common";
 
 type ImageInputProps = {
   label: string;
-  value?: string | null;
-  onChange: (filename: string | null) => void;
-  onUpload: (file: File) => Promise<string>;
+  sublabel?: string;
+  value?: MediaSchema | null;
+  onChange: (media: MediaSchema | null) => void;
+  onUpload: (file: File) => Promise<MediaSchema>;
   error?: string;
   isRequired?: boolean;
   accept?: string;
+  containerRef?: React.Ref<HTMLDivElement>;
+};
+
+const nullMedia: MediaSchema = {
+  filename: null,
+  alt: null,
+  width: null,
+  height: null,
+  size: null,
+  mimeType: null,
 };
 
 function isDisplayableUrl(url: string) {
   if (url.startsWith("blob:") || url.startsWith("data:")) return true;
-  try { new URL(url); return true; } catch { return false; }
+  try {
+    new URL(url);
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 export default function ImageInput({
   label,
+  sublabel,
   value,
   onChange,
   onUpload,
   error,
   isRequired,
   accept = "image/*",
+  containerRef,
 }: ImageInputProps) {
   const [isUploading, setIsUploading] = useState(false);
   const [uploadPreview, setUploadPreview] = useState<string | null>(null);
@@ -45,18 +65,14 @@ export default function ImageInput({
 
       if (!file.type.startsWith("image/")) return;
 
-      const objectUrl = URL.createObjectURL(file);
-      setUploadPreview(objectUrl);
       setUploadError(null);
       setIsUploading(true);
 
       try {
-        const filename = await convertAndUploadImage(file, onUpload);
-        URL.revokeObjectURL(objectUrl);
-        setUploadPreview(null);
-        onChange(filename);
+        const media = await convertAndUploadImage(file, onUpload);
+        setUploadPreview(generateMediaUrl(media.filename || ""));
+        onChange(media);
       } catch {
-        URL.revokeObjectURL(objectUrl);
         setUploadPreview(null);
         setUploadError("Nahrávání se nezdařilo. Zkuste to znovu.");
         onChange(null);
@@ -68,7 +84,9 @@ export default function ImageInput({
   );
 
   const handleFiles = useCallback(
-    (files: FileList) => { handleFile(files[0] ?? null); },
+    (files: FileList) => {
+      handleFile(files[0] ?? null);
+    },
     [handleFile],
   );
 
@@ -78,15 +96,20 @@ export default function ImageInput({
 
   const handleRemove = useCallback(() => {
     setUploadError(null);
-    onChange(null);
+    setUploadPreview(null);
+    onChange(nullMedia);
   }, [onChange]);
 
-  const displayUrl = uploadPreview ?? (value && isDisplayableUrl(value) ? value : null);
-  const hasValue = isUploading || !!value;
+  const displayUrl =
+    uploadPreview ??
+    (value && value && isDisplayableUrl(generateMediaUrl(value.filename || ""))
+      ? generateMediaUrl(value.filename || "")
+      : null);
+  const hasValue = isUploading || !!value?.filename;
 
   return (
-    <div>
-      <InputLabel label={label} isRequired={isRequired} />
+    <div ref={containerRef} tabIndex={-1}>
+      <InputLabel label={label} sublabel={sublabel} isRequired={isRequired} />
 
       <input {...fileInputProps} />
 
@@ -105,7 +128,9 @@ export default function ImageInput({
           ) : (
             <div className="flex h-48 w-full items-center justify-center gap-2 bg-zinc-100">
               <ImageIcon size={24} className="text-zinc-400" />
-              <Text variant="label" color="textLight">Obrázek</Text>
+              <Text variant="label" color="textLight">
+                Obrázek
+              </Text>
             </div>
           )}
           {isUploading && (

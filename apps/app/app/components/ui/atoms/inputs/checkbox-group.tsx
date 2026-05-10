@@ -4,6 +4,7 @@ import { useRef, useState } from "react";
 import { Lock, Search, X } from "lucide-react";
 import InputLabel from "../input-label";
 import Checkbox from "./checkbox";
+import ErrorText from "./error-text";
 
 type Item = { id: string; name: string };
 
@@ -21,6 +22,9 @@ type Props = {
   closed?: boolean;
   closedMessage?: string;
   isLoading?: boolean;
+  isRequired?: boolean;
+  sublabel?: string;
+  error?: string | null;
 };
 
 export default function CheckboxGroup({
@@ -37,6 +41,9 @@ export default function CheckboxGroup({
   closed = false,
   closedMessage,
   isLoading = false,
+  isRequired,
+  sublabel,
+  error,
 }: Props) {
   value = value ?? [];
   const [query, setQuery] = useState(defaultSearchValue);
@@ -53,12 +60,15 @@ export default function CheckboxGroup({
     onSearchChange?.(e.target.value);
   };
 
-
   return (
     <div className="flex flex-col gap-2">
       {label && (
         <div className="flex items-center gap-1.5">
-          <InputLabel label={label} />
+          <InputLabel
+            isRequired={isRequired}
+            sublabel={sublabel}
+            label={label}
+          />
           {closed && <Lock className="w-3 h-3 text-zinc-400" />}
         </div>
       )}
@@ -113,6 +123,7 @@ export default function CheckboxGroup({
               >
                 {items.map((item) => (
                   <Checkbox
+                    size="sm"
                     key={item.id}
                     checked={value.some((i) => i.id === item.id)}
                     onChange={(checked) =>
@@ -134,6 +145,7 @@ export default function CheckboxGroup({
               </div>
             )}
           </div>
+          {error && <ErrorText error={error} />}
         </>
       )}
 

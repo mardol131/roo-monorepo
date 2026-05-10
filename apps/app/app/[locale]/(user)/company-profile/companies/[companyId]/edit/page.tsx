@@ -9,16 +9,13 @@ import {
 } from "@/app/react-query/companies/hooks";
 import { useParams } from "next/navigation";
 import CompanyForm from "../../components/company-form";
+import EditCompanyForm from "../../components/edit-company-form";
 
-export default function EditCompanyPage({
-  params,
-}: {
-  params: { companyId: string };
-}) {
+export default function page() {
   const { companyId } = useParams<{ companyId: string }>();
   const router = useRouter();
   const { data: company, isPending } = useCompany(companyId);
-  const { mutate, error } = useUpdateCompany(companyId, {
+  const { mutate, error } = useUpdateCompany({
     onSuccess: () =>
       router.push({
         pathname: "/company-profile/companies/[companyId]",
@@ -43,12 +40,18 @@ export default function EditCompanyPage({
       <CompanyForm
         submitLabel="Uložit změny"
         cancelLabel="Zrušit"
-        onSubmit={mutate}
+        showGetDataFromGovButton={false}
+        onSubmit={(data) => {
+          mutate({
+            id: companyId,
+            data: data,
+          });
+        }}
         onBackClick={() => router.back()}
         defaultValues={{
           name: company.name,
           ico: company.ico,
-          description: company.description ?? undefined,
+          description: company.description ?? null,
           email: company.email,
           phone: company.phone,
           website: company.website ?? undefined,
@@ -59,7 +62,7 @@ export default function EditCompanyPage({
             country: company.billingAddress.country,
           },
           vatId: company.vatId ?? undefined,
-          logo: company.logo ?? undefined,
+          logo: company.logo,
         }}
       />
     </main>

@@ -271,9 +271,9 @@ function getCompletionGroups(
             editHref: h("section-necessities"),
           },
           {
-            label: "Pravidla",
+            label: "Pravidla pro jídlo a pití",
             filled: !!detail.foodAndDrinkRules?.length,
-            editHref: h("section-rules"),
+            editHref: h("section-food-and-drink-rules"),
           },
         ],
       },

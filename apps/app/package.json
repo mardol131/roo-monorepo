@@ -12,6 +12,8 @@
     "@dnd-kit/react": "^0.4.0",
     "@hookform/resolvers": "^5.2.2",
     "@roo/common": "workspace:*",
+    "@supabase/ssr": "^0.10.3",
+    "@supabase/supabase-js": "^2.105.4",
     "@tanstack/react-query": "^5.99.0",
     "@vis.gl/react-maplibre": "^8.1.1",
     "eventemitter3": "^5.0.4",

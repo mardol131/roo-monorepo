@@ -65,6 +65,10 @@ export async function getCollectionItem<T extends keyof Config["collections"]>({
   return res.json();
 }
 
+type PatchData<T> = {
+  [K in keyof T]?: Exclude<T[K], undefined> | null;
+};
+
 export async function patchCollectionItem<
   T extends keyof Config["collections"],
 >({
@@ -74,7 +78,7 @@ export async function patchCollectionItem<
 }: {
   collection: T;
   id: string;
-  data: Partial<Config["collections"][T]>;
+  data: PatchData<Config["collections"][T]>;
 }): Promise<Config["collections"][T]> {
   const url = new URL(
     `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/${collection}/${id}`,

@@ -25,7 +25,7 @@ type Props = {
   error?: string;
   label?: string;
   innerSearch?: boolean;
-  required?: boolean;
+  isRequired?: boolean;
   externalBbox?: Bbox;
   mapDisabled?: boolean;
   inputProps?: InputHTMLAttributes<HTMLInputElement> & {
@@ -113,10 +113,10 @@ export default function MapPointInput({
   error,
   label,
   innerSearch,
-  required,
   externalBbox,
   mapDisabled = false,
   inputProps,
+  isRequired,
 }: Props) {
   const mapRef = useRef<MapRef>(null);
   const [internalValue, setInternalValue] = useState<Coordinates | undefined>(
@@ -214,7 +214,7 @@ export default function MapPointInput({
         {...inputProps}
         value={coords ? `${coords.latitude},${coords.longitude}` : ""}
       />
-      {label && <InputLabel isRequired={required} label={label} />}
+      {label && <InputLabel isRequired={isRequired} label={label} />}
       {innerSearch && (
         <div className="flex gap-2 mb-2">
           <input

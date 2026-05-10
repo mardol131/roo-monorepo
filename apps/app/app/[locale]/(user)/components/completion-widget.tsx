@@ -122,18 +122,29 @@ export function CompletionWidget({
                 : 0,
             );
             return (
-              <div key={group.label}>
+              <div
+                key={group.label}
+                className={`border p-4 rounded-lg ${groupPercent === 100 ? "border-success" : "border-zinc-200"}`}
+              >
                 <div
-                  className={`flex ${groupPercent === 100 ? "bg-success-surface" : "bg-zinc-100"} p-1 px-2 rounded-lg items-center justify-between mb-1.5`}
+                  className={`flex items-center justify-between mb-1.5 border-b pb-2 ${groupPercent === 100 ? "border-success" : "border-zinc-200"}`}
                 >
+                  {groupPercent === 100 ? (
+                    <CheckCircle2 className="w-4 h-4 text-success shrink-0" />
+                  ) : (
+                    <CircleDashed className="w-4 h-4 text-zinc-400 shrink-0" />
+                  )}
                   <Text
-                    variant="label"
-                    color="textDark"
+                    variant="label-lg"
+                    color={groupPercent === 100 ? "success" : "textDark"}
                     className="font-medium"
                   >
                     {group.label}
                   </Text>
-                  <Text variant="caption" color="secondary">
+                  <Text
+                    variant="caption"
+                    color={groupPercent === 100 ? "success" : "secondary"}
+                  >
                     {groupPercent} %
                   </Text>
                 </div>

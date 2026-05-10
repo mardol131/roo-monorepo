@@ -1,6 +1,7 @@
 import type { CollectionConfig } from 'payload'
 import { getPhoneField } from './common-fields/phone'
 import { getRecordStatuses } from '@roo/common'
+import { getMediaFields } from './common-fields/common-fields'
 
 export const Companies: CollectionConfig = {
   slug: 'companies',
@@ -20,6 +21,17 @@ export const Companies: CollectionConfig = {
       return { status: { equals: 'active' } }
     },
     delete: ({ req }) => req.user?.collection === 'admins',
+  },
+  hooks: {
+    beforeChange: [
+      async ({ data }) => {
+        if (data.logo.filename === '') {
+          delete data.logo
+        }
+
+        return data
+      },
+    ],
   },
   fields: [
     // Základní informace
@@ -46,7 +58,10 @@ export const Companies: CollectionConfig = {
     },
     {
       name: 'logo',
-      type: 'text',
+      type: 'group',
+      fields: getMediaFields(),
+      // Stable object with nullable fields
+      required: true,
     },
 
     // Kontaktní údaje

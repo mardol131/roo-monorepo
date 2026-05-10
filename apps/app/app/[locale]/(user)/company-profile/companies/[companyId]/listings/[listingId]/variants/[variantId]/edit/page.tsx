@@ -4,7 +4,7 @@ import PageHeading from "@/app/[locale]/(user)/components/page-heading";
 import { useRouter } from "@/app/i18n/navigation";
 import { useUpdateVariant } from "@/app/react-query/variants/hooks";
 import { useVariant } from "@/app/react-query/variants/hooks";
-import { Variant } from "@roo/common";
+import { MediaSchema, undefinedToNull, Variant } from "@roo/common";
 import { useParams } from "next/navigation";
 import EditVariantFormEntertainment, {
   EntertainmentFormInputs,
@@ -15,14 +15,9 @@ import EditVariantFormGastro, {
 import EditVariantFormVenue, {
   VenueFormInputs,
 } from "./components/edit-variant-form-venue";
+import { toIds, toItem } from "../../../edit/components/utils";
 
-// ── Helpers ───────────────────────────────────────────────────────────────────
-
-const toItem = <T extends { id: string; name: string }>(v: string | T) =>
-  typeof v === "string" ? { id: v, name: "" } : { id: v.id, name: v.name };
-
-const toIds = (arr: { id: string; name: string }[]): string[] =>
-  arr.map((x) => x.id);
+// ── Helpers ──────────────────────────────────────────────────────────────────
 
 type CommonFields = {
   name: string;
@@ -40,7 +35,7 @@ type CommonFields = {
       to: string;
     }[];
   };
-  images: { mainImage: string; gallery: string[] };
+  images: { coverImage: MediaSchema; gallery: MediaSchema[] };
   eventTypes: { id: string; name: string }[];
   includes: { item: string }[];
   excludes: { item: string }[];
@@ -65,10 +60,7 @@ function commonPayload(_variant: Variant, data: CommonFields) {
         }),
       ),
     },
-    images: {
-      mainImage: data.images.mainImage,
-      gallery: data.images.gallery.map((image) => ({ image })),
-    },
+    images: data.images,
     eventTypes: toIds(data.eventTypes),
     includes: data.includes,
     excludes: data.excludes,
@@ -98,10 +90,8 @@ function commonDefaults(v: Variant) {
       ),
     },
     images: {
-      mainImage: v.images.mainImage,
-      gallery: (v.images.gallery ?? [])
-        .map(({ image }) => image ?? "")
-        .filter(Boolean),
+      coverImage: v.images.coverImage,
+      gallery: v.images.gallery ?? [],
     },
     eventTypes: (v.eventTypes ?? []).map(toItem),
     includes: (v.includes ?? []).map(({ item }) => ({ item: item ?? "" })),
@@ -144,6 +134,7 @@ function gastroDefaults(v: Variant): Partial<GastroFormInputs> {
   if (d.blockType !== "gastro") return {};
   return {
     ...commonDefaults(v),
+
     capacity: { max: d.capacity.max, min: d.capacity.min ?? undefined },
     pricePerPerson: d.pricePerPerson ?? undefined,
     minimumOrderCount: d.minimumOrderCount ?? undefined,
@@ -163,12 +154,12 @@ function entertainmentDefaults(v: Variant): Partial<EntertainmentFormInputs> {
   if (d.blockType !== "entertainment") return {};
   return {
     ...commonDefaults(v),
+
     capacity: { max: d.capacity.max, min: d.capacity.min ?? undefined },
-    audience: (d.audience ?? []) as EntertainmentFormInputs["audience"],
+    audience: d.audience ?? [],
     performanceDuration: d.performanceDuration ?? undefined,
     numberOfSets: d.numberOfSets ?? undefined,
     breakDuration: d.breakDuration ?? undefined,
-    setupAndTeardownIncluded: d.setupAndTeardown?.included ?? false,
     setupTime: d.setupAndTeardown?.setupTime ?? undefined,
     teardownTime: d.setupAndTeardown?.teardownTime ?? undefined,
     personnel: (d.personnel ?? []).map(toItem),
@@ -184,12 +175,12 @@ function venuePayload(
 ): Partial<Variant> {
   const d = variant.details[0];
   const detailId = d.blockType === "venue" ? d.id : undefined;
-  return {
+  const payload: Partial<Variant> = {
     ...commonPayload(variant, data),
     details: [
       {
         blockType: "venue",
-        id: detailId ?? undefined,
+        id: detailId ?? null,
         capacity: data.capacity,
         canBeBookedAsWhole: data.canBeBookedAsWhole,
         includedSpaces: toIds(data.includedSpaces ?? []),
@@ -200,23 +191,24 @@ function venuePayload(
         personnel: toIds(data.personnel ?? []),
         parking: data.hasParking
           ? { included: data.parkingIncluded, spots: data.parkingSpots ?? null }
-          : undefined,
+          : {},
         accommodation: data.hasAccommodation
           ? {
               included: data.accommodationIncluded,
               capacity: data.accommodationCapacity ?? null,
             }
-          : undefined,
+          : {},
         breakfast: data.hasBreakfast
           ? {
               included: data.breakfastIncluded,
               price: data.breakfastPrice ?? null,
               loweredPrice: data.breakfastLoweredPrice ?? null,
             }
-          : undefined,
+          : {},
       },
     ],
   };
+  return undefinedToNull(payload);
 }
 
 function gastroPayload(
@@ -225,12 +217,12 @@ function gastroPayload(
 ): Partial<Variant> {
   const d = variant.details[0];
   const detailId = d.blockType === "gastro" ? d.id : undefined;
-  return {
+  const payload: Partial<Variant> = {
     ...commonPayload(variant, data),
     details: [
       {
         blockType: "gastro",
-        id: detailId ?? undefined,
+        id: detailId ?? null,
         capacity: data.capacity,
         pricePerPerson: data.pricePerPerson ?? null,
         minimumOrderCount: data.minimumOrderCount ?? null,
@@ -245,6 +237,8 @@ function gastroPayload(
       },
     ],
   };
+
+  return undefinedToNull(payload);
 }
 
 function entertainmentPayload(
@@ -253,12 +247,12 @@ function entertainmentPayload(
 ): Partial<Variant> {
   const d = variant.details[0];
   const detailId = d.blockType === "entertainment" ? d.id : undefined;
-  return {
+  const payload: Partial<Variant> = {
     ...commonPayload(variant, data),
     details: [
       {
         blockType: "entertainment",
-        id: detailId ?? undefined,
+        id: detailId ?? null,
         capacity: data.capacity,
         audience: data.audience,
         performanceDuration: data.performanceDuration ?? null,
@@ -266,16 +260,16 @@ function entertainmentPayload(
         breakDuration: data.breakDuration ?? null,
         setupAndTeardown: data.setupAndTeardownIncluded
           ? {
-              included: true,
               setupTime: data.setupTime ?? null,
               teardownTime: data.teardownTime ?? null,
             }
-          : undefined,
+          : {},
         personnel: toIds(data.personnel ?? []),
         necessities: toIds(data.necessities ?? []),
       },
     ],
   };
+  return undefinedToNull(payload);
 }
 
 // ── Page ──────────────────────────────────────────────────────────────────────

@@ -28,7 +28,28 @@ export default function page() {
       <CompanyForm
         submitLabel="Vytvořit firmu"
         cancelLabel="Zrušit"
-        onSubmit={createCompany}
+        onSubmit={(data) => {
+          const payload: CreateCompanyPayload = {
+            name: data.name,
+            ico: data.ico,
+            description: data.description,
+            email: data.email,
+            phone: {
+              countryCode: data.phone.countryCode,
+              number: data.phone.number,
+            },
+            vatId: data.vatId,
+            logo: data.logo || undefined,
+            website: data.website,
+            billingAddress: {
+              street: data.billingAddress.street,
+              city: data.billingAddress.city,
+              postalCode: data.billingAddress.postalCode,
+              country: data.billingAddress.country,
+            },
+          };
+          createCompany(payload);
+        }}
         onBackClick={() => router.back()}
       />
       {error && <p className="text-red-500">{error.message}</p>}

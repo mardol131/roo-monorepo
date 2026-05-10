@@ -1,5 +1,6 @@
 import { getRecordStatuses } from '@roo/common'
 import type { CollectionConfig } from 'payload'
+import { getMediaFields } from './common-fields/common-fields'
 
 export const Spaces: CollectionConfig = {
   slug: 'spaces',
@@ -70,12 +71,7 @@ export const Spaces: CollectionConfig = {
     {
       name: 'images',
       type: 'array',
-      fields: [
-        {
-          name: 'image',
-          type: 'text',
-        },
-      ],
+      fields: getMediaFields(),
     },
     {
       name: 'hasAccommodation',

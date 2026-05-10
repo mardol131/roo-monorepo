@@ -82,6 +82,7 @@ export const Inquiries: CollectionConfig = {
     {
       name: 'request',
       type: 'group',
+      required: true,
       fields: [
         {
           name: 'note',
@@ -103,6 +104,7 @@ export const Inquiries: CollectionConfig = {
     {
       name: 'status',
       type: 'group',
+      required: true,
       fields: [
         {
           name: 'company',
@@ -138,6 +140,7 @@ export const Inquiries: CollectionConfig = {
     {
       name: 'pricing',
       type: 'group',
+      required: true,
       fields: [
         {
           name: 'mode',
@@ -161,6 +164,7 @@ export const Inquiries: CollectionConfig = {
     {
       name: 'activity',
       type: 'group',
+      required: true,
       fields: [
         {
           name: 'sentAt',
@@ -189,6 +193,7 @@ export const Inquiries: CollectionConfig = {
     {
       name: 'snapshots',
       type: 'group',
+      required: true,
       fields: [
         {
           name: 'listing',

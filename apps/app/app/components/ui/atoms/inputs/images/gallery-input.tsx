@@ -14,6 +14,8 @@ import {
   useFileInput,
 } from "./utils";
 import InputLabel from "../../input-label";
+import { MediaSchema } from "@roo/common";
+import { generateMediaUrl } from "@/app/functions/generate-media-url";
 
 type UploadingImage = {
   id: string;
@@ -75,13 +77,14 @@ function SortableGalleryItem({
 
 type GalleryInputProps = {
   label: string;
-  value?: string[];
-  onChange: (urls: string[]) => void;
-  onUpload: (file: File) => Promise<string>;
+  value?: MediaSchema[];
+  onChange: (media: MediaSchema[]) => void;
+  onUpload: (file: File) => Promise<MediaSchema>;
   error?: string;
   isRequired?: boolean;
   accept?: string;
   maxImages?: number;
+  containerRef?: React.Ref<HTMLDivElement>;
 };
 
 export default function GalleryInput({
@@ -93,6 +96,7 @@ export default function GalleryInput({
   isRequired,
   accept = "image/*",
   maxImages = 20,
+  containerRef,
 }: GalleryInputProps) {
   const [uploadingImages, setUploadingImages] = useState<UploadingImage[]>([]);
   const [uploadError, setUploadError] = useState<string | null>(null);
@@ -127,17 +131,17 @@ export default function GalleryInput({
 
       const uploadResults = await Promise.allSettled(
         filesToProcess.map(async (file, idx) => {
-          const uploadedUrl = await convertAndUploadImage(file, onUpload);
+          const uploadedMedia = await convertAndUploadImage(file, onUpload);
           URL.revokeObjectURL(uploadingWithPreviews[idx].preview);
-          return { id: uploadingWithPreviews[idx].id, url: uploadedUrl };
+          return { id: uploadingWithPreviews[idx].id, media: uploadedMedia };
         }),
       );
 
-      const successfulUrls: string[] = [];
+      const successfulMedia: MediaSchema[] = [];
 
       for (const result of uploadResults) {
         if (result.status === "fulfilled") {
-          successfulUrls.push(result.value.url);
+          successfulMedia.push(result.value.media);
         }
       }
 
@@ -150,11 +154,11 @@ export default function GalleryInput({
         ),
       );
 
-      if (successfulUrls.length > 0) {
-        onChange([...value, ...successfulUrls]);
+      if (successfulMedia.length > 0) {
+        onChange([...value, ...successfulMedia]);
       }
 
-      if (successfulUrls.length < filesToProcess.length) {
+      if (successfulMedia.length < filesToProcess.length) {
         setUploadError("Některé obrázky se nepodařilo nahrát.");
       }
     },
@@ -193,8 +197,12 @@ export default function GalleryInput({
       const { source, target } = event.operation;
       if (!source || !target) return;
 
-      const sourceIndex = value.indexOf(String(source.id));
-      const targetIndex = value.indexOf(String(target.id));
+      const sourceIndex = value.findIndex(
+        (item) => item.filename === String(source.id),
+      );
+      const targetIndex = value.findIndex(
+        (item) => item.filename === String(target.id),
+      );
       if (
         sourceIndex === -1 ||
         targetIndex === -1 ||
@@ -211,18 +219,18 @@ export default function GalleryInput({
   );
 
   return (
-    <div>
+    <div ref={containerRef} tabIndex={-1}>
       <InputLabel label={label} isRequired={isRequired} />
 
       <input {...fileInputProps} />
 
       <DragDropProvider onDragEnd={handleSortEnd}>
         <div className="grid grid-cols-4 gap-2">
-          {value.map((url, idx) => (
+          {value.map((media, idx) => (
             <SortableGalleryItem
-              key={url}
-              sortableId={url}
-              imageUrl={url}
+              key={media.filename}
+              sortableId={idx.toString()}
+              imageUrl={generateMediaUrl(media.filename || "")}
               label={label}
               index={idx}
               hasError={false}

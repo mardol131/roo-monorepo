@@ -24,7 +24,15 @@ export async function fetchCompany(id: string): Promise<Company> {
   return res;
 }
 
-export async function updateCompany(id: string, data: Partial<Company>) {
+export type UpdateCompanyPayload = Omit<Partial<Company>, "logo"> & {
+  logo?: Company["logo"] | null;
+};
+
+export async function updateCompany(
+  id: string,
+  data: UpdateCompanyPayload,
+): Promise<Company> {
+  console.log("Updating company with data:", { id, data }); // Debug log
   const res = await patchCollectionItem({
     collection: "companies",
     id,
@@ -35,7 +43,7 @@ export async function updateCompany(id: string, data: Partial<Company>) {
 }
 
 export type CreateCompanyPayload = Omit<
-  Company,
+  Company & { logo?: Company["logo"] | null },
   "id" | "createdAt" | "updatedAt" | "owner" | "status"
 >;
 

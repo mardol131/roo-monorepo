@@ -12,71 +12,49 @@ import CheckboxGroup from "@/app/components/ui/atoms/inputs/checkbox-group";
 import GalleryInput from "@/app/components/ui/atoms/inputs/images/gallery-input";
 import ImageInput from "@/app/components/ui/atoms/inputs/images/image-input";
 import Input from "@/app/components/ui/atoms/inputs/input";
+import { uploadFileToCloud } from "@/app/functions/upload-file-to-cloud";
+import { useRouter } from "@/app/i18n/navigation";
 import { useCities } from "@/app/react-query/cities/hooks";
 import { useDistricts } from "@/app/react-query/districts/hooks";
-import { useRegions } from "@/app/react-query/regions/hooks";
-import { zodResolver } from "@hookform/resolvers/zod";
+import { useEntertainmentTypes } from "@/app/react-query/filters/entertainment-types/hooks";
+import { useEventTypes } from "@/app/react-query/filters/event-types/hooks";
 import { CreateListingPayload } from "@/app/react-query/listings/fetch";
 import { useCreateListing } from "@/app/react-query/listings/hooks";
-import { uploadFileToCloud } from "@roo/common";
+import { useRegions } from "@/app/react-query/regions/hooks";
+import { useNecessities } from "@/app/react-query/specific/necessities/hooks";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useParams } from "next/navigation";
-import {
-  Banknote,
-  Building2,
-  ClipboardList,
-  Clock,
-  Image,
-  MapPin,
-  Music,
-  Users,
-} from "lucide-react";
 import { useState } from "react";
 import { Controller, Resolver, useForm } from "react-hook-form";
 import { z } from "zod";
-import { useRouter } from "@/app/i18n/navigation";
-import { useEntertainmentTypes } from "@/app/react-query/filters/entertainment-types/hooks";
-import { useNecessities } from "@/app/react-query/specific/necessities/hooks";
-import { log } from "console";
-import { useEventTypes } from "@/app/react-query/filters/event-types/hooks";
+import {
+  commonListingFieldsSchema,
+  getOptionalPositiveNumber,
+  getPositiveNumber,
+} from "./common-schema";
+import { relationshipItemSchema } from "@/app/validation/schema/relationship-item-schema";
 
 // ── Schema ─────────────────────────────────────────────────────────────────────
 
-const itemSchema = z.object({ id: z.string(), name: z.string() });
-
-const optionalPositiveNumber = z.preprocess(
-  (val) => (val === "" || val === undefined || val === null ? undefined : val),
-  z.coerce.number().positive("Musí být kladné číslo").optional(),
-);
-
 const schema = z.object({
-  name: z.string().min(1, "Název je povinný"),
-  images: z.object({
-    coverImage: z.string().min(1, "Titulní obrázek je povinný"),
-    logo: z.string().optional(),
-    gallery: z.array(z.string()).min(4, "Přidejte alespoň čtyři obrázky"),
-  }),
-  eventTypes: z.array(itemSchema).default([]),
-  price: z.object({
-    startsAt: z.coerce
-      .number({ message: "Zadejte číslo" })
-      .positive("Cena musí být kladná"),
-  }),
+  ...commonListingFieldsSchema,
   location: z.object({
-    regions: z.array(itemSchema).min(1, "Vyberte alespoň jeden kraj"),
-    districts: z.array(itemSchema).default([]),
-    cities: z.array(itemSchema).default([]),
+    regions: z
+      .array(relationshipItemSchema)
+      .min(1, "Vyberte alespoň jeden kraj"),
+    districts: z.array(relationshipItemSchema).default([]),
+    cities: z.array(relationshipItemSchema).default([]),
     address: z.string().optional(),
   }),
-  capacity: z.coerce
-    .number({ message: "Zadejte číslo" })
-    .positive("Kapacita musí být kladná")
-    .int("Zadejte celé číslo"),
-  minimumCapacity: optionalPositiveNumber,
-  entertainmentTypes: z.array(itemSchema).default([]),
+  capacity: getPositiveNumber("Kapacita musí být kladná"),
+  minimumCapacity: getOptionalPositiveNumber(
+    "Minimální kapacita musí být kladná",
+  ),
+  entertainmentTypes: z.array(relationshipItemSchema).default([]),
   audience: z.array(z.enum(["adults", "kids", "seniors"])).default([]),
-  setupTime: optionalPositiveNumber,
-  tearDownTime: optionalPositiveNumber,
-  necessities: z.array(itemSchema).default([]),
+  setupTime: getOptionalPositiveNumber("Čas přípravy musí být kladný"),
+  tearDownTime: getOptionalPositiveNumber("Čas úklidu musí být kladný"),
+  necessities: z.array(relationshipItemSchema).default([]),
 });
 
 type Inputs = z.infer<typeof schema>;
@@ -103,8 +81,8 @@ const S: Record<string, TocSection> = {
   },
   eventTypes: {
     id: "section-ent-types",
-    title: "Typ programu",
-    icon: "Music",
+    title: "Typ eventu",
+    icon: "Calendar",
   },
   requirements: {
     id: "section-requirements",
@@ -116,6 +94,11 @@ const S: Record<string, TocSection> = {
     title: "Logistika",
     icon: "Clock",
   },
+  entertainmentTypes: {
+    id: "section-entertainment-types",
+    title: "Typ programu",
+    icon: "Music",
+  },
 };
 
 const FORM_GROUPS: readonly TocGroup[] = [
@@ -126,7 +109,13 @@ const FORM_GROUPS: readonly TocGroup[] = [
   { label: "Místo působení", sections: [S.location] },
   {
     label: "Program",
-    sections: [S.capacity, S.eventTypes, S.requirements, S.logistics],
+    sections: [
+      S.capacity,
+      S.eventTypes,
+      S.entertainmentTypes,
+      S.requirements,
+      S.logistics,
+    ],
   },
 ];
 
@@ -156,7 +145,7 @@ export default function EntertainmentListingForm({ onCancel }: Props) {
     resolver: zodResolver(schema) as Resolver<Inputs>,
     defaultValues: {
       location: { regions: [], districts: [], cities: [] },
-      images: { gallery: [] },
+      images: { gallery: [], logo: {} },
       entertainmentTypes: [],
       audience: [],
       necessities: [],
@@ -180,7 +169,7 @@ export default function EntertainmentListingForm({ onCancel }: Props) {
       images: {
         coverImage: data.images.coverImage,
         logo: data.images.logo,
-        gallery: data.images.gallery.map((url) => ({ url })),
+        gallery: data.images.gallery,
       },
       price: { startsAt: data.price.startsAt },
       eventTypes: data.eventTypes.map((i) => i.id),
@@ -268,6 +257,7 @@ export default function EntertainmentListingForm({ onCancel }: Props) {
               placeholder: "Živá kapela Groove",
             }}
             error={errors.name?.message}
+            isRequired
           />
         </FormSection>
 
@@ -291,6 +281,7 @@ export default function EntertainmentListingForm({ onCancel }: Props) {
                 placeholder: "9900",
               }}
               error={errors.price?.startsAt?.message}
+              isRequired
             />
           </div>
         </FormSection>
@@ -346,6 +337,7 @@ export default function EntertainmentListingForm({ onCancel }: Props) {
                   errors.images?.gallery?.root?.message ??
                   errors.images?.gallery?.message
                 }
+                isRequired
               />
             )}
           />
@@ -372,6 +364,8 @@ export default function EntertainmentListingForm({ onCancel }: Props) {
                 onChange={field.onChange}
                 checkColor={COLOR_SCHEME.text}
                 searchable
+                error={errors.location?.regions?.message}
+                isRequired
               />
             )}
           />
@@ -411,7 +405,7 @@ export default function EntertainmentListingForm({ onCancel }: Props) {
           />
           <Input
             label="Adresa"
-            subLabel={
+            sublabel={
               !citiesValue?.length
                 ? "Nejprve vyplňte předchozí pole"
                 : undefined
@@ -445,6 +439,7 @@ export default function EntertainmentListingForm({ onCancel }: Props) {
                 placeholder: "500",
               }}
               error={errors.capacity?.message}
+              isRequired
             />
             <Input
               label="Minimální počet diváků"

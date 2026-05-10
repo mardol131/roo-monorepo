@@ -30,6 +30,7 @@ export const venueVariantDetails: Field[] = [
   {
     name: 'capacity',
     type: 'group',
+    required: true,
     fields: [
       {
         name: 'min',
@@ -61,6 +62,7 @@ export const venueVariantDetails: Field[] = [
   {
     name: 'accommodation',
     type: 'group',
+    required: true,
     fields: [
       {
         name: 'included',
@@ -75,6 +77,7 @@ export const venueVariantDetails: Field[] = [
   {
     name: 'parking',
     type: 'group',
+    required: true,
     fields: [
       {
         name: 'included',
@@ -89,6 +92,7 @@ export const venueVariantDetails: Field[] = [
   {
     name: 'breakfast',
     type: 'group',
+    required: true,
     fields: [
       {
         name: 'included',
@@ -140,6 +144,7 @@ export const gastroVariantDetails: Field[] = [
   {
     name: 'capacity',
     type: 'group',
+    required: true,
     fields: [
       {
         name: 'min',
@@ -198,6 +203,7 @@ export const entertainmentVariantDetails: Field[] = [
   {
     name: 'capacity',
     type: 'group',
+    required: true,
     fields: [
       {
         name: 'min',
@@ -234,11 +240,8 @@ export const entertainmentVariantDetails: Field[] = [
   {
     name: 'setupAndTeardown',
     type: 'group',
+    required: true,
     fields: [
-      {
-        name: 'included',
-        type: 'checkbox',
-      },
       {
         name: 'setupTime',
         type: 'number',

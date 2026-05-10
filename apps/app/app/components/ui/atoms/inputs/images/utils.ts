@@ -1,5 +1,5 @@
 import React, { useCallback, useRef, useState } from "react";
-import { convertImageToWebp } from "@roo/common";
+import { convertImageToWebp, MediaSchema } from "@roo/common";
 
 // ── Shared hook: file drag & drop state ────────────────────────────────────────
 
@@ -82,8 +82,8 @@ export function useFileInput(
 
 export async function convertAndUploadImage(
   file: File,
-  onUpload: (file: File) => Promise<string>,
-): Promise<string> {
+  onUpload: (file: File) => Promise<MediaSchema>,
+): Promise<MediaSchema> {
   const webpFile = await convertImageToWebp(file);
   return onUpload(webpFile);
 }

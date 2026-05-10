@@ -63,7 +63,7 @@ export default function NewListingPage() {
   }
 
   return (
-    <main className="w-full">
+    <main className="w-full pb-100">
       <PageHeading
         heading="Založení nové služby"
         description="Zde můžete vytvořit novou službu, kterou budete nabízet zákazníkům. Jde pouze o základní nastavení, zbytek lze pak upravit v editaci služby."

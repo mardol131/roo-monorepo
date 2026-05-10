@@ -5,7 +5,6 @@ import FormToc, {
   TocGroup,
   TocSection,
 } from "@/app/[locale]/(user)/components/form-toc";
-import PageHeading from "@/app/[locale]/(user)/components/page-heading";
 import Button from "@/app/components/ui/atoms/button";
 import Checkbox from "@/app/components/ui/atoms/inputs/checkbox";
 import GalleryInput from "@/app/components/ui/atoms/inputs/images/gallery-input";
@@ -17,19 +16,20 @@ import { useAmenities } from "@/app/react-query/filters/amenities/hooks";
 import { useCreateSpace, useUpdateSpace } from "@/app/react-query/spaces/hooks";
 import { useRules } from "@/app/react-query/specific/rules/hooks";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Space, uploadFileToCloud } from "@roo/common";
-import {
-  BedDouble,
-  Building2,
-  Image,
-  LayoutDashboard,
-  Maximize2,
-  ScrollText,
-  TreePine,
-} from "lucide-react";
+import { Space, undefinedToNull } from "@roo/common";
+import { uploadFileToCloud } from "@/app/functions/upload-file-to-cloud";
+
+import { Building2, LayoutDashboard, TreePine } from "lucide-react";
 import type { Resolver } from "react-hook-form";
 import { Controller, useFieldArray, useForm } from "react-hook-form";
 import { z } from "zod";
+import { optionalMediaSchema } from "@/app/validation/schema/media-schema";
+import CheckboxGroup from "@/app/components/ui/atoms/inputs/checkbox-group";
+import { relationshipItemSchema } from "@/app/validation/schema/relationship-item-schema";
+import {
+  getOptionalPositiveNumber,
+  getPositiveNumber,
+} from "../../../new/forms/common-schema";
 
 // ── TOC ────────────────────────────────────────────────────────────────────────
 
@@ -89,46 +89,30 @@ const TYPE_ICON: Record<Space["type"], React.ElementType> = {
 
 // ── Schema ─────────────────────────────────────────────────────────────────────
 
-const optionalPositiveInt = z.preprocess(
-  (val) => (val === "" || val === undefined || val === null ? undefined : val),
-  z.coerce
-    .number()
-    .positive("Musí být kladné číslo")
-    .int("Zadejte celé číslo")
-    .optional(),
-);
-
-const optionalPositiveNumber = z.preprocess(
-  (val) => (val === "" || val === undefined || val === null ? undefined : val),
-  z.coerce.number().positive("Musí být kladné číslo").optional(),
-);
-
 const schema = z.object({
   name: z.string().min(1, "Název je povinný"),
   description: z.string().optional(),
-  capacity: optionalPositiveInt,
-  area: optionalPositiveNumber,
-  images: z.array(z.string()).default([]),
+  capacity: getOptionalPositiveNumber("Kapacita musí být kladná"),
+  area: getOptionalPositiveNumber("Plocha musí být kladná"),
+  images: z.array(z.object(optionalMediaSchema)).default([]),
   hasAccommodation: z.boolean().default(false),
-  accommodationCapacity: optionalPositiveInt,
+  accommodationCapacity: getOptionalPositiveNumber(
+    "Kapacita ubytování musí být kladná",
+  ),
   rooms: z
     .array(
       z.object({
         id: z.string(),
         name: z.string().min(1, "Název je povinný"),
-        capacity: z.preprocess(
-          (v) => (v === "" || v === undefined || v === null ? undefined : v),
-          z.coerce.number().positive("Musí být kladné").int(),
+        capacity: getPositiveNumber("Kapacita musí být kladná"),
+        countOfRoomsOfThisType: getPositiveNumber(
+          "Počet pokojů tohoto typu musí být kladný",
         ),
-        countOfRoomsOfThisType: z.preprocess(
-          (v) => (v === "" || v === undefined || v === null ? undefined : v),
-          z.coerce.number().positive("Musí být kladné").int(),
-        ),
-        amenityIds: z.array(z.string()).default([]),
+        amenityIds: z.array(relationshipItemSchema).default([]),
       }),
     )
     .default([]),
-  spaceRuleIds: z.array(z.string()).default([]),
+  spaceRuleIds: z.array(relationshipItemSchema).default([]),
 });
 
 type FormInputs = z.infer<typeof schema>;
@@ -213,7 +197,7 @@ export function SpaceForm(props: SpaceFormProps) {
       description: data.description,
       capacity: data.capacity,
       area: data.area,
-      images: data.images.map((image) => ({ image })),
+      images: data.images,
       hasAccommodation: data.hasAccommodation,
       accommodationCapacity: data.accommodationCapacity,
       rooms: data.rooms.map(
@@ -221,19 +205,21 @@ export function SpaceForm(props: SpaceFormProps) {
           name,
           capacity,
           countOfRoomsOfThisType,
-          amenities: amenityIds,
+          amenities: amenityIds.map((item) => item.id),
         }),
       ),
-      spaceRules: data.spaceRuleIds,
+      spaceRules: data.spaceRuleIds.map((item) => item.id),
     };
+
+    const finalPayload = undefinedToNull(payload);
 
     if (props.mode === "create") {
       createSpace(
-        { ...payload, parent: props.parentId },
+        { ...finalPayload, parent: props.parentId },
         { onSuccess: navigateToSpaces },
       );
     } else {
-      updateSpace(payload, { onSuccess: navigateToSpaces });
+      updateSpace(finalPayload, { onSuccess: navigateToSpaces });
     }
   }
 
@@ -420,32 +406,14 @@ export function SpaceForm(props: SpaceFormProps) {
                       control={control}
                       name={`rooms.${index}.amenityIds`}
                       render={({ field }) => (
-                        <div className="flex flex-col gap-1.5">
-                          <span className="text-xs font-medium text-zinc-500 uppercase tracking-wide">
-                            Vybavení pokoje
-                          </span>
-                          <div className="grid grid-cols-3 gap-1.5">
-                            {amenities?.docs?.map((amenity) => (
-                              <Checkbox
-                                key={amenity.id}
-                                size="sm"
-                                checked={field.value.includes(amenity.id)}
-                                onChange={() => {
-                                  const current = field.value ?? [];
-                                  field.onChange(
-                                    current.includes(amenity.id)
-                                      ? current.filter(
-                                          (id) => id !== amenity.id,
-                                        )
-                                      : [...current, amenity.id],
-                                  );
-                                }}
-                                label={amenity.name}
-                                checkColor="text-space"
-                              />
-                            ))}
-                          </div>
-                        </div>
+                        <CheckboxGroup
+                          searchable
+                          label="Vybavení pokoje"
+                          items={amenities?.docs ?? []}
+                          value={field.value}
+                          onChange={field.onChange}
+                          checkColor={"text-space"}
+                        />
                       )}
                     />
                   </div>
@@ -468,24 +436,14 @@ export function SpaceForm(props: SpaceFormProps) {
             control={control}
             name="spaceRuleIds"
             render={({ field }) => (
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                {rules?.docs?.map((rule) => (
-                  <Checkbox
-                    key={rule.id}
-                    checked={field.value.includes(rule.id)}
-                    onChange={() => {
-                      const current = field.value ?? [];
-                      field.onChange(
-                        current.includes(rule.id)
-                          ? current.filter((id) => id !== rule.id)
-                          : [...current, rule.id],
-                      );
-                    }}
-                    label={rule.name}
-                    checkColor="text-space"
-                  />
-                ))}
-              </div>
+              <CheckboxGroup
+                searchable
+                label="Pravidla prostoru"
+                items={rules?.docs ?? []}
+                value={field.value}
+                onChange={field.onChange}
+                checkColor={"text-space"}
+              />
             )}
           />
         </FormSection>

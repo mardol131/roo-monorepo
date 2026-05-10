@@ -39,6 +39,34 @@ export const priceField: Field = {
   ],
 }
 
+export const getMediaFields = (required?: boolean): Field[] => [
+  {
+    name: 'filename',
+    type: 'text',
+    required,
+  },
+  {
+    name: 'alt',
+    type: 'text',
+  },
+  {
+    name: 'width',
+    type: 'number',
+  },
+  {
+    name: 'height',
+    type: 'number',
+  },
+  {
+    name: 'size',
+    type: 'number',
+  },
+  {
+    name: 'mimeType',
+    type: 'text',
+  },
+]
+
 export const listingsCommonFields: Field[] = [
   {
     name: 'name',
@@ -89,25 +117,25 @@ export const listingsCommonFields: Field[] = [
   {
     name: 'images',
     type: 'group',
+
     fields: [
       {
         name: 'coverImage',
-        type: 'text',
+        type: 'group',
+        fields: getMediaFields(true),
         required: true,
       },
       {
         name: 'logo',
-        type: 'text',
+        type: 'group',
+        fields: getMediaFields(),
       },
       {
         name: 'gallery',
         type: 'array',
-        fields: [
-          {
-            name: 'url',
-            type: 'text',
-          },
-        ],
+        fields: getMediaFields(true),
+        required: true,
+        minRows: 4,
       },
     ],
   },
@@ -156,7 +184,9 @@ export const listingsCommonFields: Field[] = [
     fields: [
       {
         name: 'image',
-        type: 'text',
+        type: 'group',
+        required: true,
+        fields: getMediaFields(),
       },
       {
         name: 'eventName',
@@ -198,7 +228,9 @@ export const listingsCommonFields: Field[] = [
       },
       {
         name: 'image',
-        type: 'text',
+        type: 'group',
+        required: true,
+        fields: getMediaFields(),
       },
     ],
   },
@@ -324,19 +356,15 @@ export const variantsCommonFields: Field[] = [
     required: true,
     fields: [
       {
-        name: 'mainImage',
-        type: 'text',
+        name: 'coverImage',
+        type: 'group',
         required: true,
+        fields: getMediaFields(),
       },
       {
         name: 'gallery',
         type: 'array',
-        fields: [
-          {
-            name: 'image',
-            type: 'text',
-          },
-        ],
+        fields: getMediaFields(),
       },
     ],
   },

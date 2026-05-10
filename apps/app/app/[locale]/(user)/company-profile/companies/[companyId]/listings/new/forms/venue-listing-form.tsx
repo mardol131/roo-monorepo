@@ -7,73 +7,54 @@ import FormToc, {
 } from "@/app/[locale]/(user)/components/form-toc";
 import Button, { ButtonProps } from "@/app/components/ui/atoms/button";
 import InputLabel from "@/app/components/ui/atoms/input-label";
+import CheckboxGroup from "@/app/components/ui/atoms/inputs/checkbox-group";
 import ErrorText from "@/app/components/ui/atoms/inputs/error-text";
 import GalleryInput from "@/app/components/ui/atoms/inputs/images/gallery-input";
 import ImageInput from "@/app/components/ui/atoms/inputs/images/image-input";
 import Input from "@/app/components/ui/atoms/inputs/input";
+import MapPointInput from "@/app/components/ui/atoms/inputs/map-point-input";
 import SearchInput from "@/app/components/ui/atoms/inputs/search-input";
-import { zodResolver } from "@hookform/resolvers/zod";
+import { uploadFileToCloud } from "@/app/functions/upload-file-to-cloud";
+import { useRouter } from "@/app/i18n/navigation";
 import { useCities } from "@/app/react-query/cities/hooks";
+import { useEventTypes } from "@/app/react-query/filters/event-types/hooks";
 import { CreateListingPayload } from "@/app/react-query/listings/fetch";
 import { useCreateListing } from "@/app/react-query/listings/hooks";
-import { uploadFileToCloud } from "@roo/common";
-import {
-  Banknote,
-  Building2,
-  DoorOpen,
-  Image,
-  MapPin,
-  Tag,
-  Users,
-} from "lucide-react";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useParams } from "next/navigation";
 import { useState } from "react";
 import { Controller, Resolver, useForm } from "react-hook-form";
-import { useParams } from "next/navigation";
 import { z } from "zod";
 import IconCard from "../components/icon-card";
-import { useRouter } from "@/app/i18n/navigation";
-import { useEventTypes } from "@/app/react-query/filters/event-types/hooks";
-import CheckboxGroup from "@/app/components/ui/atoms/inputs/checkbox-group";
-import MapPointInput from "@/app/components/ui/atoms/inputs/map-point-input";
+import {
+  optionalMediaSchema,
+  requiredMediaSchema,
+} from "@/app/validation/schema/media-schema";
+import {
+  commonListingFieldsSchema,
+  getOptionalPositiveNumber,
+  getPositiveNumber,
+} from "./common-schema";
+import { get } from "http";
+import { relationshipItemSchema } from "@/app/validation/schema/relationship-item-schema";
 
 // ── Schema ─────────────────────────────────────────────────────────────────────
 
-const itemSchema = z.object({ id: z.string(), name: z.string() });
-
-const optionalPositiveNumber = z.preprocess(
-  (val) => (val === "" || val === undefined || val === null ? undefined : val),
-  z.coerce.number().positive("Musí být kladné číslo").optional(),
-);
-
 const schema = z.object({
-  name: z.string().min(1, "Název je povinný"),
-  images: z.object({
-    coverImage: z.string().min(1, "Titulní obrázek je povinný"),
-    logo: z.string().optional(),
-    gallery: z.array(z.string()).min(4, "Přidejte alespoň čtyři obrázky"),
-  }),
-  price: z.object({
-    startsAt: z.coerce
-      .number({ message: "Zadejte číslo" })
-      .positive("Cena musí být kladná"),
-  }),
+  ...commonListingFieldsSchema,
   location: z.object({
     address: z.string().min(1, "Adresa je povinná"),
-    city: z.object({ id: z.string(), name: z.string() }, "Vyberte město"),
+    city: relationshipItemSchema,
     coordinates: z.object(
       { latitude: z.number(), longitude: z.number() },
       "Vyberte přesnou polohu",
     ),
   }),
-  capacity: z.coerce
-    .number({ message: "Zadejte číslo" })
-    .positive("Kapacita musí být kladná")
-    .int("Zadejte celé číslo"),
-  area: optionalPositiveNumber,
+  capacity: getPositiveNumber("Kapacita musí být kladná"),
+  area: getOptionalPositiveNumber("Plocha musí být kladná"),
   spaceType: z.enum(["area", "building", "room"] as const, {
     message: "Vyberte typ prostoru",
   }),
-  eventTypes: z.array(itemSchema).min(1, "Vyberte alespoň jeden typ akce"),
 });
 
 export type VenueFormInputs = z.infer<typeof schema>;
@@ -151,7 +132,7 @@ export default function VenueListingForm({ onCancel }: Props) {
   } = useForm<Inputs>({
     resolver: zodResolver(schema) as Resolver<Inputs>,
     defaultValues: {
-      images: { gallery: [] },
+      images: { gallery: [], logo: {} },
       eventTypes: [],
     },
   });
@@ -159,7 +140,7 @@ export default function VenueListingForm({ onCancel }: Props) {
   const [eventTypeSearch, setEventTypeSearch] = useState("");
 
   const { data: eventTypesData } = useEventTypes({
-    limit: 10,
+    limit: 20,
     query: eventTypeSearch
       ? { name: { contains: eventTypeSearch } }
       : undefined,
@@ -172,7 +153,7 @@ export default function VenueListingForm({ onCancel }: Props) {
       images: {
         coverImage: data.images.coverImage,
         logo: data.images.logo,
-        gallery: data.images.gallery.map((url) => ({ url })),
+        gallery: data.images.gallery,
       },
       price: { startsAt: data.price.startsAt },
       eventTypes: data.eventTypes.map((i) => i.id),
@@ -184,6 +165,9 @@ export default function VenueListingForm({ onCancel }: Props) {
             latitude: data.location.coordinates.latitude,
             longitude: data.location.coordinates.longitude,
           },
+          access: {},
+          parking: {},
+          breakfast: {},
           spacesType: data.spaceType,
           capacity: data.capacity,
           area: data.area ?? 0,
@@ -233,12 +217,14 @@ export default function VenueListingForm({ onCancel }: Props) {
           error={!!errors.name}
         >
           <Input
-            label="Název"
+            label="Název služby"
+            sublabel="Tento název bude vidět v katalogu"
             inputProps={{
               ...register("name"),
               placeholder: "Kongresové centrum Praha",
             }}
             error={errors.name?.message}
+            isRequired
           />
         </FormSection>
 
@@ -262,6 +248,7 @@ export default function VenueListingForm({ onCancel }: Props) {
                 placeholder: "9900",
               }}
               error={errors.price?.startsAt?.message}
+              isRequired
             />
           </div>
         </FormSection>
@@ -308,6 +295,7 @@ export default function VenueListingForm({ onCancel }: Props) {
             name="images.gallery"
             render={({ field }) => (
               <GalleryInput
+                isRequired
                 label="Galerie"
                 value={field.value}
                 onChange={field.onChange}
@@ -372,7 +360,8 @@ export default function VenueListingForm({ onCancel }: Props) {
           error={!!(errors.location?.address || errors.location?.city)}
         >
           <Input
-            label="Adresa *"
+            label="Adresa"
+            isRequired
             inputProps={{
               ...register("location.address"),
               placeholder: "Václavské náměstí 1",
@@ -384,7 +373,8 @@ export default function VenueListingForm({ onCancel }: Props) {
             name="location.city"
             render={({ field }) => (
               <SearchInput
-                label="Město *"
+                label="Město"
+                isRequired
                 placeholder="Vyberte město..."
                 onSearchQueryChange={setVenueCitySearch}
                 searching={isFetching}
@@ -454,6 +444,7 @@ export default function VenueListingForm({ onCancel }: Props) {
             render={({ field }) => (
               <MapPointInput
                 label="Kde přesně se Váš prostor nachází?"
+                isRequired
                 mapDisabled={!selectedCity}
                 value={field.value}
                 onChange={field.onChange}
@@ -484,6 +475,7 @@ export default function VenueListingForm({ onCancel }: Props) {
                 min: 1,
                 placeholder: "300",
               }}
+              isRequired
               error={errors.capacity?.message}
             />
             <Input
@@ -494,6 +486,7 @@ export default function VenueListingForm({ onCancel }: Props) {
                 min: 1,
                 placeholder: "800",
               }}
+              isRequired
               error={errors.area?.message}
             />
           </div>

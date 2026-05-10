@@ -421,10 +421,22 @@ export interface Variant {
     | null;
   eventTypes?: (string | EventType)[] | null;
   images: {
-    mainImage: string;
+    coverImage: {
+      filename?: string | null;
+      alt?: string | null;
+      width?: number | null;
+      height?: number | null;
+      size?: number | null;
+      mimeType?: string | null;
+    };
     gallery?:
       | {
-          image?: string | null;
+          filename?: string | null;
+          alt?: string | null;
+          width?: number | null;
+          height?: number | null;
+          size?: number | null;
+          mimeType?: string | null;
           id?: string | null;
         }[]
       | null;
@@ -442,15 +454,15 @@ export interface Variant {
         amenities?: (string | Amenity)[] | null;
         technology?: (string | Technology)[] | null;
         canBeBookedAsWhole?: boolean | null;
-        accommodation?: {
+        accommodation: {
           included?: boolean | null;
           capacity?: number | null;
         };
-        parking?: {
+        parking: {
           included?: boolean | null;
           spots?: number | null;
         };
-        breakfast?: {
+        breakfast: {
           included?: boolean | null;
           price?: number | null;
           loweredPrice?: number | null;
@@ -498,8 +510,7 @@ export interface Variant {
          * Délka přestávky mezi sety v minutách
          */
         breakDuration?: number | null;
-        setupAndTeardown?: {
-          included?: boolean | null;
+        setupAndTeardown: {
           /**
            * Čas potřebný na přípravu v minutách
            */
@@ -533,14 +544,31 @@ export interface Listing {
   indoor?: boolean | null;
   outdoor?: boolean | null;
   images: {
-    coverImage: string;
-    logo?: string | null;
-    gallery?:
-      | {
-          url?: string | null;
-          id?: string | null;
-        }[]
-      | null;
+    coverImage: {
+      filename: string;
+      alt?: string | null;
+      width?: number | null;
+      height?: number | null;
+      size?: number | null;
+      mimeType?: string | null;
+    };
+    logo?: {
+      filename?: string | null;
+      alt?: string | null;
+      width?: number | null;
+      height?: number | null;
+      size?: number | null;
+      mimeType?: string | null;
+    };
+    gallery: {
+      filename: string;
+      alt?: string | null;
+      width?: number | null;
+      height?: number | null;
+      size?: number | null;
+      mimeType?: string | null;
+      id?: string | null;
+    }[];
   };
   price: {
     startsAt: number;
@@ -556,7 +584,14 @@ export interface Listing {
     | null;
   references?:
     | {
-        image?: string | null;
+        image: {
+          filename?: string | null;
+          alt?: string | null;
+          width?: number | null;
+          height?: number | null;
+          size?: number | null;
+          mimeType?: string | null;
+        };
         eventName: string;
         description?: string | null;
         clientName?: string | null;
@@ -569,7 +604,14 @@ export interface Listing {
         name: string;
         role: string;
         description?: string | null;
-        image?: string | null;
+        image: {
+          filename?: string | null;
+          alt?: string | null;
+          width?: number | null;
+          height?: number | null;
+          size?: number | null;
+          mimeType?: string | null;
+        };
         id?: string | null;
       }[]
     | null;
@@ -597,7 +639,7 @@ export interface Listing {
         personnel?: (string | Personnel)[] | null;
         amenities?: (string | Amenity)[] | null;
         activities?: (string | Activity)[] | null;
-        access?: {
+        access: {
           vehicleTypes?: ('car' | 'truck' | 'van' | 'bus')[] | null;
           helpWithLoadingAndUnloading?: boolean | null;
           loadingRamp?: boolean | null;
@@ -614,7 +656,7 @@ export interface Listing {
               id?: string | null;
             }[]
           | null;
-        parking?: {
+        parking: {
           hasParking?: boolean | null;
           parkingCapacity?: number | null;
           parkingIsIncludedInPrice?: boolean | null;
@@ -629,7 +671,7 @@ export interface Listing {
               id?: string | null;
             }[]
           | null;
-        breakfast?: {
+        breakfast: {
           included?: boolean | null;
           allowAccommodationWithoutBreakfast?: boolean | null;
           allowMoreBreakfastsThanAccommodation?: boolean | null;
@@ -650,7 +692,7 @@ export interface Listing {
         blockType: 'venue';
       }
     | {
-        location?: {
+        location: {
           address?: string | null;
           region?: (string | Region)[] | null;
           district?: (string | District)[] | null;
@@ -672,7 +714,7 @@ export interface Listing {
         blockType: 'gastro';
       }
     | {
-        location?: {
+        location: {
           address?: string | null;
           region?: (string | Region)[] | null;
           district?: (string | District)[] | null;
@@ -682,7 +724,7 @@ export interface Listing {
         capacity: number;
         minimumCapacity?: number | null;
         audience?: ('adults' | 'kids' | 'seniors')[] | null;
-        setupAndTearDownRules?: {
+        setupAndTearDownRules: {
           setupTime?: number | null;
           tearDownTime?: number | null;
         };
@@ -707,7 +749,14 @@ export interface Company {
   status: 'active' | 'disabled' | 'archived';
   ico: string;
   description?: string | null;
-  logo?: string | null;
+  logo: {
+    filename?: string | null;
+    alt?: string | null;
+    width?: number | null;
+    height?: number | null;
+    size?: number | null;
+    mimeType?: string | null;
+  };
   email: string;
   phone: {
     countryCode: '420';
@@ -866,7 +915,12 @@ export interface Space {
   area?: number | null;
   images?:
     | {
-        image?: string | null;
+        filename?: string | null;
+        alt?: string | null;
+        width?: number | null;
+        height?: number | null;
+        size?: number | null;
+        mimeType?: string | null;
         id?: string | null;
       }[]
     | null;
@@ -1035,7 +1089,7 @@ export interface Inquiry {
   } | null;
   event: string | Event;
   listingType: 'venue' | 'gastro' | 'entertainment';
-  request?: {
+  request: {
     note?: string | null;
     requirements?:
       | {
@@ -1062,7 +1116,7 @@ export interface Inquiry {
     lastUserSeenAt?: string | null;
     lastCompanySeenAt?: string | null;
   };
-  snapshots?: {
+  snapshots: {
     listing?:
       | {
           [k: string]: unknown;
@@ -1616,11 +1670,25 @@ export interface VariantsSelect<T extends boolean = true> {
   images?:
     | T
     | {
-        mainImage?: T;
+        coverImage?:
+          | T
+          | {
+              filename?: T;
+              alt?: T;
+              width?: T;
+              height?: T;
+              size?: T;
+              mimeType?: T;
+            };
         gallery?:
           | T
           | {
-              image?: T;
+              filename?: T;
+              alt?: T;
+              width?: T;
+              height?: T;
+              size?: T;
+              mimeType?: T;
               id?: T;
             };
       };
@@ -1705,7 +1773,6 @@ export interface VariantsSelect<T extends boolean = true> {
               setupAndTeardown?:
                 | T
                 | {
-                    included?: T;
                     setupTime?: T;
                     teardownTime?: T;
                   };
@@ -1763,12 +1830,35 @@ export interface ListingsSelect<T extends boolean = true> {
   images?:
     | T
     | {
-        coverImage?: T;
-        logo?: T;
+        coverImage?:
+          | T
+          | {
+              filename?: T;
+              alt?: T;
+              width?: T;
+              height?: T;
+              size?: T;
+              mimeType?: T;
+            };
+        logo?:
+          | T
+          | {
+              filename?: T;
+              alt?: T;
+              width?: T;
+              height?: T;
+              size?: T;
+              mimeType?: T;
+            };
         gallery?:
           | T
           | {
-              url?: T;
+              filename?: T;
+              alt?: T;
+              width?: T;
+              height?: T;
+              size?: T;
+              mimeType?: T;
               id?: T;
             };
       };
@@ -1789,7 +1879,16 @@ export interface ListingsSelect<T extends boolean = true> {
   references?:
     | T
     | {
-        image?: T;
+        image?:
+          | T
+          | {
+              filename?: T;
+              alt?: T;
+              width?: T;
+              height?: T;
+              size?: T;
+              mimeType?: T;
+            };
         eventName?: T;
         description?: T;
         clientName?: T;
@@ -1802,7 +1901,16 @@ export interface ListingsSelect<T extends boolean = true> {
         name?: T;
         role?: T;
         description?: T;
-        image?: T;
+        image?:
+          | T
+          | {
+              filename?: T;
+              alt?: T;
+              width?: T;
+              height?: T;
+              size?: T;
+              mimeType?: T;
+            };
         id?: T;
       };
   rules?: T;
@@ -1958,7 +2066,12 @@ export interface SpacesSelect<T extends boolean = true> {
   images?:
     | T
     | {
-        image?: T;
+        filename?: T;
+        alt?: T;
+        width?: T;
+        height?: T;
+        size?: T;
+        mimeType?: T;
         id?: T;
       };
   hasAccommodation?: T;
@@ -1995,7 +2108,16 @@ export interface CompaniesSelect<T extends boolean = true> {
   status?: T;
   ico?: T;
   description?: T;
-  logo?: T;
+  logo?:
+    | T
+    | {
+        filename?: T;
+        alt?: T;
+        width?: T;
+        height?: T;
+        size?: T;
+        mimeType?: T;
+      };
   email?: T;
   phone?:
     | T

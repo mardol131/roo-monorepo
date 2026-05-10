@@ -18,7 +18,7 @@ import SelectInput from "@/app/components/ui/atoms/inputs/select-input";
 import { Textarea } from "@/app/components/ui/atoms/inputs/textarea";
 import { useListing } from "@/app/react-query/listings/hooks";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { uploadFileToCloud } from "@roo/common";
+import { uploadFileToCloud } from "@/app/functions/upload-file-to-cloud";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Controller, useFieldArray, useForm } from "react-hook-form";
@@ -36,6 +36,10 @@ import { useRules } from "@/app/react-query/specific/rules/hooks";
 import { usePlaceTypes } from "@/app/react-query/filters/place-types/hooks";
 import { usePersonnel } from "@/app/react-query/filters/personnel/hooks";
 import MapPointInput from "@/app/components/ui/atoms/inputs/map-point-input";
+import { commonEditListingFieldsSchema } from "./common-schema";
+import { toItem } from "./utils";
+import TimeInput from "@/app/components/ui/atoms/inputs/time-input";
+import { Listing, undefinedToNull } from "@roo/common";
 
 // ── TOC groups (exported for page sidebar) ────────────────────────────────────
 
@@ -135,22 +139,10 @@ const itemSchema = z.object({ id: z.string(), name: z.string() });
 
 const schema = z
   .object({
-    name: z.string().min(1, "Název je povinný"),
-    shortDescription: z.string().optional(),
-    description: z.string().optional(),
+    ...commonEditListingFieldsSchema,
     indoor: z.boolean().default(false),
     outdoor: z.boolean().default(false),
-    eventTypes: z.array(itemSchema).min(1, "Vyberte alespoň jeden typ akce"),
-    images: z.object({
-      coverImage: z.string().min(1, "Titulní obrázek je povinný"),
-      logo: z.string().optional(),
-      gallery: z.array(z.string()).default([]),
-    }),
-    price: z.object({
-      startsAt: z.coerce
-        .number({ message: "Zadejte číslo" })
-        .positive("Cena musí být kladná"),
-    }),
+
     location: z.object({
       address: z.string().min(1, "Adresa je povinná"),
       city: z.object({
@@ -162,10 +154,7 @@ const schema = z
         "Vyberte přesnou polohu",
       ),
     }),
-    capacity: z.coerce
-      .number({ message: "Zadejte číslo" })
-      .positive("Kapacita musí být kladná")
-      .int("Zadejte celé číslo"),
+
     area: z.coerce
       .number({ message: "Zadejte číslo" })
       .positive("Plocha musí být kladná"),
@@ -183,14 +172,12 @@ const schema = z
         }),
       )
       .default([]),
-    services: z.array(itemSchema).default([]),
-    personnel: z.array(itemSchema).default([]),
     amenities: z.array(itemSchema).default([]),
+    services: z.array(itemSchema).default([]),
     technology: z.array(itemSchema).default([]),
     placeTypes: z.array(itemSchema).default([]),
     foodAndDrinkRules: z.array(itemSchema).default([]),
     venueRules: z.array(itemSchema).default([]),
-    rules: z.array(itemSchema).default([]),
     storage: z
       .array(
         z.object({
@@ -229,39 +216,6 @@ const schema = z
         timeTo: z.string().nullable().optional(),
       })
       .optional(),
-    employees: z
-      .array(
-        z.object({
-          name: z.string().min(1, "Jméno je povinné"),
-          role: z.string().min(1, "Role je povinná"),
-          description: z.string().optional(),
-          image: z.string().optional(),
-        }),
-      )
-      .default([]),
-    faq: z
-      .array(
-        z.object({
-          active: z.boolean().default(true),
-          question: z.string().min(1, "Otázka je povinná"),
-          answer: z.string().min(1, "Odpověď je povinná"),
-          groupedBy: z
-            .enum(["general", "booking", "cancellation", "payment", "other"])
-            .default("general"),
-        }),
-      )
-      .default([]),
-    references: z
-      .array(
-        z.object({
-          image: z.string().optional(),
-          eventName: z.string().min(1, "Název akce je povinný"),
-          clientName: z.string().optional(),
-          eventType: itemSchema.nullable().optional(),
-          description: z.string().optional(),
-        }),
-      )
-      .default([]),
   })
   .superRefine((data, ctx) => {
     if (data.hasAccommodation && !data.accommodationCapacity) {
@@ -310,76 +264,75 @@ export default function EditVenueListingForm({
     const venueDetail = listing?.details[0];
 
     if (venueDetail?.blockType !== "venue") return;
+
+    const payload: Partial<Listing> = {
+      name: data.name,
+      shortDescription: data.shortDescription,
+      description: data.description,
+      indoor: data.indoor,
+      outdoor: data.outdoor,
+      eventTypes: data.eventTypes.map((i) => i.id),
+      rules: data.rules.map((i) => i.id),
+      employees: data.employees,
+      faq: data.faq,
+      references: data.references.map((r) => ({
+        ...r,
+        eventType: r.eventType ? r.eventType.id : undefined,
+      })),
+      images: data.images,
+      price: data.price,
+      details: [
+        {
+          blockType: "venue",
+          spacesType: venueDetail?.spacesType ?? "area",
+          location: {
+            address: data.location.address,
+            city: data.location.city.id,
+            latitude: data.location.coordinates.latitude,
+            longitude: data.location.coordinates.longitude,
+          },
+          capacity: data.capacity,
+          area: data.area,
+          canBeBookedAsWhole: data.canBeBookedAsWhole,
+          hasAccommodation: data.hasAccommodation,
+          accommodationCapacity: data.accommodationCapacity,
+          activities: data.activities.map((i) => i.id),
+          activityAddons: data.activityAddons
+            .filter((a) => a.activity != null)
+            .map((a) => ({
+              activity: a.activity!.id,
+              price: a.price,
+              type: a.type,
+              ...(a.space ? { space: a.space.id } : {}),
+            })),
+          services: data.services.map((i) => i.id),
+          personnel: data.personnel.map((i) => i.id),
+          amenities: data.amenities.map((i) => i.id),
+          technology: data.technology.map((i) => i.id),
+          placeTypes: data.placeTypes.map((i) => i.id),
+          foodAndDrinkRules: data.foodAndDrinkRules.map((i) => i.id),
+          venueRules: data.venueRules.map((i) => i.id),
+          storage: data.storage,
+          access: data.access
+            ? {
+                ...data.access,
+                vehicleTypes: data.access.vehicleTypes as (
+                  | "car"
+                  | "truck"
+                  | "van"
+                  | "bus"
+                )[],
+              }
+            : {},
+          parking: data.parking ?? {},
+          breakfast: data.breakfast ?? {},
+        },
+      ],
+    };
     mutate(
       {
         id: listingId,
-        data: {
-          name: data.name,
-          shortDescription: data.shortDescription,
-          description: data.description,
-          indoor: data.indoor,
-          outdoor: data.outdoor,
-          eventTypes: data.eventTypes.map((i) => i.id),
-          rules: data.rules.map((i) => i.id),
-          employees: data.employees,
-          faq: data.faq,
-          references: data.references.map((r) => ({
-            ...r,
-            eventType: r.eventType?.id ?? undefined,
-          })),
-          images: {
-            ...data.images,
-            gallery: data.images.gallery.map((url) => ({ url })),
-          },
-          price: data.price,
-          details: [
-            {
-              blockType: "venue",
-              spacesType: venueDetail?.spacesType ?? "area",
-              location: {
-                address: data.location.address,
-                city: data.location.city.id,
-                latitude: data.location.coordinates.latitude,
-                longitude: data.location.coordinates.longitude,
-              },
-              capacity: data.capacity,
-              area: data.area,
-              canBeBookedAsWhole: data.canBeBookedAsWhole,
-              hasAccommodation: data.hasAccommodation,
-              accommodationCapacity: data.accommodationCapacity,
-              activities: data.activities.map((i) => i.id),
-              activityAddons: data.activityAddons
-                .filter((a) => a.activity != null)
-                .map((a) => ({
-                  activity: a.activity!.id,
-                  price: a.price,
-                  type: a.type,
-                  ...(a.space ? { space: a.space.id } : {}),
-                })),
-              services: data.services.map((i) => i.id),
-              personnel: data.personnel.map((i) => i.id),
-              amenities: data.amenities.map((i) => i.id),
-              technology: data.technology.map((i) => i.id),
-              placeTypes: data.placeTypes.map((i) => i.id),
-              foodAndDrinkRules: data.foodAndDrinkRules.map((i) => i.id),
-              venueRules: data.venueRules.map((i) => i.id),
-              storage: data.storage,
-              access: data.access
-                ? {
-                    ...data.access,
-                    vehicleTypes: data.access.vehicleTypes as (
-                      | "car"
-                      | "truck"
-                      | "van"
-                      | "bus"
-                    )[],
-                  }
-                : undefined,
-              parking: data.parking,
-              breakfast: data.breakfast,
-            },
-          ],
-        },
+        data: undefinedToNull(payload),
       },
       {
         onSuccess: () =>
@@ -481,11 +434,6 @@ export default function EditVenueListingForm({
     const id = <T extends string | { id: string }>(v: T) =>
       typeof v === "string" ? v : v.id;
 
-    const toItem = <T extends { id: string; name: string }>(
-      v: string | T,
-    ): { id: string; name: string } =>
-      typeof v === "string" ? { id: v, name: "" } : { id: v.id, name: v.name };
-
     if (typeof d.location.city === "object" && d.location.city !== null) {
       const c = d.location.city as {
         bboxMinLon?: number;
@@ -505,12 +453,7 @@ export default function EditVenueListingForm({
       indoor: listing.indoor ?? false,
       outdoor: listing.outdoor ?? false,
       eventTypes: listing.eventTypes?.map(toItem) ?? [],
-      images: {
-        coverImage: listing.images.coverImage,
-        logo: listing.images.logo ?? undefined,
-        gallery:
-          listing.images.gallery?.map((g) => g.url ?? "").filter(Boolean) ?? [],
-      },
+      images: listing.images,
       price: { startsAt: listing.price.startsAt },
       location: {
         address: d.location.address,
@@ -583,7 +526,7 @@ export default function EditVenueListingForm({
           name: e.name,
           role: e.role,
           description: e.description ?? undefined,
-          image: e.image ? id(e.image as string | { id: string }) : undefined,
+          image: e.image,
         })) ?? [],
       faq:
         listing.faq?.map((f) => ({
@@ -594,16 +537,16 @@ export default function EditVenueListingForm({
         })) ?? [],
       references:
         listing.references?.map((r) => ({
-          image: r.image ? id(r.image as string | { id: string }) : undefined,
+          image: r.image,
           eventName: r.eventName ?? undefined,
           description: r.description ?? undefined,
           clientName: r.clientName ?? undefined,
-          eventType: r.eventType
-            ? toItem(r.eventType as string | { id: string; name: string })
-            : null,
+          eventType: r.eventType ? toItem(r.eventType) : undefined,
         })) ?? [],
     });
   }, [listing, reset]);
+
+  console.log("Form errors:", errors);
 
   const storageFieldArray = useFieldArray({ control, name: "storage" });
   const activityAddonsFieldArray = useFieldArray({
@@ -643,6 +586,7 @@ export default function EditVenueListingForm({
               ...register("name"),
               placeholder: "Kongresové centrum Praha",
             }}
+            isRequired
             error={errors.name?.message}
           />
           <Input
@@ -711,6 +655,7 @@ export default function EditVenueListingForm({
                 min: 0,
                 placeholder: "9900",
               }}
+              isRequired
               error={errors.price?.startsAt?.message}
             />
           </div>
@@ -724,6 +669,7 @@ export default function EditVenueListingForm({
           subtitle={S.images.subTitle}
           color="text-listing"
           surfaceColor="bg-listing-surface"
+          error={!!errors.images}
         >
           <Controller
             control={control}
@@ -734,8 +680,9 @@ export default function EditVenueListingForm({
                 value={field.value}
                 onChange={(filename) => field.onChange(filename ?? "")}
                 onUpload={uploadFileToCloud}
-                error={errors.images?.coverImage?.message}
+                error={errors.images?.coverImage?.filename?.message}
                 isRequired
+                containerRef={field.ref}
               />
             )}
           />
@@ -762,6 +709,12 @@ export default function EditVenueListingForm({
                 onChange={field.onChange}
                 onUpload={uploadFileToCloud}
                 maxImages={20}
+                containerRef={field.ref}
+                isRequired
+                error={
+                  errors.images?.gallery?.[0]?.filename?.message ||
+                  errors.images?.gallery?.message
+                }
               />
             )}
           />
@@ -782,6 +735,7 @@ export default function EditVenueListingForm({
               ...register("location.address"),
               placeholder: "Václavské náměstí 1",
             }}
+            isRequired
             error={errors.location?.address?.message}
           />
           <Controller
@@ -802,6 +756,7 @@ export default function EditVenueListingForm({
                         : undefined,
                   })) ?? []
                 }
+                isRequired
                 onSearchQueryChange={setCitySearch}
                 selectedOption={
                   field.value
@@ -862,6 +817,7 @@ export default function EditVenueListingForm({
                 onBlur={field.onBlur}
                 error={errors.location?.coordinates?.message}
                 externalBbox={cityBbox}
+                isRequired
               />
             )}
           />
@@ -886,6 +842,7 @@ export default function EditVenueListingForm({
                 placeholder: "300",
               }}
               error={errors.capacity?.message}
+              isRequired
             />
             <Input
               label="Plocha (m²)"
@@ -896,6 +853,7 @@ export default function EditVenueListingForm({
                 placeholder: "800",
               }}
               error={errors.area?.message}
+              isRequired
             />
           </div>
           <Controller
@@ -1504,23 +1462,19 @@ export default function EditVenueListingForm({
                 )}
               />
               <div className="grid grid-cols-2 gap-4">
-                <Input
-                  label="Snídaně od"
-                  inputProps={{
-                    ...register("breakfast.timeFrom"),
-                    placeholder: "07:00",
-                    disabled: !breakfastIncluded,
-                  }}
-                  error={errors.breakfast?.timeFrom?.message}
+                <Controller
+                  control={control}
+                  name="breakfast.timeFrom"
+                  render={({ field }) => (
+                    <TimeInput label="Snídaně od" onChange={field.onChange} />
+                  )}
                 />
-                <Input
-                  label="Snídaně do"
-                  inputProps={{
-                    ...register("breakfast.timeTo"),
-                    placeholder: "10:00",
-                    disabled: !breakfastIncluded,
-                  }}
-                  error={errors.breakfast?.timeTo?.message}
+                <Controller
+                  control={control}
+                  name="breakfast.timeTo"
+                  render={({ field }) => (
+                    <TimeInput label="Snídaně do" onChange={field.onChange} />
+                  )}
                 />
               </div>
             </div>
@@ -1544,7 +1498,7 @@ export default function EditVenueListingForm({
                 name: "",
                 role: "",
                 description: "",
-                image: "",
+                image: {},
               })
             }
             onRemove={employeesFieldArray.remove}
@@ -1559,7 +1513,7 @@ export default function EditVenueListingForm({
                       <ImageInput
                         label="Fotografie"
                         value={field.value}
-                        onChange={(filename) => field.onChange(filename ?? "")}
+                        onChange={(filename) => field.onChange(filename ?? {})}
                         onUpload={uploadFileToCloud}
                       />
                     )}
@@ -1691,11 +1645,11 @@ export default function EditVenueListingForm({
             fields={referencesFieldArray.fields}
             onAppend={() =>
               referencesFieldArray.append({
-                image: "",
+                image: {},
                 eventName: "",
                 description: "",
                 clientName: "",
-                eventType: null,
+                eventType: undefined,
               })
             }
             onRemove={referencesFieldArray.remove}
@@ -1748,12 +1702,16 @@ export default function EditVenueListingForm({
                       label="Typ akce"
                       placeholder="Vyberte typ akce..."
                       options={eventTypes?.docs ?? []}
-                      selectedOption={field.value ?? undefined}
                       onSelect={field.onChange}
                       onClear={() => field.onChange(null)}
                       ref={field.ref}
                       name={field.name}
                       onBlur={field.onBlur}
+                      selectedOption={
+                        eventTypes?.docs?.find(
+                          (et) => et.id === field.value?.id,
+                        ) ?? undefined
+                      }
                     />
                   )}
                 />

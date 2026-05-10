@@ -70,6 +70,7 @@ export const Events: CollectionConfig = {
     {
       name: 'date',
       type: 'group',
+      required: true,
       fields: [
         {
           name: 'start',
@@ -135,6 +136,7 @@ export const Events: CollectionConfig = {
     {
       name: 'guests',
       type: 'group',
+      required: true,
       fields: [
         {
           name: 'adults',

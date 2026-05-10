@@ -109,6 +109,7 @@ export const venueListingDetails: Field[] = [
   {
     name: 'access',
     type: 'group',
+    required: true,
     fields: [
       {
         name: 'vehicleTypes',
@@ -167,6 +168,7 @@ export const venueListingDetails: Field[] = [
   {
     name: 'parking',
     type: 'group',
+    required: true,
     fields: [
       {
         name: 'hasParking',
@@ -217,6 +219,7 @@ export const venueListingDetails: Field[] = [
   {
     name: 'breakfast',
     type: 'group',
+    required: true,
     fields: [
       {
         name: 'included',
@@ -284,6 +287,7 @@ const fullLocationFields: Field[] = [
   {
     name: 'location',
     type: 'group',
+    required: true,
     fields: [
       {
         name: 'address',
@@ -401,6 +405,7 @@ export const entertainmentListingDetails: Field[] = [
   {
     name: 'setupAndTearDownRules',
     type: 'group',
+    required: true,
     fields: [
       {
         name: 'setupTime',

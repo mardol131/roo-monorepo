@@ -16,28 +16,19 @@ import ImageInput from "@/app/components/ui/atoms/inputs/images/image-input";
 import Input from "@/app/components/ui/atoms/inputs/input";
 import RepeaterField from "@/app/components/ui/atoms/inputs/repeater-field";
 import { Textarea } from "@/app/components/ui/atoms/inputs/textarea";
+import { uploadFileToCloud } from "@/app/functions/upload-file-to-cloud";
 import { useRouter } from "@/app/i18n/navigation";
 import { useListing } from "@/app/react-query/listings/hooks";
 import { useCreateVariant } from "@/app/react-query/variants/hooks";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { uploadFileToCloud } from "@roo/common";
-import {
-  Banknote,
-  Calendar,
-  CalendarRange,
-  ChefHat,
-  Clock,
-  Image,
-  ListChecks,
-  Package,
-  Tag,
-  UserCheck,
-  Users,
-} from "lucide-react";
+import { CalendarRange, Clock } from "lucide-react";
 import { useParams } from "next/navigation";
 import type { Resolver } from "react-hook-form";
 import { Controller, useFieldArray, useForm } from "react-hook-form";
 import { z } from "zod";
+import { createVariantCommonSchema } from "./common-schema";
+import { relationshipItemSchema } from "@/app/validation/schema/relationship-item-schema";
+import { getOptionalPositiveNumber } from "../../../../new/forms/common-schema";
 
 // ── Color scheme ───────────────────────────────────────────────────────────────
 
@@ -80,84 +71,20 @@ const FORM_GROUPS: readonly TocGroup[] = [
   { label: "Nabídka", sections: [S.cuisine, S.extras, S.personnel] },
 ];
 
-// ── Item schema ────────────────────────────────────────────────────────────────
-
-const itemSchema = z.object({ id: z.string(), name: z.string() });
-
 // ── Schema ─────────────────────────────────────────────────────────────────────
 
-const optionalPositiveInt = z.preprocess(
-  (val) => (val === "" || val === undefined || val === null ? undefined : val),
-  z.coerce
-    .number()
-    .positive("Musí být kladné číslo")
-    .int("Zadejte celé číslo")
-    .optional(),
-);
-
-const optionalPositiveNumber = z.preprocess(
-  (val) => (val === "" || val === undefined || val === null ? undefined : val),
-  z.coerce.number().positive("Musí být kladné číslo").optional(),
-);
-
 const schema = z.object({
-  name: z.string().min(1, "Název je povinný"),
-  shortDescription: z
-    .string()
-    .min(1, "Krátký popis je povinný")
-    .max(50, "Max. 50 znaků"),
-  description: z.string().optional(),
-  type: z.enum(["allYear", "seasonal"]),
-  availability: z.enum(["allDay", "selectedHours"]),
-  selectedHours: z
-    .array(
-      z.object({
-        from: z.string().min(1, "Čas od je povinný"),
-        to: z.string().min(1, "Čas do je povinný"),
-      }),
-    )
-    .default([]),
-  price: z.object({
-    generalPrice: z.coerce
-      .number({ message: "Zadejte číslo" })
-      .positive("Cena musí být kladná"),
-    seasonalPrices: z
-      .array(
-        z.object({
-          price: z.coerce
-            .number({ message: "Zadejte číslo" })
-            .positive("Cena musí být kladná"),
-          description: z.string().optional(),
-          from: z.string("Datum je povinné").min(1, "Datum od je povinné"),
-          to: z.string("Datum je povinné").min(1, "Datum do je povinné"),
-        }),
-      )
-      .default([]),
-  }),
-  images: z.object({
-    mainImage: z.string().min(1, "Obrázek je povinný"),
-    gallery: z.array(z.string()).default([]),
-  }),
-  eventTypes: z.array(itemSchema).default([]),
-  includes: z.array(z.object({ item: z.string() })).default([]),
-  excludes: z.array(z.object({ item: z.string() })).default([]),
-  capacity: z.object({
-    max: z.coerce
-      .number({ message: "Zadejte číslo" })
-      .positive("Kapacita musí být kladná")
-      .int("Zadejte celé číslo"),
-    min: optionalPositiveInt,
-  }),
-  pricePerPerson: optionalPositiveNumber,
-  minimumOrderCount: optionalPositiveInt,
-  cuisines: z.array(itemSchema).default([]),
-  dishTypes: z.array(itemSchema).default([]),
-  dietaryOptions: z.array(itemSchema).default([]),
-  foodServiceStyle: z.array(itemSchema).default([]),
+  ...createVariantCommonSchema,
+  pricePerPerson: getOptionalPositiveNumber("Zadejte kladné číslo"),
+  minimumOrderCount: getOptionalPositiveNumber("Zadejte kladné číslo"),
+  cuisines: z.array(relationshipItemSchema).default([]),
+  dishTypes: z.array(relationshipItemSchema).default([]),
+  dietaryOptions: z.array(relationshipItemSchema).default([]),
+  foodServiceStyle: z.array(relationshipItemSchema).default([]),
   kidsMenu: z.boolean().default(false),
   alcoholIncluded: z.boolean().default(false),
-  personnel: z.array(itemSchema).default([]),
-  necessities: z.array(itemSchema).default([]),
+  personnel: z.array(relationshipItemSchema).default([]),
+  necessities: z.array(relationshipItemSchema).default([]),
 });
 
 type GastroFormInputs = z.infer<typeof schema>;
@@ -308,10 +235,7 @@ export default function NewVariantFormGastro({ onCancel }: Props) {
       availability: data.availability,
       selectedHours: data.selectedHours,
       price: data.price,
-      images: {
-        mainImage: data.images.mainImage,
-        gallery: (data.images.gallery ?? []).map((image) => ({ image })),
-      },
+      images: data.images,
       eventTypes: data.eventTypes.map((et) => et.id),
       includes: data.includes,
       excludes: data.excludes,
@@ -479,18 +403,18 @@ export default function NewVariantFormGastro({ onCancel }: Props) {
           subtitle="Podporované formáty: jpg, png, webp"
           surfaceColor={COLOR.surface}
           color={COLOR.text}
-          error={!!errors.images?.mainImage}
+          error={!!errors.images?.coverImage}
         >
           <Controller
             control={control}
-            name="images.mainImage"
+            name="images.coverImage"
             render={({ field }) => (
               <ImageInput
                 label="Titulní obrázek"
                 value={field.value}
                 onChange={(f) => field.onChange(f ?? "")}
                 onUpload={uploadFileToCloud}
-                error={errors.images?.mainImage?.message}
+                error={errors.images?.coverImage?.message}
                 isRequired
               />
             )}

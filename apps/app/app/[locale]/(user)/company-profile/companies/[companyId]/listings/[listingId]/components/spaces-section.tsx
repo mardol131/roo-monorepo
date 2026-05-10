@@ -45,10 +45,7 @@ function SpaceTreeNode({
     <div className="flex flex-col gap-2">
       <div className="flex items-center gap-3">
         {depth > 0 && (
-          <CornerDownRight
-            size={16}
-            className="text-zinc-400 w-6 h-6 shrink-0"
-          />
+          <CornerDownRight className="text-zinc-400 -mt-2 w-6 h-6 shrink-0" />
         )}
         <div className="w-full">
           <EntityCard
@@ -75,7 +72,7 @@ function SpaceTreeNode({
         </div>
       </div>
       {children.length > 0 && (
-        <div className="ml-9 flex flex-col gap-2">
+        <div className={`${depth > 0 ? "ml-12" : "ml-6"} flex flex-col gap-2`}>
           {children.map((child) => (
             <SpaceTreeNode
               key={child.id}

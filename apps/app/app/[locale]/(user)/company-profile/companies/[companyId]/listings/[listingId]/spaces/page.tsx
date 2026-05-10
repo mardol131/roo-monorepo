@@ -250,10 +250,7 @@ export default function SpacesPage() {
 
   const { data: spaces } = useSpacesByListing(listingId);
   const { data: listing } = useListing(listingId);
-  const { mutate: updateListing, error } = useUpdateListing(
-    listingId,
-    companyId,
-  );
+  const { mutate: updateListing, error } = useUpdateListing(companyId);
 
   const venueDetails =
     listing?.details[0].blockType === "venue" ? listing.details[0] : undefined;
@@ -277,7 +274,10 @@ export default function SpacesPage() {
       return;
     updateListing(
       {
-        details: [{ ...venueDetails, spacesType: pendingType }],
+        id: listingId,
+        data: {
+          details: [{ ...venueDetails, spacesType: pendingType }],
+        },
       },
       {
         onSuccess: () => {

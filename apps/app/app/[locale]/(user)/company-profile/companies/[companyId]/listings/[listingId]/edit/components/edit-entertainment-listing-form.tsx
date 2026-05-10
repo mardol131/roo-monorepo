@@ -15,22 +15,24 @@ import RepeaterField from "@/app/components/ui/atoms/inputs/repeater-field";
 import SearchInput from "@/app/components/ui/atoms/inputs/search-input";
 import SelectInput from "@/app/components/ui/atoms/inputs/select-input";
 import { Textarea } from "@/app/components/ui/atoms/inputs/textarea";
-import { useRouter } from "@/app/i18n/navigation";
+import { uploadFileToCloud } from "@/app/functions/upload-file-to-cloud";
+import { useCities } from "@/app/react-query/cities/hooks";
+import { useDistricts } from "@/app/react-query/districts/hooks";
+import { useEntertainmentTypes } from "@/app/react-query/filters/entertainment-types/hooks";
+import { useEventTypes } from "@/app/react-query/filters/event-types/hooks";
+import { usePersonnel } from "@/app/react-query/filters/personnel/hooks";
 import { useListing, useUpdateListing } from "@/app/react-query/listings/hooks";
 import { useRegions } from "@/app/react-query/regions/hooks";
-import { useDistricts } from "@/app/react-query/districts/hooks";
-import { useCities } from "@/app/react-query/cities/hooks";
+import { useNecessities } from "@/app/react-query/specific/necessities/hooks";
+import { useRules } from "@/app/react-query/specific/rules/hooks";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Listing, LucideIcons, uploadFileToCloud } from "@roo/common";
+import { Listing, undefinedToNull } from "@roo/common";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Controller, useFieldArray, useForm } from "react-hook-form";
 import { z } from "zod";
-import { useEntertainmentTypes } from "@/app/react-query/filters/entertainment-types/hooks";
-import { useEventTypes } from "@/app/react-query/filters/event-types/hooks";
-import { useNecessities } from "@/app/react-query/specific/necessities/hooks";
-import { usePersonnel } from "@/app/react-query/filters/personnel/hooks";
-import { useRules } from "@/app/react-query/specific/rules/hooks";
+import { getOptionalPositiveNumber } from "../../../new/forms/common-schema";
+import { commonEditListingFieldsSchema } from "./common-schema";
 
 // ── TOC ───────────────────────────────────────────────────────────────────────
 
@@ -105,75 +107,19 @@ export const TOC_GROUPS: readonly TocGroup[] = [
 const itemSchema = z.object({ id: z.string(), name: z.string() });
 
 const schema = z.object({
-  name: z.string().min(1, "Název je povinný"),
-  shortDescription: z.string().optional(),
-  description: z.string().optional(),
-  eventTypes: z.array(itemSchema).min(1, "Vyberte alespoň jeden typ akce"),
-  images: z.object({
-    coverImage: z.string().min(1, "Titulní obrázek je povinný"),
-    logo: z.string().optional(),
-    gallery: z.array(z.string()).default([]),
-  }),
-  price: z.object({
-    startsAt: z.coerce
-      .number({ message: "Zadejte číslo" })
-      .positive("Cena musí být kladná"),
-  }),
+  ...commonEditListingFieldsSchema,
   location: z.object({
     regions: z.array(itemSchema).min(1, "Vyberte alespoň jeden kraj"),
     districts: z.array(itemSchema).default([]),
     cities: z.array(itemSchema).default([]),
     address: z.string().optional(),
   }),
-  capacity: z.coerce
-    .number({ message: "Zadejte číslo" })
-    .positive("Kapacita musí být kladná")
-    .int("Zadejte celé číslo"),
-  minimumCapacity: z.coerce.number().nullable().optional(),
   entertainmentTypes: z.array(itemSchema).default([]),
   audience: z.array(z.enum(["adults", "kids", "seniors"])).default([]),
-  setupAndTearDownRules: z
-    .object({
-      setupTime: z.coerce.number().nullable().optional(),
-      tearDownTime: z.coerce.number().nullable().optional(),
-    })
-    .optional(),
-  personnel: z.array(itemSchema).default([]),
-  necessities: z.array(itemSchema).default([]),
-  rules: z.array(itemSchema).default([]),
-  employees: z
-    .array(
-      z.object({
-        name: z.string().min(1, "Jméno je povinné"),
-        role: z.string().min(1, "Role je povinná"),
-        description: z.string().optional(),
-        image: z.string().optional(),
-      }),
-    )
-    .default([]),
-  faq: z
-    .array(
-      z.object({
-        active: z.boolean().default(true),
-        question: z.string().min(1, "Otázka je povinná"),
-        answer: z.string().min(1, "Odpověď je povinná"),
-        groupedBy: z
-          .enum(["general", "booking", "cancellation", "payment", "other"])
-          .default("general"),
-      }),
-    )
-    .default([]),
-  references: z
-    .array(
-      z.object({
-        image: z.string().optional(),
-        eventName: z.string().min(1, "Název akce je povinný"),
-        description: z.string().optional(),
-        clientName: z.string().optional(),
-        eventType: z.string().optional(),
-      }),
-    )
-    .default([]),
+  setupAndTearDownRules: z.object({
+    setupTime: getOptionalPositiveNumber("Doba přípravy musí být kladná"),
+    tearDownTime: getOptionalPositiveNumber("Doba úklidu musí být kladná"),
+  }),
 });
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -199,7 +145,6 @@ export default function EditEntertainmentListingForm({
   }>();
   const { data: listing } = useListing(listingId);
   const { mutate } = useUpdateListing(companyId);
-  const router = useRouter();
 
   function onSubmit(data: EntertainmentFormInputs) {
     const existingDetail = listing?.details.find(
@@ -210,43 +155,42 @@ export default function EditEntertainmentListingForm({
         { blockType: "entertainment" }
       > => d.blockType === "entertainment",
     );
-    mutate({
-      id: listingId,
-      data: {
-        name: data.name,
-        shortDescription: data.shortDescription,
-        description: data.description,
-        eventTypes: data.eventTypes.map((i) => i.id),
-        images: {
-          ...data.images,
-          gallery: data.images.gallery.map((url) => ({ url })),
-        },
-        price: data.price,
-        rules: data.rules.map((i) => i.id),
-        employees: data.employees,
-        faq: data.faq,
-        references: data.references,
-        details: [
-          {
-            ...(existingDetail ?? {}),
-            blockType: "entertainment",
-            location: {
-              address: data.location.address ?? null,
-              region: data.location.regions.map((i) => i.id),
-              district: data.location.districts.map((i) => i.id),
-              city: data.location.cities.map((i) => i.id),
-            },
-            capacity: data.capacity,
-            minimumCapacity: data.minimumCapacity,
-            entertainmentTypes: data.entertainmentTypes.map((i) => i.id),
-            audience: data.audience,
-            setupAndTearDownRules: data.setupAndTearDownRules,
-            personnel: data.personnel.map((i) => i.id),
-            necessities: data.necessities.map((i) => i.id),
+
+    const payload: Partial<Listing> = {
+      name: data.name,
+      shortDescription: data.shortDescription,
+      description: data.description,
+      eventTypes: data.eventTypes.map((i) => i.id),
+      images: data.images,
+      price: data.price,
+      rules: data.rules.map((i) => i.id),
+      employees: data.employees,
+      faq: data.faq,
+      references: data.references.map((r) => ({
+        ...r,
+        eventType: r.eventType ? r.eventType.id : undefined,
+      })),
+      details: [
+        {
+          ...(existingDetail ?? {}),
+          blockType: "entertainment",
+          location: {
+            address: data.location.address ?? null,
+            region: data.location.regions.map((i) => i.id),
+            district: data.location.districts.map((i) => i.id),
+            city: data.location.cities.map((i) => i.id),
           },
-        ],
-      },
-    });
+          capacity: data.capacity,
+          minimumCapacity: data.minimumCapacity,
+          entertainmentTypes: data.entertainmentTypes.map((i) => i.id),
+          audience: data.audience,
+          setupAndTearDownRules: data.setupAndTearDownRules,
+          personnel: data.personnel.map((i) => i.id),
+          necessities: data.necessities.map((i) => i.id),
+        },
+      ],
+    };
+    mutate({ id: listingId, data: undefinedToNull(payload) });
   }
 
   const {
@@ -304,12 +248,7 @@ export default function EditEntertainmentListingForm({
       shortDescription: listing.shortDescription ?? undefined,
       description: listing.description ?? undefined,
       eventTypes: listing.eventTypes?.map(toItem) ?? [],
-      images: {
-        coverImage: listing.images.coverImage,
-        logo: listing.images.logo ?? undefined,
-        gallery:
-          listing.images.gallery?.map((g) => g.url ?? "").filter(Boolean) ?? [],
-      },
+      images: listing.images,
       price: { startsAt: listing.price.startsAt },
       location: {
         regions: d.location?.region?.map(toItem) ?? [],
@@ -336,7 +275,7 @@ export default function EditEntertainmentListingForm({
           name: e.name,
           role: e.role,
           description: e.description ?? undefined,
-          image: e.image ? id(e.image as string | { id: string }) : undefined,
+          image: e.image,
         })) ?? [],
       faq:
         listing.faq?.map((f) => ({
@@ -347,13 +286,11 @@ export default function EditEntertainmentListingForm({
         })) ?? [],
       references:
         listing.references?.map((r) => ({
-          image: r.image ? id(r.image as string | { id: string }) : undefined,
+          image: r.image,
           eventName: r.eventName ?? undefined,
           description: r.description ?? undefined,
           clientName: r.clientName ?? undefined,
-          eventType: r.eventType
-            ? id(r.eventType as string | { id: string })
-            : undefined,
+          eventType: r.eventType ? toItem(r.eventType) : undefined,
         })) ?? [],
     });
   }, [listing, reset]);
@@ -417,6 +354,7 @@ export default function EditEntertainmentListingForm({
               placeholder: "DJ Studio Praha",
             }}
             error={errors.name?.message}
+            isRequired
           />
           <Input
             label="Krátký popis"
@@ -456,6 +394,7 @@ export default function EditEntertainmentListingForm({
                 placeholder: "7900",
               }}
               error={errors.price?.startsAt?.message}
+              isRequired
             />
           </div>
         </FormSection>
@@ -506,6 +445,7 @@ export default function EditEntertainmentListingForm({
                 onChange={field.onChange}
                 onUpload={uploadFileToCloud}
                 maxImages={20}
+                isRequired
               />
             )}
           />
@@ -532,6 +472,7 @@ export default function EditEntertainmentListingForm({
                 onChange={field.onChange}
                 checkColor="text-listing"
                 searchable
+                isRequired
               />
             )}
           />
@@ -571,7 +512,7 @@ export default function EditEntertainmentListingForm({
           />
           <Input
             label="Adresa"
-            subLabel={
+            sublabel={
               !citiesValue?.length
                 ? "Nejprve vyplňte předchozí pole"
                 : undefined
@@ -596,16 +537,6 @@ export default function EditEntertainmentListingForm({
         >
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Input
-              label="Min. kapacita (osob)"
-              inputProps={{
-                ...register("minimumCapacity"),
-                type: "number",
-                min: 1,
-                placeholder: "50",
-              }}
-              error={errors.minimumCapacity?.message}
-            />
-            <Input
               label="Max. kapacita (osob)"
               inputProps={{
                 ...register("capacity"),
@@ -614,6 +545,17 @@ export default function EditEntertainmentListingForm({
                 placeholder: "500",
               }}
               error={errors.capacity?.message}
+              isRequired
+            />
+            <Input
+              label="Min. kapacita (osob)"
+              inputProps={{
+                ...register("minimumCapacity"),
+                type: "number",
+                min: 1,
+                placeholder: "50",
+              }}
+              error={errors.minimumCapacity?.message}
             />
           </div>
         </FormSection>
@@ -822,7 +764,7 @@ export default function EditEntertainmentListingForm({
                 name: "",
                 role: "",
                 description: "",
-                image: "",
+                image: {},
               })
             }
             onRemove={employeesFieldArray.remove}
@@ -969,11 +911,11 @@ export default function EditEntertainmentListingForm({
             fields={referencesFieldArray.fields}
             onAppend={() =>
               referencesFieldArray.append({
-                image: "",
+                image: {},
                 eventName: "",
                 description: "",
                 clientName: "",
-                eventType: "",
+                eventType: undefined,
               })
             }
             onRemove={referencesFieldArray.remove}
@@ -1026,12 +968,16 @@ export default function EditEntertainmentListingForm({
                       label="Typ akce"
                       placeholder="Vyberte typ akce..."
                       options={eventTypes?.docs ?? []}
-                      value={field.value}
                       onSelect={field.onChange}
                       onClear={() => field.onChange(null)}
                       ref={field.ref}
                       name={field.name}
                       onBlur={field.onBlur}
+                      selectedOption={
+                        eventTypes?.docs?.find(
+                          (et) => et.id === field.value?.id,
+                        ) ?? undefined
+                      }
                     />
                   )}
                 />

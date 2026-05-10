@@ -102,7 +102,6 @@ export default function FormToc({
 
   return (
     <div>
-      {" "}
       <nav
         className={`${sticky ? "sticky top-6" : ""} flex flex-col gap-0.5 w-52 shrink-0  max-lg:block`}
       >
