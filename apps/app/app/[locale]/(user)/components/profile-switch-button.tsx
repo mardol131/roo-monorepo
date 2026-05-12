@@ -7,7 +7,7 @@ export default function ProfileSwitchButton() {
   const pathname = usePathname();
 
   return (
-    <div className="py-2 border-b border-zinc-100 flex flex-col w-full gap-1">
+    <div className="border-zinc-100 flex flex-col w-full gap-1">
       <SidebarNavItem
         label="Osobní"
         href="/user-profile"

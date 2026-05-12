@@ -93,28 +93,20 @@ export default function InquiryList({ inquiries }: { inquiries: Inquiry[] }) {
                 rowComponents={group
                   .filter(
                     (inquiry) =>
-                      typeof inquiry.listing.value !== "string" &&
-                      inquiry.listing.value,
+                      typeof inquiry.listing !== "string" && inquiry.listing,
                   )
                   .map((inquiry) => (
                     <EntityRow
                       key={inquiry.id}
                       label={
-                        typeof inquiry.listing.value !== "string"
-                          ? inquiry.listing.value.name
+                        typeof inquiry.listing !== "string"
+                          ? inquiry.listing.name
                           : "Poptávka"
                       }
                       icon="MessageSquare"
                       iconBackgroundColor="bg-inquiry-surface"
                       iconColor="text-inquiry"
                       items={[
-                        {
-                          icon: "Clock",
-                          content: format(
-                            new Date(inquiry.activity.sentAt),
-                            "d. M. yyyy",
-                          ),
-                        },
                         {
                           icon: "Activity",
                           content: {

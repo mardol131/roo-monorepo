@@ -46,7 +46,7 @@ function SpaceNode({
 
   return (
     <div>
-      <div className="flex items-center gap-1.5">
+      <div className="flex items-center mb-2 gap-1.5">
         {depth > 0 && (
           <CornerDownRight className="w-4 h-4 text-zinc-300 shrink-0" />
         )}
@@ -65,7 +65,7 @@ function SpaceNode({
         />
       </div>
       {children.length > 0 && (
-        <div className="ml-6 mt-1 flex flex-col gap-1">
+        <div className={`${depth > 0 ? "ml-8" : "ml-2.5"} flex flex-col gap-1`}>
           {children.map((child) => (
             <SpaceNode
               key={child.id}

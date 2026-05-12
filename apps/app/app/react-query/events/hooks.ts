@@ -50,10 +50,10 @@ export function useAddEventNote(eventId: string) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (note: string) => {
+    mutationFn: ({ note, description }: { note: string; description?: string }) => {
       const current = queryClient.getQueryData<Event>(eventKeys.byId(eventId));
       const existing = current?.notes ?? [];
-      return addNoteToEvent(eventId, [...existing, { note }]);
+      return addNoteToEvent(eventId, [...existing, { note, description, createdAt: new Date().toISOString() }]);
     },
     onSuccess: (updated) => {
       queryClient.setQueryData(eventKeys.byId(eventId), updated);

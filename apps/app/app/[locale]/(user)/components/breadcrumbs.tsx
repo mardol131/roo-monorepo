@@ -9,6 +9,7 @@ import { useCompany } from "@/app/react-query/companies/hooks";
 import { useVariant } from "@/app/react-query/variants/hooks";
 import { useTranslations } from "next-intl";
 import { useSpace } from "@/app/react-query/spaces/hooks";
+import { useEvent } from "@/app/react-query/events/hooks";
 
 type BreadcrumbItem = {
   label: string;
@@ -33,9 +34,7 @@ export default function Breadcrumbs({ items }: Props) {
   const { data: company } = useCompany(
     typeof companyId === "string" ? companyId : "",
   );
-  const { data: events } = useListing(
-    typeof eventId === "string" ? eventId : "",
-  );
+  const { data: events } = useEvent(typeof eventId === "string" ? eventId : "");
   const { data: inquiries } = useListing(
     typeof inquiryId === "string" ? inquiryId : "",
   );
@@ -52,7 +51,7 @@ export default function Breadcrumbs({ items }: Props) {
     if (variantId && segment === variantId) return variant?.name ?? segment;
     if (spaceId && segment === spaceId) return space?.name ?? segment;
 
-    if (segment === "company-profile") return t("companies.singular");
+    if (segment === "company-profile") return t("breadcrumbs.company-profile");
     if (segment === "companies") return t("companies.plural");
     if (segment === "listings") return t("listings.plural");
     if (segment === "events") return t("events.plural");
@@ -60,6 +59,10 @@ export default function Breadcrumbs({ items }: Props) {
     if (segment === "variants") return t("variants.plural");
     if (segment === "spaces") return t("spaces.plural");
     if (segment === "edit") return t("breadcrumbs.edit");
+    if (segment === "new") return t("breadcrumbs.new");
+    if (segment === "user-profile") return t("breadcrumbs.user-profile");
+    if (segment === "messages") return t("breadcrumbs.messages");
+    if (segment === "favourites") return t("breadcrumbs.favourites");
 
     if (segment === "[companyId]")
       return company?.name ?? t("companies.singular");

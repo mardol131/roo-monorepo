@@ -15,6 +15,16 @@ export default function page() {
   }>();
   const { data: inquiries } = useInquiriesByListing(listingId);
 
+  const filteredInquiries = inquiries?.docs?.filter((inquiry) => {
+    const activity = inquiry.activity;
+    return (
+      activity.lastUserMessageSentAt &&
+      (!activity.lastCompanySeenAt ||
+        new Date(activity.lastUserMessageSentAt) >
+          new Date(activity.lastCompanySeenAt))
+    );
+  });
+
   return (
     <main className="w-full">
       <PageHeading
@@ -22,19 +32,19 @@ export default function page() {
         description="Poptávky s nepřečtenými zprávami."
       />
 
-      {inquiries?.length === 0 ? (
+      {filteredInquiries?.length === 0 ? (
         <EmptyState
           text="Zatím žádné zprávy"
           subtext="Zprávy se zobrazí, jakmile zákazníci projeví zájem o vaši službu."
         />
       ) : (
         <div className="flex flex-col gap-3">
-          {inquiries?.map((inquiry) => (
+          {filteredInquiries?.map((inquiry) => (
             <EntityCard
               key={inquiry.id}
               label={
-                typeof inquiry.listing.value !== "string"
-                  ? inquiry.listing.value.name
+                typeof inquiry.listing !== "string"
+                  ? inquiry.listing.name
                   : "Poptávka"
               }
               icon="MessageSquare"

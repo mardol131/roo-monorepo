@@ -24,6 +24,8 @@ type Props = {
   onBlur?: () => void;
   error?: string;
   label?: string;
+  containerRef?: Ref<HTMLDivElement>;
+
   innerSearch?: boolean;
   isRequired?: boolean;
   externalBbox?: Bbox;
@@ -117,6 +119,7 @@ export default function MapPointInput({
   mapDisabled = false,
   inputProps,
   isRequired,
+  containerRef,
 }: Props) {
   const mapRef = useRef<MapRef>(null);
   const [internalValue, setInternalValue] = useState<Coordinates | undefined>(

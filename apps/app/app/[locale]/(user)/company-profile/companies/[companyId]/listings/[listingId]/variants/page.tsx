@@ -98,7 +98,6 @@ export default function page() {
                   icon: "DollarSign",
                   content: `${variant.price.generalPrice} Kč`,
                 },
-                { icon: "CheckCheck", content: variant.availability },
               ]}
               deleteEntityHandler={(e) => {
                 e.stopPropagation();

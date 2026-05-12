@@ -1,8 +1,11 @@
 import {
   getCollection,
+  getCollectionItem,
   patchCollectionItem,
+  postCollectionItem,
 } from "@/app/functions/api/general";
 import { Inquiry, Listing } from "@roo/common";
+import { PatchData } from "@/app/functions/api/general";
 
 export async function fetchInquiriesByListing(listingId: string) {
   const res = await getCollection({
@@ -22,20 +25,31 @@ export async function fetchInquiries() {
 }
 
 export async function fetchInquiry(id: string) {
-  const res = await getCollection({
+  const res = await getCollectionItem({
     collection: "inquiries",
-    query: { id: { equals: id } },
+    id,
   });
   if (!res) throw new Error("Failed to fetch inquiry");
   return res;
 }
 
-export async function updateInquiry(id: string, data: Partial<Inquiry>) {
+export async function updateInquiry(id: string, data: PatchData<Inquiry>) {
   const res = await patchCollectionItem({
     collection: "inquiries",
     id,
     data,
   });
   if (!res) throw new Error("Failed to update inquiry");
+  return res;
+}
+
+type CreateInquiryData = Omit<Inquiry, "id" | "createdAt" | "updatedAt">;
+
+export async function createInquiry(data: CreateInquiryData) {
+  const res = await postCollectionItem({
+    collection: "inquiries",
+    data,
+  });
+  if (!res) throw new Error("Failed to create inquiry");
   return res;
 }

@@ -268,6 +268,7 @@ export default function VenueListingForm({ onCancel }: Props) {
             name="images.coverImage"
             render={({ field }) => (
               <ImageInput
+                containerRef={field.ref}
                 label="Titulní obrázek"
                 value={field.value}
                 onChange={(f) => field.onChange(f ?? "")}
@@ -295,6 +296,7 @@ export default function VenueListingForm({ onCancel }: Props) {
             name="images.gallery"
             render={({ field }) => (
               <GalleryInput
+                containerRef={field.ref}
                 isRequired
                 label="Galerie"
                 value={field.value}
@@ -451,6 +453,7 @@ export default function VenueListingForm({ onCancel }: Props) {
                 onBlur={field.onBlur}
                 error={errors.location?.coordinates?.message}
                 externalBbox={cityBbox}
+                inputProps={{ ref: field.ref }}
               />
             )}
           />
@@ -479,14 +482,13 @@ export default function VenueListingForm({ onCancel }: Props) {
               error={errors.capacity?.message}
             />
             <Input
-              label="Plocha (m²)"
+              label="Velikost prostoru celkem (m²)"
               inputProps={{
                 ...register("area"),
                 type: "number",
                 min: 1,
                 placeholder: "800",
               }}
-              isRequired
               error={errors.area?.message}
             />
           </div>
@@ -508,7 +510,11 @@ export default function VenueListingForm({ onCancel }: Props) {
             render={({ field }) => (
               <div className="flex flex-col gap-2">
                 <InputLabel label="Co nabízíte?" />
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div
+                  ref={field.ref}
+                  tabIndex={-1}
+                  className="grid grid-cols-1 sm:grid-cols-3 gap-3"
+                >
                   {(
                     [
                       {

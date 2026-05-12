@@ -696,6 +696,7 @@ export default function EditVenueListingForm({
                 onChange={(filename) => field.onChange(filename ?? "")}
                 onUpload={uploadFileToCloud}
                 error={errors.images?.logo?.message}
+                containerRef={field.ref}
               />
             )}
           />
@@ -818,6 +819,7 @@ export default function EditVenueListingForm({
                 error={errors.location?.coordinates?.message}
                 externalBbox={cityBbox}
                 isRequired
+                containerRef={field.ref}
               />
             )}
           />

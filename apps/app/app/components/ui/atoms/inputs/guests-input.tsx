@@ -3,6 +3,8 @@ import { Users, X } from "lucide-react";
 import Text from "@/app/components/ui/atoms/text";
 import { useClickOutside } from "@/app/hooks/use-click-outside";
 import { Event, formatGuestsString } from "@roo/common";
+import ErrorText from "./error-text";
+import InputLabel from "../input-label";
 
 interface GuestsFilterProps {
   value: Event["guests"];
@@ -10,6 +12,7 @@ interface GuestsFilterProps {
   label: string;
   error?: string;
   type?: "dropdown" | "fixed";
+  isRequired?: boolean;
 }
 
 export default function GuestsInput({
@@ -17,6 +20,7 @@ export default function GuestsInput({
   onChange,
   label,
   error,
+  isRequired = false,
   type = "dropdown",
 }: GuestsFilterProps) {
   const [isOpen, setIsOpen] = useState(false);
@@ -61,8 +65,7 @@ export default function GuestsInput({
           <input
             type="number"
             value={value.adults}
-            onChange={(e) => handleAdultsChange(parseInt(e.target.value) || 1)}
-            min="1"
+            onChange={(e) => handleAdultsChange(parseInt(e.target.value))}
             className="flex-1 px-3 py-2 border border-zinc-200 rounded-lg text-center text-sm focus:outline-none focus:ring-1 focus:ring-rose-500"
           />
           <button
@@ -141,11 +144,7 @@ export default function GuestsInput({
 
   return (
     <div className="flex flex-col gap-2">
-      <label className="block">
-        <Text variant="label" color="textDark" className="font-semibold">
-          {label}
-        </Text>
-      </label>
+      <InputLabel label={label} isRequired={isRequired} />
 
       {type === "fixed" ? (
         <div className="border border-zinc-200 rounded-lg">{controls}</div>
@@ -168,11 +167,7 @@ export default function GuestsInput({
         </div>
       )}
 
-      {error && (
-        <Text variant="caption" color="secondary" className="text-red-500 mt-1">
-          {error}
-        </Text>
-      )}
+      {error && <ErrorText error={error} />}
     </div>
   );
 }

@@ -64,6 +64,23 @@ export default function InquiryDetails({ inquiry }: Props) {
             }
           />
         )}
+        {(inquiry.request?.requirements ?? []).length > 0 && (
+          <Row
+            label="Požadavky"
+            value={
+              <ul className="flex flex-col gap-1">
+                {inquiry.request.requirements!.map((req, index) => (
+                  <li key={index} className="flex items-center gap-2">
+                    <span className="w-1.5 h-1.5 rounded-full bg-zinc-400 shrink-0" />
+                    <Text variant="body-sm" color="textDark">
+                      {req.text}
+                    </Text>
+                  </li>
+                ))}
+              </ul>
+            }
+          />
+        )}
       </div>
     </DashboardSection>
   );

@@ -1,76 +1,45 @@
 "use client";
 
 import Text from "@/app/components/ui/atoms/text";
+import { useAuth } from "@/app/context/auth/auth-context";
+import {
+  useChatMessagesByInquiry,
+  useCreateChatMessage,
+} from "@/app/react-query/chat-messages/hooks";
 import { ChatMessage } from "@roo/common";
 import { format } from "date-fns";
-import { MessageCircle, Send } from "lucide-react";
+import { Send } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import DashboardSectionHeader from "./dashboard-section-header";
+import { useUpdateInquiry } from "@/app/react-query/inquiries/hooks";
+import { updateInquiry } from "@/app/react-query/inquiries/fetch";
 
-type Message = {
-  id: string;
-  inquiryId: string;
-  senderType: "user" | "company";
-  content: string;
-  sentAt: Date;
-};
+function getTextFromContent(content: ChatMessage["content"]): string {
+  if (!content) return "";
+  const block = content.find((b) => b.blockType === "text");
+  return block?.text ?? "";
+}
 
 export default function ChatWindow({
-  initialMessages,
   senderRole,
   inquiryId,
+  listingId,
 }: {
-  initialMessages: ChatMessage[];
-  senderRole: "user" | "company";
+  senderRole: ChatMessage["senderType"];
   inquiryId: string;
+  listingId: string;
 }) {
-  const [messages, setMessages] = useState<Message[]>(
-    initialMessages
-      .map((msg) => {
-        const block = msg.content?.[0];
-        if (block?.blockType !== "text") return undefined;
-        return {
-          id: msg.id,
-          inquiryId,
-          senderType: msg.senderType,
-          content: block.text ?? "",
-          sentAt: new Date(msg.sentAt),
-        };
-      })
-      .filter((msg) => !!msg),
-  );
+  const { user } = useAuth();
   const [draft, setDraft] = useState("");
-  const [countdown, setCountdown] = useState(10);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCountdown((prev) => {
-        if (prev <= 1) {
-          // TODO: fetch new messages
-          return 10;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-    return () => clearInterval(interval);
-  }, []);
+  const { data: messagesData } = useChatMessagesByInquiry(inquiryId, {
+    refetchInterval: 5_000,
+  });
+  const { mutate: sendMessage, isPending } = useCreateChatMessage();
+  const { mutate: patchInquiry } = useUpdateInquiry({ listingId });
 
-  const sendMessage = () => {
-    const trimmed = draft.trim();
-    if (!trimmed) return;
-    setMessages((prev) => [
-      ...prev,
-      {
-        inquiryId,
-        id: `m${Date.now()}`,
-        senderType: senderRole,
-        content: trimmed,
-        sentAt: new Date(),
-      },
-    ]);
-    setDraft("");
-  };
+  const messages = messagesData?.docs ?? [];
 
   useEffect(() => {
     const el = scrollContainerRef.current;
@@ -78,8 +47,42 @@ export default function ChatWindow({
     el.scrollTop = el.scrollHeight;
   }, [messages]);
 
+  const handleSend = () => {
+    const trimmed = draft.trim();
+    if (!trimmed || !user) return;
+
+    sendMessage(
+      {
+        inquiry: inquiryId,
+        sender: user.id,
+        senderType: senderRole,
+        sentAt: new Date().toISOString(),
+        content: [{ blockType: "text", text: trimmed }],
+      },
+      {
+        onSuccess: () => setDraft(""),
+      },
+    );
+
+    if (senderRole === "user") {
+      patchInquiry({
+        id: inquiryId,
+        data: {
+          activity: { lastUserMessageSentAt: new Date().toISOString() },
+        },
+      });
+    } else {
+      patchInquiry({
+        id: inquiryId,
+        data: {
+          activity: { lastCompanyMessageSentAt: new Date().toISOString() },
+        },
+      });
+    }
+  };
+
   return (
-    <div className="lg:col-span-3 h-200 bg-white rounded-2xl border border-zinc-200 flex flex-col overflow-hidden">
+    <div className="lg:col-span-3 h-150 bg-white rounded-2xl border border-zinc-200 flex flex-col overflow-hidden">
       <DashboardSectionHeader
         icon={"MessageCircle"}
         heading="Konverzace"
@@ -106,7 +109,7 @@ export default function ChatWindow({
             onKeyDown={(e) => {
               if (e.key === "Enter" && !e.shiftKey) {
                 e.preventDefault();
-                sendMessage();
+                handleSend();
               }
             }}
             placeholder="Napište zprávu…"
@@ -115,19 +118,16 @@ export default function ChatWindow({
           />
           <button
             type="button"
-            onClick={sendMessage}
-            disabled={!draft.trim()}
+            onClick={handleSend}
+            disabled={!draft.trim() || isPending}
             className="w-10 h-10 flex items-center justify-center bg-rose-500 hover:bg-rose-600 disabled:opacity-40 disabled:cursor-not-allowed text-white rounded-xl transition-colors shrink-0"
           >
             <Send className="w-4 h-4" />
           </button>
         </div>
-        <div className="flex items-center justify-between mt-1.5 px-1">
+        <div className="mt-1.5 px-1">
           <Text variant="caption" color="secondary">
             Enter pro odeslání · Shift+Enter pro nový řádek
-          </Text>
-          <Text variant="caption" color="secondary">
-            Načtení nových zpráv za {countdown}s
           </Text>
         </div>
       </div>
@@ -139,25 +139,27 @@ function ChatBubble({
   message,
   senderRole,
 }: {
-  message: Message;
+  message: ChatMessage;
   senderRole: "user" | "company";
 }) {
   const isMine = message.senderType === senderRole;
+  const text = getTextFromContent(message.content);
+
   return (
     <div
       className={`flex flex-col gap-1 ${isMine ? "items-end" : "items-start"}`}
     >
       <div
         className={`max-w-[80%] px-4 py-2.5 rounded-2xl text-sm leading-relaxed ${
-          isMine
+          !isMine
             ? "bg-rose-500 text-white rounded-br-md"
-            : "bg-zinc-100 text-zinc-900 rounded-bl-md"
+            : "bg-slate-900 text-white rounded-bl-md"
         }`}
       >
-        {message.content}
+        {text}
       </div>
       <Text variant="caption" color="secondary" className="px-1">
-        {format(message.sentAt, "d. M. yyyy, H:mm")}
+        {format(new Date(message.sentAt), "d. M. yyyy, H:mm")}
       </Text>
     </div>
   );

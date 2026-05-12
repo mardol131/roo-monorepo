@@ -1,9 +1,43 @@
-import type { CollectionConfig } from 'payload'
+import type { CollectionConfig, Where } from 'payload'
 
 export const ChatMessages: CollectionConfig = {
   slug: 'chat-messages',
   admin: {
     useAsTitle: 'id',
+  },
+  access: {
+    create: ({ req }) => {
+      if (!req.user) return false
+      if (req.user.collection === 'admins') return true
+      const query: Where = {
+        or: [
+          { 'inquiry.user': { equals: req.user.id } },
+          { 'inquiry.listing.company.owner': { equals: req.user.id } },
+        ],
+      }
+      return query
+    },
+    read: ({ req }) => {
+      if (!req.user) return false
+      if (req.user.collection === 'admins') return true
+      const query: Where = {
+        or: [
+          { 'inquiry.user': { equals: req.user.id } },
+          { 'inquiry.listing.company.owner': { equals: req.user.id } },
+        ],
+      }
+      return query
+    },
+    update: ({ req }) => {
+      if (!req.user) return false
+      if (req.user.collection === 'admins') return true
+      return false
+    },
+    delete: ({ req }) => {
+      if (!req.user) return false
+      if (req.user.collection === 'admins') return true
+      return false
+    },
   },
   fields: [
     {

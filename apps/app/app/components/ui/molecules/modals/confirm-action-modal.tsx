@@ -91,7 +91,7 @@ export function ConfirmActionModal() {
   return (
     <ModalLayout
       header={
-        <div className="flex items-center gap-3">
+        <div className="flex items-start gap-3">
           <div
             className={`w-9 h-9 rounded-xl flex items-center justify-center ${bgColor} shrink-0`}
           >

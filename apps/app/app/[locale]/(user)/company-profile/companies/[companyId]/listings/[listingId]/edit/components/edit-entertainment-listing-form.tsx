@@ -413,6 +413,7 @@ export default function EditEntertainmentListingForm({
             name="images.coverImage"
             render={({ field }) => (
               <ImageInput
+                containerRef={field.ref}
                 label="Titulní obrázek"
                 value={field.value}
                 onChange={(filename) => field.onChange(filename ?? "")}
@@ -440,6 +441,7 @@ export default function EditEntertainmentListingForm({
             name="images.gallery"
             render={({ field }) => (
               <GalleryInput
+                containerRef={field.ref}
                 label="Galerie"
                 value={field.value}
                 onChange={field.onChange}

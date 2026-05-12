@@ -9,7 +9,10 @@ import Loader from "@/app/[locale]/(user)/components/loader";
 import VariantSection from "@/app/[locale]/(user)/components/variant-section";
 import { INQUIRY_STATUS } from "@/app/data/inquiry";
 import { confirmActionModalEvents } from "@/app/components/ui/molecules/modals/confirm-action-modal";
-import { useInquiry } from "@/app/react-query/inquiries/hooks";
+import {
+  useInquiry,
+  useUpdateInquiry,
+} from "@/app/react-query/inquiries/hooks";
 import { aggregateInquiryStatus } from "@roo/common";
 import { format } from "date-fns";
 import { cs } from "date-fns/locale";
@@ -21,7 +24,7 @@ import CustomerCard from "./components/customer-card";
 import InquiryDetails from "../../../../../../../components/inquiry-details";
 import { AlertSection } from "@/app/components/ui/molecules/alert-section";
 import { useChatMessagesByInquiry } from "@/app/react-query/chat-messages/hooks";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { PriceChangeModal } from "@/app/components/ui/molecules/modals/price-change-modal";
 import { VariantVenueDetails } from "@/app/[locale]/(user)/components/variant-venue-details";
 import { VariantGastroDetails } from "@/app/[locale]/(user)/components/variant-gastro-details";
@@ -35,18 +38,27 @@ export default function page() {
   }>();
 
   const { data: inquiry, isPending } = useInquiry(inquiryId);
-  const { data: chatMessages } = useChatMessagesByInquiry(inquiryId);
   const t = useTranslations();
   const [priceChangeModalOpen, setPriceChangeModalOpen] = useState(false);
+  const { mutate: patchInquiry } = useUpdateInquiry({ listingId });
+
+  useEffect(() => {
+    patchInquiry({
+      id: inquiryId,
+      data: {
+        activity: {
+          lastCompanySeenAt: new Date().toISOString(),
+        },
+      },
+    });
+  }, [inquiryId, patchInquiry]);
 
   if (isPending) return <Loader text="Načítám poptávku..." />;
   if (!inquiry) return null;
 
-  const status = INQUIRY_STATUS[aggregateInquiryStatus(inquiry)];
+  const status = INQUIRY_STATUS[aggregateInquiryStatus(inquiry.status)];
   const listingName =
-    typeof inquiry.listing.value === "string"
-      ? "Poptávka"
-      : inquiry.listing.value.name;
+    typeof inquiry.listing === "string" ? "Poptávka" : inquiry.listing.name;
   const customerName =
     typeof inquiry.user !== "string"
       ? `${inquiry.user.firstName} ${inquiry.user.lastName}`
@@ -55,6 +67,7 @@ export default function page() {
   const priceChangeModalStateHandler = () => {
     setPriceChangeModalOpen(!priceChangeModalOpen);
   };
+
   return (
     <main className="w-full flex flex-col gap-6">
       <Breadcrumbs />
@@ -70,18 +83,11 @@ export default function page() {
         }
         infoItems={[
           { icon: "Tag", text: t(`listings.type.${inquiry.listingType}`) },
-          {
-            icon: "Clock",
-            text: `Odesláno ${format(new Date(inquiry.activity.sentAt), "d. M. yyyy", { locale: cs })}`,
-          },
           { icon: "User", text: customerName },
         ]}
       />
       <div className="bg-white rounded-2xl border border-zinc-200 px-8 py-5">
-        <InquiryTimeline
-          userStatus={inquiry.status.user}
-          companyStatus={inquiry.status.company}
-        />
+        <InquiryTimeline status={inquiry.status} />
       </div>
       {inquiry.status.user === "confirmed" && (
         <AlertSection
@@ -198,18 +204,15 @@ export default function page() {
         ]}
       />
       <ChatWindow
-        initialMessages={chatMessages || []}
         senderRole="company"
         inquiryId={inquiry.id}
+        listingId={listingId}
       />
       <CustomerCard user={inquiry.user} />
-      {typeof inquiry.variant?.value !== "string" && inquiry.variant?.value && (
+      {typeof inquiry.variant !== "string" && inquiry.variant && (
         <>
-          <VariantSection
-            variant={inquiry.variant.value}
-            title="Vybraná varianta"
-          />
-          {inquiry.variant.value.details.map((block, i) => {
+          <VariantSection variant={inquiry.variant} title="Vybraná varianta" />
+          {inquiry.variant.details.map((block, i) => {
             if (block.blockType === "venue")
               return <VariantVenueDetails key={i} block={block} />;
             if (block.blockType === "gastro")

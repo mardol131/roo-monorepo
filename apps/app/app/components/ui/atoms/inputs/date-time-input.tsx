@@ -9,10 +9,13 @@ import TimeInput from "./time-input";
 
 interface DateTimeInputProps {
   label: string;
+  sublabel?: string;
   value?: string | null;
   onChange?: (value: string | null) => void;
   min?: string;
+  containerRef?: React.Ref<HTMLDivElement>;
   placeholder?: string;
+  isRequired?: boolean;
   error?: string;
 }
 
@@ -40,11 +43,14 @@ const isValidTime = (value: string): boolean => {
 
 export default function DateTimeInput({
   label,
+  sublabel,
   value = null,
   onChange,
   min,
   placeholder = "Vyberte datum a čas",
   error,
+  isRequired,
+  containerRef,
 }: DateTimeInputProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [openUpward, setOpenUpward] = useState(false);
@@ -175,7 +181,12 @@ export default function DateTimeInput({
   };
 
   const handleTimeChange = (value: string) => {
-    if (isTimeBelowMin(value, selectedDateState ? new Date(selectedDateState) : null)) {
+    if (
+      isTimeBelowMin(
+        value,
+        selectedDateState ? new Date(selectedDateState) : null,
+      )
+    ) {
       setTime(minTimeString!);
     } else {
       setTime(value);
@@ -183,8 +194,10 @@ export default function DateTimeInput({
   };
 
   const timeMin =
-    selectedDateState && min && isSameDay(new Date(selectedDateState), new Date(min))
-      ? minTimeString ?? undefined
+    selectedDateState &&
+    min &&
+    isSameDay(new Date(selectedDateState), new Date(min))
+      ? (minTimeString ?? undefined)
       : undefined;
 
   const displayText =
@@ -193,9 +206,10 @@ export default function DateTimeInput({
       : placeholder;
 
   return (
-    <div className="flex flex-col w-full">
-      <InputLabel label={label} />
-
+    <div ref={containerRef} className="flex flex-col w-full">
+      {label && (
+        <InputLabel label={label} isRequired={isRequired} sublabel={sublabel} />
+      )}
       <div className="relative" ref={ref}>
         <button
           type="button"

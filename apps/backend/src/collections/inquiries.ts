@@ -10,6 +10,13 @@ export const Inquiries: CollectionConfig = {
   },
   hooks: {
     beforeChange: [
+      async ({ req, data, operation }) => {
+        if (operation !== 'create') return
+        if (!data || !req) return
+        if (!req.user) return
+
+        data.user = req.user.id
+      },
       async ({ data, req, operation, originalDoc }) => {
         if (operation !== 'update') return data
 
@@ -57,13 +64,13 @@ export const Inquiries: CollectionConfig = {
     {
       name: 'listing',
       type: 'relationship',
-      relationTo: ['listings'],
+      relationTo: 'listings',
       required: true,
     },
     {
       name: 'variant',
       type: 'relationship',
-      relationTo: ['variants'],
+      relationTo: 'variants',
     },
     {
       name: 'event',
@@ -166,11 +173,6 @@ export const Inquiries: CollectionConfig = {
       type: 'group',
       required: true,
       fields: [
-        {
-          name: 'sentAt',
-          type: 'date',
-          required: true,
-        },
         {
           name: 'lastCompanyMessageSentAt',
           type: 'date',

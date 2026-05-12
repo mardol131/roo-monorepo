@@ -65,8 +65,10 @@ export async function getCollectionItem<T extends keyof Config["collections"]>({
   return res.json();
 }
 
-type PatchData<T> = {
-  [K in keyof T]?: Exclude<T[K], undefined> | null;
+export type PatchData<T> = {
+  [K in keyof T]?: T[K] extends object
+    ? PatchData<T[K]> | null
+    : Exclude<T[K], undefined> | null;
 };
 
 export async function patchCollectionItem<

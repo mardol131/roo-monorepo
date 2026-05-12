@@ -453,6 +453,7 @@ export default function EditGastroListingForm({
                 onUpload={uploadFileToCloud}
                 error={errors.images?.coverImage?.message}
                 isRequired
+                containerRef={field.ref}
               />
             )}
           />
@@ -466,6 +467,7 @@ export default function EditGastroListingForm({
                 onChange={(filename) => field.onChange(filename ?? "")}
                 onUpload={uploadFileToCloud}
                 error={errors.images?.logo?.message}
+                containerRef={field.ref}
               />
             )}
           />
@@ -481,6 +483,7 @@ export default function EditGastroListingForm({
                 maxImages={20}
                 isRequired
                 error={errors.images?.gallery?.message}
+                containerRef={field.ref}
               />
             )}
           />

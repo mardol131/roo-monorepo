@@ -17,6 +17,8 @@ export default function page() {
     (i) => aggregateInquiryStatus(i.status) === "confirmed",
   ).length;
 
+  console.log("inquiries", inquiries);
+
   return (
     <main className="w-full">
       <PageHeading

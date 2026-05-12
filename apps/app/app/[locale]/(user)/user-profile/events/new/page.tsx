@@ -1,6 +1,6 @@
 import Text from "@/app/components/ui/atoms/text";
 import React from "react";
-import NewEventForm from "./components/new-event-form";
+import NewEventForm from "../../../../../components/forms/new-event-form";
 import PageHeading from "../../../components/page-heading";
 
 export default function page() {

@@ -95,8 +95,12 @@
   },
   "breadcrumbs": {
     "company-profile": "Firemní účet",
+    "user-profile": "Můj účet",
     "create": "Vytvořit",
-    "edit": "Upravit"
+    "edit": "Upravit",
+    "new": "Vytvořit",
+    "messages": "Zprávy",
+    "favourites": "Oblíbené"
   },
   "weekdays": {
     "short": {

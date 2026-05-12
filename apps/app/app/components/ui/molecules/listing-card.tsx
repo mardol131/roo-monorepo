@@ -9,6 +9,7 @@ import { Link } from "@/app/i18n/navigation";
 
 type Props = {
   imageUrl: string;
+  id: string;
   title: string;
   price: number;
   imageAlt?: string;
@@ -21,6 +22,7 @@ export default function ListingCard({
   price,
   imageAlt,
   liked = false,
+  id,
 }: Props) {
   const [isLiked, setIsLiked] = useState(liked);
 
@@ -37,7 +39,7 @@ export default function ListingCard({
     <Link
       href={{
         pathname: "/listing/[listingId]",
-        params: { listingId: "123" },
+        params: { listingId: id },
       }}
       target="_blank"
       className="group rounded-xl transition ease-in-out"

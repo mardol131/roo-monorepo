@@ -37,6 +37,16 @@ export const Events: CollectionConfig = {
           name: 'note',
           type: 'text',
         },
+        {
+          name: 'createdAt',
+          type: 'date',
+          required: true,
+          defaultValue: new Date().toISOString(),
+        },
+        {
+          name: 'description',
+          type: 'text',
+        },
       ],
     },
     {
@@ -61,6 +71,12 @@ export const Events: CollectionConfig = {
           type: 'checkbox',
           defaultValue: false,
         },
+        {
+          name: 'priority',
+          type: 'select',
+          options: ['low', 'medium', 'high'],
+          defaultValue: 'medium',
+        },
       ],
     },
     {
@@ -81,6 +97,29 @@ export const Events: CollectionConfig = {
           name: 'end',
           type: 'date',
           required: true,
+        },
+      ],
+    },
+    {
+      name: 'sharing',
+      type: 'group',
+      required: true,
+      fields: [
+        {
+          name: 'contactDetails',
+          type: 'checkbox',
+          defaultValue: false,
+        },
+
+        {
+          name: 'confirmedInquiries',
+          type: 'checkbox',
+          defaultValue: false,
+        },
+        {
+          name: 'place',
+          type: 'checkbox',
+          defaultValue: false,
         },
       ],
     },

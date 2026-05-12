@@ -44,8 +44,26 @@ export async function registerUser({
   return response;
 }
 
-export async function switchAccountTypeToCompany() {
-  const response = await fetch(`${apiUrl}/api/users`, {
+export async function changeEmail(userId: string, email: string) {
+  return fetch(`${apiUrl}/api/users/${userId}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify({ email }),
+  });
+}
+
+export async function changePassword(userId: string, password: string) {
+  return fetch(`${apiUrl}/api/users/${userId}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify({ password }),
+  });
+}
+
+export async function switchAccountTypeToCompany(userId: string) {
+  const response = await fetch(`${apiUrl}/api/users/${userId}`, {
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
     credentials: "include",

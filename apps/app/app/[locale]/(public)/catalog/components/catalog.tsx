@@ -12,6 +12,7 @@ import CatalogTypeSelection from "./catalog-type-selection";
 import ActiveFilterTags from "./filters/active-filter-tags";
 import CatalogSidebarFilters from "./filters/catalog-sidebar-filters";
 import GeneralFilters from "./filters/general-filters";
+import { generateMediaUrl } from "@/app/functions/generate-media-url";
 
 type Props = {
   type: "venue" | "gastro" | "entertainment";
@@ -54,8 +55,9 @@ export default function Catalog({ type }: Props) {
         <div className="w-full grid grid-cols-[repeat(auto-fill,minmax(300px,1fr))] content-start gap-5">
           {listings?.docs?.map((listing) => (
             <ListingCard
-              key={listing.name}
-              imageUrl={listing.images.coverImage}
+              key={listing.id}
+              id={listing.id}
+              imageUrl={generateMediaUrl(listing.images.coverImage.filename)}
               title={listing.name}
               price={listing.price.startsAt}
             />

@@ -3,8 +3,13 @@
 import Button from "@/app/components/ui/atoms/button";
 import Input from "@/app/components/ui/atoms/inputs/input";
 import Text from "@/app/components/ui/atoms/text";
-import { useAddEventNote, useRemoveEventNote } from "@/app/react-query/events/hooks";
+import {
+  useAddEventNote,
+  useRemoveEventNote,
+} from "@/app/react-query/events/hooks";
 import type { Event } from "@roo/common";
+import { format } from "date-fns";
+import { cs } from "date-fns/locale";
 import { NotebookPen, Trash2 } from "lucide-react";
 import { useState } from "react";
 
@@ -14,15 +19,31 @@ type Props = {
 };
 
 export default function EventNotesSection({ eventId, notes }: Props) {
-  const [value, setValue] = useState("");
+  const [note, setNote] = useState("");
+  const [description, setDescription] = useState("");
+  const [formOpen, setFormOpen] = useState(false);
   const { mutate, isPending } = useAddEventNote(eventId);
-  const { mutate: removeNote, isPending: isRemoving } = useRemoveEventNote(eventId);
+  const { mutate: removeNote, isPending: isRemoving } =
+    useRemoveEventNote(eventId);
 
   function submit() {
-    const trimmed = value.trim();
+    const trimmed = note.trim();
     if (!trimmed) return;
-    mutate(trimmed, { onSuccess: () => setValue("") });
+    mutate(
+      { note: trimmed, description: description.trim() || undefined },
+      {
+        onSuccess: () => {
+          setNote("");
+          setDescription("");
+          setFormOpen(false);
+        },
+      },
+    );
   }
+
+  const sorted = [...notes].sort(
+    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+  );
 
   return (
     <div className="bg-white rounded-2xl border border-zinc-200 overflow-hidden">
@@ -41,53 +62,116 @@ export default function EventNotesSection({ eventId, notes }: Props) {
         </div>
       </div>
 
-      {/* Notes list */}
-      {notes.length > 0 && (
-        <ul className="divide-y divide-zinc-50">
-          {notes.map((n, i) => (
-            <li key={n.id ?? i} className="px-6 py-3 flex items-center gap-3">
-              <Text variant="body-sm" color="textDark" className="flex-1">
-                {n.note}
-              </Text>
-              {n.id && (
-                <button
-                  type="button"
-                  onClick={() => removeNote(n.id!)}
-                  disabled={isRemoving}
-                  className="shrink-0 text-zinc-300 hover:text-danger transition-colors disabled:opacity-50"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </button>
-              )}
-            </li>
+      {sorted.length > 0 && (
+        <ul className="px-6 py-4 flex flex-col gap-2">
+          {sorted.map((n, i) => (
+            <NoteCard
+              key={n.id ?? i}
+              n={n}
+              onDelete={n.id ? () => removeNote(n.id!) : undefined}
+              isRemoving={isRemoving}
+            />
           ))}
         </ul>
       )}
 
       {/* Add note */}
-      <div className="px-6 py-4 flex flex-col items-end gap-3 border-t border-zinc-100">
-        <div className="flex-1 w-full">
-          <Input
-            label=""
-            disabled={isPending}
-            inputProps={{
-              value,
-              placeholder: "Přidat poznámku…",
-              onChange: (e) => setValue(e.target.value),
-              onKeyDown: (e) => e.key === "Enter" && submit(),
-            }}
+      <div className="px-6 py-4 border-t border-zinc-100">
+        {formOpen ? (
+          <div className="flex flex-col items-end gap-3">
+            <div className="w-full flex flex-col gap-2">
+              <Input
+                label=""
+                placeholder="Název poznámky"
+                disabled={isPending}
+                inputProps={{
+                  value: note,
+                  onChange: (e) => setNote(e.target.value),
+                  onKeyDown: (e) => e.key === "Enter" && submit(),
+                  autoFocus: true,
+                }}
+              />
+              <Input
+                label=""
+                placeholder="Popis (volitelný)"
+                disabled={isPending}
+                inputProps={{
+                  value: description,
+                  onChange: (e) => setDescription(e.target.value),
+                }}
+              />
+            </div>
+            <div className="flex gap-2">
+              <Button
+                text="Zrušit"
+                version="plain"
+                size="sm"
+                disabled={isPending}
+                onClick={() => {
+                  setFormOpen(false);
+                  setNote("");
+                  setDescription("");
+                }}
+              />
+              <Button
+                text="Přidat poznámku"
+                iconLeft="Plus"
+                version="eventFull"
+                size="sm"
+                disabled={isPending || !note.trim()}
+                loading={isPending}
+                onClick={submit}
+              />
+            </div>
+          </div>
+        ) : (
+          <Button
+            text="Přidat poznámku"
+            iconLeft="Plus"
+            version="plain"
+            size="sm"
+            onClick={() => setFormOpen(true)}
           />
-        </div>
-        <Button
-          text="Přidat poznámku"
-          iconLeft="Plus"
-          version="eventFull"
-          size="sm"
-          disabled={isPending || !value.trim()}
-          loading={isPending}
-          onClick={submit}
-        />
+        )}
       </div>
     </div>
+  );
+}
+
+function NoteCard({
+  n,
+  onDelete,
+  isRemoving,
+}: {
+  n: NonNullable<Event["notes"]>[number];
+  onDelete?: () => void;
+  isRemoving: boolean;
+}) {
+  return (
+    <li className="flex items-start gap-3 bg-amber-50 border-l-4 border-amber-300 rounded-r-xl px-4 py-3">
+      <div className="flex-1 flex flex-col gap-0.5">
+        <Text variant="body-sm" color="textDark" className="leading-relaxed">
+          {n.note}
+        </Text>
+        {n.description && (
+          <Text variant="caption" color="secondary">
+            {n.description}
+          </Text>
+        )}
+        <Text variant="caption" color="secondary" className="mt-1 opacity-60">
+          {format(new Date(n.createdAt), "d. M. yyyy HH:mm", { locale: cs })}
+        </Text>
+      </div>
+      {onDelete && (
+        <button
+          type="button"
+          onClick={onDelete}
+          disabled={isRemoving}
+          className="shrink-0 mt-0.5 text-amber-300 hover:text-danger transition-colors disabled:opacity-50"
+        >
+          <Trash2 className="w-4 h-4" />
+        </button>
+      )}
+    </li>
   );
 }

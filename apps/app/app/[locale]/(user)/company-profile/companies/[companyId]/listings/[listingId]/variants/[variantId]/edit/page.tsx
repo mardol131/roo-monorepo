@@ -4,17 +4,17 @@ import PageHeading from "@/app/[locale]/(user)/components/page-heading";
 import { useRouter } from "@/app/i18n/navigation";
 import { useUpdateVariant } from "@/app/react-query/variants/hooks";
 import { useVariant } from "@/app/react-query/variants/hooks";
-import { MediaSchema, undefinedToNull, Variant } from "@roo/common";
+import { MediaSchema, Variant } from "@roo/common";
 import { useParams } from "next/navigation";
-import EditVariantFormEntertainment, {
+import VariantFormEntertainment, {
   EntertainmentFormInputs,
-} from "./components/edit-variant-form-entertainment";
-import EditVariantFormGastro, {
+} from "../../components/variant-form-entertainment";
+import VariantFormGastro, {
   GastroFormInputs,
-} from "./components/edit-variant-form-gastro";
-import EditVariantFormVenue, {
+} from "../../components/variant-form-gastro";
+import VariantFormVenue, {
   VenueFormInputs,
-} from "./components/edit-variant-form-venue";
+} from "../../components/variant-form-venue";
 import { toIds, toItem } from "../../../edit/components/utils";
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
@@ -175,12 +175,12 @@ function venuePayload(
 ): Partial<Variant> {
   const d = variant.details[0];
   const detailId = d.blockType === "venue" ? d.id : undefined;
-  const payload: Partial<Variant> = {
+  return {
     ...commonPayload(variant, data),
     details: [
       {
         blockType: "venue",
-        id: detailId ?? null,
+        id: detailId ?? undefined,
         capacity: data.capacity,
         canBeBookedAsWhole: data.canBeBookedAsWhole,
         includedSpaces: toIds(data.includedSpaces ?? []),
@@ -208,7 +208,6 @@ function venuePayload(
       },
     ],
   };
-  return undefinedToNull(payload);
 }
 
 function gastroPayload(
@@ -217,12 +216,12 @@ function gastroPayload(
 ): Partial<Variant> {
   const d = variant.details[0];
   const detailId = d.blockType === "gastro" ? d.id : undefined;
-  const payload: Partial<Variant> = {
+  return {
     ...commonPayload(variant, data),
     details: [
       {
         blockType: "gastro",
-        id: detailId ?? null,
+        id: detailId ?? undefined,
         capacity: data.capacity,
         pricePerPerson: data.pricePerPerson ?? null,
         minimumOrderCount: data.minimumOrderCount ?? null,
@@ -237,8 +236,6 @@ function gastroPayload(
       },
     ],
   };
-
-  return undefinedToNull(payload);
 }
 
 function entertainmentPayload(
@@ -247,12 +244,12 @@ function entertainmentPayload(
 ): Partial<Variant> {
   const d = variant.details[0];
   const detailId = d.blockType === "entertainment" ? d.id : undefined;
-  const payload: Partial<Variant> = {
+  return {
     ...commonPayload(variant, data),
     details: [
       {
         blockType: "entertainment",
-        id: detailId ?? null,
+        id: detailId ?? undefined,
         capacity: data.capacity,
         audience: data.audience,
         performanceDuration: data.performanceDuration ?? null,
@@ -269,7 +266,6 @@ function entertainmentPayload(
       },
     ],
   };
-  return undefinedToNull(payload);
 }
 
 // ── Page ──────────────────────────────────────────────────────────────────────
@@ -301,7 +297,7 @@ export default function EditVariantPage() {
       />
 
       {blockType === "venue" && variant && (
-        <EditVariantFormVenue
+        <VariantFormVenue
           listingId={listingId}
           defaultValues={venueDefaults(variant)}
           onSubmit={(data) =>
@@ -311,7 +307,7 @@ export default function EditVariantPage() {
         />
       )}
       {blockType === "gastro" && variant && (
-        <EditVariantFormGastro
+        <VariantFormGastro
           listingId={listingId}
           defaultValues={gastroDefaults(variant)}
           onSubmit={(data) =>
@@ -321,7 +317,7 @@ export default function EditVariantPage() {
         />
       )}
       {blockType === "entertainment" && variant && (
-        <EditVariantFormEntertainment
+        <VariantFormEntertainment
           listingId={listingId}
           defaultValues={entertainmentDefaults(variant)}
           onSubmit={(data) =>

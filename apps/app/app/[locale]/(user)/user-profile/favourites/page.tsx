@@ -58,8 +58,9 @@ export default function FavoritesPage() {
             {paginatedListings.map((listing) => (
               <ListingCard
                 key={listing.id}
+                id={listing.id}
                 title={listing.name}
-                price={listing.price?.startsAt?.toString() ?? "–"}
+                price={listing.price?.startsAt ?? "–"}
                 imageUrl={
                   typeof listing.images?.coverImage === "string"
                     ? listing.images.coverImage

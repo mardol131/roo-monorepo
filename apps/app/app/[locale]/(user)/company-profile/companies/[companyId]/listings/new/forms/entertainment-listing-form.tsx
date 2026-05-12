@@ -301,6 +301,7 @@ export default function EntertainmentListingForm({ onCancel }: Props) {
             name="images.coverImage"
             render={({ field }) => (
               <ImageInput
+                containerRef={field.ref}
                 label="Titulní obrázek"
                 value={field.value}
                 onChange={(f) => field.onChange(f ?? "")}
@@ -328,6 +329,7 @@ export default function EntertainmentListingForm({ onCancel }: Props) {
             name="images.gallery"
             render={({ field }) => (
               <GalleryInput
+                containerRef={field.ref}
                 label="Galerie"
                 value={field.value}
                 onChange={field.onChange}

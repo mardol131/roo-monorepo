@@ -34,6 +34,7 @@ import { SummaryCard } from "../../../components/summary-card";
 import InquiryStatusTag from "../../../components/tags/inquiry-status-tag";
 import EventChecklistSection from "./components/event-checklist-section";
 import EventNotesSection from "./components/event-notes-section";
+import Breadcrumbs from "../../../components/breadcrumbs";
 
 // ── Page ───────────────────────────────────────────────────────────────────────
 
@@ -47,6 +48,8 @@ export default function page() {
   const t = useTranslations();
 
   const { data: inquiries } = useInquiries();
+
+  console.log("inquiries", inquiries);
 
   if (isPending) return <Loader text="Načítání události..." />;
   if (!event) return router.back();
@@ -74,13 +77,7 @@ export default function page() {
   return (
     <main className="w-full">
       {/* Back + header */}
-      <Link
-        href="/user-profile/events"
-        className="inline-flex items-center gap-1.5 text-sm text-zinc-500 hover:text-zinc-800 transition-colors mb-6"
-      >
-        <ArrowLeft className="w-4 h-4" />
-        Zpět na události
-      </Link>
+      <Breadcrumbs />
       <DashboardHeader
         iconBg="bg-event-surface"
         iconColor="text-event"
@@ -105,7 +102,6 @@ export default function page() {
       />
 
       <div className="flex flex-col gap-5">
-        {" "}
         {/* Summary cards */}
         <div className="grid grid-cols-3 gap-4">
           <SummaryCard
@@ -131,6 +127,80 @@ export default function page() {
             note="pouze potvrzené"
           />
         </div>
+        <ControlSection
+          rows={[
+            {
+              kind: "switch",
+              icon: "UserRound",
+              iconColor: "text-blue-500",
+              iconBgColor: "bg-blue-50",
+              title: "Sdílet kontaktní údaje",
+              text: "Dodavatelé uvidí vaše kontaktní údaje (jméno, email, telefon).",
+              checked: event.sharing?.contactDetails ?? false,
+              onEnable: () => {},
+              onDisable: () => {},
+            },
+            {
+              kind: "switch",
+              icon: "MapPin",
+              iconColor: "text-violet-500",
+              iconBgColor: "bg-violet-50",
+              title: "Sdílet místo konání",
+              text: "Dodavatelé uvidí přesnou adresu místa konání události.",
+              checked: event.sharing?.place ?? false,
+              onEnable: () => {},
+              onDisable: () => {},
+            },
+            {
+              kind: "switch",
+              icon: "CheckCircle2",
+              iconColor: "text-emerald-500",
+              iconBgColor: "bg-emerald-50",
+              title: "Sdílet potvrzené dodavatele",
+              text: "Ostatní dodavatelé uvidí, kteří dodavatelé již mají potvrzenou poptávku.",
+              checked: event.sharing?.confirmedInquiries ?? false,
+              onEnable: () => {},
+              onDisable: () => {},
+            },
+            {
+              icon: "CircleMinus",
+              iconColor: "text-danger",
+              iconBgColor: "bg-danger-surface",
+              title: "Zrušit událost",
+              text: "Po zrušení události budou všechny související informace odstraněny.",
+              button: {
+                text: "Zrušit",
+                version: "dangerFull",
+                iconLeft: "CircleMinus",
+                size: "sm",
+                disabled: event.status === "deactivated",
+                onClick: () =>
+                  confirmActionModalEvents.emit("open", {
+                    title: "Zrušit událost",
+                    description:
+                      "Všechny poptávky budou zrušeny a dodavatelé budou informováni, že událost byla zrušena.",
+                    Icon: lucideIcons.X,
+                    buttonText: "Zrušit událost",
+                    buttonVersion: "dangerFull",
+                    textColor: "text-danger",
+                    whatIsGoingToHappenText:
+                      "Opravdu chcete zrušit tuto událost?",
+                    whatIsGoingToHappenTextColor: "danger",
+                    whatIsGoingToHappenList: [
+                      "Zákazník obdrží oznámení o zrušení",
+                      "Všechny poptávky budou zrušeny",
+                      "Tuto akci nelze vrátit zpět",
+                    ],
+                    borderColor: "border-danger",
+                    bgColor: "bg-danger-surface",
+                    onConfirmClick: async () => {
+                      // TODO: reject inquiry mutation
+                    },
+                  }),
+              },
+            },
+          ]}
+        />
         {/* Inquiries */}
         <RowContainer
           iconBgColor="bg-inquiry-surface"
@@ -149,8 +219,8 @@ export default function page() {
                   <EntityRow
                     key={inquiry.id}
                     label={
-                      typeof inquiry.listing.value !== "string"
-                        ? inquiry.listing.value.name
+                      typeof inquiry.listing !== "string"
+                        ? inquiry.listing.name
                         : "Poptávka"
                     }
                     icon="MessageSquare"
@@ -192,47 +262,6 @@ export default function page() {
           checklist={event.checklist ?? []}
         />
         <EventNotesSection eventId={eventId} notes={event.notes ?? []} />
-        <ControlSection
-          rows={[
-            {
-              icon: "CircleMinus",
-              iconColor: "text-danger",
-              iconBgColor: "bg-danger-surface",
-              title: "Zrušit událost",
-              text: "Po zrušení události budou všechny související informace odstraněny.",
-              button: {
-                text: "Zrušit",
-                version: "dangerFull",
-                iconLeft: "CircleMinus",
-                size: "sm",
-                disabled: event.status === "deactivated",
-                onClick: () =>
-                  confirmActionModalEvents.emit("open", {
-                    title: "Zrušit událost",
-                    description:
-                      "Všechny poptávky budou zrušeny a dodavatelé budou informováni, že událost byla zrušena.",
-                    Icon: lucideIcons.X,
-                    buttonText: "Zrušit událost",
-                    buttonVersion: "dangerFull",
-                    textColor: "text-danger",
-                    whatIsGoingToHappenText:
-                      "Opravdu chcete zrušit tuto událost?",
-                    whatIsGoingToHappenTextColor: "danger",
-                    whatIsGoingToHappenList: [
-                      "Zákazník obdrží oznámení o zrušení",
-                      "Všechny poptávky budou zrušeny",
-                      "Tuto akci nelze vrátit zpět",
-                    ],
-                    borderColor: "border-danger",
-                    bgColor: "bg-danger-surface",
-                    onConfirmClick: async () => {
-                      // TODO: reject inquiry mutation
-                    },
-                  }),
-              },
-            },
-          ]}
-        />
       </div>
     </main>
   );

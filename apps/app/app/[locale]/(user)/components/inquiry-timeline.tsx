@@ -49,12 +49,6 @@ export default function InquiryTimeline({
       state: isCancelled ? "dimmed" : bothConfirmed ? "done" : "active",
     },
     {
-      label: "Přijato zákazníkem",
-      icon: UserCheck,
-      state:
-        userStatus === "confirmed" ? "done" : isCancelled ? "dimmed" : "active",
-    },
-    {
       label: "Přijato firmou",
       icon: HandshakeIcon,
       state:
@@ -63,6 +57,18 @@ export default function InquiryTimeline({
           : isCancelled
             ? "dimmed"
             : "active",
+    },
+    {
+      label: "Přijato zákazníkem",
+      icon: UserCheck,
+      state:
+        userStatus === "confirmed"
+          ? "done"
+          : isCancelled
+            ? "dimmed"
+            : companyStatus === "confirmed"
+              ? "active"
+              : "dimmed",
     },
     {
       label: cancelledLabel,

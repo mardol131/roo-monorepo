@@ -1,15 +1,16 @@
-import React from "react";
 import PageHeading from "../../components/page-heading";
+import { AccountSettingsSection } from "../../components/account-settings-section";
 
-type Props = {};
-
-export default function page({}: Props) {
+export default function page() {
   return (
-    <main className="w-full">
+    <main className="w-full pb-20">
       <PageHeading
         heading="Nastavení profilu"
         description="Zde můžete upravit nastavení svého profilu a spravovat své informace."
       />
+      <div className="flex flex-col gap-4 mt-6">
+        <AccountSettingsSection />
+      </div>
     </main>
   );
 }

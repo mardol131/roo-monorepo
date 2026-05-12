@@ -35,6 +35,8 @@ export function useListingsByCompany(companyId: string) {
 }
 
 export function useListing(id: string | undefined) {
+  const queryClient = useQueryClient();
+
   return useQuery({
     queryKey: listingKeys.byId(id ?? ""),
     queryFn: () => fetchListing(id!),

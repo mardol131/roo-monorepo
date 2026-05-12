@@ -9,51 +9,78 @@ import Loader from "@/app/[locale]/(user)/components/loader";
 import VariantSection from "@/app/[locale]/(user)/components/variant-section";
 import { INQUIRY_STATUS } from "@/app/data/inquiry";
 import { confirmActionModalEvents } from "@/app/components/ui/molecules/modals/confirm-action-modal";
-import { useInquiry } from "@/app/react-query/inquiries/hooks";
-import { aggregateInquiryStatus } from "@roo/common";
+import {
+  useInquiry,
+  useUpdateInquiry,
+} from "@/app/react-query/inquiries/hooks";
+import {
+  aggregateInquiryStatus,
+  getIdFromRelationshipField,
+} from "@roo/common";
 import { format } from "date-fns";
 import { cs } from "date-fns/locale";
-import { Check, Coins, Package, X } from "lucide-react";
+import { Check, Clock, Package, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useParams } from "next/navigation";
 
 import { AlertSection } from "@/app/components/ui/molecules/alert-section";
 import { useChatMessagesByInquiry } from "@/app/react-query/chat-messages/hooks";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { PriceChangeModal } from "@/app/components/ui/molecules/modals/price-change-modal";
 import { VariantVenueDetails } from "@/app/[locale]/(user)/components/variant-venue-details";
 import { VariantGastroDetails } from "@/app/[locale]/(user)/components/variant-gastro-details";
 import { VariantEntertainmentDetails } from "@/app/[locale]/(user)/components/variant-entertainment-details";
 import InquiryDetails from "@/app/[locale]/(user)/components/inquiry-details";
+import AlertInfoSections from "./components/alert-info-sections";
 
 export default function page() {
-  const { companyId, listingId, inquiryId } = useParams<{
-    companyId: string;
-    listingId: string;
+  const { inquiryId } = useParams<{
     inquiryId: string;
   }>();
 
   const { data: inquiry, isPending } = useInquiry(inquiryId);
-  const { data: chatMessages } = useChatMessagesByInquiry(inquiryId);
   const t = useTranslations();
-  const [priceChangeModalOpen, setPriceChangeModalOpen] = useState(false);
+  const { mutate: patchInquiry } = useUpdateInquiry({
+    listingId: getIdFromRelationshipField(inquiry?.listing || ""),
+  });
+
+  useEffect(() => {
+    if (!inquiry) return;
+    patchInquiry({
+      id: inquiryId,
+      data: {
+        activity: {
+          lastUserSeenAt: new Date().toISOString(),
+        },
+      },
+    });
+  }, []);
 
   if (isPending) return <Loader text="Načítám poptávku..." />;
   if (!inquiry) return null;
 
   const status = INQUIRY_STATUS[aggregateInquiryStatus(inquiry.status)];
   const listingName =
-    typeof inquiry.listing.value === "string"
-      ? "Poptávka"
-      : inquiry.listing.value.name;
+    typeof inquiry.listing === "string" ? "Poptávka" : inquiry.listing.name;
   const customerName =
     typeof inquiry.user !== "string"
       ? `${inquiry.user.firstName} ${inquiry.user.lastName}`
       : "Zákazník";
 
-  const priceChangeModalStateHandler = () => {
-    setPriceChangeModalOpen(!priceChangeModalOpen);
-  };
+  function confirmInquiry() {
+    patchInquiry({
+      id: inquiryId,
+      data: { status: { ...inquiry!.status, user: "confirmed" } },
+    });
+  }
+
+  function cancelInquiry() {
+    patchInquiry({
+      id: inquiryId,
+      data: { status: { ...inquiry!.status, user: "cancelled" } },
+    });
+  }
+
   return (
     <main className="w-full flex flex-col gap-6">
       <Breadcrumbs />
@@ -69,56 +96,20 @@ export default function page() {
         }
         infoItems={[
           { icon: "Tag", text: t(`listings.type.${inquiry.listingType}`) },
-          {
-            icon: "Clock",
-            text: `Odesláno ${format(new Date(inquiry.activity.sentAt), "d. M. yyyy", { locale: cs })}`,
-          },
+
           { icon: "User", text: customerName },
         ]}
       />
       <div className="bg-white rounded-2xl border border-zinc-200 px-8 py-5">
         <InquiryTimeline status={inquiry.status} />
       </div>
-      {inquiry.status.user === "confirmed" &&
-        inquiry.status.company === "confirmed" && (
-          <AlertSection
-            icon={Check}
-            iconBg="bg-success-surface"
-            iconColor="text-success"
-            borderColor="border-success"
-            title="Firma potvrdila poptávku"
-            text="Firma potvrdila poptávku dle nastavených podmínek, které můžete vidět níže."
-            bgColor="bg-success-surface"
-          />
-        )}
-      {inquiry.status.user === "confirmed" && (
-        <AlertSection
-          icon={Check}
-          iconBg="bg-success-surface"
-          iconColor="text-success"
-          borderColor="border-success"
-          title="Teď je řada na firmě"
-          text="Z vaší strany je vše připraveno. Teď je třeba ještě počkat na finální potvrzení od dodavatele."
-          bgColor="bg-success-surface/40"
-        />
-      )}
-      {inquiry.status.user === "cancelled" && (
-        <AlertSection
-          icon={X}
-          iconBg="bg-danger-surface"
-          iconColor="text-danger"
-          borderColor="border-danger"
-          title="Poptávající zrušil poptávku"
-          text="Zákazník zrušil tuto poptávku."
-          bgColor="bg-danger-surface"
-        />
-      )}
-      <InquiryDetails inquiry={inquiry} />
-
+      <AlertInfoSections inquiry={inquiry} />
       <ControlSection
         rows={[
           {
-            disabled: inquiry.status.user === "confirmed",
+            disabled:
+              inquiry.status.user === "confirmed" ||
+              inquiry.status.company !== "confirmed",
             title: "Potvrdit poptávku",
             text: "Potvzením poptávky uzavíráte dohodu s firmou. Z vaší strany již budou podmínky neměnné",
             icon: "Check",
@@ -147,9 +138,7 @@ export default function page() {
                   ],
                   borderColor: "border-success",
                   bgColor: "bg-success-surface",
-                  onConfirmClick: async () => {
-                    // TODO: reject inquiry mutation
-                  },
+                  onConfirmClick: async () => confirmInquiry(),
                 }),
             },
           },
@@ -183,26 +172,22 @@ export default function page() {
                   ],
                   borderColor: "border-danger",
                   bgColor: "bg-danger-surface",
-                  onConfirmClick: async () => {
-                    // TODO: reject inquiry mutation
-                  },
+                  onConfirmClick: async () => cancelInquiry(),
                 }),
             },
           },
         ]}
       />
       <ChatWindow
-        initialMessages={chatMessages || []}
         senderRole="user"
         inquiryId={inquiry.id}
+        listingId={getIdFromRelationshipField(inquiry?.listing || "")}
       />
-      {typeof inquiry.variant?.value !== "string" && inquiry.variant?.value && (
+      <InquiryDetails inquiry={inquiry} />
+      {typeof inquiry.variant !== "string" && inquiry.variant && (
         <>
-          <VariantSection
-            variant={inquiry.variant.value}
-            title="Vybraná varianta"
-          />
-          {inquiry.variant.value.details.map((block, i) => {
+          <VariantSection variant={inquiry.variant} title="Vybraná varianta" />
+          {inquiry.variant.details.map((block, i) => {
             if (block.blockType === "venue")
               return <VariantVenueDetails key={i} block={block} />;
             if (block.blockType === "gastro")

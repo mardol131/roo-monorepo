@@ -980,6 +980,8 @@ export interface Event {
   notes?:
     | {
         note?: string | null;
+        createdAt: string;
+        description?: string | null;
         id?: string | null;
       }[]
     | null;
@@ -989,6 +991,7 @@ export interface Event {
         description?: string | null;
         dueDate?: string | null;
         completed?: boolean | null;
+        priority?: ('low' | 'medium' | 'high') | null;
         id?: string | null;
       }[]
     | null;
@@ -996,6 +999,11 @@ export interface Event {
   date: {
     start: string;
     end: string;
+  };
+  sharing: {
+    contactDetails?: boolean | null;
+    confirmedInquiries?: boolean | null;
+    place?: boolean | null;
   };
   location?:
     | (
@@ -1079,14 +1087,8 @@ export interface ChatMessage {
 export interface Inquiry {
   id: string;
   user: string | User;
-  listing: {
-    relationTo: 'listings';
-    value: string | Listing;
-  };
-  variant?: {
-    relationTo: 'variants';
-    value: string | Variant;
-  } | null;
+  listing: string | Listing;
+  variant?: (string | null) | Variant;
   event: string | Event;
   listingType: 'venue' | 'gastro' | 'entertainment';
   request: {
@@ -1110,7 +1112,6 @@ export interface Inquiry {
     agreedPrice?: number | null;
   };
   activity: {
-    sentAt: string;
     lastCompanyMessageSentAt?: string | null;
     lastUserMessageSentAt?: string | null;
     lastUserSeenAt?: string | null;
@@ -2244,6 +2245,8 @@ export interface EventsSelect<T extends boolean = true> {
     | T
     | {
         note?: T;
+        createdAt?: T;
+        description?: T;
         id?: T;
       };
   checklist?:
@@ -2253,6 +2256,7 @@ export interface EventsSelect<T extends boolean = true> {
         description?: T;
         dueDate?: T;
         completed?: T;
+        priority?: T;
         id?: T;
       };
   icon?: T;
@@ -2261,6 +2265,13 @@ export interface EventsSelect<T extends boolean = true> {
     | {
         start?: T;
         end?: T;
+      };
+  sharing?:
+    | T
+    | {
+        contactDetails?: T;
+        confirmedInquiries?: T;
+        place?: T;
       };
   location?:
     | T
@@ -2367,7 +2378,6 @@ export interface InquiriesSelect<T extends boolean = true> {
   activity?:
     | T
     | {
-        sentAt?: T;
         lastCompanyMessageSentAt?: T;
         lastUserMessageSentAt?: T;
         lastUserSeenAt?: T;

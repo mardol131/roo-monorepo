@@ -1,7 +1,14 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Inquiry, Listing } from "@roo/common";
+import {
+  useQuery,
+  useMutation,
+  useQueryClient,
+  UseMutationOptions,
+} from "@tanstack/react-query";
+import { getIdFromRelationshipField, Inquiry, Listing } from "@roo/common";
+import { PatchData } from "@/app/functions/api/general";
 import { companyKeys, inquiryKeys, listingKeys } from "../query-keys";
 import {
+  createInquiry,
   fetchInquiries,
   fetchInquiriesByListing,
   fetchInquiry,
@@ -31,17 +38,46 @@ export function useInquiry(id: string | undefined) {
   });
 }
 
-export function useUpdateInquiry(id: string, listingId: string) {
+export type UpdateInquiryVars = { id: string; data: PatchData<Inquiry> };
+
+export function useUpdateInquiry({
+  listingId,
+  options,
+}: {
+  listingId: string;
+  options?: UseMutationOptions<Inquiry, Error, UpdateInquiryVars>;
+}) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (data: Partial<Inquiry>) => updateInquiry(id, data),
-    onSuccess: () => {
+    mutationFn: ({ id, data }: UpdateInquiryVars) => updateInquiry(id, data),
+    onSuccess: (data, variables, context, mutation) => {
       // Invaliduje detail listingu i seznam na dashboardu
-      queryClient.invalidateQueries({ queryKey: inquiryKeys.byId(id) });
+      queryClient.invalidateQueries({ queryKey: inquiryKeys.byId(data.id) });
       queryClient.invalidateQueries({
         queryKey: inquiryKeys.byListing(listingId),
       });
+      options?.onSuccess?.(data, variables, context, mutation);
+    },
+    onError: (...args) => {
+      options?.onError?.(...args);
+    },
+  });
+}
+
+export function useCreateInquiry() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (data: Omit<Inquiry, "id" | "createdAt" | "updatedAt">) =>
+      createInquiry(data),
+    onSuccess: (newInquiry) => {
+      const listingId = getIdFromRelationshipField(newInquiry?.doc?.listing);
+      if (listingId) {
+        queryClient.invalidateQueries({
+          queryKey: inquiryKeys.byListing(listingId),
+        });
+      }
     },
   });
 }

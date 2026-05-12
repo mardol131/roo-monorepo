@@ -1,5 +1,3 @@
-"use client";
-
 import { fetchCompanies } from "@/app/react-query/companies/fetch";
 import { fetchAllListings } from "@/app/react-query/listings/fetch";
 import { companyKeys, listingKeys } from "@/app/react-query/query-keys";

@@ -122,7 +122,6 @@ export default function UserProfilePage() {
               },
             },
           }}
-          className="mb-10"
         />
 
         {/* Recent inquiries */}

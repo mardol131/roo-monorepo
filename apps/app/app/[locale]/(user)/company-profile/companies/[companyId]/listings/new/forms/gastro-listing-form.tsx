@@ -301,6 +301,7 @@ export default function GastroListingForm({ onCancel }: Props) {
             name="images.coverImage"
             render={({ field }) => (
               <ImageInput
+                containerRef={field.ref}
                 label="Titulní obrázek"
                 value={field.value}
                 onChange={(f) => field.onChange(f ?? "")}
@@ -333,6 +334,7 @@ export default function GastroListingForm({ onCancel }: Props) {
                 onChange={field.onChange}
                 onUpload={uploadFileToCloud}
                 maxImages={20}
+                containerRef={field.ref}
                 error={
                   errors.images?.gallery?.root?.message ??
                   errors.images?.gallery?.message

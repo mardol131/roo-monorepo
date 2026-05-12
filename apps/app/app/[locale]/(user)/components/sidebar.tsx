@@ -17,12 +17,7 @@ export type SidebarProps = {
   headerComponent?: React.ReactNode;
 };
 
-export default function Sidebar({
-  button,
-  mainMenuItems,
-  subMenuItems,
-  headerComponent,
-}: SidebarProps) {
+export default function Sidebar({ mainMenuItems, subMenuItems }: SidebarProps) {
   const pathname = usePathname();
 
   const auth = useAuth();
@@ -46,13 +41,6 @@ export default function Sidebar({
     <aside className="w-20 shrink-0 flex flex-col bg-white border-r border-zinc-200">
       <div className="sticky top-0 flex flex-col h-screen">
         <Image src={logo} alt="Logo" className="p-3" />
-        {headerComponent}
-
-        {button && (
-          <div className="flex justify-center py-3 border-b border-zinc-100">
-            <Button {...button} />
-          </div>
-        )}
 
         <nav className="flex-1 px-2 py-3 overflow-y-auto">
           <ul className="flex flex-col gap-1">
@@ -67,9 +55,17 @@ export default function Sidebar({
         </nav>
 
         {subMenuItems && subMenuItems.length > 0 && (
-          <div className="px-2 pb-3 border-t border-zinc-100">
-            <ul className="flex flex-col gap-1">
-              {auth.user?.type == "company" && <ProfileSwitchButton />}
+          <div className="px-2 py-2 border-zinc-100">
+            <ul className="flex flex-col gap-2">
+              {auth.user?.type == "company" && (
+                <>
+                  <div className="h-px bg-zinc-200"></div>
+                  <div>
+                    <ProfileSwitchButton />
+                  </div>
+                </>
+              )}
+              <div className="h-px bg-zinc-200"></div>
               {subMenuItems.map((item) => (
                 <SidebarNavItem
                   key={item.href?.toString() || item.label}

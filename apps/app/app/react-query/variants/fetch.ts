@@ -5,7 +5,6 @@ import {
   postCollectionItem,
 } from "@/app/functions/api/general";
 import { PayloadResponse, Variant } from "@roo/common";
-import { CreateListingPayload } from "../listings/fetch";
 
 export async function fetchVariantsByListing(
   listingId: string,

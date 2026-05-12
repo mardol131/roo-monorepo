@@ -1,6 +1,12 @@
 "use client";
 
-import { login, logout, refreshToken, refreshUser } from "@/app/functions/api/users";
+import {
+  login,
+  logout,
+  refreshToken,
+  refreshUser,
+  switchAccountTypeToCompany,
+} from "@/app/functions/api/users";
 import { usePathname } from "@/app/i18n/navigation";
 import type { User } from "@roo/common";
 import {
@@ -21,6 +27,7 @@ interface AuthContextValue {
   login: (email: string, password: string) => Promise<{ error?: string }>;
   logout: () => Promise<void>;
   refresh: () => Promise<void>;
+  switchProfileTypeToCompany: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -35,7 +42,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const scheduleRefresh = useCallback((expSeconds: number) => {
     if (refreshTimerRef.current) clearTimeout(refreshTimerRef.current);
 
-    const msUntilRefresh = expSeconds * 1000 - Date.now() - REFRESH_BEFORE_EXPIRY_MS;
+    const msUntilRefresh =
+      expSeconds * 1000 - Date.now() - REFRESH_BEFORE_EXPIRY_MS;
     if (msUntilRefresh <= 0) return;
 
     refreshTimerRef.current = setTimeout(async () => {
@@ -98,6 +106,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(null);
   }, []);
 
+  const switchProfileTypeToCompany = useCallback(async () => {
+    await switchAccountTypeToCompany(user?.id ?? "");
+    await refresh();
+  }, [user, refresh]);
+
   return (
     <AuthContext.Provider
       value={{
@@ -107,6 +120,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         login: loginHandler,
         logout: logoutHandler,
         refresh,
+        switchProfileTypeToCompany,
       }}
     >
       {children}

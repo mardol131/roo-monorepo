@@ -20,6 +20,8 @@ export default function page() {
 
   const { data: inquiries } = useInquiriesByListing(listingId);
 
+  console.log("Inquiries for listing", listingId, inquiries);
+
   return (
     <main className="w-full">
       <PageHeading
@@ -44,8 +46,8 @@ export default function page() {
             <EntityCard
               key={inquiry.id}
               label={
-                typeof inquiry.listing.value !== "string"
-                  ? inquiry.listing.value.name
+                typeof inquiry.listing !== "string"
+                  ? inquiry.listing.name
                   : "Poptávka"
               }
               rightComponent={<InquiryStatusTag status={inquiry.status} />}

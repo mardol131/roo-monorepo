@@ -1,21 +1,28 @@
-import { off } from "process";
 import { create } from "zustand";
-import { EventData, Variant } from "@roo/common";
-import { variants } from "../[locale]/(public)/listing/[id]/page";
+import { Event } from "@roo/common";
 
 type EventVariant = "new-event" | "existing-event" | null;
+export type InquiryMode = "variant" | "custom" | null;
+
+export interface CustomRequest {
+  note: string;
+  requirements: { text: string }[];
+}
 
 interface OrderStore {
   isOrderModalOpen: boolean;
-  currentVariantIndex?: number;
+  currentVariantId?: string;
   currentStep: number;
-  variants: Variant[];
   eventVariant: EventVariant;
-  eventData: (EventData & { id?: string }) | undefined;
-  setCurrentVariantIndex: (index: number) => void;
+  eventData: Event | undefined;
+  inquiryMode: InquiryMode;
+  customRequest?: CustomRequest;
+  setCurrentVariantId: (variantId: string) => void;
+  setInquiryMode: (mode: InquiryMode) => void;
   setCurrentStep: (step: number) => void;
   setEventVariant: (variant: EventVariant) => void;
-  setEventData: (eventData: EventData & { id?: string }) => void;
+  setEventData: (eventData: Event) => void;
+  setCustomRequest: (req: CustomRequest | undefined) => void;
   isOrderStepActivated: (step: number) => boolean;
   resetIndices: () => void;
   clearEventData: () => void;
@@ -24,23 +31,32 @@ interface OrderStore {
 export const useOrderStore = create<OrderStore>((set, get) => {
   return {
     isOrderModalOpen: false,
-    currentVariantIndex: undefined,
+    currentVariantId: undefined,
     currentStep: 1,
-    variants: variants,
     eventData: undefined,
     eventVariant: null,
-    clearEventData: () =>
+    inquiryMode: null,
+    clearEventData: () => set({ eventData: undefined }),
+    setCurrentVariantId: (variantId: string) =>
       set({
-        eventData: undefined,
+        currentVariantId: variantId,
+        inquiryMode: "variant",
+        customRequest: undefined,
       }),
-    setCurrentVariantIndex: (index: number) =>
-      set({ currentVariantIndex: index }),
+    setInquiryMode: (mode) =>
+      set(
+        mode === "custom"
+          ? { inquiryMode: "custom", currentVariantId: undefined }
+          : { inquiryMode: mode },
+      ),
     setCurrentStep: (step: number) => set({ currentStep: step }),
-    setEventData: (eventData: EventData & { id?: string }) =>
-      set({ eventData }),
+    setEventData: (eventData: Event) => set({ eventData }),
+    setCustomRequest: (req) => set({ customRequest: req }),
     setEventVariant: (variant: EventVariant) => {
       set({ eventVariant: variant });
-      set({ eventData: undefined });
+      if (variant !== "existing-event") {
+        set({ eventData: undefined });
+      }
     },
 
     isOrderStepActivated: (step: number) => {
@@ -51,30 +67,37 @@ export const useOrderStore = create<OrderStore>((set, get) => {
         state.eventData?.date &&
         state.eventData?.location &&
         state.eventData?.guests;
-      const variantSelected = state.currentVariantIndex !== undefined;
 
       switch (step) {
         case 1:
-          return true; // Always active
+          return true;
         case 2:
-          if (eventDataExists) {
-            return true;
-          }
-          return false;
+          return !!eventDataExists;
         case 3:
-          if (eventDataExists && variantSelected) {
+          if (!eventDataExists) return false;
+          if (
+            state.inquiryMode === "variant" &&
+            state.currentVariantId !== undefined
+          )
             return true;
-          }
+          if (state.inquiryMode === "custom" && !!state.customRequest?.note)
+            return true;
           return false;
+        case 4:
+          return state.currentStep === 4;
       }
       return false;
     },
 
     resetIndices: () =>
       set({
-        currentVariantIndex: undefined,
+        currentVariantId: undefined,
         currentStep: 1,
         isOrderModalOpen: false,
+        inquiryMode: null,
+        customRequest: undefined,
+        eventData: undefined,
+        eventVariant: null,
       }),
   };
 });

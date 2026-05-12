@@ -2,6 +2,9 @@ import { getTranslations } from "next-intl/server";
 import React, { PropsWithChildren } from "react";
 
 import type { Locale } from "next-intl";
+import { ConfirmActionModal } from "../components/ui/molecules/modals/confirm-action-modal";
+import LoginModal from "../components/ui/molecules/modals/login-modal/login-modal";
+import { SimpleConfirmActionModal } from "../components/ui/molecules/modals/simple-confirm-action-modal";
 
 type Props = {
   params: Promise<{ locale: Locale }>;
@@ -19,5 +22,12 @@ export async function generateMetadata({ params }: Props) {
 }
 
 export default function layout({ children }: PropsWithChildren) {
-  return <>{children}</>;
+  return (
+    <>
+      <ConfirmActionModal />
+      <LoginModal />
+      <SimpleConfirmActionModal />
+      {children}
+    </>
+  );
 }

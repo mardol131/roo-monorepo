@@ -1,12 +1,12 @@
 import Button, { ButtonProps } from "@/app/components/ui/atoms/button";
 import Text from "@/app/components/ui/atoms/text";
 import { LucideIcons } from "@roo/common";
-import { Cog } from "lucide-react";
 import { ElementType } from "react";
 import * as lucideIcons from "lucide-react";
 import { DashboardSection } from "./dashboard-section";
 
 export type ControlRow = {
+  kind?: "button";
   icon: LucideIcons;
   iconColor: string;
   iconBgColor: string;
@@ -16,7 +16,22 @@ export type ControlRow = {
   disabled?: boolean;
 };
 
-export function ControlSection({ rows }: { rows: ControlRow[] }) {
+export type SwitchRow = {
+  kind: "switch";
+  icon: LucideIcons;
+  iconColor: string;
+  iconBgColor: string;
+  title: string;
+  text: string;
+  checked: boolean;
+  onEnable: () => void;
+  onDisable: () => void;
+  disabled?: boolean;
+};
+
+export type ControlItem = ControlRow | SwitchRow;
+
+export function ControlSection({ rows }: { rows: ControlItem[] }) {
   return (
     <DashboardSection
       title="Ovládání"
@@ -47,11 +62,27 @@ export function ControlSection({ rows }: { rows: ControlRow[] }) {
                   </Text>
                 </div>
               </div>
-              <Button
-                {...row.button}
-                className={`ml-4 shrink-0 ${row.button.className ?? ""}`}
-                disabled={row.disabled}
-              />
+              {row.kind === "switch" ? (
+                <button
+                  role="switch"
+                  aria-checked={row.checked}
+                  disabled={row.disabled}
+                  onClick={() =>
+                    row.checked ? row.onDisable() : row.onEnable()
+                  }
+                  className={`ml-4 shrink-0 relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 ${row.checked ? "bg-success" : "bg-zinc-200"}`}
+                >
+                  <span
+                    className={`inline-block h-4 w-4 rounded-full bg-white shadow transition-transform ${row.checked ? "translate-x-6" : "translate-x-1"}`}
+                  />
+                </button>
+              ) : (
+                <Button
+                  {...row.button}
+                  className={`ml-4 shrink-0 ${row.button.className ?? ""}`}
+                  disabled={row.disabled || row.button.disabled}
+                />
+              )}
             </div>
           );
         })}
