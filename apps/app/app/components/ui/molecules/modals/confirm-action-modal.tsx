@@ -101,7 +101,7 @@ export function ConfirmActionModal() {
             <Text variant="h4" color="textDark">
               {title}
             </Text>
-            <Text variant="caption" color="secondary">
+            <Text variant="label" color="secondary">
               {description}
             </Text>
           </div>
@@ -122,8 +122,8 @@ export function ConfirmActionModal() {
           <ul className="flex flex-col gap-1">
             {whatIsGoingToHappenList.map((item) => (
               <li key={item} className="flex items-start gap-2">
-                <Dot className={`w-6 h-6 ${textColor} mt-0.5 shrink-0`} />
-                <Text variant="body-sm" color="textDark">
+                <Dot className={`w-6 h-6 ${textColor} shrink-0`} />
+                <Text variant="label-lg" color="textDark">
                   {item}
                 </Text>
               </li>

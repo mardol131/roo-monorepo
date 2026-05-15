@@ -59,7 +59,9 @@ export default function page() {
   if (isPending) return <Loader text="Načítám poptávku..." />;
   if (!inquiry) return null;
 
-  const status = INQUIRY_STATUS[aggregateInquiryStatus(inquiry.status)];
+  const aggregatedStatus = aggregateInquiryStatus(inquiry.status);
+
+  const status = INQUIRY_STATUS[aggregatedStatus];
   const listingName =
     typeof inquiry.listing === "string" ? "Poptávka" : inquiry.listing.name;
   const customerName =
@@ -67,19 +69,67 @@ export default function page() {
       ? `${inquiry.user.firstName} ${inquiry.user.lastName}`
       : "Zákazník";
 
-  function confirmInquiry() {
-    patchInquiry({
-      id: inquiryId,
-      data: { status: { ...inquiry!.status, user: "confirmed" } },
-    });
-  }
-
   function cancelInquiry() {
     patchInquiry({
       id: inquiryId,
       data: { status: { ...inquiry!.status, user: "cancelled" } },
     });
   }
+
+  const confirmAcceptInquiry = () => {
+    patchInquiry({
+      id: inquiryId,
+      data: {
+        status: {
+          user: "confirmed",
+        },
+      },
+    });
+  };
+
+  const acceptInquiryHandler = () => {
+    confirmActionModalEvents.emit("open", {
+      title: "Potvrdit poptávku",
+      description:
+        "Dodavatel bude informován o vašem rozhodnutí a poptávka přejde do stavu 'Potvrzeno'. Následně bude řada na dodavateli, aby objednávku finálně odsouhlasil.",
+      Icon: Check,
+      buttonText: "Potvrdit poptávku",
+      buttonVersion: "successFull",
+      textColor: "text-success",
+      whatIsGoingToHappenText: "Jakmile tuto poptávku potvrdíte:",
+      whatIsGoingToHappenTextColor: "success",
+      whatIsGoingToHappenList: [
+        "Dodavatel bude informován o vašem rozhodnutí",
+        "Poptávka přejde do stavu 'Potvrzeno'",
+        "Tuto akci nelze vrátit zpět",
+      ],
+      borderColor: "border-success",
+      bgColor: "bg-success-surface",
+      onConfirmClick: async () => confirmAcceptInquiry(),
+    });
+  };
+
+  const cancelInquiryHandler = () => {
+    confirmActionModalEvents.emit("open", {
+      title: "Zrušit poptávku",
+      description:
+        "Dodavatel bude informován o vašem rozhodnutí a poptávka přejde do stavu 'Odmítnuto'. Tuto akci nelze vrátit zpět.",
+      Icon: X,
+      buttonText: "Zrušit poptávku",
+      buttonVersion: "dangerFull",
+      textColor: "text-danger",
+      whatIsGoingToHappenText: "Opravdu chcete zrušit tuto poptávku?",
+      whatIsGoingToHappenTextColor: "danger",
+      whatIsGoingToHappenList: [
+        "Dodavatel bude informován o vašem rozhodnutí",
+        "Poptávka přejde do stavu 'Odmítnuto'",
+        "Tuto akci nelze vrátit zpět",
+      ],
+      borderColor: "border-danger",
+      bgColor: "bg-danger-surface",
+      onConfirmClick: async () => cancelInquiry(),
+    });
+  };
 
   return (
     <main className="w-full flex flex-col gap-6">
@@ -103,101 +153,75 @@ export default function page() {
       <div className="bg-white rounded-2xl border border-zinc-200 px-8 py-5">
         <InquiryTimeline status={inquiry.status} />
       </div>
-      <AlertInfoSections inquiry={inquiry} />
-      <ControlSection
-        rows={[
-          {
-            disabled:
-              inquiry.status.user === "confirmed" ||
-              inquiry.status.company !== "confirmed",
-            title: "Potvrdit poptávku",
-            text: "Potvzením poptávky uzavíráte dohodu s firmou. Z vaší strany již budou podmínky neměnné",
-            icon: "Check",
-            iconColor: "text-success",
-            iconBgColor: "bg-success-surface",
-            button: {
-              version: "successFull",
-              text: "Potvrdit",
-              iconLeft: "Check",
-              size: "sm",
-              onClick: () =>
-                confirmActionModalEvents.emit("open", {
-                  title: "Potvrdit poptávku",
-                  description:
-                    "Dodavatel bude informován o vašem rozhodnutí a poptávka přejde do stavu 'Potvrzeno'. Následně bude řada na dodavateli, aby objednávku finálně odsouhlasil.",
-                  Icon: Check,
-                  buttonText: "Potvrdit poptávku",
-                  buttonVersion: "successFull",
-                  textColor: "text-success",
-                  whatIsGoingToHappenText: "Jakmile tuto poptávku potvrdíte:",
-                  whatIsGoingToHappenTextColor: "success",
-                  whatIsGoingToHappenList: [
-                    "Dodavatel bude informován o vašem rozhodnutí",
-                    "Poptávka přejde do stavu 'Potvrzeno'",
-                    "Tuto akci nelze vrátit zpět",
-                  ],
-                  borderColor: "border-success",
-                  bgColor: "bg-success-surface",
-                  onConfirmClick: async () => confirmInquiry(),
-                }),
-            },
-          },
-          {
-            title: "Zrušit poptávku",
-            text: "Zrušením poptávky informujete zákazníka, že nemůžete nabídnout své služby pro jeho požadavek.",
-            icon: "X",
-            iconColor: "text-danger",
-            iconBgColor: "bg-danger-surface",
-            button: {
-              version: "dangerFull",
-              text: "Zrušit",
-              iconLeft: "X",
-              size: "sm",
-              onClick: () =>
-                confirmActionModalEvents.emit("open", {
-                  title: "Zrušit poptávku",
-                  description:
-                    "Dodavatel bude informován o vašem rozhodnutí a poptávka přejde do stavu 'Odmítnuto'. Tuto akci nelze vrátit zpět.",
-                  Icon: X,
-                  buttonText: "Zrušit poptávku",
-                  buttonVersion: "dangerFull",
-                  textColor: "text-danger",
-                  whatIsGoingToHappenText:
-                    "Opravdu chcete zrušit tuto poptávku?",
-                  whatIsGoingToHappenTextColor: "danger",
-                  whatIsGoingToHappenList: [
-                    "Dodavatel bude informován o vašem rozhodnutí",
-                    "Poptávka přejde do stavu 'Odmítnuto'",
-                    "Tuto akci nelze vrátit zpět",
-                  ],
-                  borderColor: "border-danger",
-                  bgColor: "bg-danger-surface",
-                  onConfirmClick: async () => cancelInquiry(),
-                }),
-            },
-          },
-        ]}
+      <AlertInfoSections
+        inquiry={inquiry}
+        acceptInquiryHandler={acceptInquiryHandler}
       />
-      <ChatWindow
-        senderRole="user"
-        inquiryId={inquiry.id}
-        listingId={getIdFromRelationshipField(inquiry?.listing || "")}
-      />
-      <InquiryDetails inquiry={inquiry} />
-      {typeof inquiry.variant !== "string" && inquiry.variant && (
-        <>
-          <VariantSection variant={inquiry.variant} title="Vybraná varianta" />
-          {inquiry.variant.details.map((block, i) => {
-            if (block.blockType === "venue")
-              return <VariantVenueDetails key={i} block={block} />;
-            if (block.blockType === "gastro")
-              return <VariantGastroDetails key={i} block={block} />;
-            if (block.blockType === "entertainment")
-              return <VariantEntertainmentDetails key={i} block={block} />;
-            return null;
-          })}
-        </>
-      )}
+      <div
+        className={`flex flex-col gap-6 w-full ${aggregatedStatus === "cancelled" ? "opacity-50 pointer-events-none cursor-default" : ""}`}
+      >
+        <ControlSection
+          rows={[
+            {
+              disabled:
+                inquiry.status.user === "confirmed" ||
+                inquiry.status.company !== "confirmed",
+              title: "Potvrdit poptávku",
+              text: "Potvzením poptávky uzavíráte dohodu s firmou. Z vaší strany již budou podmínky neměnné",
+              icon: "Check",
+              iconColor: "text-success",
+              iconBgColor: "bg-success-surface",
+              button: {
+                version: "successFull",
+                text: "Potvrdit",
+                iconLeft: "Check",
+                size: "sm",
+                onClick: acceptInquiryHandler,
+              },
+            },
+            {
+              title: "Zrušit poptávku",
+              text: "Zrušením poptávky informujete zákazníka, že nemůžete nabídnout své služby pro jeho požadavek.",
+              icon: "X",
+              iconColor: "text-danger",
+              iconBgColor: "bg-danger-surface",
+              disabled:
+                aggregateInquiryStatus(inquiry.status) === "cancelled" ||
+                aggregateInquiryStatus(inquiry.status) === "confirmed",
+              button: {
+                version: "dangerFull",
+                text: "Zrušit",
+                iconLeft: "X",
+                size: "sm",
+                onClick: cancelInquiryHandler,
+              },
+            },
+          ]}
+        />
+        <ChatWindow
+          senderRole="user"
+          inquiryId={inquiry.id}
+          listingId={getIdFromRelationshipField(inquiry?.listing || "")}
+        />
+        <InquiryDetails inquiry={inquiry} />
+        {typeof inquiry.variant !== "string" && inquiry.variant && (
+          <>
+            <VariantSection
+              variant={inquiry.variant}
+              title="Vybraná varianta"
+            />
+            {inquiry.variant.details.map((block, i) => {
+              if (block.blockType === "venue")
+                return <VariantVenueDetails key={i} block={block} />;
+              if (block.blockType === "gastro")
+                return <VariantGastroDetails key={i} block={block} />;
+              if (block.blockType === "entertainment")
+                return <VariantEntertainmentDetails key={i} block={block} />;
+              return null;
+            })}
+          </>
+        )}
+      </div>
     </main>
   );
 }

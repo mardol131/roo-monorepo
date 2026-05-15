@@ -1,16 +1,18 @@
+import { PatchData } from "@/app/functions/api/general";
+import type { Event } from "@roo/common";
 import {
   useMutation,
   UseMutationOptions,
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
-import type { Event } from "@roo/common";
 import { eventKeys } from "../query-keys";
 import {
   addNoteToEvent,
   createEvent,
   fetchEventById,
   fetchEvents,
+  patchEvent,
   updateChecklist,
 } from "./fetch";
 
@@ -31,7 +33,11 @@ export function useEvent(id: string) {
 type CreateEventData = Parameters<typeof createEvent>[0];
 
 export function useCreateEvent(
-  options?: UseMutationOptions<{ doc: Event; message: string }, Error, CreateEventData>,
+  options?: UseMutationOptions<
+    { doc: Event; message: string },
+    Error,
+    CreateEventData
+  >,
 ) {
   const queryClient = useQueryClient();
 
@@ -50,10 +56,19 @@ export function useAddEventNote(eventId: string) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ note, description }: { note: string; description?: string }) => {
+    mutationFn: ({
+      note,
+      description,
+    }: {
+      note: string;
+      description?: string;
+    }) => {
       const current = queryClient.getQueryData<Event>(eventKeys.byId(eventId));
       const existing = current?.notes ?? [];
-      return addNoteToEvent(eventId, [...existing, { note, description, createdAt: new Date().toISOString() }]);
+      return addNoteToEvent(eventId, [
+        ...existing,
+        { note, description, createdAt: new Date().toISOString() },
+      ]);
     },
     onSuccess: (updated) => {
       queryClient.setQueryData(eventKeys.byId(eventId), updated);
@@ -84,6 +99,31 @@ export function useUpdateChecklist(eventId: string) {
       updateChecklist(eventId, checklist),
     onSuccess: (updated) => {
       queryClient.setQueryData(eventKeys.byId(eventId), updated);
+    },
+  });
+}
+
+export type UpdateEvent = { id: string; data: PatchData<Event> };
+
+export function useUpdateEvent({
+  options,
+}: {
+  options?: UseMutationOptions<Event, Error, UpdateEvent>;
+}) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ id, data }: UpdateEvent) => patchEvent(id, data),
+    onSuccess: (data, variables, context, mutation) => {
+      // Invaliduje detail listingu i seznam na dashboardu
+      queryClient.invalidateQueries({ queryKey: eventKeys.byId(data.id) });
+      queryClient.invalidateQueries({
+        queryKey: eventKeys.byId(data.id),
+      });
+      options?.onSuccess?.(data, variables, context, mutation);
+    },
+    onError: (...args) => {
+      options?.onError?.(...args);
     },
   });
 }

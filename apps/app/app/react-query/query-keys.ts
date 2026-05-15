@@ -18,6 +18,7 @@ export const inquiryKeys = {
   byId: (id: string) => ["inquiries", id] as const,
   byListing: (listingId: string) =>
     ["inquiries", "listing", listingId] as const,
+  byEvent: (eventId: string) => ["inquiries", "event", eventId] as const,
 };
 
 export const variantKeys = {

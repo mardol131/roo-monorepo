@@ -7,7 +7,7 @@ import InquiryList from "./components/inquiry-list";
 import InquirySummary from "./components/inquiry-summary";
 
 export default function page() {
-  const { data: inquiries } = useInquiries();
+  const { data: inquiries } = useInquiries({ refetchInterval: 60_000 });
 
   const total = inquiries?.docs?.length;
   const pending = inquiries?.docs?.filter(
@@ -16,8 +16,6 @@ export default function page() {
   const confirmed = inquiries?.docs?.filter(
     (i) => aggregateInquiryStatus(i.status) === "confirmed",
   ).length;
-
-  console.log("inquiries", inquiries);
 
   return (
     <main className="w-full">

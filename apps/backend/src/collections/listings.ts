@@ -504,7 +504,7 @@ export const Listings: CollectionConfig = {
       ({ data }) => {
         if (!data) return
         if (!data.slug) {
-          data.slug = slugify(data.name)
+          data.slug = slugify(data.name, true)
         }
       },
     ],

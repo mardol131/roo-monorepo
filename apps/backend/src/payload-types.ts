@@ -746,6 +746,7 @@ export interface Listing {
 export interface Company {
   id: string;
   name: string;
+  slug: string;
   status: 'active' | 'disabled' | 'archived';
   ico: string;
   description?: string | null;
@@ -2106,6 +2107,7 @@ export interface PersonnelSelect<T extends boolean = true> {
  */
 export interface CompaniesSelect<T extends boolean = true> {
   name?: T;
+  slug?: T;
   status?: T;
   ico?: T;
   description?: T;

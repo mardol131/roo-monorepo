@@ -5,7 +5,7 @@ import Loader from "@/app/[locale]/(user)/components/loader";
 import EventStatusTag from "@/app/[locale]/(user)/components/tags/event-status-tag";
 import { confirmActionModalEvents } from "@/app/components/ui/molecules/modals/confirm-action-modal";
 import { useRouter } from "@/app/i18n/navigation";
-import { useEvent } from "@/app/react-query/events/hooks";
+import { useEvent, useUpdateEvent } from "@/app/react-query/events/hooks";
 import { useInquiries } from "@/app/react-query/inquiries/hooks";
 import {
   aggregateInquiryStatus,
@@ -42,14 +42,13 @@ export default function page() {
   const { eventId } = useParams<{ eventId: string }>();
 
   const { data: event, isPending } = useEvent(eventId);
+  const { mutate: updateEvent } = useUpdateEvent({});
 
   const router = useRouter();
 
   const t = useTranslations();
 
   const { data: inquiries } = useInquiries();
-
-  console.log("inquiries", inquiries);
 
   if (isPending) return <Loader text="Načítání události..." />;
   if (!event) return router.back();
@@ -74,6 +73,135 @@ export default function page() {
         .toLocaleString("cs-CZ")
     : "0";
 
+  const shareInfoHandler = (
+    type: "contactDetails" | "place" | "confirmedInquiries",
+  ) => {
+    if (type === "contactDetails") {
+      updateEvent({
+        id: eventId,
+        data: {
+          sharing: {
+            contactDetails: true,
+          },
+        },
+      });
+    } else if (type === "place") {
+      updateEvent({
+        id: eventId,
+        data: {
+          sharing: {
+            place: true,
+          },
+        },
+      });
+    } else if (type === "confirmedInquiries") {
+      updateEvent({
+        id: eventId,
+        data: {
+          sharing: {
+            confirmedInquiries: true,
+          },
+        },
+      });
+    }
+  };
+
+  const cancelShareInfoHandler = (
+    type: "contactDetails" | "place" | "confirmedInquiries",
+  ) => {
+    if (type === "contactDetails") {
+      updateEvent({
+        id: eventId,
+        data: {
+          sharing: {
+            contactDetails: false,
+          },
+        },
+      });
+    } else if (type === "place") {
+      updateEvent({
+        id: eventId,
+        data: {
+          sharing: {
+            place: false,
+          },
+        },
+      });
+    } else if (type === "confirmedInquiries") {
+      updateEvent({
+        id: eventId,
+        data: {
+          sharing: {
+            confirmedInquiries: false,
+          },
+        },
+      });
+    }
+  };
+
+  const cancelEventHandler = () => {
+    updateEvent({
+      id: eventId,
+      data: {
+        status: "deactivated",
+      },
+    });
+  };
+
+  const finishEventHandler = () => {
+    updateEvent({
+      id: eventId,
+      data: {
+        status: "completed",
+      },
+    });
+  };
+
+  const confirmFinishEventHandler = () => {
+    confirmActionModalEvents.emit("open", {
+      title: "Dokončit událost",
+      description:
+        "Po dokončení události budou všechny související poptávky uzavřeny. Opravdu chcete dokončit tuto událost?",
+      Icon: lucideIcons.CircleCheck,
+      buttonText: "Dokončit událost",
+      buttonVersion: "successFull",
+      textColor: "text-success",
+      whatIsGoingToHappenText: "Opravdu chcete dokončit tuto událost?",
+      whatIsGoingToHappenTextColor: "success",
+      whatIsGoingToHappenList: [
+        "Zákazník obdrží oznámení o dokončení",
+        "Všechny poptávky budou uzavřeny",
+        "Tuto akci nelze vrátit zpět",
+      ],
+      borderColor: "border-success",
+      bgColor: "bg-success-surface",
+      onConfirmClick: async () => finishEventHandler(),
+    });
+  };
+
+  const confirmCancelEventHandler = () => {
+    confirmActionModalEvents.emit("open", {
+      title: "Zrušit událost",
+      description:
+        "Všechny poptávky budou zrušeny a dodavatelé budou informováni, že událost byla zrušena.",
+      Icon: lucideIcons.X,
+      buttonText: "Zrušit událost",
+      buttonVersion: "dangerFull",
+      textColor: "text-danger",
+      whatIsGoingToHappenText: "Opravdu chcete zrušit tuto událost?",
+      whatIsGoingToHappenTextColor: "danger",
+      whatIsGoingToHappenList: [
+        "Zákazník obdrží oznámení o zrušení",
+        "Všechny poptávky budou zrušeny",
+        "Tuto akci nelze vrátit zpět",
+      ],
+      borderColor: "border-danger",
+      bgColor: "bg-danger-surface",
+      onConfirmClick: async () => {
+        // TODO: reject inquiry mutation
+      },
+    });
+  };
   return (
     <main className="w-full">
       {/* Back + header */}
@@ -137,8 +265,8 @@ export default function page() {
               title: "Sdílet kontaktní údaje",
               text: "Dodavatelé uvidí vaše kontaktní údaje (jméno, email, telefon).",
               checked: event.sharing?.contactDetails ?? false,
-              onEnable: () => {},
-              onDisable: () => {},
+              onEnable: () => shareInfoHandler("contactDetails"),
+              onDisable: () => cancelShareInfoHandler("contactDetails"),
             },
             {
               kind: "switch",
@@ -148,19 +276,34 @@ export default function page() {
               title: "Sdílet místo konání",
               text: "Dodavatelé uvidí přesnou adresu místa konání události.",
               checked: event.sharing?.place ?? false,
-              onEnable: () => {},
-              onDisable: () => {},
+              onEnable: () => shareInfoHandler("place"),
+              onDisable: () => cancelShareInfoHandler("place"),
             },
             {
               kind: "switch",
-              icon: "CheckCircle2",
+              icon: "MessageSquare",
               iconColor: "text-emerald-500",
               iconBgColor: "bg-emerald-50",
               title: "Sdílet potvrzené dodavatele",
               text: "Ostatní dodavatelé uvidí, kteří dodavatelé již mají potvrzenou poptávku.",
               checked: event.sharing?.confirmedInquiries ?? false,
-              onEnable: () => {},
-              onDisable: () => {},
+              onEnable: () => shareInfoHandler("confirmedInquiries"),
+              onDisable: () => cancelShareInfoHandler("confirmedInquiries"),
+            },
+            {
+              icon: "CircleCheck",
+              iconColor: "text-success",
+              iconBgColor: "bg-success-surface",
+              title: "Dokončit událost",
+              text: "Po dokončení události budou všechny související poptávky uzavřeny.",
+              button: {
+                text: "Dokončit",
+                version: "successFull",
+                iconLeft: "CircleCheck",
+                size: "sm",
+                disabled: event.status === "deactivated",
+                onClick: () => confirmFinishEventHandler(),
+              },
             },
             {
               icon: "CircleMinus",
@@ -174,29 +317,7 @@ export default function page() {
                 iconLeft: "CircleMinus",
                 size: "sm",
                 disabled: event.status === "deactivated",
-                onClick: () =>
-                  confirmActionModalEvents.emit("open", {
-                    title: "Zrušit událost",
-                    description:
-                      "Všechny poptávky budou zrušeny a dodavatelé budou informováni, že událost byla zrušena.",
-                    Icon: lucideIcons.X,
-                    buttonText: "Zrušit událost",
-                    buttonVersion: "dangerFull",
-                    textColor: "text-danger",
-                    whatIsGoingToHappenText:
-                      "Opravdu chcete zrušit tuto událost?",
-                    whatIsGoingToHappenTextColor: "danger",
-                    whatIsGoingToHappenList: [
-                      "Zákazník obdrží oznámení o zrušení",
-                      "Všechny poptávky budou zrušeny",
-                      "Tuto akci nelze vrátit zpět",
-                    ],
-                    borderColor: "border-danger",
-                    bgColor: "bg-danger-surface",
-                    onConfirmClick: async () => {
-                      // TODO: reject inquiry mutation
-                    },
-                  }),
+                onClick: () => confirmCancelEventHandler(),
               },
             },
           ]}

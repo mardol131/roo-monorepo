@@ -7,6 +7,7 @@ import {
   Clock,
   HandshakeIcon,
   Send,
+  Trophy,
   UserCheck,
   XCircle,
 } from "lucide-react";
@@ -39,14 +40,9 @@ export default function InquiryTimeline({
 
   const steps: Step[] = [
     {
-      label: "Přijato",
+      label: "Poptávka vystavena",
       icon: Send,
       state: "done",
-    },
-    {
-      label: "V jednání",
-      icon: Clock,
-      state: isCancelled ? "dimmed" : bothConfirmed ? "done" : "active",
     },
     {
       label: "Přijato firmou",
@@ -69,6 +65,11 @@ export default function InquiryTimeline({
             : companyStatus === "confirmed"
               ? "active"
               : "dimmed",
+    },
+    {
+      label: "Závazně potvrzeno",
+      icon: Trophy,
+      state: bothConfirmed ? "done" : "dimmed",
     },
     {
       label: cancelledLabel,

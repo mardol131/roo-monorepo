@@ -4,12 +4,12 @@ export function aggregateInquiryStatus(
   status: Inquiry["status"],
 ): Inquiry["status"]["user"] {
   const { user: userStatus, company: companyStatus } = status;
-  if (userStatus === "pending" || companyStatus === "pending") {
+  if (userStatus === "cancelled" || companyStatus === "cancelled") {
+    return "cancelled";
+  } else if (userStatus === "pending" || companyStatus === "pending") {
     return "pending";
   } else if (userStatus === "confirmed" && companyStatus === "confirmed") {
     return "confirmed";
-  } else if (userStatus === "cancelled" || companyStatus === "cancelled") {
-    return "cancelled";
   } else {
     return "pending";
   }

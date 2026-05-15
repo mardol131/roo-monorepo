@@ -2,9 +2,10 @@ import {
   getCollection,
   getCollectionItem,
   patchCollectionItem,
+  PatchData,
   postCollectionItem,
 } from "@/app/functions/api/general";
-import type { Event } from "@roo/common";
+import type { Event, Where } from "@roo/common";
 
 export async function fetchEvents() {
   const res = await getCollection({
@@ -37,7 +38,7 @@ export async function createEvent(data: CreateEventData) {
 
 export async function patchEvent(
   eventId: string,
-  body: Partial<Event>,
+  body: PatchData<Event>,
 ): Promise<Event> {
   const res = await patchCollectionItem({
     collection: "events",

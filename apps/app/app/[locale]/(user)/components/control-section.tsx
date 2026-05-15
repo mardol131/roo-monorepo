@@ -1,4 +1,5 @@
 import Button, { ButtonProps } from "@/app/components/ui/atoms/button";
+import Switch from "@/app/components/ui/atoms/inputs/switch";
 import Text from "@/app/components/ui/atoms/text";
 import { LucideIcons } from "@roo/common";
 import { ElementType } from "react";
@@ -63,19 +64,12 @@ export function ControlSection({ rows }: { rows: ControlItem[] }) {
                 </div>
               </div>
               {row.kind === "switch" ? (
-                <button
-                  role="switch"
-                  aria-checked={row.checked}
+                <Switch
+                  checked={row.checked}
                   disabled={row.disabled}
-                  onClick={() =>
-                    row.checked ? row.onDisable() : row.onEnable()
-                  }
-                  className={`ml-4 shrink-0 relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 ${row.checked ? "bg-success" : "bg-zinc-200"}`}
-                >
-                  <span
-                    className={`inline-block h-4 w-4 rounded-full bg-white shadow transition-transform ${row.checked ? "translate-x-6" : "translate-x-1"}`}
-                  />
-                </button>
+                  onEnable={row.onEnable}
+                  onDisable={row.onDisable}
+                />
               ) : (
                 <Button
                   {...row.button}

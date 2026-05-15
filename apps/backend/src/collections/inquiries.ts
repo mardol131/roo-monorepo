@@ -1,4 +1,4 @@
-import { getRecordStatuses } from '@roo/common'
+import { getRecordStatuses, slugify } from '@roo/common'
 import type { CollectionConfig } from 'payload'
 
 const INQUIRY_STATUS = ['pending', 'confirmed', 'cancelled']

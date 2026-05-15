@@ -19,6 +19,7 @@ type Props = {
   label: string;
   items: Item[];
   link?: IntlLink;
+  target?: React.HTMLAttributeAnchorTarget;
   labelComponent?: ReactNode;
   rightComponent?: ReactNode;
   onClick?: () => void;
@@ -34,6 +35,7 @@ export default function EntityCard({
   label,
   items,
   link,
+  target,
   labelComponent,
   rightComponent,
   hideLinkIcon = false,
@@ -93,7 +95,7 @@ export default function EntityCard({
   if (link) {
     return (
       <div className="flex gap-4">
-        <Link href={link} className="block w-full">
+        <Link href={link} target={target} className="block w-full">
           {content}
         </Link>
         {deleteEntityHandler && (

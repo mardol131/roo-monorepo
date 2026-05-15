@@ -1,6 +1,6 @@
 import type { CollectionConfig } from 'payload'
 import { getPhoneField } from './common-fields/phone'
-import { getRecordStatuses } from '@roo/common'
+import { getRecordStatuses, slugify } from '@roo/common'
 import { getMediaFields } from './common-fields/common-fields'
 
 export const Companies: CollectionConfig = {
@@ -23,6 +23,14 @@ export const Companies: CollectionConfig = {
     delete: ({ req }) => req.user?.collection === 'admins',
   },
   hooks: {
+    beforeValidate: [
+      ({ data }) => {
+        if (!data) return
+        if (!data.slug) {
+          data.slug = slugify(data.name, true)
+        }
+      },
+    ],
     beforeChange: [
       async ({ data }) => {
         if (data.logo.filename === '') {
@@ -37,6 +45,11 @@ export const Companies: CollectionConfig = {
     // Základní informace
     {
       name: 'name',
+      type: 'text',
+      required: true,
+    },
+    {
+      name: 'slug',
       type: 'text',
       required: true,
     },

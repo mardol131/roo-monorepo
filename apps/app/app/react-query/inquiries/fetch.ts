@@ -4,7 +4,7 @@ import {
   patchCollectionItem,
   postCollectionItem,
 } from "@/app/functions/api/general";
-import { Inquiry, Listing } from "@roo/common";
+import { Inquiry, Listing, Where } from "@roo/common";
 import { PatchData } from "@/app/functions/api/general";
 
 export async function fetchInquiriesByListing(listingId: string) {
@@ -16,9 +16,22 @@ export async function fetchInquiriesByListing(listingId: string) {
   return res;
 }
 
-export async function fetchInquiries() {
+export type FetchInquiriesOptions = {
+  query?: Where;
+  limit?: number;
+  sortBy?: string;
+};
+
+export async function fetchInquiries({
+  query,
+  limit,
+  sortBy,
+}: FetchInquiriesOptions = {}) {
   const res = await getCollection({
     collection: "inquiries",
+    query,
+    limit,
+    sort: sortBy,
   });
   if (!res) throw new Error("Failed to fetch inquiries");
   return res;

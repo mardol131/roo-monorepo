@@ -46,8 +46,15 @@
     "plural": "Poptávky",
     "status": {
       "pending": "Čekající",
-      "confirmed": "Potvrzené",
+      "company_confirmed": "Přijato dodavatelem",
+      "confirmed": "Domluveno",
       "cancelled": "Odmítnuté"
+    },
+    "status_actions": {
+      "pending": "V jednání",
+      "company_confirmed": "Čeká na potrvzení uživatele",
+      "confirmed": "Domluveno",
+      "cancelled": "Zrušeno"
     }
   },
   "spaces": {
