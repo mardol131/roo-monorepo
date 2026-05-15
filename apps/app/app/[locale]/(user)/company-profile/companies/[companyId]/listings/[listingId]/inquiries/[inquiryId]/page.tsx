@@ -34,6 +34,7 @@ import { VariantVenueDetails } from "@/app/[locale]/(user)/components/variant-ve
 import { VariantGastroDetails } from "@/app/[locale]/(user)/components/variant-gastro-details";
 import { VariantEntertainmentDetails } from "@/app/[locale]/(user)/components/variant-entertainment-details";
 import AlertsSectionGroup from "./components/alerts-section-group";
+import { SingleInputModal } from "@/app/components/ui/molecules/modals/single-input-modal";
 
 export default function page() {
   const { companyId, listingId, inquiryId } = useParams<{
@@ -43,7 +44,7 @@ export default function page() {
   }>();
 
   const { data: inquiry, isPending } = useInquiry(inquiryId, {
-    refetchInterval: 10_000,
+    refetchInterval: 60_000,
   });
   const t = useTranslations();
   const [priceChangeModalOpen, setPriceChangeModalOpen] = useState(false);
@@ -57,11 +58,9 @@ export default function page() {
           { "status.user": { equals: "confirmed" } },
         ],
       },
-      refetchInterval: 10_000,
+      refetchInterval: 60_000,
     },
   );
-
-  console.log("inquiriesByEvent", inquiriesByEvent);
 
   useEffect(() => {
     patchInquiry({
@@ -106,6 +105,17 @@ export default function page() {
       data: {
         status: {
           company: "cancelled",
+        },
+      },
+    });
+  };
+
+  const changeQuotedPriceHandler = ({ newPrice }: { newPrice: number }) => {
+    patchInquiry({
+      id: inquiryId,
+      data: {
+        pricing: {
+          quotedPrice: newPrice,
         },
       },
     });
@@ -184,11 +194,28 @@ export default function page() {
         acceptInquiryHandler={acceptInquiryHandler}
       />
       <InquiryDetails inquiry={inquiry} />
-      <PriceChangeModal
+      <SingleInputModal
         isOpen={priceChangeModalOpen}
         onClose={priceChangeModalStateHandler}
-        inquiryId={inquiry.id}
-        currentPrice={inquiry.pricing.quotedPrice || undefined}
+        onSubmit={(values) => {
+          if (typeof values === "string" && !isNaN(Number(values))) {
+            changeQuotedPriceHandler({
+              newPrice: Number(values),
+            });
+          }
+        }}
+        header="Změna ceny poptávky"
+        description="Zadejte novou cenu poptávky."
+        inputLabel="Nová cena"
+        inputType="number"
+        placeholder={
+          inquiry.pricing.quotedPrice
+            ? inquiry.pricing.quotedPrice.toString()
+            : "0"
+        }
+        submitLabel="Změnit cenu"
+        successHeader="Cena byla změněna"
+        successMessage={`Navrhli jste novou cenu pro tuto poptávku. Zákazník bude informován o navrhované změně ceny.`}
       />
       <ControlSection
         rows={[

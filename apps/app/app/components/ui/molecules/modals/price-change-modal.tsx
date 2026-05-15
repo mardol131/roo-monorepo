@@ -41,7 +41,6 @@ export function PriceChangeModal({
     setIsProcessing(true);
     try {
       // TODO: mutation — change price for inquiryId to parsedPrice
-      console.log("change price", inquiryId, parsedPrice);
       handleClose();
     } catch (err) {
       setError(

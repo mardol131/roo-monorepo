@@ -546,8 +546,6 @@ export default function EditVenueListingForm({
     });
   }, [listing, reset]);
 
-  console.log("Form errors:", errors);
-
   const storageFieldArray = useFieldArray({ control, name: "storage" });
   const activityAddonsFieldArray = useFieldArray({
     control,

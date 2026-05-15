@@ -404,7 +404,6 @@ export function createActivitiesGroup<
     count: (f) => f.activities.length || 0,
     Content: ({ filters, onChange }) => {
       const { data } = useActivities();
-      console.log("Activities data:", data);
       return (
         <FilterSection
           title="Aktivity"

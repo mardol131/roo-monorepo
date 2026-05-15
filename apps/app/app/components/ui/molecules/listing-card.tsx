@@ -1,11 +1,17 @@
 "use client";
 
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import Image from "next/image";
 import Text from "../atoms/text";
-import { Heart, Star } from "lucide-react";
 import { FaHeart, FaStar } from "react-icons/fa";
 import { Link } from "@/app/i18n/navigation";
+import {
+  useCreateFavouriteListing,
+  useDeleteFavouriteListing,
+  useFavouriteListings,
+} from "@/app/react-query/favourite-listings/hooks";
+import { useAuth } from "@/app/context/auth/auth-context";
+import { storage } from "@/app/local-storage/storage";
 
 type Props = {
   imageUrl: string;
@@ -13,7 +19,6 @@ type Props = {
   title: string;
   price: number;
   imageAlt?: string;
-  liked?: boolean;
 };
 
 export default function ListingCard({
@@ -21,19 +26,69 @@ export default function ListingCard({
   title,
   price,
   imageAlt,
-  liked = false,
   id,
 }: Props) {
-  const [isLiked, setIsLiked] = useState(liked);
+  const [isLiked, setIsLiked] = useState(false);
+  const { mutate: createFavouriteListing } = useCreateFavouriteListing();
+  const { mutate: removeFavouriteListing } = useDeleteFavouriteListing();
+  const { data: favouriteListings } = useFavouriteListings();
+  const auth = useAuth();
 
   const clickOnLikedHandler = useCallback(
     (e: React.MouseEvent<SVGAElement | SVGElement, MouseEvent>) => {
       e.stopPropagation();
       e.preventDefault();
-      setIsLiked((prev) => !prev);
+
+      if (!auth.isAuthenticated) {
+        setIsLiked((prev) => {
+          const current = storage.read("favouriteListings") ?? [];
+          if (prev) {
+            storage.write(
+              "favouriteListings",
+              current.filter((listingId) => listingId !== id),
+            );
+          } else {
+            storage.write("favouriteListings", [...current, id]);
+          }
+          return !prev;
+        });
+        return;
+      }
+
+      setIsLiked((prev) => {
+        if (prev) {
+          const record = favouriteListings?.docs?.find((f) =>
+            typeof f.listing === "string"
+              ? f.listing === id
+              : f.listing.id === id,
+          );
+          if (record) removeFavouriteListing(record.id);
+        } else {
+          createFavouriteListing({ listingId: id });
+        }
+        return !prev;
+      });
     },
-    [isLiked],
+    [
+      auth.isAuthenticated,
+      id,
+      favouriteListings,
+      createFavouriteListing,
+      removeFavouriteListing,
+    ],
   );
+
+  useEffect(() => {
+    if (auth.isAuthenticated) {
+      const isFavourite = favouriteListings?.docs?.some((f) =>
+        typeof f.listing === "string" ? f.listing === id : f.listing.id === id,
+      );
+      setIsLiked(Boolean(isFavourite));
+    } else {
+      const local = storage.read("favouriteListings") ?? [];
+      setIsLiked(local.includes(id));
+    }
+  }, [auth.isAuthenticated, favouriteListings, id]);
 
   return (
     <Link

@@ -13,49 +13,49 @@ export const mockListings = [
     imageUrl:
       "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=400&q=80",
     title: "Letní festival v Praze",
-    price: "350",
+    price: 350,
   },
   {
     imageUrl:
       "https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=400&q=80",
     title: "Koncert pod širým nebem",
-    price: "490",
+    price: 490,
   },
   {
     imageUrl:
       "https://images.unsplash.com/photo-1519125323398-675f0ddb6308?auto=format&fit=crop&w=400&q=80",
     title: "Divadelní představení",
-    price: "250",
+    price: 250,
   },
   {
     imageUrl:
       "https://images.unsplash.com/photo-1514320291840-2e0a9bf2a9ae?auto=format&fit=crop&w=400&q=80",
     title: "Jazz večer v jazzklubu",
-    price: "420",
+    price: 420,
   },
   {
     imageUrl:
       "https://images.unsplash.com/photo-1459749411175-04bf5292ceea?auto=format&fit=crop&w=400&q=80",
     title: "Openair kino",
-    price: "180",
+    price: 180,
   },
   {
     imageUrl:
       "https://images.unsplash.com/photo-1470229722913-7f419344ca51?auto=format&fit=crop&w=400&q=80",
     title: "Stand-up comedy show",
-    price: "280",
+    price: 280,
   },
   {
     imageUrl:
       "https://images.unsplash.com/photo-1501612780289-11201ef255cb?auto=format&fit=crop&w=400&q=80",
     title: "Hudební festival",
-    price: "650",
+    price: 650,
   },
   {
     imageUrl:
       "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?auto=format&fit=crop&w=400&q=80",
     title: "Klasický koncert",
-    price: "380",
+    price: 380,
   },
 ];
 
@@ -119,6 +119,7 @@ export default function CardsSection({}: Props) {
               imageUrl={listing.imageUrl}
               title={listing.title}
               price={listing.price}
+              id={listing.title}
             />
           ))}
         </div>

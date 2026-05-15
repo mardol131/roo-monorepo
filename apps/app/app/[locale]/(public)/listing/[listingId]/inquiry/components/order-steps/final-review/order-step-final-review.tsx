@@ -83,6 +83,25 @@ export default function OrderStepFinalReview({
     const isCustom = inquiryMode === "custom";
     if (!isCustom && !currentVariantId) return;
 
+    let price = null;
+    if (!isCustom) {
+      const selectedVariant = variants?.docs?.find(
+        (v) => v.id === currentVariantId,
+      );
+
+      const currentDate = new Date();
+      const seasonalPricing = selectedVariant?.price.seasonalPrices?.find(
+        (sp) => {
+          if (!sp.from || !sp.to) return false;
+          const startDate = new Date(sp.from);
+          const endDate = new Date(sp.to);
+          return currentDate >= startDate && currentDate <= endDate;
+        },
+      );
+      price =
+        seasonalPricing?.price ?? selectedVariant?.price.generalPrice ?? null;
+    }
+
     createInquiry(
       {
         listing: listingId,
@@ -101,8 +120,8 @@ export default function OrderStepFinalReview({
           listing: "active",
           variant: "active",
         },
-        pricing: { mode: "open" },
-        activity: { sentAt: new Date().toISOString() },
+        pricing: { mode: "open", quotedPrice: price, agreedPrice: null },
+        activity: {},
         user: "",
         snapshots: {},
       },

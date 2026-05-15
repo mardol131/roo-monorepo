@@ -32,7 +32,6 @@ export async function updateCompany(
   id: string,
   data: UpdateCompanyPayload,
 ): Promise<Company> {
-  console.log("Updating company with data:", { id, data }); // Debug log
   const res = await patchCollectionItem({
     collection: "companies",
     id,

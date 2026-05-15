@@ -31,7 +31,6 @@ export default function Sidebar({ mainMenuItems, subMenuItems }: SidebarProps) {
         return pathname.startsWith(href);
       } else if ("params" in href) {
         const { pathname: hrefPathname } = href;
-        console.log("Comparing", pathname, "with", hrefPathname);
         return pathname === hrefPathname;
       } else return false;
     },

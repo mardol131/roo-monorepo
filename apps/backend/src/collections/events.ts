@@ -5,6 +5,52 @@ export const Events: CollectionConfig = {
   admin: {
     useAsTitle: 'name',
   },
+  access: {
+    create: ({ req }) => {
+      return !!req.user
+    },
+    read: async ({ req, id }) => {
+      if (req.user?.collection === 'admins') return true
+      if (!req.user) return false
+
+      // List query — vrátí jen vlastní eventy
+      if (!id) return { owner: { equals: req.user.id } }
+
+      // Vlastník má vždy přístup
+      const event = await req.payload.findByID({
+        collection: 'events',
+        id,
+        depth: 0,
+        overrideAccess: true,
+      })
+
+      if (event.owner === req.user.id) return true
+
+      // Firma s poptávkou na tomto eventu, pokud má event zapnuté sdílení
+      const sharingEnabled =
+        event.sharing?.contactDetails || event.sharing?.confirmedInquiries || event.sharing?.place
+
+      if (!sharingEnabled) return false
+
+      const inquiries = await req.payload.find({
+        collection: 'inquiries',
+        where: {
+          and: [{ event: { equals: id } }, { 'listing.company.owner': { equals: req.user.id } }],
+        },
+        overrideAccess: true,
+        depth: 0,
+        limit: 1,
+      })
+
+      return inquiries.totalDocs > 0
+    },
+    update: ({ req }) => {
+      if (!req.user) return false
+      if (req.user.collection === 'admins') return true
+      return { owner: { equals: req.user.id } }
+    },
+    delete: ({ req }) => req.user?.collection === 'admins',
+  },
   fields: [
     {
       name: 'name',
@@ -119,7 +165,7 @@ export const Events: CollectionConfig = {
         {
           name: 'place',
           type: 'checkbox',
-          defaultValue: false,
+          defaultValue: true,
         },
       ],
     },

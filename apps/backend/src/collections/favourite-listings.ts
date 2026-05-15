@@ -1,4 +1,4 @@
-import type { CollectionConfig, Where } from 'payload'
+import type { CollectionConfig } from 'payload'
 
 export const FavouriteListings: CollectionConfig = {
   slug: 'favourite-listings',
@@ -7,57 +7,40 @@ export const FavouriteListings: CollectionConfig = {
   },
   access: {
     create: ({ req }) => {
-      return !!req.user
+      if (!req.user) return false
+      return true
     },
     read: ({ req }) => {
       if (req.user?.collection === 'admins') return true
-      if (!req.user) {
-        const query: Where = { status: { equals: 'active' } }
-        return query
-      }
-      return {
-        or: [
-          {
-            and: [
-              { 'company.owner': { equals: req.user.id } },
-              { status: { in: ['active', 'inactive'] } },
-            ],
-          },
-          {
-            and: [
-              { 'company.owner': { not_equals: req.user.id } },
-              { status: { equals: 'active' } },
-            ],
-          },
-        ],
-      }
+      if (!req.user) return false
+      return { user: { equals: req.user.id } }
     },
     update: ({ req }) => {
       if (!req.user) return false
       if (req.user.collection === 'admins') return true
-      return { 'company.owner': { equals: req.user.id } }
+      return { user: { equals: req.user.id } }
     },
-    delete: ({ req }) => req.user?.collection === 'admins',
+    delete: ({ req }) => {
+      if (!req.user) return false
+      if (req.user.collection === 'admins') return true
+      return { user: { equals: req.user.id } }
+    },
   },
   fields: [
     {
       name: 'user',
       type: 'relationship',
       relationTo: 'users',
-      required: true,
-      unique: true,
+      defaultValue: ({ req }) => {
+        if (req.user) return req.user.id
+        return null
+      },
     },
     {
       name: 'listing',
       type: 'relationship',
       relationTo: 'listings',
       required: true,
-    },
-    {
-      name: 'addedAt',
-      type: 'date',
-      required: true,
-      defaultValue: new Date().toISOString(),
     },
   ],
 }

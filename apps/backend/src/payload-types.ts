@@ -1166,9 +1166,8 @@ export interface CalendarEvent {
  */
 export interface FavouriteListing {
   id: string;
-  user: string | User;
+  user?: (string | null) | User;
   listing: string | Listing;
-  addedAt: string;
   updatedAt: string;
   createdAt: string;
 }
@@ -2419,7 +2418,6 @@ export interface CalendarEventsSelect<T extends boolean = true> {
 export interface FavouriteListingsSelect<T extends boolean = true> {
   user?: T;
   listing?: T;
-  addedAt?: T;
   updatedAt?: T;
   createdAt?: T;
 }

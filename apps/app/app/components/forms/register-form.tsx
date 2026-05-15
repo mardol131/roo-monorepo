@@ -87,7 +87,6 @@ export default function RegisterForm({
 
       if (!res.ok) {
         const body = await res.json().catch(() => null);
-        console.log("Registration error:", body);
         const errorMessage = body?.errors?.[0]?.data?.errors?.[0];
         if (
           errorMessage.path === "gdprConsent" ||

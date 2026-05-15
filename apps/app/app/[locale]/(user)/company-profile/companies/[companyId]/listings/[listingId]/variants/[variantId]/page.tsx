@@ -53,7 +53,6 @@ export default function Page() {
       },
       {
         onSuccess: () => {
-          console.log("Variant archived successfully");
           router.push({
             pathname:
               "/company-profile/companies/[companyId]/listings/[listingId]/variants",

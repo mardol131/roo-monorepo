@@ -36,7 +36,6 @@ export async function createVariant(data: CreateVariantPayload) {
     collection: "variants",
     data,
   });
-  console.log("Created variant:", res);
   if (!res) throw new Error("Failed to create variant");
   return res.doc;
 }

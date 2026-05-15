@@ -109,7 +109,7 @@ export async function postCollectionItem<
   collection: T;
   data: Omit<
     Config["collections"][T],
-    "id" | "createdAt" | "updatedAt" | "owner" | "slug" | "status"
+    "id" | "createdAt" | "updatedAt" | "owner" | "slug" | "status" | "user"
   >;
 }): Promise<{ doc: Config["collections"][T]; message: string }> {
   const url = new URL(

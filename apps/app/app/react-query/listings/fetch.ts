@@ -21,7 +21,6 @@ export async function fetchAllListings(options?: FetchListingsOptions) {
     limit,
     sort: sortBy,
   });
-  console.log("Fetched listings:", res);
   if (!res) throw new Error("Failed to fetch listings");
   return res;
 }

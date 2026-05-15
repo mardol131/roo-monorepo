@@ -20,8 +20,6 @@ export default function page() {
 
   const { data: inquiries } = useInquiriesByListing(listingId);
 
-  console.log("Inquiries for listing", listingId, inquiries);
-
   return (
     <main className="w-full">
       <PageHeading
@@ -55,6 +53,12 @@ export default function page() {
               iconBackgroundColor="bg-inquiry-surface"
               iconColor="text-inquiry"
               items={[
+                {
+                  content: inquiry.variant
+                    ? `Varianta ${typeof inquiry.variant !== "string" ? `: ${inquiry.variant.name}` : ""}`
+                    : "Individuální poptávka",
+                  icon: "Layers",
+                },
                 ...(inquiry.pricing.agreedPrice
                   ? [
                       {

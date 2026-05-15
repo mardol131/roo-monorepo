@@ -66,7 +66,6 @@ export default function FavoritesPage() {
                     ? listing.images.coverImage
                     : ""
                 }
-                liked
               />
             ))}
           </div>

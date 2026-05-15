@@ -20,10 +20,10 @@ export default function AlertsSectionGroup({
             icon={Check}
             iconBg="bg-success-surface"
             iconColor="text-success"
-            borderColor="border-success"
+            borderColor="border-zinc-200"
             title="Poptávající vytvořil poptávku"
             text="Zákazník vytvořil poptávku a čeká na vaši odpověď. Pokud poptávku potvrdíte, zákazník obdrží oznámení a bude muset odsouhlasit svou stranu."
-            bgColor="bg-success-surface"
+            bgColor="bg-white"
             button={{
               text: "Potvrdit poptávku",
               version: "successFull",

@@ -746,6 +746,7 @@ export interface Listing {
 export interface Company {
   id: string;
   name: string;
+  slug: string;
   status: 'active' | 'disabled' | 'archived';
   ico: string;
   description?: string | null;
@@ -1167,7 +1168,6 @@ export interface FavouriteListing {
   id: string;
   user: string | User;
   listing: string | Listing;
-  addedAt: string;
   updatedAt: string;
   createdAt: string;
 }
@@ -2106,6 +2106,7 @@ export interface PersonnelSelect<T extends boolean = true> {
  */
 export interface CompaniesSelect<T extends boolean = true> {
   name?: T;
+  slug?: T;
   status?: T;
   ico?: T;
   description?: T;
@@ -2417,7 +2418,6 @@ export interface CalendarEventsSelect<T extends boolean = true> {
 export interface FavouriteListingsSelect<T extends boolean = true> {
   user?: T;
   listing?: T;
-  addedAt?: T;
   updatedAt?: T;
   createdAt?: T;
 }

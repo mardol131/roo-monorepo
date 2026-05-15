@@ -235,8 +235,6 @@ export default function GastroListingForm({ onCancel }: Props) {
         : undefined,
   });
 
-  console.log("errors", errors);
-
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="flex gap-6">
       <div className="flex w-full flex-col gap-4">

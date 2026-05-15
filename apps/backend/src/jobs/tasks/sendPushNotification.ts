@@ -83,8 +83,6 @@ export const sendPushNotificationTask: TaskConfig<any> = {
       data,
     )
 
-    console.log('Push notification sent:', res)
-
     return {
       output: {
         success: true,
