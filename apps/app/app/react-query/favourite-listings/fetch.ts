@@ -15,7 +15,6 @@ export async function fetchFavouriteListings() {
 
 export type CreateFavouriteListingPayload = {
   listing: string;
-  user: string;
 };
 
 export async function createFavouriteListing(

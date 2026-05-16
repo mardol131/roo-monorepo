@@ -1,7 +1,8 @@
 import SectionWrapper from "../section-wrapper";
-import { ChipList, InfoRow, SubSection, resolveNames } from "../listing-ui";
+import { ChipList, InfoRow, resolveNames } from "../listing-ui";
 import { Listing } from "@roo/common";
 import { Clock, MapPin, Users } from "lucide-react";
+import DescriptionSection from "../description-section";
 
 type EntertainmentDetail = Extract<
   Listing["details"][number],
@@ -19,7 +20,7 @@ const audienceLabels: Record<string, string> = {
   seniors: "Senioři",
 };
 
-export default function EntertainmentSection({ detail }: Props) {
+export default function EntertainmentSection({ detail, listing }: Props) {
   const entertainmentTypes = resolveNames(detail.entertainmentTypes ?? []);
   const rules = resolveNames(detail.rules ?? []);
   const necessities = resolveNames(detail.necessities ?? []);
@@ -39,97 +40,82 @@ export default function EntertainmentSection({ detail }: Props) {
 
   return (
     <>
-      {/* Lokace */}
-      {locationParts.length > 0 && (
-        <SectionWrapper>
-          <SubSection title="Kde působíme">
-            <InfoRow
-              icon={<MapPin size={16} />}
-              label="Lokalita"
-              value={locationParts.join(", ")}
-            />
-          </SubSection>
+      {listing.description && (
+        <SectionWrapper title="O tomto inzerátu">
+          <DescriptionSection description={listing.description} />
         </SectionWrapper>
       )}
 
-      {/* Kapacita */}
-      <SectionWrapper>
-        <SubSection title="Kapacita">
-          <div className="flex flex-col gap-2">
+      {locationParts.length > 0 && (
+        <SectionWrapper title="Kde působíme">
+          <InfoRow
+            icon={<MapPin size={16} />}
+            label="Lokalita"
+            value={locationParts.join(", ")}
+          />
+        </SectionWrapper>
+      )}
+
+      <SectionWrapper title="Kapacita">
+        <div className="flex flex-col gap-2">
+          <InfoRow
+            icon={<Users size={16} />}
+            label="Maximum"
+            value={`${detail.capacity} osob`}
+          />
+          {detail.minimumCapacity != null && (
             <InfoRow
               icon={<Users size={16} />}
-              label="Maximum"
-              value={`${detail.capacity} osob`}
+              label="Minimum"
+              value={`${detail.minimumCapacity} osob`}
             />
-            {detail.minimumCapacity != null && (
+          )}
+        </div>
+      </SectionWrapper>
+
+      {entertainmentTypes.length > 0 && (
+        <SectionWrapper title="Typy zábavy">
+          <ChipList items={entertainmentTypes} />
+        </SectionWrapper>
+      )}
+
+      {audience.length > 0 && (
+        <SectionWrapper title="Cílové publikum">
+          <ChipList items={audience} />
+        </SectionWrapper>
+      )}
+
+      {(detail.setupAndTearDownRules.setupTime != null ||
+        detail.setupAndTearDownRules.tearDownTime != null) && (
+        <SectionWrapper title="Příprava a úklid">
+          <div className="flex flex-col gap-2">
+            {detail.setupAndTearDownRules.setupTime != null && (
               <InfoRow
-                icon={<Users size={16} />}
-                label="Minimum"
-                value={`${detail.minimumCapacity} osob`}
+                icon={<Clock size={16} />}
+                label="Příprava"
+                value={`${detail.setupAndTearDownRules.setupTime} min`}
+              />
+            )}
+            {detail.setupAndTearDownRules.tearDownTime != null && (
+              <InfoRow
+                icon={<Clock size={16} />}
+                label="Úklid"
+                value={`${detail.setupAndTearDownRules.tearDownTime} min`}
               />
             )}
           </div>
-        </SubSection>
-      </SectionWrapper>
-
-      {/* Typy zábavy */}
-      {entertainmentTypes.length > 0 && (
-        <SectionWrapper>
-          <SubSection title="Typy zábavy">
-            <ChipList items={entertainmentTypes} />
-          </SubSection>
         </SectionWrapper>
       )}
 
-      {/* Publikum */}
-      {audience.length > 0 && (
-        <SectionWrapper>
-          <SubSection title="Cílové publikum">
-            <ChipList items={audience} />
-          </SubSection>
-        </SectionWrapper>
-      )}
-
-      {/* Příprava a úklid */}
-      {(detail.setupAndTearDownRules.setupTime != null ||
-        detail.setupAndTearDownRules.tearDownTime != null) && (
-        <SectionWrapper>
-          <SubSection title="Příprava a úklid">
-            <div className="flex flex-col gap-2">
-              {detail.setupAndTearDownRules.setupTime != null && (
-                <InfoRow
-                  icon={<Clock size={16} />}
-                  label="Příprava"
-                  value={`${detail.setupAndTearDownRules.setupTime} min`}
-                />
-              )}
-              {detail.setupAndTearDownRules.tearDownTime != null && (
-                <InfoRow
-                  icon={<Clock size={16} />}
-                  label="Úklid"
-                  value={`${detail.setupAndTearDownRules.tearDownTime} min`}
-                />
-              )}
-            </div>
-          </SubSection>
-        </SectionWrapper>
-      )}
-
-      {/* Pravidla */}
       {rules.length > 0 && (
-        <SectionWrapper>
-          <SubSection title="Pravidla">
-            <ChipList items={rules} />
-          </SubSection>
+        <SectionWrapper title="Pravidla">
+          <ChipList items={rules} />
         </SectionWrapper>
       )}
 
-      {/* Požadavky */}
       {necessities.length > 0 && (
-        <SectionWrapper>
-          <SubSection title="Požadavky">
-            <ChipList items={necessities} />
-          </SubSection>
+        <SectionWrapper title="Požadavky">
+          <ChipList items={necessities} />
         </SectionWrapper>
       )}
     </>

@@ -805,6 +805,7 @@ export interface Rule {
   id: string;
   name: string;
   slug: string;
+  type: 'gastro' | 'venue' | 'entertainment';
   updatedAt: string;
   createdAt: string;
 }
@@ -1166,7 +1167,7 @@ export interface CalendarEvent {
  */
 export interface FavouriteListing {
   id: string;
-  user?: (string | null) | User;
+  user: string | User;
   listing: string | Listing;
   updatedAt: string;
   createdAt: string;
@@ -2190,6 +2191,7 @@ export interface PlaceTypesSelect<T extends boolean = true> {
 export interface RulesSelect<T extends boolean = true> {
   name?: T;
   slug?: T;
+  type?: T;
   updatedAt?: T;
   createdAt?: T;
 }

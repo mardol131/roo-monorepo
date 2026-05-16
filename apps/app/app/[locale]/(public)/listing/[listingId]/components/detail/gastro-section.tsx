@@ -1,7 +1,8 @@
 import SectionWrapper from "../section-wrapper";
-import { ChipList, InfoRow, SubSection, resolveNames } from "../listing-ui";
+import { ChipList, InfoRow, resolveNames } from "../listing-ui";
 import { Listing } from "@roo/common";
 import { MapPin, Users } from "lucide-react";
+import DescriptionSection from "../description-section";
 
 type GastroDetail = Extract<
   Listing["details"][number],
@@ -13,7 +14,7 @@ interface Props {
   detail: GastroDetail;
 }
 
-export default function GastroSection({ detail }: Props) {
+export default function GastroSection({ detail, listing }: Props) {
   const cuisines = resolveNames(detail.cuisines ?? []);
   const dishTypes = resolveNames(detail.dishTypes ?? []);
   const dietary = resolveNames(detail.dietaryOptions ?? []);
@@ -38,88 +39,72 @@ export default function GastroSection({ detail }: Props) {
 
   return (
     <>
-      {/* Lokace */}
-      {locationParts.length > 0 && (
-        <SectionWrapper>
-          <SubSection title="Kde působíme">
-            <InfoRow
-              icon={<MapPin size={16} />}
-              label="Lokalita"
-              value={locationParts.join(", ")}
-            />
-          </SubSection>
+      {listing.description && (
+        <SectionWrapper title="O tomto inzerátu">
+          <DescriptionSection description={listing.description} />
         </SectionWrapper>
       )}
 
-      {/* Kapacita */}
-      <SectionWrapper>
-        <SubSection title="Kapacita">
-          <div className="flex flex-col gap-2">
+      {locationParts.length > 0 && (
+        <SectionWrapper title="Kde působíme">
+          <InfoRow
+            icon={<MapPin size={16} />}
+            label="Lokalita"
+            value={locationParts.join(", ")}
+          />
+        </SectionWrapper>
+      )}
+
+      <SectionWrapper title="Kapacita">
+        <div className="flex flex-col gap-2">
+          <InfoRow
+            icon={<Users size={16} />}
+            label="Maximum"
+            value={`${detail.capacity} osob`}
+          />
+          {detail.minimumCapacity != null && (
             <InfoRow
               icon={<Users size={16} />}
-              label="Maximum"
-              value={`${detail.capacity} osob`}
+              label="Minimum"
+              value={`${detail.minimumCapacity} osob`}
             />
-            {detail.minimumCapacity != null && (
-              <InfoRow
-                icon={<Users size={16} />}
-                label="Minimum"
-                value={`${detail.minimumCapacity} osob`}
-              />
-            )}
-          </div>
-        </SubSection>
+          )}
+        </div>
       </SectionWrapper>
 
-      {/* Flagy */}
       {flags.length > 0 && (
         <SectionWrapper>
           <ChipList items={flags} />
         </SectionWrapper>
       )}
 
-      {/* Kuchyně */}
       {cuisines.length > 0 && (
-        <SectionWrapper>
-          <SubSection title="Kuchyně">
-            <ChipList items={cuisines} />
-          </SubSection>
+        <SectionWrapper title="Kuchyně">
+          <ChipList items={cuisines} />
         </SectionWrapper>
       )}
 
-      {/* Typy jídel */}
       {dishTypes.length > 0 && (
-        <SectionWrapper>
-          <SubSection title="Typy jídel">
-            <ChipList items={dishTypes} />
-          </SubSection>
+        <SectionWrapper title="Typy jídel">
+          <ChipList items={dishTypes} />
         </SectionWrapper>
       )}
 
-      {/* Dietní možnosti */}
       {dietary.length > 0 && (
-        <SectionWrapper>
-          <SubSection title="Dietní možnosti">
-            <ChipList items={dietary} />
-          </SubSection>
+        <SectionWrapper title="Dietní možnosti">
+          <ChipList items={dietary} />
         </SectionWrapper>
       )}
 
-      {/* Forma servisu */}
       {serviceStyles.length > 0 && (
-        <SectionWrapper>
-          <SubSection title="Forma servisu">
-            <ChipList items={serviceStyles} />
-          </SubSection>
+        <SectionWrapper title="Forma servisu">
+          <ChipList items={serviceStyles} />
         </SectionWrapper>
       )}
 
-      {/* Požadavky */}
       {necessities.length > 0 && (
-        <SectionWrapper>
-          <SubSection title="Požadavky">
-            <ChipList items={necessities} />
-          </SubSection>
+        <SectionWrapper title="Požadavky">
+          <ChipList items={necessities} />
         </SectionWrapper>
       )}
     </>

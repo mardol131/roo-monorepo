@@ -60,6 +60,7 @@ export default function Catalog({ type }: Props) {
               imageUrl={generateMediaUrl(listing.images.coverImage.filename)}
               title={listing.name}
               price={listing.price.startsAt}
+              details={listing.details[0]}
             />
           ))}
         </div>

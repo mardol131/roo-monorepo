@@ -8,7 +8,7 @@ const COLLECTIONS = ["necessities", "room-amenities", "rules", "space-types"] as
 
 type Collection = (typeof COLLECTIONS)[number];
 
-type Row = { collection: Collection; name: string; slug: string };
+type Row = { collection: Collection; name: string; slug: string; type?: string };
 
 function parseCSV(content: string): Row[] {
   return content
@@ -17,8 +17,8 @@ function parseCSV(content: string): Row[] {
     .slice(1)
     .filter((l) => l.trim())
     .map((line) => {
-      const [collection, name, slug] = line.split(";").map((s) => s.trim());
-      return { collection: collection as Collection, name, slug };
+      const [collection, name, slug, type] = line.split(";").map((s) => s.trim());
+      return { collection: collection as Collection, name, slug, type: type || undefined };
     });
 }
 
@@ -35,7 +35,7 @@ async function login(): Promise<string> {
 async function upsert(
   token: string,
   collection: Collection,
-  item: { name: string; slug: string },
+  item: { name: string; slug: string; type?: string },
 ): Promise<"created" | "updated"> {
   const headers = { "Content-Type": "application/json", Authorization: `JWT ${token}` };
 
@@ -87,7 +87,7 @@ async function main() {
 
     for (const row of items) {
       try {
-        const action = await upsert(token, collection, { name: row.name, slug: row.slug });
+        const action = await upsert(token, collection, { name: row.name, slug: row.slug, type: row.type });
         action === "created" ? created++ : updated++;
         console.log(`  ${action === "created" ? "✓" : "↺"} ${row.name} [${action}]`);
       } catch (err) {

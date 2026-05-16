@@ -1,6 +1,6 @@
 import ItemsSection from "../items-section";
 import SectionWrapper from "../section-wrapper";
-import { ChipList, InfoRow, SubSection, resolveNames } from "../listing-ui";
+import { ChipList, InfoRow, resolveNames } from "../listing-ui";
 import { Listing } from "@roo/common";
 import {
   BedDouble,
@@ -14,6 +14,7 @@ import {
   Cpu,
   Dumbbell,
 } from "lucide-react";
+import DescriptionSection from "../description-section";
 
 type VenueDetail = Extract<Listing["details"][number], { blockType: "venue" }>;
 
@@ -62,73 +63,71 @@ export default function VenueSection({ listing, detail }: Props) {
 
   return (
     <>
-      {/* Lokace */}
-      <SectionWrapper>
-        <SubSection title="Kde nás najdete">
-          <div className="flex flex-col gap-2">
-            <InfoRow
-              icon={<MapPin size={16} />}
-              label="Adresa"
-              value={`${detail.location.address}${cityName ? `, ${cityName}` : ""}`}
-            />
-            <a
-              href={mapUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-sm text-primary underline-offset-2 hover:underline ml-7"
-            >
-              Zobrazit na mapě
-            </a>
-          </div>
-        </SubSection>
+      {listing.description && (
+        <SectionWrapper title="O tomto inzerátu">
+          <DescriptionSection description={listing.description} />
+        </SectionWrapper>
+      )}
+
+      <SectionWrapper title="Kde nás najdete">
+        <div className="flex flex-col gap-2">
+          <InfoRow
+            icon={<MapPin size={16} />}
+            label="Adresa"
+            value={`${detail.location.address}${cityName ? `, ${cityName}` : ""}`}
+          />
+          <a
+            href={mapUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-sm text-primary underline-offset-2 hover:underline ml-7"
+          >
+            Zobrazit na mapě
+          </a>
+        </div>
       </SectionWrapper>
 
-      {/* Základní info */}
-      <SectionWrapper>
-        <SubSection title="Základní informace">
-          <div className="grid grid-cols-2 gap-3">
-            <InfoRow
-              icon={<Users size={16} />}
-              label="Kapacita"
-              value={`${detail.capacity} osob`}
-            />
-            <InfoRow
-              icon={<Maximize2 size={16} />}
-              label="Plocha"
-              value={`${detail.area} m²`}
-            />
+      <SectionWrapper title="Základní informace">
+        <div className="grid grid-cols-2 gap-3">
+          <InfoRow
+            icon={<Users size={16} />}
+            label="Kapacita"
+            value={`${detail.capacity} osob`}
+          />
+          <InfoRow
+            icon={<Maximize2 size={16} />}
+            label="Plocha"
+            value={`${detail.area} m²`}
+          />
+          <InfoRow
+            icon={<Tag size={16} />}
+            label="Typ prostoru"
+            value={spacesTypeLabels[detail.spacesType]}
+          />
+          {(listing.indoor != null || listing.outdoor != null) && (
             <InfoRow
               icon={<Tag size={16} />}
-              label="Typ prostoru"
-              value={spacesTypeLabels[detail.spacesType]}
+              label="Prostředí"
+              value={
+                listing.indoor && listing.outdoor
+                  ? "Interiér i exteriér"
+                  : listing.indoor
+                    ? "Interiér"
+                    : "Exteriér"
+              }
             />
-            {(listing.indoor != null || listing.outdoor != null) && (
-              <InfoRow
-                icon={<Tag size={16} />}
-                label="Prostředí"
-                value={
-                  listing.indoor && listing.outdoor
-                    ? "Interiér i exteriér"
-                    : listing.indoor
-                      ? "Interiér"
-                      : "Exteriér"
-                }
-              />
-            )}
-          </div>
-          {placeTypes.length > 0 && (
-            <div className="mt-4">
-              <ChipList items={placeTypes} />
-            </div>
           )}
-        </SubSection>
+        </div>
+        {placeTypes.length > 0 && (
+          <div className="mt-4">
+            <ChipList items={placeTypes} />
+          </div>
+        )}
       </SectionWrapper>
 
-      {/* Amenities */}
       {amenities.length > 0 && (
-        <SectionWrapper>
+        <SectionWrapper title="Vybavení">
           <ItemsSection
-            title="Vybavení"
             items={amenities.map((name) => ({
               id: name,
               label: name,
@@ -141,11 +140,9 @@ export default function VenueSection({ listing, detail }: Props) {
         </SectionWrapper>
       )}
 
-      {/* Služby */}
       {services.length > 0 && (
-        <SectionWrapper>
+        <SectionWrapper title="Služby">
           <ItemsSection
-            title="Služby"
             items={services.map((name) => ({
               id: name,
               label: name,
@@ -158,133 +155,113 @@ export default function VenueSection({ listing, detail }: Props) {
         </SectionWrapper>
       )}
 
-      {/* Technika */}
       {technology.length > 0 && (
-        <SectionWrapper>
+        <SectionWrapper title="Technika">
           <ItemsSection
-            title="Technika"
             items={technology.map((name) => ({
               id: name,
               label: name,
               icon: <Cpu size={18} />,
             }))}
             displayCount={8}
-            buttonText={`Ukázat vše`}
+            buttonText="Ukázat vše"
             columns={2}
           />
         </SectionWrapper>
       )}
 
-      {/* Aktivity */}
       {activities.length > 0 && (
-        <SectionWrapper>
+        <SectionWrapper title="Aktivity">
           <ItemsSection
-            title="Aktivity"
             items={activities.map((name) => ({
               id: name,
               label: name,
               icon: <Dumbbell size={18} />,
             }))}
             displayCount={8}
-            buttonText={`Ukázat vše`}
+            buttonText="Ukázat vše"
             columns={2}
           />
         </SectionWrapper>
       )}
 
-      {/* Přístup */}
       {(vehicleTypes.length > 0 || accessFlags.length > 0) && (
-        <SectionWrapper>
-          <SubSection title="Přístup a logistika">
-            <div className="flex flex-col gap-4">
-              {vehicleTypes.length > 0 && (
-                <div className="flex flex-col gap-2">
-                  <InfoRow icon={<Car size={16} />} label="Vozidla" value="" />
-                  <div className="ml-7">
-                    <ChipList items={vehicleTypes} />
-                  </div>
-                </div>
-              )}
-              {accessFlags.length > 0 && (
+        <SectionWrapper title="Přístup a logistika">
+          <div className="flex flex-col gap-4">
+            {vehicleTypes.length > 0 && (
+              <div className="flex flex-col gap-2">
+                <InfoRow icon={<Car size={16} />} label="Vozidla" value="" />
                 <div className="ml-7">
-                  <ChipList items={accessFlags} />
+                  <ChipList items={vehicleTypes} />
                 </div>
-              )}
-            </div>
-          </SubSection>
+              </div>
+            )}
+            {accessFlags.length > 0 && (
+              <div className="ml-7">
+                <ChipList items={accessFlags} />
+              </div>
+            )}
+          </div>
         </SectionWrapper>
       )}
 
-      {/* Parkování */}
       {detail.parking.hasParking && (
-        <SectionWrapper>
-          <SubSection title="Parkování">
-            <div className="flex flex-col gap-2">
-              {detail.parking.parkingCapacity != null && (
-                <InfoRow
-                  icon={<Car size={16} />}
-                  label="Kapacita"
-                  value={`${detail.parking.parkingCapacity} míst`}
-                />
-              )}
-              {detail.parking.parkingIsIncludedInPrice ? (
-                <InfoRow icon={<Car size={16} />} label="Cena" value="V ceně" />
-              ) : detail.parking.parkingPrice != null ? (
-                <InfoRow
-                  icon={<Car size={16} />}
-                  label="Cena"
-                  value={`${detail.parking.parkingPrice.toLocaleString("cs-CZ")} Kč`}
-                />
-              ) : null}
-            </div>
-          </SubSection>
-        </SectionWrapper>
-      )}
-
-      {/* Ubytování */}
-      {detail.hasAccommodation && (
-        <SectionWrapper>
-          <SubSection title="Ubytování">
-            {detail.accommodationCapacity != null && (
+        <SectionWrapper title="Parkování">
+          <div className="flex flex-col gap-2">
+            {detail.parking.parkingCapacity != null && (
               <InfoRow
-                icon={<BedDouble size={16} />}
+                icon={<Car size={16} />}
                 label="Kapacita"
-                value={`${detail.accommodationCapacity} osob`}
+                value={`${detail.parking.parkingCapacity} míst`}
               />
             )}
-          </SubSection>
+            {detail.parking.parkingIsIncludedInPrice ? (
+              <InfoRow icon={<Car size={16} />} label="Cena" value="V ceně" />
+            ) : detail.parking.parkingPrice != null ? (
+              <InfoRow
+                icon={<Car size={16} />}
+                label="Cena"
+                value={`${detail.parking.parkingPrice.toLocaleString("cs-CZ")} Kč`}
+              />
+            ) : null}
+          </div>
         </SectionWrapper>
       )}
 
-      {/* Snídaně */}
+      {detail.hasAccommodation && (
+        <SectionWrapper title="Ubytování">
+          {detail.accommodationCapacity != null && (
+            <InfoRow
+              icon={<BedDouble size={16} />}
+              label="Kapacita"
+              value={`${detail.accommodationCapacity} osob`}
+            />
+          )}
+        </SectionWrapper>
+      )}
+
       {detail.breakfast.included && (
-        <SectionWrapper>
-          <SubSection title="Snídaně">
-            <div className="flex flex-col gap-2">
-              {detail.breakfast.timeFrom && detail.breakfast.timeTo && (
-                <InfoRow
-                  icon={<Coffee size={16} />}
-                  label="Čas"
-                  value={`${detail.breakfast.timeFrom}–${detail.breakfast.timeTo}`}
-                />
-              )}
-              {!detail.breakfast.breakfastIsIncludedInPrice &&
-                detail.breakfast.price != null && (
-                  <InfoRow
-                    icon={<Coffee size={16} />}
-                    label="Cena"
-                    value={`${detail.breakfast.price.toLocaleString("cs-CZ")} Kč ${detail.breakfast.pricePer === "person" ? "/ osoba" : "/ rezervace"}`}
-                  />
-                )}
-              {detail.breakfast.breakfastIsIncludedInPrice && (
+        <SectionWrapper title="Snídaně">
+          <div className="flex flex-col gap-2">
+            {detail.breakfast.timeFrom && detail.breakfast.timeTo && (
+              <InfoRow
+                icon={<Coffee size={16} />}
+                label="Čas"
+                value={`${detail.breakfast.timeFrom}–${detail.breakfast.timeTo}`}
+              />
+            )}
+            {!detail.breakfast.breakfastIsIncludedInPrice &&
+              detail.breakfast.price != null && (
                 <InfoRow
                   icon={<Coffee size={16} />}
                   label="Cena"
-                  value="V ceně"
+                  value={`${detail.breakfast.price.toLocaleString("cs-CZ")} Kč ${detail.breakfast.pricePer === "person" ? "/ osoba" : "/ rezervace"}`}
                 />
               )}
-            </div>
-          </SubSection>
+            {detail.breakfast.breakfastIsIncludedInPrice && (
+              <InfoRow icon={<Coffee size={16} />} label="Cena" value="V ceně" />
+            )}
+          </div>
         </SectionWrapper>
       )}
     </>

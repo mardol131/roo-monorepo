@@ -85,6 +85,7 @@ export default function FavoritesPage() {
                     ? listing.images.coverImage
                     : ""
                 }
+                details={listing.details?.[0]}
               />
             ))}
           </div>

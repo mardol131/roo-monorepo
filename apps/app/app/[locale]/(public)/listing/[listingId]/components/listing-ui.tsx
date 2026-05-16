@@ -44,23 +44,6 @@ export function InfoRow({
   );
 }
 
-export function SubSection({
-  title,
-  children,
-}: {
-  title: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <div className="flex flex-col gap-3">
-      <Text variant="h4" color="textDark">
-        {title}
-      </Text>
-      {children}
-    </div>
-  );
-}
-
 export function resolveNames<T extends { name: string }>(
   items: (string | T)[],
 ): string[] {

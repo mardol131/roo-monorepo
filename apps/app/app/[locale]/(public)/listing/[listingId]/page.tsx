@@ -47,11 +47,6 @@ export default function Page() {
         />
         <div className="grid grid-cols-[1fr_400px] gap-6 mt-10">
           <div className="min-h-screen flex flex-col w-full gap-15">
-            {listing.description && (
-              <SectionWrapper>
-                <DescriptionSection description={listing.description} />
-              </SectionWrapper>
-            )}
             <ListingDetailSection listing={listing} />
             {company && (
               <SectionWrapper>

@@ -26,11 +26,23 @@ export const FavouriteListings: CollectionConfig = {
       return { user: { equals: req.user.id } }
     },
   },
+  hooks: {
+    beforeValidate: [
+      async ({ data, req }) => {
+        if (!data || !req) return data
+        if (!data.user && req.user) {
+          data.user = req.user.id
+        }
+        return data
+      },
+    ],
+  },
   fields: [
     {
       name: 'user',
       type: 'relationship',
       relationTo: 'users',
+      required: true,
     },
     {
       name: 'listing',

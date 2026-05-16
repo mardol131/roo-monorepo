@@ -11,7 +11,6 @@ export interface Item {
 }
 
 interface ItemsSectionProps {
-  title: string;
   items: Item[];
   displayCount?: number;
   buttonText?: string;
@@ -19,7 +18,6 @@ interface ItemsSectionProps {
 }
 
 export default function ItemsSection({
-  title,
   items,
   displayCount = 10,
   buttonText,
@@ -36,10 +34,6 @@ export default function ItemsSection({
 
   return (
     <section className="flex flex-col gap-6">
-      <Text variant="h4" color="textDark">
-        {title}
-      </Text>
-
       <div className={`grid ${colsClass} gap-6`}>
         {displayedItems.map((item) => (
           <div key={item.id} className="flex items-center gap-3">

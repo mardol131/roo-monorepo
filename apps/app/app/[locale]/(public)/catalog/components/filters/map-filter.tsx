@@ -107,13 +107,13 @@ export default function MapFilter({
       className={`relative rounded-md ${height ? height : "h-100"} w-full overflow-hidden border border-zinc-200`}
     >
       {topRightButton && (
-        <div className="absolute top-3 right-3 z-10">
+        <div className="absolute top-3 right-3 z-5">
           <Button {...topRightButton} />
         </div>
       )}
       <Map
         ref={mapRef}
-        style={{ height: "100%" }}
+        style={{ height: "100%", zIndex: 1 }}
         initialViewState={{
           latitude: (activeBbox[1] + activeBbox[3]) / 2,
           longitude: (activeBbox[0] + activeBbox[2]) / 2,

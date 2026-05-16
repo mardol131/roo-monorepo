@@ -2,47 +2,39 @@
 
 ## Kolekce
 
-- Smazat mock data
-- Přidat funkce na call backendu
 - Nastavit správné ACL na kolekcích
-- Nastavit správná queries a cally
 
 ## FRONTEND
 
 ### Katalog
 
-- Call na databázi
 - Filtrovací queries
-- Design karet
 
 ### Inzerát
 
-- Obecný design
-- Design poptávek
-- Cally na databázi
+- Vyřešit premium partner badge
+- Upravit nějak ty informace, aby to nevypadalo tak stroze
+- Lokaci
+- Chce to víc fotek
 
 ## Objednávání eventu
 
-- Upravit formulář - udělat obecný tak, aby se dal vložit i jinam na stránku
-- Napojit na backend
+## Images
 
 ## ADMIN SEKCE
 
-- Formulář na vytvoření služby
-- Formulář na vytvoření varianty
-- Obecná funkce na vložení recordu do CMS
-
 ## Ovládání poptávky
 
-- Změna ceny u poptávky
-- Přijetí poptávky objedantelem
+- Zkontrolovat ovládání
+
+## Ovládání eventu
+
+- Zkontrolovat ovládání
 
 ## Account management
 
-- Ochrana stránek, kam se může dostat jen přihlášený
-- Registrace
-- Login
 - Password change
+- Email change
 
 ## Inzeráty
 
@@ -69,9 +61,13 @@
 
 ## Kalendář
 
-- Kolekce záznamů do kalendáře
-- Kalendář pro dodavatele
-- Vytvoření vlastního záznamu do kalendáře
+#################################################################
+
+# AFTER LAUNCH
+
+## Locale
+
+- Předělat texty do locales
 
 #################################################################
 
@@ -84,6 +80,7 @@
 - Možnost specifikovat vlastní místo přímo na eventu - včetně zásuvek, necessities apod.
 - Možnost sdílet venu nebo vlastní místo s dodavatelem¨
 - Do chatu přidat možnost odesílat strukturované formuláře - firma nebo uživatel vyplní otázku, do chatu se druhé straně zobrazí input pro odpověď a odpověď se ukládá do nějakého summary.
+- úprava sekcí v inzerátu
 
 # Blog
 

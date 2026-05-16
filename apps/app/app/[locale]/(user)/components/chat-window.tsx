@@ -6,13 +6,12 @@ import {
   useChatMessagesByInquiry,
   useCreateChatMessage,
 } from "@/app/react-query/chat-messages/hooks";
+import { useUpdateInquiry } from "@/app/react-query/inquiries/hooks";
 import { ChatMessage } from "@roo/common";
 import { format } from "date-fns";
 import { Send } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import DashboardSectionHeader from "./dashboard-section-header";
-import { useUpdateInquiry } from "@/app/react-query/inquiries/hooks";
-import { updateInquiry } from "@/app/react-query/inquiries/fetch";
 
 function getTextFromContent(content: ChatMessage["content"]): string {
   if (!content) return "";

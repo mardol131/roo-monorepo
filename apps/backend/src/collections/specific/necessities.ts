@@ -1,5 +1,6 @@
 import { adminOrApiKeyAuth } from '@/functions/ACL'
 import type { CollectionConfig } from 'payload'
+import { getFiltersFields } from '../common-fields/filters-fields'
 
 export const Necessities: CollectionConfig = {
   slug: 'necessities',
@@ -12,16 +13,5 @@ export const Necessities: CollectionConfig = {
     create: ({ req }) => adminOrApiKeyAuth(req),
     delete: ({ req }) => adminOrApiKeyAuth(req),
   },
-  fields: [
-    {
-      name: 'name',
-      type: 'text',
-      required: true,
-    },
-    {
-      name: 'slug',
-      type: 'text',
-      required: true,
-    },
-  ],
+  fields: getFiltersFields({}),
 }
