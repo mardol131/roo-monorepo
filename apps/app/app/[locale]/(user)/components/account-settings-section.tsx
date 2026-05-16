@@ -15,7 +15,7 @@ export function AccountSettingsSection() {
   const [emailSent, setEmailSent] = useState(false);
   const [passwordResetSent, setPasswordResetSent] = useState(false);
 
-  const isCompany = user?.type === "company";
+  const isCompany = user?.roles.includes("company");
 
   function closeModal() {
     setOpenModal(null);

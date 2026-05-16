@@ -19,12 +19,12 @@ import { phoneSchema } from "@/app/validation/schema/phone";
 import { useTranslations } from "next-intl";
 
 type CountryCode = NonNullable<NonNullable<User["phone"]>["countryCode"]>;
-type AccountType = User["type"];
+type AccountType = User["roles"];
 
 type RegisterFormValues = zod.infer<typeof formSchema>;
 
 type Props = {
-  accountType: AccountType;
+  accountType: AccountType[number];
   onSuccess?: () => void;
   buttonVersion?: ButtonProps["version"];
   buttonText?: string;
@@ -76,10 +76,14 @@ export default function RegisterForm({
 
   async function onSubmit(data: RegisterFormValues) {
     setServerError(undefined);
+
+    const accountTypeValue: AccountType[number][] =
+      accountType === "company" ? ["user", "company"] : ["user"];
+
     try {
       const res = await registerUser({
         ...data,
-        type: accountType,
+        roles: accountTypeValue,
         marketingConsent: data.marketing,
         gdprConsent: data.legal,
         termsOfUseConsent: data.legal,

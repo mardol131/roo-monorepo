@@ -26,10 +26,11 @@ export const Users: CollectionConfig = {
     },
     getPhoneField(false),
     {
-      name: 'type',
+      name: 'roles',
       type: 'select',
       options: ['user', 'company'],
       defaultValue: 'user',
+      hasMany: true,
       required: true,
     },
     {

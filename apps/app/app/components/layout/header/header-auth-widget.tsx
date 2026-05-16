@@ -56,9 +56,9 @@ export default function HeaderAuthWidget({
           link={{
             pathname: "/register",
           }}
-          size="md"
-          rounding="2xl"
-          version="secondary"
+          size="sm"
+          rounding="lg"
+          version="primary"
         />
       </>
     );
@@ -128,7 +128,7 @@ export default function HeaderAuthWidget({
             </Text>
           </Link>
           <Link
-            href={{ pathname: "/user-profile/favorites" }}
+            href={{ pathname: "/user-profile/favourites" }}
             onClick={() => {
               setOpen(false);
               onNavigate?.();
@@ -141,7 +141,7 @@ export default function HeaderAuthWidget({
             </Text>
           </Link>
 
-          {user.type === "company" && (
+          {user.roles.includes("company") && (
             <>
               <div className="border-t border-zinc-100 mt-1 pt-1 mb-1">
                 <Text variant="caption" color="secondary" className="px-3 py-1">

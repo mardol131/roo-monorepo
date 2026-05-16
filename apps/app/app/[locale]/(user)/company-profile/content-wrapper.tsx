@@ -8,6 +8,7 @@ import { SidebarItem } from "../components/sidebar-item";
 import { useListing } from "@/app/react-query/listings/hooks";
 import { useCompany } from "@/app/react-query/companies/hooks";
 import { useParams } from "next/navigation";
+import Navbar from "../components/navbar";
 
 export default function ContentWrapper({ children }: PropsWithChildren) {
   const pathname = usePathname();
@@ -29,14 +30,6 @@ export default function ContentWrapper({ children }: PropsWithChildren) {
         href: "/company-profile/companies/new",
         icon: "Plus",
       },
-    ],
-    subMenuItems: [
-      {
-        label: "Nastavení",
-        href: "/company-profile/profile-settings",
-        icon: "Settings",
-      },
-      { label: "Odhlásit se", href: "/homepage", icon: "LogOut" },
     ],
   };
 
@@ -182,7 +175,25 @@ export default function ContentWrapper({ children }: PropsWithChildren) {
     <>
       <Sidebar {...sidebarProps} />
       {company && subSidebarData && <SubSidebar {...subSidebarData} />}
-      <div className="flex-1 flex justify-center">
+      <div className="flex-1 flex flex-col justify-start items-center">
+        <Navbar
+          buttons={[
+            {
+              text: "Odejít",
+              size: "sm",
+              version: "plain",
+              iconLeft: "ExternalLink",
+              link: "/homepage",
+            },
+            {
+              text: "Nastavení",
+              size: "sm",
+              version: "plain",
+              iconLeft: "Settings",
+              link: "/company-profile/profile-settings",
+            },
+          ]}
+        />
         <div
           className={`${dontRestraintWidth ? "max-w-user-profile-content-form" : "max-w-user-profile-content"} w-full flex flex-col px-8 py-20`}
         >

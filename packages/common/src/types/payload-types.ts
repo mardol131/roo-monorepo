@@ -300,7 +300,7 @@ export interface User {
     countryCode?: '420' | null;
     number?: string | null;
   };
-  type: 'user' | 'company';
+  roles: ('user' | 'company')[];
   gdprConsent: boolean;
   termsOfUseConsent: boolean;
   marketingConsent?: boolean | null;
@@ -1551,7 +1551,7 @@ export interface UsersSelect<T extends boolean = true> {
         countryCode?: T;
         number?: T;
       };
-  type?: T;
+  roles?: T;
   gdprConsent?: T;
   termsOfUseConsent?: T;
   marketingConsent?: T;

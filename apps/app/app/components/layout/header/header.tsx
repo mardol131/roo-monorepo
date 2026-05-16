@@ -33,7 +33,7 @@ export default function Header() {
   const auth = useAuth();
 
   const userIsNotLoggedInOrDoesNotHaveCompany =
-    !auth.user || auth.user.type === "user";
+    !auth.user || auth.user.roles.includes("user");
   return (
     <header className="sticky top-0 z-50 px-6 w-full bg-white/95 backdrop-blur-sm border-b border-zinc-100">
       <div className="max-w-content mx-auto flex items-center justify-between h-16">
