@@ -165,8 +165,10 @@ export default function ContentWrapper({ children }: PropsWithChildren) {
     const subSidebar: SubSidebarProps = {
       mainMenuItems,
       subMenuItems,
-      mainMenuLabel: "Navigace firmy",
-      subMenuLabel: listingId ? "Navigace služby" : undefined,
+      mainMenuLabel: { label: "Navigace firmy", sublabel: company.name },
+      subMenuLabel: listingId
+        ? { label: "Navigace služby", sublabel: listing?.name || undefined }
+        : undefined,
     };
 
     return subSidebar;

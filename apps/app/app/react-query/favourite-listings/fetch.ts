@@ -14,17 +14,16 @@ export async function fetchFavouriteListings() {
 }
 
 export type CreateFavouriteListingPayload = {
-  listingId: string;
+  listing: string;
+  user: string;
 };
 
-export async function createFavouriteListing({
-  listingId,
-}: CreateFavouriteListingPayload) {
+export async function createFavouriteListing(
+  payload: CreateFavouriteListingPayload,
+) {
   const res = await postCollectionItem({
     collection: "favourite-listings",
-    data: {
-      listing: listingId,
-    },
+    data: payload,
   });
   if (!res) throw new Error("Failed to create favourite listing");
   return res;

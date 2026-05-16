@@ -13,21 +13,13 @@ import {
 } from "./fetch";
 import { FavouriteListing } from "@roo/common";
 import { useAuth } from "@/app/context/auth/auth-context";
-import { is } from "date-fns/locale";
 
 export function useFavouriteListings() {
-  const auth = useAuth();
-  if (!auth.user)
-    return {
-      data: undefined,
-      isLoading: false,
-      error: null,
-      isPending: false,
-      isFetching: false,
-    };
+  const { isAuthenticated } = useAuth();
   return useQuery({
     queryKey: favouriteListingKeys.all(),
     queryFn: async () => await fetchFavouriteListings(),
+    enabled: isAuthenticated,
   });
 }
 

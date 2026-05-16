@@ -21,6 +21,7 @@ import {
   Coordinates,
   buildOverlayGeoJSON,
 } from "@/app/components/ui/atoms/inputs/map-point-input";
+import { generateMediaUrl } from "@/app/functions/generate-media-url";
 
 export type PinProps = {
   value?: Coordinates;
@@ -28,7 +29,7 @@ export type PinProps = {
   data: {
     label: string;
     tags: string[];
-    imageUrl?: string;
+    filename?: string;
     buttonUrl?: IntlLink;
   };
 };
@@ -165,35 +166,45 @@ export default function MapFilter({
             closeButton={false}
             offset={20}
             focusAfterOpen
+            maxWidth="240px"
           >
-            <div className="flex relative flex-col gap-1.5 min-w-40 max-w-56">
-              {activePin.data.imageUrl && (
-                <div className="relative w-full h-28 rounded overflow-hidden mb-1">
+            <div className="flex flex-col w-60 -m-3 overflow-hidden rounded-lg">
+              {activePin.data.filename ? (
+                <div className="relative w-full h-36 flex-shrink-0">
                   <Image
-                    src={activePin.data.imageUrl}
+                    src={generateMediaUrl(activePin.data.filename)}
                     alt={activePin.data.label}
                     fill
                     className="object-cover"
                   />
+                  <button
+                    onClick={() => setActiveIndex(null)}
+                    className="absolute top-2 right-2 bg-black/40 hover:bg-black/60 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs leading-none"
+                  >
+                    ✕
+                  </button>
+                </div>
+              ) : (
+                <div className="flex justify-end px-3 pt-3">
+                  <button
+                    onClick={() => setActiveIndex(null)}
+                    className="text-zinc-400 hover:text-zinc-700 text-sm leading-none"
+                  >
+                    ✕
+                  </button>
                 </div>
               )}
-              <Text variant="h4"> {activePin.data.label}</Text>
-              {activePin.data.tags.length > 0 && (
-                <div className="flex flex-wrap gap-1">
-                  {activePin.data.tags.map((tag) => (
-                    <div key={tag} className="bg-zinc-100 p-1 rounded-md">
-                      <Text variant="caption">{tag}</Text>
-                    </div>
-                  ))}
-                </div>
-              )}
-              <div className="flex absolute -top-[3%] left-[80%] justify-end">
+              <div className="flex flex-col gap-3 p-3">
+                <Text variant="label-lg">{activePin.data.label}</Text>
                 {activePin.data.buttonUrl && (
                   <Button
-                    text=""
-                    iconLeft="Link2"
+                    text="Otevřít listing"
+                    iconLeft="ExternalLink"
                     size="sm"
+                    version="primary"
                     link={activePin.data.buttonUrl}
+                    linkTarget="_blank"
+                    className="w-full justify-center"
                   />
                 )}
               </div>

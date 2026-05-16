@@ -143,7 +143,7 @@ export default function page() {
     updateEvent({
       id: eventId,
       data: {
-        status: "deactivated",
+        status: "archived",
       },
     });
   };
@@ -301,7 +301,10 @@ export default function page() {
                 version: "successFull",
                 iconLeft: "CircleCheck",
                 size: "sm",
-                disabled: event.status === "deactivated",
+                disabled:
+                  event.status === "completed" ||
+                  event.status === "archived" ||
+                  event.status === "disabled",
                 onClick: () => confirmFinishEventHandler(),
               },
             },
@@ -316,7 +319,10 @@ export default function page() {
                 version: "dangerFull",
                 iconLeft: "CircleMinus",
                 size: "sm",
-                disabled: event.status === "deactivated",
+                disabled:
+                  event.status === "completed" ||
+                  event.status === "archived" ||
+                  event.status === "disabled",
                 onClick: () => confirmCancelEventHandler(),
               },
             },
@@ -376,6 +382,14 @@ export default function page() {
           emptyState={{
             text: "Zatím žádné poptávky",
             subtext: "Přejděte do katalogu a oslovte dodavatele pro svou akci.",
+            button: {
+              text: "Přejít do katalogu",
+              link: {
+                pathname: "/catalog",
+              },
+              size: "sm",
+              version: "eventFull",
+            },
           }}
         />
         <EventChecklistSection

@@ -64,7 +64,7 @@ export default function ListingCard({
           );
           if (record) removeFavouriteListing(record.id);
         } else {
-          createFavouriteListing({ listingId: id });
+          createFavouriteListing({ listing: id, user: auth?.user?.id || "" });
         }
         return !prev;
       });

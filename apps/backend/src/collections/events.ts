@@ -1,3 +1,4 @@
+import { getRecordStatuses } from '@roo/common'
 import type { CollectionConfig } from 'payload'
 
 export const Events: CollectionConfig = {
@@ -62,7 +63,7 @@ export const Events: CollectionConfig = {
       type: 'select',
       required: true,
       defaultValue: 'planned',
-      options: ['planning', 'deactivated', 'completed'],
+      options: getRecordStatuses(['active', 'archived', 'disabled', 'completed']),
     },
     {
       name: 'eventType',

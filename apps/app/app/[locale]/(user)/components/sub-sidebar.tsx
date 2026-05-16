@@ -5,6 +5,7 @@ import { SidebarItem } from "./sidebar-item";
 import { LucideIcons } from "@roo/common";
 import * as lucideIcons from "lucide-react";
 import React, { useCallback } from "react";
+import Text, { TextProps } from "@/app/components/ui/atoms/text";
 
 type ColorVariant = "company" | "listing";
 
@@ -35,9 +36,15 @@ const variants: Record<
 };
 
 export type SubSidebarProps = {
-  mainMenuLabel?: string;
+  mainMenuLabel?: {
+    label: string;
+    sublabel?: string;
+  };
   mainMenuItems: SidebarItem[];
-  subMenuLabel?: string;
+  subMenuLabel?: {
+    label: string;
+    sublabel?: string;
+  };
   subMenuItems?: SidebarItem[];
 };
 
@@ -68,11 +75,13 @@ export function SubSidebar({
       <div className="sticky top-0 flex flex-col h-screen">
         {mainMenuLabel && (
           <SectionLabel
-            label={mainMenuLabel}
+            label={mainMenuLabel.label}
+            sublabel={mainMenuLabel.sublabel}
             variant="company"
             icon="Building2"
             iconBgColor="bg-company-surface"
             iconColor="text-company"
+            labelColor="company"
           />
         )}
 
@@ -93,11 +102,13 @@ export function SubSidebar({
           <div className="border-t border-zinc-100 flex flex-col flex-1 overflow-y-auto">
             {subMenuLabel && (
               <SectionLabel
-                label={subMenuLabel}
+                label={subMenuLabel.label}
+                sublabel={subMenuLabel.sublabel}
                 variant="listing"
                 icon="Tag"
                 iconBgColor="bg-listing-surface"
                 iconColor="text-listing"
+                labelColor="listing"
               />
             )}
             <nav className="px-3 py-2">
@@ -121,12 +132,18 @@ export function SubSidebar({
 
 function SectionLabel({
   label,
+  sublabel,
+  labelColor,
+  subLabelColor,
   variant,
   icon,
   iconColor,
   iconBgColor,
 }: {
   label: string;
+  sublabel?: string;
+  labelColor?: TextProps["color"];
+  subLabelColor?: TextProps["color"];
   variant: ColorVariant;
   icon: LucideIcons;
   iconColor?: string;
@@ -139,12 +156,21 @@ function SectionLabel({
   >;
   return (
     <div
-      className={`px-4 pt-4 pb-1 text-[12px] font-semibold ${v.label} flex items-center gap-2`}
+      className={`px-4 pt-4 pb-1 text-[12px] font-semibold ${v.label} flex items-start gap-2`}
     >
       <div className={`p-2 ${iconBgColor || v.activeBg} rounded-md`}>
         <IconComponent className={`w-5 h-5 ${iconColor || v.activeIcon}`} />
       </div>
-      {label}
+      <div className="flex flex-col">
+        <Text variant="label" color={labelColor || "textDark"}>
+          {label}
+        </Text>
+        {sublabel && (
+          <Text variant="caption" color={subLabelColor || "textDark"}>
+            {sublabel}
+          </Text>
+        )}
+      </div>
     </div>
   );
 }

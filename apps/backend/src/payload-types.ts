@@ -900,7 +900,7 @@ export interface Activity {
  */
 export interface Space {
   id: string;
-  status: 'active' | 'inactive' | 'disabled' | 'archived' | 'unavailable';
+  status: 'active' | 'inactive' | 'disabled' | 'archived' | 'unavailable' | 'completed';
   name: string;
   type: 'area' | 'building' | 'room';
   parent?: (string | null) | Space;
@@ -975,7 +975,7 @@ export interface Cuisine {
 export interface Event {
   id: string;
   name: string;
-  status: 'planning' | 'deactivated' | 'completed';
+  status: 'active' | 'disabled' | 'archived' | 'completed';
   eventType: string | EventType;
   budget?: number | null;
   notes?:

@@ -85,9 +85,10 @@
     "singular": "Událost",
     "plural": "Události",
     "status": {
-      "deactivated": "Zrušené",
-      "planning": "Plánované",
-      "completed": "Dokončené"
+      "disabled": "Zrušené",
+      "active": "Plánované",
+      "completed": "Dokončené",
+      "archived": "Archivované"
     }
   },
   "common": {

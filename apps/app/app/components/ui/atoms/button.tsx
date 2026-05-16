@@ -56,6 +56,7 @@ export interface ButtonProps {
   size?: ButtonSize;
   rounding?: ButtonRounding;
   onClick?: () => void;
+  linkTarget?: string;
   link?: IntlLink;
   className?: string;
   iconLeft?: LucideIcons;
@@ -139,6 +140,7 @@ export default function Button({
   rounding = "full",
   onClick,
   link,
+  linkTarget,
   className,
   iconLeft,
   iconRight,
@@ -177,7 +179,7 @@ export default function Button({
 
   if (link) {
     return (
-      <Link href={link} className={buttonClass}>
+      <Link href={link} className={buttonClass} target={linkTarget}>
         {buttonContent}
       </Link>
     );

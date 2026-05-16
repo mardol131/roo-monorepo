@@ -7,11 +7,22 @@ import { useListings } from "@/app/react-query/listings/hooks";
 import Loader from "../../components/loader";
 import { EmptyState } from "../../components/empty-state";
 import ListingCard from "@/app/components/ui/molecules/listing-card";
+import TabFilter from "../../components/tab-filter";
 
 const PAGE_SIZE = 10;
 
+type ListingTypeFilter = "all" | "venue" | "gastro" | "entertainment";
+
+const filters: { label: string; value: ListingTypeFilter }[] = [
+  { label: "Vše", value: "all" },
+  { label: "Venue", value: "venue" },
+  { label: "Gastro", value: "gastro" },
+  { label: "Entertainment", value: "entertainment" },
+];
+
 export default function FavoritesPage() {
   const [page, setPage] = useState(1);
+  const [activeFilter, setActiveFilter] = useState<ListingTypeFilter>("all");
 
   const { data: favourites, isPending: isFavouritesPending } =
     useFavouriteListings();
@@ -27,10 +38,12 @@ export default function FavoritesPage() {
     [favourites],
   );
 
-  const filteredListings = useMemo(
-    () => allListings?.docs?.filter((l) => favouriteIds.has(l.id)) ?? [],
-    [allListings, favouriteIds],
-  );
+  const filteredListings = useMemo(() => {
+    const favourites =
+      allListings?.docs?.filter((l) => favouriteIds.has(l.id)) ?? [];
+    if (activeFilter === "all") return favourites;
+    return favourites.filter((l) => l.details[0].blockType === activeFilter);
+  }, [allListings, favouriteIds, activeFilter]);
 
   const totalPages = Math.ceil(filteredListings.length / PAGE_SIZE);
   const paginatedListings = filteredListings.slice(
@@ -46,6 +59,12 @@ export default function FavoritesPage() {
       <PageHeading
         heading="Oblíbení dodavatelé"
         description="Přehled všech vašich oblíbených dodavatelů."
+      />
+      <TabFilter
+        tabs={filters}
+        activeTab={activeFilter}
+        onChange={setActiveFilter}
+        className="mb-6"
       />
       {filteredListings.length === 0 ? (
         <EmptyState

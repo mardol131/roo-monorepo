@@ -11,9 +11,11 @@ type Props = {
 const color = ({ eventStatus }: Props) => {
   const status = eventStatus;
   switch (status) {
-    case "planning":
+    case "active":
       return { bgColor: "bg-zinc-100", textColor: "text-zinc-500" };
-    case "deactivated":
+    case "disabled":
+      return { bgColor: "bg-danger-surface", textColor: "text-danger" };
+    case "archived":
       return { bgColor: "bg-danger-surface", textColor: "text-danger" };
     case "completed":
       return { bgColor: "bg-success-surface", textColor: "text-success" };
@@ -25,10 +27,14 @@ const color = ({ eventStatus }: Props) => {
 const icon = ({ eventStatus }: Props) => {
   const status = eventStatus;
   switch (status) {
-    case "planning":
-      return "CircleQuestionMark";
-    case "deactivated":
+    case "active":
+      return "CircleCheck";
+    case "disabled":
       return "CircleMinus";
+    case "archived":
+      return "CircleMinus";
+    case "completed":
+      return "CircleCheck";
     default:
       return "CircleCheck";
   }

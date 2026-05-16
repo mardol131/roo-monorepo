@@ -31,10 +31,6 @@ export const FavouriteListings: CollectionConfig = {
       name: 'user',
       type: 'relationship',
       relationTo: 'users',
-      defaultValue: ({ req }) => {
-        if (req.user) return req.user.id
-        return null
-      },
     },
     {
       name: 'listing',

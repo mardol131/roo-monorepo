@@ -175,6 +175,7 @@ export default function NewEventForm({
         budget: data.budget,
         date: { start: data.startDate, end: data.endDate },
         guests: data.guests,
+        sharing: {},
         location:
           data.locationType === "custom"
             ? [
@@ -187,7 +188,7 @@ export default function NewEventForm({
                 },
               ]
             : [{ blockType: "venue" }],
-        status: "planning",
+        status: "active",
       },
       {
         onSuccess: ({ doc }) => {
@@ -195,8 +196,7 @@ export default function NewEventForm({
             onSuccess(doc);
           } else {
             router.push({
-              pathname: "/user-profile/events/[eventId]",
-              params: { eventId: doc.id },
+              pathname: "/user-profile/events",
             });
           }
         },

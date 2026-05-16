@@ -209,7 +209,7 @@ export default function CatalogSidebarFilters({
             listing.eventTypes?.flatMap((e) =>
               typeof e === "object" ? [e.name] : [],
             ) ?? [],
-          imageUrl: listing.images.coverImage,
+          filename: listing.images.coverImage.filename,
           buttonUrl: {
             pathname: "/listing/[listingId]",
             params: { listingId: listing.id },
@@ -354,7 +354,7 @@ export default function CatalogSidebarFilters({
       <div className="relative h-full flex flex-col">
         {/* Mapa */}
         <div
-          className={`mb-6 rounded-xl overflow-hidden ${mapViewIsActive ? "h-100" : "h-100 bg-linear-to-br from-zinc-50 to-zinc-100 flex items-center justify-center border border-zinc-200"} transition-all ease-in-out`}
+          className={`mb-6 rounded-xl overflow-hidden ${mapViewIsActive ? "h-130" : "h-100 bg-linear-to-br from-zinc-50 to-zinc-100 flex items-center justify-center border border-zinc-200"} transition-all ease-in-out`}
         >
           <MapFilter
             pins={mapPins}
