@@ -246,6 +246,76 @@ export const listingsCommonFields: Field[] = [
     relationTo: 'technologies',
     hasMany: true,
   },
+  {
+    name: 'customSections',
+    type: 'blocks',
+    blocks: [
+      {
+        slug: 'gallery1',
+        fields: [
+          { name: 'title', type: 'text', required: true },
+          { name: 'text', type: 'textarea' },
+          {
+            name: 'images',
+            type: 'array',
+            minRows: 1,
+            maxRows: 1,
+            fields: getMediaFields(true),
+            required: true,
+          },
+        ],
+      },
+      {
+        slug: 'gallery2',
+        fields: [
+          { name: 'title', type: 'text', required: true },
+          { name: 'text', type: 'textarea' },
+          {
+            name: 'images',
+            type: 'array',
+            minRows: 2,
+            maxRows: 2,
+            fields: getMediaFields(true),
+            required: true,
+          },
+        ],
+      },
+      {
+        slug: 'gallery4',
+        fields: [
+          { name: 'title', type: 'text', required: true },
+          { name: 'text', type: 'textarea' },
+          { name: 'images', type: 'array', minRows: 4, maxRows: 4, fields: getMediaFields(true) },
+        ],
+      },
+      {
+        slug: 'gallery5',
+        fields: [
+          { name: 'title', type: 'text', required: true },
+          { name: 'text', type: 'textarea' },
+          {
+            name: 'images',
+            type: 'array',
+            minRows: 5,
+            maxRows: 5,
+            fields: getMediaFields(true),
+            required: true,
+          },
+        ],
+      },
+    ],
+  },
+  {
+    name: 'sectionOrder',
+    type: 'array',
+    fields: [
+      {
+        name: 'key',
+        type: 'text',
+        required: true,
+      },
+    ],
+  },
 ]
 
 export const variantsCommonFields: Field[] = [

@@ -1,5 +1,6 @@
 export * from "./types/icons";
 export * from "./types/payload-types";
+export * from "./types/section-keys";
 export * from "./types/payload-custom";
 export * from "./types/media";
 export * from "./types/custom";

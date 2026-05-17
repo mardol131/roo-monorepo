@@ -6,28 +6,17 @@ import {
   BedDouble,
   Car,
   Coffee,
-  MapPin,
-  Maximize2,
   Tag,
-  Users,
   Wrench,
   Cpu,
   Dumbbell,
 } from "lucide-react";
-import DescriptionSection from "../description-section";
 
 type VenueDetail = Extract<Listing["details"][number], { blockType: "venue" }>;
 
 interface Props {
-  listing: Listing;
   detail: VenueDetail;
 }
-
-const spacesTypeLabels: Record<VenueDetail["spacesType"], string> = {
-  area: "Otevřená plocha",
-  building: "Budova",
-  room: "Místnost",
-};
 
 const vehicleTypeLabels: Record<string, string> = {
   car: "Osobní auto",
@@ -36,20 +25,14 @@ const vehicleTypeLabels: Record<string, string> = {
   bus: "Autobus",
 };
 
-export default function VenueSection({ listing, detail }: Props) {
-  const cityName =
-    typeof detail.location.city === "string"
-      ? detail.location.city
-      : (detail.location.city?.name ?? "");
-
+export default function VenueSection({ detail }: Props) {
   const amenities = resolveNames(detail.amenities ?? []);
   const services = resolveNames(detail.services ?? []);
   const technology = resolveNames(detail.technology ?? []);
   const activities = resolveNames(detail.activities ?? []);
-  const placeTypes = resolveNames(detail.placeTypes ?? []);
 
   const vehicleTypes = (detail.access.vehicleTypes ?? []).map(
-    (v) => vehicleTypeLabels[v] ?? v,
+    (v: string) => vehicleTypeLabels[v] ?? v,
   );
   const accessFlags = [
     detail.access.loadingRamp && "Nakládací rampa",
@@ -59,72 +42,8 @@ export default function VenueSection({ listing, detail }: Props) {
     detail.access.serviceArea && "Servisní plocha",
   ].filter((f): f is string => !!f);
 
-  const mapUrl = `https://maps.google.com/?q=${detail.location.latitude},${detail.location.longitude}`;
-
   return (
     <>
-      {listing.description && (
-        <SectionWrapper title="O tomto inzerátu">
-          <DescriptionSection description={listing.description} />
-        </SectionWrapper>
-      )}
-
-      <SectionWrapper title="Kde nás najdete">
-        <div className="flex flex-col gap-2">
-          <InfoRow
-            icon={<MapPin size={16} />}
-            label="Adresa"
-            value={`${detail.location.address}${cityName ? `, ${cityName}` : ""}`}
-          />
-          <a
-            href={mapUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-sm text-primary underline-offset-2 hover:underline ml-7"
-          >
-            Zobrazit na mapě
-          </a>
-        </div>
-      </SectionWrapper>
-
-      <SectionWrapper title="Základní informace">
-        <div className="grid grid-cols-2 gap-3">
-          <InfoRow
-            icon={<Users size={16} />}
-            label="Kapacita"
-            value={`${detail.capacity} osob`}
-          />
-          <InfoRow
-            icon={<Maximize2 size={16} />}
-            label="Plocha"
-            value={`${detail.area} m²`}
-          />
-          <InfoRow
-            icon={<Tag size={16} />}
-            label="Typ prostoru"
-            value={spacesTypeLabels[detail.spacesType]}
-          />
-          {(listing.indoor != null || listing.outdoor != null) && (
-            <InfoRow
-              icon={<Tag size={16} />}
-              label="Prostředí"
-              value={
-                listing.indoor && listing.outdoor
-                  ? "Interiér i exteriér"
-                  : listing.indoor
-                    ? "Interiér"
-                    : "Exteriér"
-              }
-            />
-          )}
-        </div>
-        {placeTypes.length > 0 && (
-          <div className="mt-4">
-            <ChipList items={placeTypes} />
-          </div>
-        )}
-      </SectionWrapper>
-
       {amenities.length > 0 && (
         <SectionWrapper title="Vybavení">
           <ItemsSection

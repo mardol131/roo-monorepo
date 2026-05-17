@@ -13,9 +13,7 @@
 ### Inzerát
 
 - Vyřešit premium partner badge
-- Upravit nějak ty informace, aby to nevypadalo tak stroze
 - Lokaci
-- Chce to víc fotek
 
 ## Objednávání eventu
 
@@ -73,14 +71,9 @@
 
 # Features to be added
 
-- Fotky nakládacího a vykládacího prostoru
-- Obecné dispozice pokojů
 - Přidat services do listings, variants a obecně umožnit registraci službám
 - U každé poptávky pro přihlášeného uživatele zobrazit, jestli už jej má v nějakém eventu
-- Možnost specifikovat vlastní místo přímo na eventu - včetně zásuvek, necessities apod.
-- Možnost sdílet venu nebo vlastní místo s dodavatelem¨
 - Do chatu přidat možnost odesílat strukturované formuláře - firma nebo uživatel vyplní otázku, do chatu se druhé straně zobrazí input pro odpověď a odpověď se ukládá do nějakého summary.
-- úprava sekcí v inzerátu
 
 # Blog
 

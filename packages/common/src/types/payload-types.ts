@@ -617,6 +617,82 @@ export interface Listing {
     | null;
   rules?: (string | Rule)[] | null;
   technologies?: (string | Technology)[] | null;
+  customSections?:
+    | (
+        | {
+            title: string;
+            text?: string | null;
+            images: {
+              filename: string;
+              alt?: string | null;
+              width?: number | null;
+              height?: number | null;
+              size?: number | null;
+              mimeType?: string | null;
+              id?: string | null;
+            }[];
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'gallery1';
+          }
+        | {
+            title: string;
+            text?: string | null;
+            images: {
+              filename: string;
+              alt?: string | null;
+              width?: number | null;
+              height?: number | null;
+              size?: number | null;
+              mimeType?: string | null;
+              id?: string | null;
+            }[];
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'gallery2';
+          }
+        | {
+            title: string;
+            text?: string | null;
+            images?:
+              | {
+                  filename: string;
+                  alt?: string | null;
+                  width?: number | null;
+                  height?: number | null;
+                  size?: number | null;
+                  mimeType?: string | null;
+                  id?: string | null;
+                }[]
+              | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'gallery4';
+          }
+        | {
+            title: string;
+            text?: string | null;
+            images: {
+              filename: string;
+              alt?: string | null;
+              width?: number | null;
+              height?: number | null;
+              size?: number | null;
+              mimeType?: string | null;
+              id?: string | null;
+            }[];
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'gallery5';
+          }
+      )[]
+    | null;
+  sectionOrder?:
+    | {
+        key: string;
+        id?: string | null;
+      }[]
+    | null;
   details: (
     | {
         location: {
@@ -1917,6 +1993,92 @@ export interface ListingsSelect<T extends boolean = true> {
       };
   rules?: T;
   technologies?: T;
+  customSections?:
+    | T
+    | {
+        gallery1?:
+          | T
+          | {
+              title?: T;
+              text?: T;
+              images?:
+                | T
+                | {
+                    filename?: T;
+                    alt?: T;
+                    width?: T;
+                    height?: T;
+                    size?: T;
+                    mimeType?: T;
+                    id?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+        gallery2?:
+          | T
+          | {
+              title?: T;
+              text?: T;
+              images?:
+                | T
+                | {
+                    filename?: T;
+                    alt?: T;
+                    width?: T;
+                    height?: T;
+                    size?: T;
+                    mimeType?: T;
+                    id?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+        gallery4?:
+          | T
+          | {
+              title?: T;
+              text?: T;
+              images?:
+                | T
+                | {
+                    filename?: T;
+                    alt?: T;
+                    width?: T;
+                    height?: T;
+                    size?: T;
+                    mimeType?: T;
+                    id?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+        gallery5?:
+          | T
+          | {
+              title?: T;
+              text?: T;
+              images?:
+                | T
+                | {
+                    filename?: T;
+                    alt?: T;
+                    width?: T;
+                    height?: T;
+                    size?: T;
+                    mimeType?: T;
+                    id?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+      };
+  sectionOrder?:
+    | T
+    | {
+        key?: T;
+        id?: T;
+      };
   details?:
     | T
     | {

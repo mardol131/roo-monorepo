@@ -11,9 +11,7 @@ export default function ListingDetailSection({ listing }: Props) {
   const detail = listing.details[0];
   if (!detail) return null;
 
-  if (detail.blockType === "venue")
-    return <VenueSection listing={listing} detail={detail} />;
-  if (detail.blockType === "gastro")
-    return <GastroSection listing={listing} detail={detail} />;
-  return <EntertainmentSection listing={listing} detail={detail} />;
+  if (detail.blockType === "venue") return <VenueSection detail={detail} />;
+  if (detail.blockType === "gastro") return <GastroSection detail={detail} />;
+  return <EntertainmentSection detail={detail} />;
 }

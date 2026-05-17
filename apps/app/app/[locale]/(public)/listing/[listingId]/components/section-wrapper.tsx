@@ -25,7 +25,7 @@ export default function SectionWrapper({
               <Text
                 variant="h3"
                 color="textDark"
-                className="font-display uppercase tracking-[0.12em]"
+                className="font-display uppercase"
               >
                 {title}
               </Text>

@@ -16,6 +16,7 @@ type Props = {
   nameSideComponent?: React.ReactNode;
   infoItems?: InfoItemDef[];
   button?: ButtonProps;
+  buttons?: ButtonProps[];
 };
 
 export default function DashboardHeader({
@@ -26,6 +27,7 @@ export default function DashboardHeader({
   nameSideComponent,
   infoItems,
   button,
+  buttons,
 }: Props) {
   return (
     <div className="flex items-start justify-between mb-8">
@@ -56,7 +58,12 @@ export default function DashboardHeader({
         </div>
       </div>
 
-      {button && <Button {...button} />}
+      {(button || buttons) && (
+        <div className="flex items-center gap-2 shrink-0">
+          {buttons?.map((b, i) => <Button key={i} {...b} />)}
+          {button && <Button {...button} />}
+        </div>
+      )}
     </div>
   );
 }

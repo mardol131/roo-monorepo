@@ -103,6 +103,15 @@ export default function ContentWrapper({ children }: PropsWithChildren) {
             icon: "Settings",
           },
           {
+            label: "Vzhled inzerátu",
+            href: {
+              pathname:
+                "/company-profile/companies/[companyId]/listings/[listingId]/sections",
+              params: { companyId, listingId },
+            },
+            icon: "Wallpaper",
+          },
+          {
             label: "Poptávky",
             href: {
               pathname:
