@@ -3,9 +3,14 @@ import React from "react";
 
 export function Chip({ label }: { label: string }) {
   return (
-    <span className="px-3 py-1.5 bg-zinc-100 text-zinc-700 rounded-full text-sm font-medium whitespace-nowrap">
+    <Text
+      as="span"
+      variant="caption"
+      color="textDark"
+      className="inline-block px-3 py-1.5 border border-zinc-200 bg-white rounded-md tracking-wider"
+    >
       {label}
-    </span>
+    </Text>
   );
 }
 
@@ -30,13 +35,23 @@ export function InfoRow({
   value: string;
 }) {
   return (
-    <div className="flex items-center gap-3">
-      <div className="text-zinc-400 shrink-0">{icon}</div>
-      <div className="flex items-baseline gap-2">
-        <Text variant="label" color="secondary">
+    <div className="flex items-start gap-3">
+      <div className="text-primary shrink-0 mt-0.5">{icon}</div>
+      <div className="flex flex-col gap-0.5">
+        <Text
+          as="span"
+          variant="caption"
+          color="textLight"
+          className="uppercase tracking-widest font-semibold"
+        >
           {label}
         </Text>
-        <Text variant="label-lg" color="textDark">
+        <Text
+          as="span"
+          variant="label-lg"
+          color="textDark"
+          className="font-semibold"
+        >
           {value}
         </Text>
       </div>

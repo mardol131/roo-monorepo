@@ -16,18 +16,27 @@ export default function SectionWrapper({
   id,
 }: PropsWithChildren<SectionWrapperProps>) {
   return (
-    <section id={id} className="not-last:border-b w-full pb-15 border-zinc-300">
+    <section id={id} className="not-last:border-b w-full py-10 border-zinc-100">
       {(title || subtitle) && (
-        <div className="flex items-center gap-2 mb-5">
-          {Icon && <Icon className="w-5 h-5 text-zinc-400 shrink-0" />}
-          <div>
-            {title && <Text variant="h3">{title}</Text>}
-            {subtitle && (
-              <Text variant="body-sm" color="textLight">
-                {subtitle}
+        <div className="mb-8">
+          <div className="flex items-center gap-3 mb-3">
+            {Icon && <Icon className="w-5 h-5 text-primary shrink-0" />}
+            {title && (
+              <Text
+                variant="h3"
+                color="textDark"
+                className="font-display uppercase tracking-[0.12em]"
+              >
+                {title}
               </Text>
             )}
           </div>
+          <div className="w-8 h-0.5 bg-primary rounded-full" />
+          {subtitle && (
+            <Text variant="body-sm" color="textLight" className="mt-3">
+              {subtitle}
+            </Text>
+          )}
         </div>
       )}
       {children}

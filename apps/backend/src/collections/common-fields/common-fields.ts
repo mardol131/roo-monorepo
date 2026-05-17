@@ -171,7 +171,7 @@ export const listingsCommonFields: Field[] = [
         required: true,
       },
       {
-        name: 'groupedBy',
+        name: 'group',
         type: 'select',
         options: ['general', 'booking', 'cancellation', 'payment', 'other'],
         defaultValue: 'general',

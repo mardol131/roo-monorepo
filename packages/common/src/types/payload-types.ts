@@ -578,7 +578,7 @@ export interface Listing {
         active?: boolean | null;
         question: string;
         answer: string;
-        groupedBy?: ('general' | 'booking' | 'cancellation' | 'payment' | 'other') | null;
+        group?: ('general' | 'booking' | 'cancellation' | 'payment' | 'other') | null;
         id?: string | null;
       }[]
     | null;
@@ -1875,7 +1875,7 @@ export interface ListingsSelect<T extends boolean = true> {
         active?: T;
         question?: T;
         answer?: T;
-        groupedBy?: T;
+        group?: T;
         id?: T;
       };
   references?:

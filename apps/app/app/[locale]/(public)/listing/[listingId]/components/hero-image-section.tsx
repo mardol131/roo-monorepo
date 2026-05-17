@@ -8,12 +8,11 @@ import Image from "next/image";
 import React, { useState } from "react";
 
 interface Props {
-  name: string;
   coverImage: string;
   gallery: string[];
 }
 
-export default function HeroImageSection({ name, coverImage, gallery }: Props) {
+export default function HeroImageSection({ coverImage, gallery }: Props) {
   const images = [coverImage, ...gallery].slice(0, 5);
   const allImageUrls = [coverImage, ...gallery].map((image) =>
     generateMediaUrl(image),
@@ -40,7 +39,7 @@ export default function HeroImageSection({ name, coverImage, gallery }: Props) {
           >
             <Image
               src={generateMediaUrl(filename)}
-              alt={name}
+              alt={`Image ${i + 1}`}
               width={600}
               height={400}
               className="w-full h-full aspect-square object-cover transition-transform duration-300 hover:scale-105"
@@ -55,10 +54,6 @@ export default function HeroImageSection({ name, coverImage, gallery }: Props) {
           onClick={() => openAt(0)}
         />
       </div>
-
-      <Text variant="h2" as="h1" className="mt-5">
-        {name}
-      </Text>
 
       <ImageGallery
         isOpen={galleryOpen}

@@ -34,10 +34,13 @@ export default function ItemsSection({
 
   return (
     <section className="flex flex-col gap-6">
-      <div className={`grid ${colsClass} gap-6`}>
+      <div className={`grid ${colsClass} gap-3`}>
         {displayedItems.map((item) => (
-          <div key={item.id} className="flex items-center gap-3">
-            <div className="flex-shrink-0 text-primary mt-1">{item.icon}</div>
+          <div
+            key={item.id}
+            className="flex items-center gap-3 px-4 py-3 rounded-lg bg-zinc-50 border border-zinc-100"
+          >
+            <div className="text-primary shrink-0">{item.icon}</div>
             <Text variant="label-lg" color="textDark">
               {item.label}
             </Text>
