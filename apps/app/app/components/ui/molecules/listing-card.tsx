@@ -24,15 +24,12 @@ import {
   Clock,
 } from "lucide-react";
 
-type Details = Listing["details"][number];
-
 type Props = {
   imageUrl: string;
   id: string;
   title: string;
   price: number;
   imageAlt?: string;
-  details?: Details;
 };
 
 const AUDIENCE_LABEL: Record<string, string> = {
@@ -63,105 +60,12 @@ function Chip({ icon, label }: { icon: React.ReactNode; label: string }) {
   );
 }
 
-function DetailsChips({ details }: { details: Details }) {
-  const chips: React.ReactNode[] = [];
-  const iconSize = 11;
-
-  if (details.blockType === "venue") {
-    const city = getCityName(details.location.city);
-    if (city)
-      chips.push(
-        <Chip key="city" icon={<MapPin size={iconSize} />} label={city} />,
-      );
-    chips.push(
-      <Chip
-        key="cap"
-        icon={<Users size={iconSize} />}
-        label={`${details.capacity} hostů`}
-      />,
-    );
-    chips.push(
-      <Chip
-        key="area"
-        icon={<Maximize2 size={iconSize} />}
-        label={`${details.area} m²`}
-      />,
-    );
-    if (details.hasAccommodation)
-      chips.push(
-        <Chip
-          key="acc"
-          icon={<BedDouble size={iconSize} />}
-          label="Ubytování"
-        />,
-      );
-    if (details.parking?.hasParking)
-      chips.push(
-        <Chip key="park" icon={<Car size={iconSize} />} label="Parkování" />,
-      );
-  }
-
-  if (details.blockType === "gastro") {
-    const city = getCityName(details.location.city);
-    if (city)
-      chips.push(
-        <Chip key="city" icon={<MapPin size={iconSize} />} label={city} />,
-      );
-    chips.push(
-      <Chip
-        key="cap"
-        icon={<Users size={iconSize} />}
-        label={`${details.capacity} hostů`}
-      />,
-    );
-    if (details.hasAlcoholLicense)
-      chips.push(
-        <Chip key="alc" icon={<Wine size={iconSize} />} label="Alkohol" />,
-      );
-    if (details.kidsMenu)
-      chips.push(
-        <Chip key="kids" icon={<Baby size={iconSize} />} label="Dětské menu" />,
-      );
-  }
-
-  if (details.blockType === "entertainment") {
-    chips.push(
-      <Chip
-        key="cap"
-        icon={<Users size={iconSize} />}
-        label={`${details.capacity} hostů`}
-      />,
-    );
-    if (details.audience?.length) {
-      const label = details.audience
-        .map((a) => AUDIENCE_LABEL[a] ?? a)
-        .join(", ");
-      chips.push(
-        <Chip key="aud" icon={<Users size={iconSize} />} label={label} />,
-      );
-    }
-    if (details.setupAndTearDownRules?.setupTime) {
-      chips.push(
-        <Chip
-          key="setup"
-          icon={<Clock size={iconSize} />}
-          label={`Instalace ${details.setupAndTearDownRules.setupTime} min`}
-        />,
-      );
-    }
-  }
-
-  if (chips.length === 0) return null;
-  return <div className="flex flex-wrap gap-1 mt-1">{chips}</div>;
-}
-
 export default function ListingCard({
   imageUrl,
   title,
   price,
   imageAlt,
   id,
-  details,
 }: Props) {
   const { isAuthenticated } = useAuth();
   const [isLiked, setIsLiked] = useState(false);
@@ -253,7 +157,6 @@ export default function ListingCard({
             <FaStar size={13} className="text-rose-500" />
           </div>
         </div>
-        {details && <DetailsChips details={details} />}
         <Text variant="label" color="textLight" className="font-semibold mt-1">
           Cena od <span className="text-primary">{price} Kč</span>
         </Text>

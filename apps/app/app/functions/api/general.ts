@@ -1,19 +1,24 @@
 import { Config, PayloadResponse, Where } from "@roo/common";
 import { stringify } from "qs-esm";
 
-export type GetCollectionOptions<T extends keyof Config["collections"]> = {
-  collection: T;
+export type GetCollectionParams = {
   query?: Where;
   limit?: number;
   sort?: string;
+  searchParams?: URLSearchParams;
   headers?: Record<string, string>;
 };
+
+export type GetCollectionOptions<T extends keyof Config["collections"]> = {
+  collection: T;
+} & GetCollectionParams;
 
 export async function getCollection<T extends keyof Config["collections"]>({
   collection,
   query,
   limit,
   sort,
+  searchParams,
   headers,
 }: GetCollectionOptions<T>): Promise<
   PayloadResponse<Config["collections"][T]>
@@ -25,7 +30,12 @@ export async function getCollection<T extends keyof Config["collections"]>({
   const limitQuery = limit ? `limit=${limit}` : undefined;
   const sortQuery = sort ? `sort=${sort}` : undefined;
 
-  const queryParams = [stringifiedQuery, limitQuery, sortQuery]
+  const queryParams = [
+    stringifiedQuery,
+    limitQuery,
+    sortQuery,
+    searchParams?.toString(),
+  ]
     .filter(Boolean)
     .join("&");
 
@@ -109,7 +119,15 @@ export async function postCollectionItem<
   collection: T;
   data: Omit<
     Config["collections"][T],
-    "id" | "createdAt" | "updatedAt" | "owner" | "slug" | "status" | "user"
+    | "id"
+    | "createdAt"
+    | "updatedAt"
+    | "owner"
+    | "slug"
+    | "status"
+    | "user"
+    | "type"
+    | "tariff"
   >;
 }): Promise<{ doc: Config["collections"][T]; message: string }> {
   const url = new URL(
@@ -125,7 +143,9 @@ export async function postCollectionItem<
     body: JSON.stringify(data),
   });
 
-  if (!res.ok) throw new Error(`Failed to create item in ${collection}`);
+  if (!res.ok) {
+    throw new Error(`Failed to create item in ${collection}`);
+  }
   return res.json();
 }
 

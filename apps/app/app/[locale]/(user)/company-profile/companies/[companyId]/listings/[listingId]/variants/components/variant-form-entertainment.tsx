@@ -24,8 +24,9 @@ import type { Resolver } from "react-hook-form";
 import { Controller, useFieldArray, useForm } from "react-hook-form";
 import { z } from "zod";
 import { createVariantCommonSchema } from "./common-schema";
-import { getOptionalPositiveNumber } from "../../../new/forms/common-schema";
+import { getOptionalPositiveNumber } from "@/app/validation/schema/utils";
 import { relationshipItemSchema } from "@/app/validation/schema/relationship-item-schema";
+import { useFilterOptions } from "@/app/react-query/filters/aggregated-filters/hooks";
 
 // ── Color scheme ───────────────────────────────────────────────────────────────
 
@@ -142,22 +143,26 @@ export default function EditVariantFormEntertainment({
   defaultValues,
 }: Props) {
   const { data: listing } = useListing(listingId);
-  const entertainmentDetail = listing?.details.find(
-    (d) => d.blockType === "entertainment",
+  const { data: filters } = useFilterOptions();
+
+  const listingEventTypes = (listing?.properties.eventTypes ?? []).flatMap(
+    (id) => {
+      const found = filters?.eventTypes.find((e) => e.id === id);
+      return found ? [{ id: found.id, name: found.name }] : [];
+    },
   );
-
-  const toItem = <T extends { id: string; name: string }>(v: string | T) =>
-    typeof v === "string" ? { id: v, name: "" } : { id: v.id, name: v.name };
-
-  const listingEventTypes = (listing?.eventTypes ?? []).map(toItem);
-  const listingPersonnel =
-    entertainmentDetail?.blockType === "entertainment"
-      ? (entertainmentDetail.personnel ?? []).map(toItem)
-      : [];
-  const listingNecessities =
-    entertainmentDetail?.blockType === "entertainment"
-      ? (entertainmentDetail.necessities ?? []).map(toItem)
-      : [];
+  const listingPersonnel = (listing?.properties.personnel ?? []).flatMap(
+    (id) => {
+      const found = filters?.personnel.find((p) => p.id === id);
+      return found ? [{ id: found.id, name: found.name }] : [];
+    },
+  );
+  const listingNecessities = (listing?.properties.necessities ?? []).flatMap(
+    (id) => {
+      const found = filters?.necessities.find((n) => n.id === id);
+      return found ? [{ id: found.id, name: found.name }] : [];
+    },
+  );
   const {
     control,
     register,

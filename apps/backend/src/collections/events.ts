@@ -172,50 +172,53 @@ export const Events: CollectionConfig = {
     },
     {
       name: 'location',
-      type: 'blocks',
-      maxRows: 1,
-      minRows: 1,
-      blocks: [
+      type: 'group',
+      required: true,
+      fields: [
         {
-          slug: 'venue',
-          fields: [
-            {
-              name: 'venue',
-              type: 'relationship',
-              relationTo: 'listings',
-              admin: {
-                description: 'Vyberte venue z katalogu služeb.',
-              },
-            },
-          ],
+          name: 'type',
+          type: 'select',
+          required: true,
+          defaultValue: 'custom',
+          options: ['custom', 'venue'],
         },
         {
-          slug: 'custom',
-          fields: [
-            {
-              name: 'city',
-              type: 'relationship',
-              relationTo: 'cities',
-              required: true,
-            },
-            {
-              name: 'address',
-              type: 'text',
-              admin: {
-                placeholder: 'Ulice a číslo popisné',
-              },
-            },
-            {
-              name: 'spaceType',
-              type: 'relationship',
-              relationTo: 'space-types',
-              required: true,
-            },
-            {
-              name: 'description',
-              type: 'text',
-            },
-          ],
+          name: 'venue',
+          type: 'relationship',
+          relationTo: 'listings',
+          admin: {
+            description: 'Vyberte venue z katalogu služeb.',
+          },
+        },
+        {
+          name: 'city',
+          type: 'relationship',
+          relationTo: 'cities',
+          validate: (value: unknown, { siblingData }: { siblingData: Record<string, unknown> }) => {
+            if (siblingData?.type === 'custom' && !value) {
+              return 'Město je povinné, pokud není zvoleno venue z katalogu.'
+            }
+            return true
+          },
+        },
+        {
+          name: 'address',
+          type: 'text',
+        },
+        {
+          name: 'spaceType',
+          type: 'relationship',
+          relationTo: 'space-types',
+          validate: (value: unknown, { siblingData }: { siblingData: Record<string, unknown> }) => {
+            if (siblingData?.type === 'custom' && !value) {
+              return 'Typ prostoru je povinný, pokud není zvoleno venue z katalogu.'
+            }
+            return true
+          },
+        },
+        {
+          name: 'description',
+          type: 'text',
         },
       ],
     },

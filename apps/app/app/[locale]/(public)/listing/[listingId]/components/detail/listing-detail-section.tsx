@@ -8,10 +8,13 @@ interface Props {
 }
 
 export default function ListingDetailSection({ listing }: Props) {
-  const detail = listing.details[0];
-  if (!detail) return null;
+  const detail = listing.detail;
+  if (!detail || typeof detail.value === "string") return null;
 
-  if (detail.blockType === "venue") return <VenueSection detail={detail} />;
-  if (detail.blockType === "gastro") return <GastroSection detail={detail} />;
-  return <EntertainmentSection detail={detail} />;
+  if (detail.relationTo === "listing-venue-details")
+    return <VenueSection detail={detail.value} listing={listing} />;
+  if (detail.relationTo === "listing-gastro-details")
+    return <GastroSection detail={detail.value} listing={listing} />;
+  if (detail.relationTo === "listing-entertainment-details")
+    return <EntertainmentSection detail={detail.value} listing={listing} />;
 }

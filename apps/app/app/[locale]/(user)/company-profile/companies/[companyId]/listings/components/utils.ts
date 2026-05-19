@@ -1,3 +1,5 @@
+import z from "zod";
+
 export const toItem = <T extends { id: string; name: string }>(
   v: string | T,
 ): { id: string; name: string } =>
@@ -5,3 +7,5 @@ export const toItem = <T extends { id: string; name: string }>(
 
 export const toIds = (arr: { id: string; name: string }[]): string[] =>
   arr.map((x) => x.id);
+
+export const itemSchema = z.object({ id: z.string(), name: z.string() });

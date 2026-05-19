@@ -142,8 +142,8 @@ export default function UserProfilePage() {
                       iconColor="text-inquiry"
                       iconBackgroundColor="bg-inquiry-surface"
                       label={
-                        typeof inquiry.listing.value === "string"
-                          ? inquiry.listing.value
+                        typeof inquiry.listing !== "string"
+                          ? inquiry.listing.name
                           : "Poptávka"
                       }
                       items={[

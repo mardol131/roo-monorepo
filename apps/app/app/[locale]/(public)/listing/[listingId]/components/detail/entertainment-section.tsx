@@ -1,15 +1,14 @@
-import SectionWrapper from "../section-wrapper";
-import { ChipList, InfoRow, resolveNames } from "../listing-ui";
-import { Listing } from "@roo/common";
-import { Clock } from "lucide-react";
+"use client";
 
-type EntertainmentDetail = Extract<
-  Listing["details"][number],
-  { blockType: "entertainment" }
->;
+import SectionWrapper from "../section-wrapper";
+import { ChipList, InfoRow } from "../listing-ui";
+import { Listing, ListingEntertainmentDetail } from "@roo/common";
+import { Clock } from "lucide-react";
+import { useFilterOptions } from "@/app/react-query/filters/aggregated-filters/hooks";
 
 interface Props {
-  detail: EntertainmentDetail;
+  detail: ListingEntertainmentDetail;
+  listing: Listing;
 }
 
 const audienceLabels: Record<string, string> = {
@@ -18,10 +17,23 @@ const audienceLabels: Record<string, string> = {
   seniors: "Senioři",
 };
 
-export default function EntertainmentSection({ detail }: Props) {
-  const entertainmentTypes = resolveNames(detail.entertainmentTypes ?? []);
-  const rules = resolveNames(detail.rules ?? []);
-  const necessities = resolveNames(detail.necessities ?? []);
+export default function EntertainmentSection({ detail, listing }: Props) {
+  const { data: filters } = useFilterOptions();
+
+  const entertainmentTypes = (
+    listing.properties.entertainmentTypes ?? []
+  ).flatMap((id) => {
+    const found = filters?.entertainmentTypes.find((e) => e.id === id);
+    return found ? [found.name] : [];
+  });
+  const rules = (listing.properties.entertainmentRules ?? []).flatMap((id) => {
+    const found = filters?.rules.find((e) => e.id === id);
+    return found ? [found.name] : [];
+  });
+  const necessities = (listing.properties.necessities ?? []).flatMap((id) => {
+    const found = filters?.necessities.find((e) => e.id === id);
+    return found ? [found.name] : [];
+  });
 
   const audience = (detail.audience ?? []).map((a) => audienceLabels[a] ?? a);
 

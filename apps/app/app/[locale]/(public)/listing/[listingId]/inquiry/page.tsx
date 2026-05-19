@@ -14,7 +14,6 @@ import Button from "@/app/components/ui/atoms/button";
 import { useRouter } from "@/app/i18n/navigation";
 
 export default function Page() {
-  const { listingId } = useParams<{ listingId: string }>();
   const { isOrderStepActivated, setCurrentStep, inquiryMode } = useOrderStore();
   const router = useRouter();
 

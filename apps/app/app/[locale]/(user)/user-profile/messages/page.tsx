@@ -88,13 +88,13 @@ export default function MessagesPage() {
                   </Link>
                 }
                 rowComponents={inquiries
-                  .filter((i) => typeof i.listing.value !== "string")
+                  .filter((i) => typeof i.listing !== "string")
                   .map((inquiry) => (
                     <EntityRow
                       key={inquiry.id}
                       label={
-                        typeof inquiry.listing.value !== "string"
-                          ? inquiry.listing.value.name
+                        typeof inquiry.listing !== "string"
+                          ? inquiry.listing.name
                           : "Poptávka"
                       }
                       icon="MessageSquare"

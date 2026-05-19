@@ -8,10 +8,11 @@ import Loader from "../../components/loader";
 import { EmptyState } from "../../components/empty-state";
 import ListingCard from "@/app/components/ui/molecules/listing-card";
 import TabFilter from "../../components/tab-filter";
+import { Listing } from "@roo/common";
 
 const PAGE_SIZE = 10;
 
-type ListingTypeFilter = "all" | "venue" | "gastro" | "entertainment";
+type ListingTypeFilter = "all" | Listing["type"];
 
 const filters: { label: string; value: ListingTypeFilter }[] = [
   { label: "Vše", value: "all" },
@@ -42,7 +43,7 @@ export default function FavoritesPage() {
     const favourites =
       allListings?.docs?.filter((l) => favouriteIds.has(l.id)) ?? [];
     if (activeFilter === "all") return favourites;
-    return favourites.filter((l) => l.details[0].blockType === activeFilter);
+    return favourites.filter((l) => l.type === activeFilter);
   }, [allListings, favouriteIds, activeFilter]);
 
   const totalPages = Math.ceil(filteredListings.length / PAGE_SIZE);
@@ -85,7 +86,6 @@ export default function FavoritesPage() {
                     ? listing.images.coverImage
                     : ""
                 }
-                details={listing.details?.[0]}
               />
             ))}
           </div>

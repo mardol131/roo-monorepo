@@ -3,19 +3,13 @@ import { MapPin } from "lucide-react";
 import { InfoRow, resolveNames } from "../listing-ui";
 import SectionWrapper from "../section-wrapper";
 
-type VenueDetail = Extract<Listing["details"][number], { blockType: "venue" }>;
-type OtherDetail = Extract<
-  Listing["details"][number],
-  { blockType: "gastro" | "entertainment" }
->;
-
-function VenueLocation({ detail }: { detail: VenueDetail }) {
+function ExactLocation({ listing }: { listing: Listing }) {
   const cityName =
-    typeof detail.location.city === "string"
-      ? detail.location.city
-      : (detail.location.city?.name ?? "");
+    typeof listing.location.city === "string"
+      ? listing.location.city
+      : (listing.location.city?.name ?? "");
 
-  const mapUrl = `https://maps.google.com/?q=${detail.location.latitude},${detail.location.longitude}`;
+  const mapUrl = `https://maps.google.com/?q=${listing.location.latitude},${listing.location.longitude}`;
 
   return (
     <SectionWrapper title="Kde nás najdete">
@@ -23,7 +17,7 @@ function VenueLocation({ detail }: { detail: VenueDetail }) {
         <InfoRow
           icon={<MapPin size={16} />}
           label="Adresa"
-          value={`${detail.location.address}${cityName ? `, ${cityName}` : ""}`}
+          value={`${listing.location.address}${cityName ? `, ${cityName}` : ""}`}
         />
         <a
           href={mapUrl}
@@ -38,16 +32,18 @@ function VenueLocation({ detail }: { detail: VenueDetail }) {
   );
 }
 
-function OtherLocation({ detail }: { detail: OtherDetail }) {
+function RegionsLocation({ listing }: { listing: Listing }) {
   const cities = resolveNames(
-    (detail.location.city ?? []) as (string | { name: string })[],
+    (listing.location.cities ?? []) as (string | { name: string })[],
   );
   const regions = resolveNames(
-    (detail.location.region ?? []) as (string | { name: string })[],
+    (listing.location.regions ?? []) as (string | { name: string })[],
   );
-  const locationParts = [detail.location.address, ...cities, ...regions].filter(
-    Boolean,
-  ) as string[];
+  const locationParts = [
+    listing.location.address,
+    ...cities,
+    ...regions,
+  ].filter(Boolean) as string[];
 
   if (locationParts.length === 0) return null;
 
@@ -62,10 +58,11 @@ function OtherLocation({ detail }: { detail: OtherDetail }) {
   );
 }
 
-export default function ListingLocationSection({ listing }: { listing: Listing }) {
-  const detail = listing.details[0];
-  if (!detail) return null;
-
-  if (detail.blockType === "venue") return <VenueLocation detail={detail} />;
-  return <OtherLocation detail={detail} />;
+export default function ListingLocationSection({
+  listing,
+}: {
+  listing: Listing;
+}) {
+  if (listing.location.type === "exact") return <ExactLocation listing={listing} />;
+  return <RegionsLocation listing={listing} />;
 }

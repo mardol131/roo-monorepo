@@ -140,9 +140,7 @@ export default function ContentWrapper({ children }: PropsWithChildren) {
             icon: "Calendar",
           },
 
-          ...(listing?.details[0]?.blockType === "venue"
-            ? [spaceMenuItem]
-            : []),
+          ...(listing?.type === "venue" ? [spaceMenuItem] : []),
           {
             label: "Varianty",
             href: {

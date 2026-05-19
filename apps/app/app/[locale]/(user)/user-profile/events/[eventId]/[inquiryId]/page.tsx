@@ -7,8 +7,8 @@ import DashboardHeader from "@/app/[locale]/(user)/components/dashboard-header";
 import InquiryTimeline from "@/app/[locale]/(user)/components/inquiry-timeline";
 import Loader from "@/app/[locale]/(user)/components/loader";
 import VariantSection from "@/app/[locale]/(user)/components/variant-section";
-import { INQUIRY_STATUS } from "@/app/data/inquiry";
 import { confirmActionModalEvents } from "@/app/components/ui/molecules/modals/confirm-action-modal";
+import { INQUIRY_STATUS } from "@/app/data/inquiry";
 import {
   useInquiry,
   useUpdateInquiry,
@@ -17,21 +17,18 @@ import {
   aggregateInquiryStatus,
   getIdFromRelationshipField,
 } from "@roo/common";
-import { format } from "date-fns";
-import { cs } from "date-fns/locale";
-import { Check, Clock, Package, X } from "lucide-react";
+import { Building, Check, Package, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useParams } from "next/navigation";
 
-import { AlertSection } from "@/app/components/ui/molecules/alert-section";
-import { useChatMessagesByInquiry } from "@/app/react-query/chat-messages/hooks";
-import { useEffect, useState } from "react";
-import { PriceChangeModal } from "@/app/components/ui/molecules/modals/price-change-modal";
-import { VariantVenueDetails } from "@/app/[locale]/(user)/components/variant-venue-details";
-import { VariantGastroDetails } from "@/app/[locale]/(user)/components/variant-gastro-details";
-import { VariantEntertainmentDetails } from "@/app/[locale]/(user)/components/variant-entertainment-details";
 import InquiryDetails from "@/app/[locale]/(user)/components/inquiry-details";
+import { VariantEntertainmentDetails } from "@/app/[locale]/(user)/components/variant-entertainment-details";
+import { VariantGastroDetails } from "@/app/[locale]/(user)/components/variant-gastro-details";
+import { VariantVenueDetails } from "@/app/[locale]/(user)/components/variant-venue-details";
+import { useEffect } from "react";
 import AlertInfoSections from "./components/alert-info-sections";
+import { useListing } from "@/app/react-query/listings/hooks";
+import { useEvent, useUpdateEvent } from "@/app/react-query/events/hooks";
 
 export default function page() {
   const { inquiryId } = useParams<{
@@ -39,10 +36,17 @@ export default function page() {
   }>();
 
   const { data: inquiry, isPending } = useInquiry(inquiryId);
+  const { data: listing } = useListing(
+    getIdFromRelationshipField(inquiry?.listing || ""),
+  );
+  const { data: event } = useEvent(
+    getIdFromRelationshipField(inquiry?.event || ""),
+  );
   const t = useTranslations();
   const { mutate: patchInquiry } = useUpdateInquiry({
     listingId: getIdFromRelationshipField(inquiry?.listing || ""),
   });
+  const { mutate: updateEvent } = useUpdateEvent({});
 
   useEffect(() => {
     if (!inquiry) return;
@@ -131,6 +135,44 @@ export default function page() {
     });
   };
 
+  const setAsEventVenueHandler = () => {
+    if (!event) return;
+    updateEvent({
+      id: event.id,
+      data: {
+        location: {
+          ...event.location,
+          venue: listing?.id || "",
+        },
+      },
+    });
+  };
+
+  const confirmSetAsEventVenue = () => {
+    confirmActionModalEvents.emit("open", {
+      title: "Nastavit jako místo konání",
+      description:
+        "Tímto krokem nastavíte tuto službu jako místo konání pro tento event. Tuto akci nelze vrátit zpět.",
+      Icon: Building,
+      buttonText: "Nastavit jako místo konání",
+      buttonVersion: "successFull",
+      textColor: "text-success",
+      whatIsGoingToHappenText:
+        "Opravdu chcete nastavit tuto službu jako místo konání?",
+      whatIsGoingToHappenTextColor: "success",
+      whatIsGoingToHappenList: [],
+      borderColor: "border-success",
+      bgColor: "bg-success-surface",
+      onConfirmClick: async () => setAsEventVenueHandler(),
+    });
+  };
+
+  const listingCanBeSetAsEventVenue =
+    listing?.type === "venue" &&
+    !event?.location?.venue &&
+    event?.location?.type === "venue" &&
+    aggregateInquiryStatus(inquiry.status) === "confirmed";
+
   return (
     <main className="w-full flex flex-col gap-6">
       <Breadcrumbs />
@@ -162,6 +204,21 @@ export default function page() {
       >
         <ControlSection
           rows={[
+            {
+              disabled: !listingCanBeSetAsEventVenue,
+              title: "Nastavit jako místo konání",
+              text: "Tímto krokem nastavíte tuto službu jako místo konání pro tento event. Tuto akci nelze vrátit zpět.",
+              icon: "Building",
+              iconColor: "text-event",
+              iconBgColor: "bg-event-surface",
+              button: {
+                version: "successFull",
+                text: "Nastavit jako místo konání",
+                iconLeft: "Building",
+                size: "sm",
+                onClick: confirmSetAsEventVenue,
+              },
+            },
             {
               disabled:
                 inquiry.status.user === "confirmed" ||

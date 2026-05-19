@@ -29,7 +29,7 @@ import { relationshipItemSchema } from "@/app/validation/schema/relationship-ite
 import {
   getOptionalPositiveNumber,
   getPositiveNumber,
-} from "../../../new/forms/common-schema";
+} from "@/app/validation/schema/utils";
 
 // ── TOC ────────────────────────────────────────────────────────────────────────
 

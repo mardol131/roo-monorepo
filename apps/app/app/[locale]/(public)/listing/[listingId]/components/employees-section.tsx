@@ -1,9 +1,9 @@
 import Text from "@/app/components/ui/atoms/text";
 import { generateMediaUrl } from "@/app/functions/generate-media-url";
-import { Listing } from "@roo/common";
+import { ListingVenueDetail } from "@roo/common";
 import Image from "next/image";
 
-type Employee = NonNullable<Listing["employees"]>[number];
+type Employee = NonNullable<ListingVenueDetail["employees"]>[number];
 
 interface Props {
   employees: Employee[];

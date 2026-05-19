@@ -2,21 +2,76 @@ import { PayloadResponse, Region } from "@roo/common";
 import { config } from "../config";
 
 const CUZK_URL = "https://ags.cuzk.cz/arcgis/rest/services/RUIAN/MapServer/15/query";
+const PAGE_SIZE = 500;
 
-type CuzkDistrict = { kod: number; nazev: string; vusc: number };
+type CuzkDistrict = {
+  kod: number;
+  nazev: string;
+  vusc: number;
+  geometry: { rings: number[][][] };
+};
+
+type BboxPayload = {
+  bboxMinLon: number;
+  bboxMinLat: number;
+  bboxMaxLon: number;
+  bboxMaxLat: number;
+};
+
+type DistrictPayload = {
+  name: string;
+  code: string;
+  region: string;
+  country: string;
+} & BboxPayload;
 
 async function fetchDistrictsFromCuzk(): Promise<CuzkDistrict[]> {
-  const params = new URLSearchParams({
-    where: "platido IS NULL",
-    outFields: "kod,nazev,vusc",
-    returnGeometry: "false",
-    f: "json",
-  });
-  const res = await fetch(`${CUZK_URL}?${params}`);
-  if (!res.ok) throw new Error(`ČÚZK request failed: ${res.status}`);
-  const data = await res.json() as { features?: { attributes: CuzkDistrict }[] };
-  if (!data.features?.length) throw new Error("No features returned — check layer ID");
-  return data.features.map((f) => f.attributes);
+  const districts: CuzkDistrict[] = [];
+  let offset = 0;
+
+  while (true) {
+    const params = new URLSearchParams({
+      where: "platido IS NULL",
+      outFields: "kod,nazev,vusc",
+      returnGeometry: "true",
+      outSR: "4326",
+      resultOffset: String(offset),
+      resultRecordCount: String(PAGE_SIZE),
+      f: "json",
+    });
+    const res = await fetch(`${CUZK_URL}?${params}`);
+    if (!res.ok) throw new Error(`ČÚZK request failed: ${res.status}`);
+    const data = await res.json() as {
+      features?: { attributes: Omit<CuzkDistrict, "geometry">; geometry: CuzkDistrict["geometry"] }[];
+      exceededTransferLimit?: boolean;
+    };
+
+    if (!data.features?.length) break;
+    districts.push(...data.features.map((f) => ({ ...f.attributes, geometry: f.geometry })));
+
+    if (!data.exceededTransferLimit) break;
+    offset += PAGE_SIZE;
+    process.stdout.write(`\r  Fetching from ČÚZK: ${districts.length} districts...`);
+  }
+
+  console.log(`\r  Fetched ${districts.length} districts from ČÚZK.     `);
+  return districts;
+}
+
+function calcGeodata(rings: number[][][]): BboxPayload {
+  let minLon = Infinity, maxLon = -Infinity;
+  let minLat = Infinity, maxLat = -Infinity;
+
+  for (const ring of rings) {
+    for (const [lon, lat] of ring) {
+      if (lon < minLon) minLon = lon;
+      if (lon > maxLon) maxLon = lon;
+      if (lat < minLat) minLat = lat;
+      if (lat > maxLat) maxLat = lat;
+    }
+  }
+
+  return { bboxMinLon: minLon, bboxMinLat: minLat, bboxMaxLon: maxLon, bboxMaxLat: maxLat };
 }
 
 async function login(): Promise<string> {
@@ -29,21 +84,47 @@ async function login(): Promise<string> {
   return ((await res.json()) as { token: string }).token;
 }
 
-async function fetchRegions(token: string): Promise<{ byCode: Map<string, string>; byName: Map<string, string> }> {
-  const res = await fetch(`${config.backendUrl}/api/regions?limit=100`, {
-    headers: { Authorization: `JWT ${token}` },
+type RegionEntry = {
+  id: string;
+  bbox: BboxPayload;
+};
+
+async function fetchRegions(token: string): Promise<{
+  byCode: Map<string, RegionEntry>;
+  byName: Map<string, RegionEntry>;
+}> {
+  const docs: (Region & { code: string; name: string } & BboxPayload)[] = [];
+  let page = 1;
+  while (true) {
+    const res = await fetch(`${config.backendUrl}/api/regions?limit=100&page=${page}`, {
+      headers: { Authorization: `JWT ${token}` },
+    });
+    if (!res.ok) throw new Error(`Failed to fetch regions: ${res.status}`);
+    const data = (await res.json()) as PayloadResponse<Region & { code: string; name: string } & BboxPayload>;
+    if (data.docs) docs.push(...data.docs);
+    if (page >= data.totalPages) break;
+    page++;
+  }
+
+  const toEntry = (r: (typeof docs)[number]): RegionEntry => ({
+    id: r.id,
+    bbox: {
+      bboxMinLon: r.bboxMinLon,
+      bboxMinLat: r.bboxMinLat,
+      bboxMaxLon: r.bboxMaxLon,
+      bboxMaxLat: r.bboxMaxLat,
+    },
   });
-  if (!res.ok) throw new Error(`Failed to fetch regions: ${res.status}`);
-  const data = (await res.json()) as PayloadResponse<Region & { code: string; name: string }>;
+
   return {
-    byCode: new Map((data.docs ?? []).map((r) => [r.code, r.id])),
-    byName: new Map((data.docs ?? []).map((r) => [r.name, r.id])),
+    byCode: new Map(docs.map((r) => [r.code, toEntry(r)])),
+    byName: new Map(docs.map((r) => [r.name, toEntry(r)])),
   };
 }
 
 async function upsertDistrict(
   token: string,
-  district: { name: string; code: string; region: string; country: string },
+  district: DistrictPayload,
 ): Promise<"created" | "updated"> {
   const headers = { "Content-Type": "application/json", Authorization: `JWT ${token}` };
 
@@ -70,7 +151,6 @@ async function upsertDistrict(
 async function main() {
   console.log("Fetching districts from ČÚZK...");
   const rows = await fetchDistrictsFromCuzk();
-  console.log(`Found ${rows.length} districts.\n`);
 
   console.log(`Logging in as ${config.email}...`);
   const token = await login();
@@ -83,8 +163,8 @@ async function main() {
   const failures: { name: string; error: string }[] = [];
 
   for (const row of rows) {
-    const regionId = regionMap.byCode.get(String(row.vusc));
-    if (!regionId) {
+    const entry = regionMap.byCode.get(String(row.vusc));
+    if (!entry) {
       console.log(`  ⚠ ${row.nazev} — no region for vusc=${row.vusc} [skipped]`);
       skipped++;
       continue;
@@ -93,8 +173,9 @@ async function main() {
       const action = await upsertDistrict(token, {
         name: row.nazev,
         code: String(row.kod),
-        region: regionId,
+        region: entry.id,
         country: "cz",
+        ...calcGeodata(row.geometry.rings),
       });
       action === "created" ? created++ : updated++;
       console.log(`  ${action === "created" ? "✓" : "↺"} ${row.nazev} [${action}]`);
@@ -104,14 +185,15 @@ async function main() {
     }
   }
 
-  const prahaRegionId = regionMap.byName.get("Hlavní město Praha");
-  if (prahaRegionId) {
+  const prahaEntry = regionMap.byName.get("Hlavní město Praha");
+  if (prahaEntry) {
     try {
       const action = await upsertDistrict(token, {
         name: "Hlavní město Praha",
         code: "Praha",
-        region: prahaRegionId,
+        region: prahaEntry.id,
         country: "cz",
+        ...prahaEntry.bbox,
       });
       action === "created" ? created++ : updated++;
       console.log(`  ${action === "created" ? "✓" : "↺"} Hlavní město Praha (synthetic) [${action}]`);

@@ -3,14 +3,19 @@
 import EntityCard from "@/app/[locale]/(user)/components/entity-card";
 import PageHeading from "@/app/[locale]/(user)/components/page-heading";
 import Text from "@/app/components/ui/atoms/text";
-import { useListing, useUpdateListing } from "@/app/react-query/listings/hooks";
+import {
+  useListing,
+  useListingDetail,
+  useUpdateListing,
+  useUpdateListingDetail,
+} from "@/app/react-query/listings/hooks";
 import {
   useDeleteSpace,
   useSpacesByListing,
   useUpdateSpace,
 } from "@/app/react-query/spaces/hooks";
 import { IntlLink, Link, useRouter } from "@/app/i18n/navigation";
-import { Listing, Space } from "@roo/common";
+import { getIdFromRelationshipField, Listing, Space } from "@roo/common";
 import {
   AlertTriangle,
   Building2,
@@ -250,10 +255,16 @@ export default function SpacesPage() {
 
   const { data: spaces } = useSpacesByListing(listingId);
   const { data: listing } = useListing(listingId);
-  const { mutate: updateListing, error } = useUpdateListing(companyId);
+  const { mutate: updateListingDetail, error } = useUpdateListingDetail(
+    "listing-venue-details",
+  );
+  const { data: listingDetail } = useListingDetail(
+    `listing-${listing?.type ?? "gastro"}-details`,
+    getIdFromRelationshipField(listing?.detail.value ?? ""),
+  );
 
   const venueDetails =
-    listing?.details[0].blockType === "venue" ? listing.details[0] : undefined;
+    listingDetail?.type === "venue" ? listingDetail : undefined;
   const spacesType = venueDetails?.spacesType;
 
   const [pendingType, setPendingType] = useState<SpacesType | null>(null);
@@ -272,12 +283,10 @@ export default function SpacesPage() {
   function handleConfirm() {
     if (!venueDetails || !pendingType || confirmValue !== CONFIRMATION_TEXT)
       return;
-    updateListing(
+    updateListingDetail(
       {
         id: listingId,
-        data: {
-          details: [{ ...venueDetails, spacesType: pendingType }],
-        },
+        data: { ...venueDetails, spacesType: pendingType },
       },
       {
         onSuccess: () => {

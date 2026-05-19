@@ -18,6 +18,7 @@ export const Districts: CollectionConfig = {
       name: 'name',
       type: 'text',
       required: true,
+      index: true,
     },
     {
       name: 'slug',
@@ -31,9 +32,9 @@ export const Districts: CollectionConfig = {
     },
     {
       name: 'region',
-      type: 'relationship',
-      relationTo: 'regions',
+      type: 'text',
       required: true,
+      index: true,
     },
     {
       name: 'country',
@@ -41,6 +42,10 @@ export const Districts: CollectionConfig = {
       options: COUNTRIES,
       required: true,
     },
+    { name: 'bboxMinLon', type: 'number', required: true },
+    { name: 'bboxMinLat', type: 'number', required: true },
+    { name: 'bboxMaxLon', type: 'number', required: true },
+    { name: 'bboxMaxLat', type: 'number', required: true },
   ],
   hooks: {
     beforeValidate: [

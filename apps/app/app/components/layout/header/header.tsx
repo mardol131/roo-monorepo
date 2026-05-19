@@ -4,7 +4,7 @@ import { IntlLink, Link } from "@/app/i18n/navigation";
 import { Gamepad2, MapPin, Menu, UtensilsCrossed, X } from "lucide-react";
 import Image from "next/image";
 import logo from "@/public/logo.png";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import HeaderAuthWidget from "./header-auth-widget";
 import { useAuth } from "@/app/context/auth/auth-context";
 import Text from "../../ui/atoms/text";

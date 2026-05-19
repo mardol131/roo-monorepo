@@ -8,11 +8,11 @@ import { fileURLToPath } from 'url'
 import { sendEmailTask } from './jobs/tasks/sendEmailTask'
 
 import { sendPushNotificationTask } from './jobs/tasks/sendPushNotification'
-import { Variants } from './collections/variants'
+import { Variants } from './collections/variants/variants'
 import { Activities } from './collections/filters/activities'
 import { Services } from './collections/filters/services'
 import { EventTypes } from './collections/filters/event-types'
-import { Listings } from './collections/listings'
+import { Listings } from './collections/listings/listings'
 import { Spaces } from './collections/spaces'
 import { Personnel } from './collections/filters/personnel'
 import { Companies } from './collections/companies'
@@ -42,6 +42,10 @@ import { SpaceTypes } from './collections/specific/space-types'
 import { uploadFileToCloud } from './endpoints/upload-file-to-cloud/upload-file-to-cloud'
 import { Users } from './collections/users'
 import { Media } from './collections/media'
+import { ListingEntertainmentDetails } from './collections/listings/listing-entertainment-details'
+import { ListingGastroDetails } from './collections/listings/listing-gastro-details'
+import { ListingVenueDetails } from './collections/listings/listing-venue-details'
+import { getFiltersAndSpecifics } from './endpoints/get-filters-and-specific/get-filters-and-specifics'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -100,6 +104,9 @@ export default buildConfig({
     CalendarEvents,
     FavouriteListings,
     SpaceTypes,
+    ListingEntertainmentDetails,
+    ListingGastroDetails,
+    ListingVenueDetails,
   ],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || '',
@@ -109,7 +116,7 @@ export default buildConfig({
   db: mongooseAdapter({
     url: process.env.DATABASE_URL || '',
   }),
-  endpoints: [uploadFileToCloud],
+  endpoints: [uploadFileToCloud, getFiltersAndSpecifics],
   plugins: [],
   cors: ['http://localhost:3000', process.env.NEXT_PUBLIC_WEBSITE_URL || ''],
   csrf: ['http://localhost:3000', process.env.NEXT_PUBLIC_WEBSITE_URL || ''],

@@ -43,7 +43,7 @@ export async function updateCompany(
 
 export type CreateCompanyPayload = Omit<
   Company & { logo?: Company["logo"] | null },
-  "id" | "createdAt" | "updatedAt" | "owner" | "status"
+  "id" | "createdAt" | "updatedAt" | "owner" | "status" | "slug"
 >;
 
 export async function createCompany(data: CreateCompanyPayload) {

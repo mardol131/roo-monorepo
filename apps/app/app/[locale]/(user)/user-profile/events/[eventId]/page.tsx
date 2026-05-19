@@ -34,6 +34,7 @@ import { SummaryCard } from "../../../components/summary-card";
 import InquiryStatusTag from "../../../components/tags/inquiry-status-tag";
 import EventChecklistSection from "./components/event-checklist-section";
 import EventNotesSection from "./components/event-notes-section";
+import EventLocationSection from "./components/event-location-section";
 import Breadcrumbs from "../../../components/breadcrumbs";
 
 // ── Page ───────────────────────────────────────────────────────────────────────
@@ -198,7 +199,7 @@ export default function page() {
       borderColor: "border-danger",
       bgColor: "bg-danger-surface",
       onConfirmClick: async () => {
-        // TODO: reject inquiry mutation
+        cancelEventHandler();
       },
     });
   };
@@ -227,10 +228,36 @@ export default function page() {
             text: formatGuestsString({ ...event.guests }),
           },
         ]}
+        button={{
+          text: "Upravit událost",
+          version: "eventFull",
+          size: "sm",
+          iconLeft: "Pen",
+          link: {
+            pathname: "/user-profile/events/[eventId]/edit",
+            params: { eventId },
+          },
+        }}
       />
 
       <div className="flex flex-col gap-5">
         {/* Summary cards */}
+        <EventLocationSection
+          event={event}
+          confirmedVenueInquiries={
+            inquiries?.docs?.filter(
+              (i) =>
+                i.listingType === "venue" &&
+                aggregateInquiryStatus(i.status) === "confirmed",
+            ) ?? []
+          }
+          onSetVenue={(venueId) =>
+            updateEvent({
+              id: eventId,
+              data: { location: { ...event.location, venue: venueId } },
+            })
+          }
+        />
         <div className="grid grid-cols-3 gap-4">
           <SummaryCard
             label="Celkem poptávek"

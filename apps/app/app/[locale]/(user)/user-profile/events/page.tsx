@@ -13,8 +13,8 @@ import Loader from "../../components/loader";
 
 const TABS: { label: string; value: Event["status"] | "all" }[] = [
   { label: "Všechny", value: "all" },
-  { label: "Zrušené", value: "deactivated" },
-  { label: "Plánované", value: "planning" },
+  { label: "Zrušené", value: "disabled" },
+  { label: "Plánované", value: "active" },
   { label: "Dokončené", value: "completed" },
 ];
 

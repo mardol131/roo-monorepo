@@ -15,19 +15,18 @@ export function formatGuestsString(
   return `${sum} ${guestFormat}`;
 }
 export function formatEventAddress(event: Event): string {
-  const block = event.location?.[0];
-  if (!block) return "Neznámá adresa";
+  const loc = event.location;
+  if (!loc) return "Neznámá adresa";
 
-  if (block.blockType === "venue") {
-    if (!block.venue) return "Neznámá adresa";
-    return typeof block.venue === "string" ? block.venue : block.venue.name;
+  if (loc.venue) {
+    return typeof loc.venue === "string" ? loc.venue : loc.venue.name;
   }
 
-  const city = block.city
-    ? typeof block.city === "string"
-      ? block.city
-      : block.city.name
+  const city = loc.city
+    ? typeof loc.city === "string"
+      ? loc.city
+      : loc.city.name
     : null;
-  const parts = [block.address, city].filter(Boolean);
+  const parts = [loc.address, city].filter(Boolean);
   return parts.length > 0 ? parts.join(", ") : "Neznámá adresa";
 }

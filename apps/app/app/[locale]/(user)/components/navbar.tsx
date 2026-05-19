@@ -28,7 +28,7 @@ export default function Navbar({ buttons }: { buttons?: ButtonProps[] }) {
         <div className="flex items-center gap-0.5 p-0.5 bg-zinc-100 border border-zinc-200 rounded-lg mr-1">
           <Button
             text="Osobní"
-            size="sm"
+            size="xs"
             version="none"
             link="/user-profile"
             rounding="md"
@@ -40,7 +40,7 @@ export default function Navbar({ buttons }: { buttons?: ButtonProps[] }) {
           />
           <Button
             text="Firemní"
-            size="sm"
+            size="xs"
             version="none"
             link="/company-profile"
             rounding="md"

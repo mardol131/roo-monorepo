@@ -4,9 +4,9 @@ import PageHeading from "@/app/[locale]/(user)/components/page-heading";
 import { useRouter } from "@/app/i18n/navigation";
 import { useListing, useUpdateListing } from "@/app/react-query/listings/hooks";
 import { useParams, useSearchParams } from "next/navigation";
-import EditEntertainmentListingForm from "./components/edit-entertainment-listing-form";
-import EditGastroListingForm from "./components/edit-gastro-listing-form";
-import EditVenueListingForm from "./components/edit-venue-listing-form";
+import EntertainmentListingForm from "../../components/entertainment-listing-form";
+import GastroListingForm from "../../components/gastro-listing-form";
+import VenueListingForm from "../../components/venue-listing-form";
 import { Listing } from "@roo/common";
 import { useEffect } from "react";
 import Loader from "@/app/[locale]/(user)/components/loader";
@@ -19,7 +19,7 @@ export default function page({}: Props) {
     companyId: string;
   }>();
   const { data: listing, isPending } = useListing(listingId);
-  const isVenue = listing?.details[0].blockType === "venue";
+  const isVenue = listing?.type === "venue";
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -46,12 +46,14 @@ export default function page({}: Props) {
         description="Zde můžeš upravit všechny detaily vaší služby. Nezapomeň změny uložit!"
       />
 
-      {isVenue && <EditVenueListingForm onCancel={() => router.back()} />}
-      {listing?.details[0].blockType === "gastro" && (
-        <EditGastroListingForm onCancel={() => router.back()} />
+      {isVenue && (
+        <VenueListingForm type="edit" onCancel={() => router.back()} />
       )}
-      {listing?.details[0].blockType === "entertainment" && (
-        <EditEntertainmentListingForm onCancel={() => router.back()} />
+      {listing?.type === "gastro" && (
+        <GastroListingForm type="edit" onCancel={() => router.back()} />
+      )}
+      {listing?.type === "entertainment" && (
+        <EntertainmentListingForm type="edit" onCancel={() => router.back()} />
       )}
     </main>
   );

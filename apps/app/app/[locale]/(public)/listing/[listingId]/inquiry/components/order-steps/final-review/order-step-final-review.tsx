@@ -23,17 +23,22 @@ import * as yup from "yup";
 import FormVariantSummary from "./form-variant-summary";
 import StepHeading from "../step-heading";
 import { useVariantsByListing } from "@/app/react-query/variants/hooks";
-import { useRouter } from "@/app/i18n/navigation";
 
 function getLocationLabel(location: Event["location"]): string | null {
-  if (!location || location.length === 0) return null;
-  const custom = location.find((l) => l.blockType === "custom");
-  if (custom && custom.blockType === "custom") {
-    const cityName =
-      typeof custom.city === "string" ? custom.city : custom.city.name;
-    return [cityName, custom.address].filter(Boolean).join(", ");
+  if (!location) return null;
+  if (location.type === "venue") {
+    if (!location.venue) return "Zatím neurčeno";
+    return typeof location.venue === "string"
+      ? location.venue
+      : location.venue.name;
   }
-  return null;
+  const cityName = location.city
+    ? typeof location.city === "string"
+      ? location.city
+      : location.city.name
+    : null;
+  const parts = [cityName, location.address].filter(Boolean);
+  return parts.length > 0 ? parts.join(", ") : "Zatím neurčeno";
 }
 
 const schema = yup.object({

@@ -80,7 +80,11 @@ function ChipList({ items }: { items: string[] }) {
   );
 }
 
-function VenueDetails({ detail }: { detail: Extract<VariantDetail, { blockType: "venue" }> }) {
+function VenueDetails({
+  detail,
+}: {
+  detail: Extract<VariantDetail, { blockType: "venue" }>;
+}) {
   const amenities = (detail.amenities ?? [])
     .filter((a): a is Amenity => typeof a !== "string")
     .map((a) => a.name);
@@ -119,18 +123,12 @@ function VenueDetails({ detail }: { detail: Extract<VariantDetail, { blockType: 
             icon={<Car size={16} />}
             label="Parkování"
             value={
-              detail.parking.spots
-                ? `${detail.parking.spots} míst`
-                : "v ceně"
+              detail.parking.spots ? `${detail.parking.spots} míst` : "v ceně"
             }
           />
         )}
         {detail.breakfast.included && (
-          <InfoRow
-            icon={<Coffee size={16} />}
-            label="Snídaně"
-            value="v ceně"
-          />
+          <InfoRow icon={<Coffee size={16} />} label="Snídaně" value="v ceně" />
         )}
       </div>
       {amenities.length > 0 && (
@@ -161,7 +159,11 @@ function VenueDetails({ detail }: { detail: Extract<VariantDetail, { blockType: 
   );
 }
 
-function GastroDetails({ detail }: { detail: Extract<VariantDetail, { blockType: "gastro" }> }) {
+function GastroDetails({
+  detail,
+}: {
+  detail: Extract<VariantDetail, { blockType: "gastro" }>;
+}) {
   const cuisines = (detail.cuisines ?? [])
     .filter((c): c is Cuisine => typeof c !== "string")
     .map((c) => c.name);
@@ -294,9 +296,7 @@ function EntertainmentDetails({
             Cílové publikum
           </Text>
           <ChipList
-            items={(detail.audience ?? []).map(
-              (a) => audienceLabels[a] ?? a,
-            )}
+            items={(detail.audience ?? []).map((a) => audienceLabels[a] ?? a)}
           />
         </div>
       )}
@@ -368,7 +368,7 @@ export default function VariantItem({
           .join(", ");
 
   return (
-    <div className="border border-zinc-200 rounded-3xl overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+    <div className="border border-zinc-200 rounded-3xl overflow-hidden shadow-sm transition-shadow">
       <div className="grid grid-cols-[380px_1fr]">
         {/* Left column — image + availability */}
         <div className="bg-zinc-50 p-6 flex flex-col gap-6 border-r border-zinc-200">

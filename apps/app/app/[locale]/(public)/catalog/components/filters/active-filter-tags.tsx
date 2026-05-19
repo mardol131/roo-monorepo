@@ -26,14 +26,9 @@ import {
   EMPTY_GENERAL_FILTERS,
 } from "./filter-groups";
 import { useCities } from "@/app/react-query/cities/hooks";
-import { useCuisines } from "@/app/react-query/filters/cuisines/hooks";
-import { useDishTypes } from "@/app/react-query/filters/dish-types/hooks";
-import { useDietaryOptions } from "@/app/react-query/filters/dietary-options/hooks";
-import { useFoodServiceStyles } from "@/app/react-query/filters/food-service-styles/hooks";
-import { usePlaceTypes } from "@/app/react-query/filters/place-types/hooks";
-import { useEventTypes } from "@/app/react-query/filters/event-types/hooks";
-import { useAmenities } from "@/app/react-query/filters/amenities/hooks";
-import { useActivities } from "@/app/react-query/filters/activities/hooks";
+import { useDistricts } from "@/app/react-query/districts/hooks";
+import { useRegions } from "@/app/react-query/regions/hooks";
+import { useFilterOptions } from "@/app/react-query/filters/aggregated-filters/hooks";
 import Text from "@/app/components/ui/atoms/text";
 
 // ─── Primitives ──────────────────────────────────────────────────────────────
@@ -96,7 +91,7 @@ function IdTagGroup({
   );
 }
 
-// ─── Type-specific tag groups (each with its own hook) ───────────────────────
+// ─── Locality tag groups (need dynamic query by ID) ──────────────────────────
 
 function CityTagGroup({
   label,
@@ -107,10 +102,9 @@ function CityTagGroup({
   ids: string[];
   onRemove: (id: string) => void;
 }) {
-  const orClauses = ids.map((id) => ({ id: { equals: id } }));
   const { data } = useCities({
     limit: ids.length,
-    query: { or: orClauses },
+    query: { or: ids.map((id) => ({ id: { equals: id } })) },
   });
   return (
     <IdTagGroup
@@ -122,149 +116,41 @@ function CityTagGroup({
   );
 }
 
-function CuisineTagGroup({
-  ids,
+function DistrictTagGroup({
+  id,
   onRemove,
 }: {
-  ids: string[];
-  onRemove: (id: string) => void;
+  id: string;
+  onRemove: () => void;
 }) {
-  const { data } = useCuisines({ limit: 50 });
+  const { data } = useDistricts({ id: { equals: id } }, 1, !!id);
+  const name = data?.docs?.[0]?.name;
+  if (!name) return null;
   return (
-    <IdTagGroup
-      label="Kuchyně"
-      selectedIds={ids}
-      options={data?.docs ?? []}
-      onRemove={onRemove}
-    />
+    <TagGroup label="Okres">
+      <FilterTag label={name} onRemove={onRemove} />
+    </TagGroup>
   );
 }
 
-function DishTypeTagGroup({
-  ids,
+function RegionTagGroup({
+  id,
   onRemove,
 }: {
-  ids: string[];
-  onRemove: (id: string) => void;
+  id: string;
+  onRemove: () => void;
 }) {
-  const { data } = useDishTypes({ limit: 50 });
+  const { data } = useRegions({ id: { equals: id } }, 1, !!id);
+  const name = data?.docs?.[0]?.name;
+  if (!name) return null;
   return (
-    <IdTagGroup
-      label="Typ jídla"
-      selectedIds={ids}
-      options={data?.docs ?? []}
-      onRemove={onRemove}
-    />
+    <TagGroup label="Kraj">
+      <FilterTag label={name} onRemove={onRemove} />
+    </TagGroup>
   );
 }
 
-function DietaryOptionTagGroup({
-  ids,
-  onRemove,
-}: {
-  ids: string[];
-  onRemove: (id: string) => void;
-}) {
-  const { data } = useDietaryOptions({ limit: 50 });
-  return (
-    <IdTagGroup
-      label="Dietní možnosti"
-      selectedIds={ids}
-      options={data?.docs ?? []}
-      onRemove={onRemove}
-    />
-  );
-}
-
-function FoodServiceStyleTagGroup({
-  ids,
-  onRemove,
-}: {
-  ids: string[];
-  onRemove: (id: string) => void;
-}) {
-  const { data } = useFoodServiceStyles({ limit: 50 });
-  return (
-    <IdTagGroup
-      label="Styl obsluhy"
-      selectedIds={ids}
-      options={data?.docs ?? []}
-      onRemove={onRemove}
-    />
-  );
-}
-
-function PlaceTypeTagGroup({
-  ids,
-  onRemove,
-}: {
-  ids: string[];
-  onRemove: (id: string) => void;
-}) {
-  const { data } = usePlaceTypes({ limit: 50 });
-  return (
-    <IdTagGroup
-      label="Typ prostoru"
-      selectedIds={ids}
-      options={data?.docs ?? []}
-      onRemove={onRemove}
-    />
-  );
-}
-
-function EventTypeTagGroup({
-  ids,
-  onRemove,
-}: {
-  ids: string[];
-  onRemove: (id: string) => void;
-}) {
-  const { data } = useEventTypes({ limit: 50 });
-  return (
-    <IdTagGroup
-      label="Typ akce"
-      selectedIds={ids}
-      options={data?.docs ?? []}
-      onRemove={onRemove}
-    />
-  );
-}
-
-function AmenityTagGroup({
-  ids,
-  onRemove,
-}: {
-  ids: string[];
-  onRemove: (id: string) => void;
-}) {
-  const { data } = useAmenities({ limit: 50 });
-  return (
-    <IdTagGroup
-      label="Vybavení"
-      selectedIds={ids}
-      options={data?.docs ?? []}
-      onRemove={onRemove}
-    />
-  );
-}
-
-function ActivityTagGroup({
-  ids,
-  onRemove,
-}: {
-  ids: string[];
-  onRemove: (id: string) => void;
-}) {
-  const { data } = useActivities({ limit: 50 });
-  return (
-    <IdTagGroup
-      label="Aktivity"
-      selectedIds={ids}
-      options={data?.docs ?? []}
-      onRemove={onRemove}
-    />
-  );
-}
+// ─── Price ───────────────────────────────────────────────────────────────────
 
 function PriceTagGroup({
   minPrice,
@@ -298,9 +184,8 @@ function PriceTagGroup({
 function isFilterActive<T extends object>(current: T, empty: T): boolean {
   return (Object.keys(current) as (keyof T)[]).some((key) => {
     const val = current[key];
-    const emptyVal = empty[key];
     if (Array.isArray(val)) return val.length > 0;
-    return val !== emptyVal;
+    return val !== empty[key];
   });
 }
 
@@ -318,14 +203,13 @@ function formatDateTime(iso: string): string {
 export default function ActiveFilterTags({ type }: { type: CatalogType }) {
   const searchParams = useSearchParams();
   const router = useRouter();
+  const { data: filters } = useFilterOptions();
 
   const replaceParams = (updater: (p: URLSearchParams) => void) => {
     const params = new URLSearchParams(searchParams.toString());
     updater(params);
     router.replace(`?${params}`, { scroll: false });
   };
-
-  // _______ Filters __________________________
 
   const general = generalFiltersFromParams(searchParams);
   const gastro =
@@ -336,8 +220,6 @@ export default function ActiveFilterTags({ type }: { type: CatalogType }) {
       ? entertainmentFiltersFromParams(searchParams)
       : null;
   const common = commonFiltersFromParams(searchParams);
-
-  // _______ Updaters __________________________
 
   const updateGeneral = (update: Partial<typeof general>) =>
     replaceParams((p) => generalFiltersToParams({ ...general, ...update }, p));
@@ -378,7 +260,19 @@ export default function ActiveFilterTags({ type }: { type: CatalogType }) {
         <CityTagGroup
           label="Město"
           ids={[general.city]}
-          onRemove={() => updateGeneral({ city: "" })}
+          onRemove={() => updateGeneral({ city: "", district: "", region: "", bbox: [] })}
+        />
+      )}
+      {!general.city && general.district && (
+        <DistrictTagGroup
+          id={general.district}
+          onRemove={() => updateGeneral({ district: "", region: "", bbox: [] })}
+        />
+      )}
+      {!general.city && !general.district && general.region && (
+        <RegionTagGroup
+          id={general.region}
+          onRemove={() => updateGeneral({ region: "", bbox: [] })}
         />
       )}
 
@@ -398,10 +292,11 @@ export default function ActiveFilterTags({ type }: { type: CatalogType }) {
           )}
         </TagGroup>
       )}
+
       {general.bbox && general.bbox.length === 4 && (
         <TagGroup label="Podle mapy">
           <FilterTag
-            label={`Aktivní`}
+            label="Aktivní"
             onRemove={() => updateGeneral({ bbox: undefined })}
           />
         </TagGroup>
@@ -441,7 +336,7 @@ export default function ActiveFilterTags({ type }: { type: CatalogType }) {
 
       {/* ── Common ── */}
 
-      {common.minPrice !== undefined || common.maxPrice !== undefined ? (
+      {(common.minPrice !== undefined || common.maxPrice !== undefined) && (
         <PriceTagGroup
           minPrice={common.minPrice}
           maxPrice={common.maxPrice}
@@ -449,10 +344,13 @@ export default function ActiveFilterTags({ type }: { type: CatalogType }) {
             updateCommon({ minPrice: undefined, maxPrice: undefined })
           }
         />
-      ) : null}
+      )}
+
       {common.eventTypes.length > 0 && (
-        <EventTypeTagGroup
-          ids={common.eventTypes}
+        <IdTagGroup
+          label="Typ akce"
+          selectedIds={common.eventTypes}
+          options={filters?.eventTypes ?? []}
           onRemove={(id) =>
             updateCommon({
               eventTypes: common.eventTypes.filter((e) => e !== id),
@@ -464,16 +362,21 @@ export default function ActiveFilterTags({ type }: { type: CatalogType }) {
       {/* ── Gastro ── */}
 
       {gastro && gastro.cuisines.length > 0 && (
-        <CuisineTagGroup
-          ids={gastro.cuisines}
+        <IdTagGroup
+          label="Kuchyně"
+          selectedIds={gastro.cuisines}
+          options={filters?.cuisines ?? []}
           onRemove={(id) =>
             updateGastro({ cuisines: gastro.cuisines.filter((c) => c !== id) })
           }
         />
       )}
+
       {gastro && gastro.dishTypes.length > 0 && (
-        <DishTypeTagGroup
-          ids={gastro.dishTypes}
+        <IdTagGroup
+          label="Typ jídla"
+          selectedIds={gastro.dishTypes}
+          options={filters?.dishTypes ?? []}
           onRemove={(id) =>
             updateGastro({
               dishTypes: gastro.dishTypes.filter((d) => d !== id),
@@ -481,9 +384,12 @@ export default function ActiveFilterTags({ type }: { type: CatalogType }) {
           }
         />
       )}
+
       {gastro && gastro.dietaryOptions.length > 0 && (
-        <DietaryOptionTagGroup
-          ids={gastro.dietaryOptions}
+        <IdTagGroup
+          label="Dietní možnosti"
+          selectedIds={gastro.dietaryOptions}
+          options={filters?.dietaryOptions ?? []}
           onRemove={(id) =>
             updateGastro({
               dietaryOptions: gastro.dietaryOptions.filter((d) => d !== id),
@@ -491,9 +397,12 @@ export default function ActiveFilterTags({ type }: { type: CatalogType }) {
           }
         />
       )}
+
       {gastro && gastro.foodServiceStyles.length > 0 && (
-        <FoodServiceStyleTagGroup
-          ids={gastro.foodServiceStyles}
+        <IdTagGroup
+          label="Styl obsluhy"
+          selectedIds={gastro.foodServiceStyles}
+          options={filters?.foodServiceStyles ?? []}
           onRemove={(id) =>
             updateGastro({
               foodServiceStyles: gastro.foodServiceStyles.filter(
@@ -507,8 +416,10 @@ export default function ActiveFilterTags({ type }: { type: CatalogType }) {
       {/* ── Venue ── */}
 
       {venue && venue.placeTypes.length > 0 && (
-        <PlaceTypeTagGroup
-          ids={venue.placeTypes}
+        <IdTagGroup
+          label="Typ prostoru"
+          selectedIds={venue.placeTypes}
+          options={filters?.placeTypes ?? []}
           onRemove={(id) =>
             updateVenue({
               placeTypes: venue.placeTypes.filter((p) => p !== id),
@@ -518,8 +429,10 @@ export default function ActiveFilterTags({ type }: { type: CatalogType }) {
       )}
 
       {venue && venue.amenities.length > 0 && (
-        <AmenityTagGroup
-          ids={venue.amenities}
+        <IdTagGroup
+          label="Vybavení"
+          selectedIds={venue.amenities}
+          options={filters?.amenities ?? []}
           onRemove={(id) =>
             updateVenue({ amenities: venue.amenities.filter((a) => a !== id) })
           }
@@ -529,8 +442,10 @@ export default function ActiveFilterTags({ type }: { type: CatalogType }) {
       {/* ── Entertainment ── */}
 
       {entertainment && entertainment.activities.length > 0 && (
-        <ActivityTagGroup
-          ids={entertainment.activities}
+        <IdTagGroup
+          label="Aktivity"
+          selectedIds={entertainment.activities}
+          options={filters?.activities ?? []}
           onRemove={(id) =>
             updateEntertainment({
               activities: entertainment.activities.filter((a) => a !== id),

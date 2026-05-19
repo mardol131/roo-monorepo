@@ -1,14 +1,7 @@
 import React from "react";
 import PriceFilter from "./special/price-filter";
 import { useCities } from "@/app/react-query/cities/hooks";
-import { useEventTypes } from "@/app/react-query/filters/event-types/hooks";
-import { useCuisines } from "@/app/react-query/filters/cuisines/hooks";
-import { useDishTypes } from "@/app/react-query/filters/dish-types/hooks";
-import { useDietaryOptions } from "@/app/react-query/filters/dietary-options/hooks";
-import { useFoodServiceStyles } from "@/app/react-query/filters/food-service-styles/hooks";
-import { usePlaceTypes } from "@/app/react-query/filters/place-types/hooks";
-import { useAmenities } from "@/app/react-query/filters/amenities/hooks";
-import { useActivities } from "@/app/react-query/filters/activities/hooks";
+import { useFilterOptions } from "@/app/react-query/filters/aggregated-filters/hooks";
 import FilterSection from "./filter-section";
 
 // ─── Core types ────────────────────────────────────────────────────────────────
@@ -50,6 +43,8 @@ export interface CommonFilterState {
 
 export interface GeneralFilterState {
   city: string;
+  district: string;
+  region: string;
   dateFrom: string;
   dateTo: string;
   adults: number;
@@ -62,40 +57,42 @@ export interface GeneralFilterState {
 // ─── Keys ─────────────────────────────────────────────────────────────
 
 export const GENERAL_PARAM_KEYS: Record<keyof GeneralFilterState, string> = {
-  city: "mesto",
-  dateFrom: "datumOd",
-  dateTo: "datumDo",
-  adults: "dospeli",
-  children: "deti",
-  accessibility: "ztp",
-  pets: "zvirata",
+  city: "city",
+  district: "district",
+  region: "region",
+  dateFrom: "dateFrom",
+  dateTo: "dateTo",
+  adults: "adults",
+  children: "children",
+  accessibility: "accessibility",
+  pets: "pets",
   bbox: "bbox",
 };
 
 export const GASTRO_PARAM_KEYS: Record<keyof GastroFilterState, string> = {
-  cuisines: "kuchyne",
-  dishTypes: "jidlo",
-  dietaryOptions: "dieta",
-  foodServiceStyles: "obsluha",
+  cuisines: "cuisines",
+  dishTypes: "dishTypes",
+  dietaryOptions: "dietaryOptions",
+  foodServiceStyles: "foodServiceStyles",
 };
 
 export const VENUE_PARAM_KEYS: Record<keyof VenueFilterState, string> = {
-  placeTypes: "prostor",
-  amenities: "vybaveni",
-  activities: "aktivity",
+  placeTypes: "placeTypes",
+  amenities: "amenities",
+  activities: "activities",
 };
 
 export const ENTERTAINMENT_PARAM_KEYS: Record<
   keyof EntertainmentFilterState,
   string
 > = {
-  activities: "aktivity",
+  activities: "activities",
 };
 
 export const COMMON_PARAM_KEYS: Record<keyof CommonFilterState, string> = {
-  minPrice: "priceFrom",
-  maxPrice: "priceTo",
-  eventTypes: "akce",
+  minPrice: "minPrice",
+  maxPrice: "maxPrice",
+  eventTypes: "eventTypes",
 };
 
 // ─── Empty states ───────────────────────────────────────────────────────────────────
@@ -109,6 +106,8 @@ export const EMPTY_GENERAL_FILTERS: GeneralFilterState = {
   accessibility: false,
   pets: false,
   bbox: undefined,
+  district: "",
+  region: "",
 };
 
 export const EMPTY_GASTRO_FILTERS: GastroFilterState = {
@@ -252,11 +251,11 @@ export function createCuisinesGroup<
     label: "Kuchyně",
     count: (f) => f.cuisines.length,
     Content: ({ filters, onChange }) => {
-      const { data } = useCuisines({ limit: 50 });
+      const { data: filterOptions } = useFilterOptions();
       return (
         <FilterSection
           title="Kuchyně"
-          options={data?.docs || []}
+          options={filterOptions?.cuisines || []}
           selectedIds={filters.cuisines}
           onSelectionChange={(ids) => onChange({ ...filters, cuisines: ids })}
         />
@@ -273,11 +272,11 @@ export function createDishTypesGroup<
     label: "Typ jídla",
     count: (f) => f.dishTypes.length,
     Content: ({ filters, onChange }) => {
-      const { data } = useDishTypes({ limit: 50 });
+      const { data: filterOptions } = useFilterOptions();
       return (
         <FilterSection
           title="Typ jídla"
-          options={data?.docs || []}
+          options={filterOptions?.dishTypes || []}
           selectedIds={filters.dishTypes}
           onSelectionChange={(ids) => onChange({ ...filters, dishTypes: ids })}
         />
@@ -294,11 +293,11 @@ export function createDietaryOptionsGroup<
     label: "Dietní možnosti",
     count: (f) => f.dietaryOptions.length,
     Content: ({ filters, onChange }) => {
-      const { data } = useDietaryOptions({ limit: 50 });
+      const { data: filterOptions } = useFilterOptions();
       return (
         <FilterSection
           title="Dietní možnosti"
-          options={data?.docs || []}
+          options={filterOptions?.dietaryOptions || []}
           selectedIds={filters.dietaryOptions}
           onSelectionChange={(ids) =>
             onChange({ ...filters, dietaryOptions: ids })
@@ -317,11 +316,11 @@ export function createFoodServiceStylesGroup<
     label: "Styl obsluhy",
     count: (f) => f.foodServiceStyles.length,
     Content: ({ filters, onChange }) => {
-      const { data } = useFoodServiceStyles({ limit: 50 });
+      const { data: filterOptions } = useFilterOptions();
       return (
         <FilterSection
           title="Styl obsluhy"
-          options={data?.docs || []}
+          options={filterOptions?.foodServiceStyles || []}
           selectedIds={filters.foodServiceStyles}
           onSelectionChange={(ids) =>
             onChange({ ...filters, foodServiceStyles: ids })
@@ -340,11 +339,11 @@ export function createPlaceTypesGroup<
     label: "Typ prostoru",
     count: (f) => f.placeTypes.length,
     Content: ({ filters, onChange }) => {
-      const { data } = usePlaceTypes({ limit: 50 });
+      const { data: filterOptions } = useFilterOptions();
       return (
         <FilterSection
           title="Typ prostoru"
-          options={data?.docs || []}
+          options={filterOptions?.placeTypes || []}
           selectedIds={filters.placeTypes}
           onSelectionChange={(ids) => onChange({ ...filters, placeTypes: ids })}
         />
@@ -361,11 +360,11 @@ export function createEventTypesGroup<
     label: "Typ akce",
     count: (f) => f.eventTypes.length,
     Content: ({ filters, onChange }) => {
-      const { data } = useEventTypes({ limit: 50 });
+      const { data: filterOptions } = useFilterOptions();
       return (
         <FilterSection
           title="Typ akce"
-          options={data?.docs || []}
+          options={filterOptions?.eventTypes || []}
           selectedIds={filters.eventTypes}
           onSelectionChange={(ids) => onChange({ ...filters, eventTypes: ids })}
         />
@@ -382,11 +381,11 @@ export function createAmenitiesGroup<
     label: "Vybavení",
     count: (f) => f.amenities.length,
     Content: ({ filters, onChange }) => {
-      const { data } = useAmenities({ limit: 50 });
+      const { data: filterOptions } = useFilterOptions();
       return (
         <FilterSection
           title="Vybavení"
-          options={data?.docs || []}
+          options={filterOptions?.amenities || []}
           selectedIds={filters.amenities}
           onSelectionChange={(ids) => onChange({ ...filters, amenities: ids })}
         />
@@ -403,11 +402,11 @@ export function createActivitiesGroup<
     label: "Aktivity",
     count: (f) => f.activities.length || 0,
     Content: ({ filters, onChange }) => {
-      const { data } = useActivities();
+      const { data: filterOptions } = useFilterOptions();
       return (
         <FilterSection
           title="Aktivity"
-          options={data?.docs || []}
+          options={filterOptions?.activities || []}
           selectedIds={filters.activities}
           onSelectionChange={(ids) => onChange({ ...filters, activities: ids })}
         />

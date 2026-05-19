@@ -3,11 +3,11 @@ import {
   requiredMediaSchema,
 } from "@/app/validation/schema/media-schema";
 import { relationshipItemSchema } from "@/app/validation/schema/relationship-item-schema";
-import z from "zod";
 import {
   getOptionalPositiveNumber,
   getPositiveNumber,
-} from "../../../new/forms/common-schema";
+} from "@/app/validation/schema/utils";
+import z from "zod";
 
 export const createVariantCommonSchema = {
   name: z.string().min(1, "Název je povinný"),

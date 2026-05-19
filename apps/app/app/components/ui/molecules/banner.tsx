@@ -21,42 +21,29 @@ export default function Banner({
   buttonText,
   link,
   imageAlt,
-  rotate = false,
 }: Props) {
   return (
-    <div className="w-full bg-gradient-to-r from-zinc-50 to-white rounded-2xl shadow-lg overflow-hidden">
-      <div className="grid grid-cols-1 md:grid-cols-2 items-center min-h-80">
-        {/* Left Content */}
-        <div className="p-6 sm:p-8 md:p-12 lg:p-16 flex flex-col items-start justify-center gap-6 order-2 md:order-1">
-          <div className="flex flex-col gap-3 sm:gap-4">
-            <Text
-              variant="h2"
-              className="text-zinc-900 text-2xl sm:text-3xl lg:text-4xl"
-            >
-              {title}
-            </Text>
-            <Text
-              variant="h2"
-              className="text-zinc-600 text-base sm:text-lg"
-            >
-              {text}
-            </Text>
-          </div>
-
-          <Button text={buttonText} version="primary" size="lg" link={link} />
+    <div className="relative w-full rounded-3xl overflow-hidden">
+      <div className="relative h-80">
+        <Image
+          src={image}
+          alt={imageAlt || title}
+          fill
+          className="object-cover object-center"
+          priority
+        />
+        <div className="absolute inset-0 bg-linear-to-r from-black/80 via-black/50 to-black/10" />
+      </div>
+      <div className="absolute inset-0 flex flex-col items-start justify-center gap-5 px-12 max-w-2xl">
+        <div className="flex flex-col gap-2">
+          <Text variant="display-xl" className="text-white">
+            {title}
+          </Text>
+          <Text variant="body-lg" className="text-white/70">
+            {text}
+          </Text>
         </div>
-
-        {/* Right Image */}
-        <div className="relative w-full h-full order-1 md:order-2">
-          <Image
-            src={image}
-            alt={imageAlt || title}
-            width={600}
-            height={400}
-            className={`object-cover object-center w-full rounded-2xl h-full ${rotate ? "md:-rotate-3" : ""}`}
-            priority
-          />
-        </div>
+        <Button text={buttonText} version="primary" size="lg" link={link} />
       </div>
     </div>
   );

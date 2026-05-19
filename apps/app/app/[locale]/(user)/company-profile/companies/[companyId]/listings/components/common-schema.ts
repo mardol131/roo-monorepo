@@ -3,19 +3,23 @@ import {
   requiredMediaSchema,
 } from "@/app/validation/schema/media-schema";
 import z from "zod";
+import { relationshipItemSchema } from "@/app/validation/schema/relationship-item-schema";
 import {
   getOptionalPositiveNumber,
   getPositiveNumber,
-} from "../../../new/forms/common-schema";
-import { relationshipItemSchema } from "@/app/validation/schema/relationship-item-schema";
+} from "@/app/validation/schema/utils";
+import { itemSchema } from "./utils";
 
 export const commonEditListingFieldsSchema = {
   name: z.string().min(1, "Název je povinný"),
   images: z.object({
     coverImage: z.object(requiredMediaSchema, "Titulní obrázek je povinný"),
-    logo: z.object(optionalMediaSchema),
+    logo: z.object(optionalMediaSchema).optional(),
     gallery: z
-      .array(z.object(requiredMediaSchema))
+      .array(
+        z.object(requiredMediaSchema, "Přidejte alespoň čtyři obrázky"),
+        "Přidejte alespoň čtyři obrázky",
+      )
       .min(4, "Přidejte alespoň čtyři obrázky"),
   }),
   price: z.object({
@@ -26,8 +30,12 @@ export const commonEditListingFieldsSchema = {
     .min(1, "Vyberte alespoň jeden typ akce"),
   shortDescription: z.string().optional(),
   description: z.string().optional(),
-  capacity: getPositiveNumber("Zadejte kapacitu"),
-  minimumCapacity: getOptionalPositiveNumber("Zadejte minimální kapacitu"),
+  guests: z.object({
+    min: getOptionalPositiveNumber("Zadejte minimální kapacitu"),
+    max: getPositiveNumber("Zadejte maximální kapacitu"),
+    ztp: z.boolean().default(true),
+    pets: z.boolean().default(true),
+  }),
   employees: z
     .array(
       z.object({
@@ -63,5 +71,7 @@ export const commonEditListingFieldsSchema = {
     .default([]),
   personnel: z.array(relationshipItemSchema).default([]),
   necessities: z.array(relationshipItemSchema).default([]),
-  rules: z.array(relationshipItemSchema).default([]),
+  gastroRules: z.array(itemSchema).default([]),
+  venueRules: z.array(itemSchema).default([]),
+  entertainmentRules: z.array(itemSchema).default([]),
 };

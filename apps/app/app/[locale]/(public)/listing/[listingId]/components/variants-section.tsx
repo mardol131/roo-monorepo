@@ -17,13 +17,14 @@ export default function VariantsSection({
 }: VariantsSectionProps) {
   const { listingId } = useParams<{ listingId: string }>();
 
-  const { setCurrentVariantIndex, setCurrentStep } = useOrderStore();
+  const { setCurrentVariantId, setCurrentStep } = useOrderStore();
   const { data: variants } = useVariantsByListing(listingId);
   const router = useRouter();
 
   if (!variants || variants.docs?.length === 0) return null;
-  const handleVariantClick = (index: number) => {
-    setCurrentVariantIndex(index);
+
+  const handleVariantClick = (variantId: string) => {
+    setCurrentVariantId(variantId);
     setCurrentStep(2);
     router.push({
       pathname: "/listing/[listingId]/inquiry",
@@ -38,11 +39,11 @@ export default function VariantsSection({
       </Text>
 
       <div className="grid grid-cols-1 gap-6">
-        {variants?.docs?.map((variant, index) => (
+        {variants?.docs?.map((variant) => (
           <VariantItem
             key={variant.id}
             variant={variant}
-            onOrderButtonClick={() => handleVariantClick(index)}
+            onOrderButtonClick={() => handleVariantClick(variant.id)}
             orderButtonText="Přejít k vytvoření poptávky"
           />
         ))}

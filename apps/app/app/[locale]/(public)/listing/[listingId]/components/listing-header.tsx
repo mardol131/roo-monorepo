@@ -1,25 +1,27 @@
 import Text from "@/app/components/ui/atoms/text";
+import { useFilterOptions } from "@/app/react-query/filters/aggregated-filters/hooks";
 import { Listing } from "@roo/common";
-import { Tag } from "lucide-react";
+import { Building2, Tag, Utensils, Music } from "lucide-react";
+
+const listingTypeConfig: Record<
+  Listing["type"],
+  { label: string; Icon: React.ElementType }
+> = {
+  venue: { label: "Prostory & Venue", Icon: Building2 },
+  gastro: { label: "Catering", Icon: Utensils },
+  entertainment: { label: "Zábava & Program", Icon: Music },
+};
 
 interface Props {
   listing: Listing;
 }
 
 export default function ListingHeader({ listing }: Props) {
-  const eventTypes = listing.eventTypes
-    .filter(
-      (
-        e,
-      ): e is {
-        id: string;
-        name: string;
-        slug: string;
-        updatedAt: string;
-        createdAt: string;
-      } => typeof e !== "string",
-    )
-    .map((e) => e.name);
+  const { data: filters } = useFilterOptions();
+  const eventTypes = (listing.properties.eventTypes ?? []).flatMap((id) => {
+    const found = filters?.eventTypes.find((e) => e.id === id);
+    return found ? [found.name] : [];
+  });
 
   const environment =
     listing.indoor && listing.outdoor
@@ -47,6 +49,17 @@ export default function ListingHeader({ listing }: Props) {
       )}
 
       <div className="flex flex-wrap items-center gap-3">
+        {(() => {
+          const { label, Icon } = listingTypeConfig[listing.type];
+          return (
+            <span className="flex items-center gap-1.5 px-3 py-1.5 bg-zinc-900 rounded-md">
+              <Icon size={11} className="text-white shrink-0" />
+              <Text as="span" variant="label" className="text-white">
+                {label}
+              </Text>
+            </span>
+          );
+        })()}
         {environment && (
           <span className="flex items-center gap-1.5 px-3 py-1.5 bg-primary/8 rounded-md">
             <Text as="span" variant="label" color="primary">

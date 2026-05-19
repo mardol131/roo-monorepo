@@ -3,6 +3,7 @@
 import Button from "@/app/components/ui/atoms/button";
 import Text from "@/app/components/ui/atoms/text";
 import { useRouter } from "@/app/i18n/navigation";
+import { useListing } from "@/app/react-query/listings/hooks";
 import { useOrderStore } from "@/app/store/order-store";
 import { BadgeCheck, CircleCheck } from "lucide-react";
 import { useParams } from "next/navigation";
@@ -15,6 +16,7 @@ export default function OrderBox({ startingPrice }: Props) {
   const { listingId } = useParams<{ listingId: string }>();
   const router = useRouter();
   const { setCurrentStep } = useOrderStore();
+  const { data: listing } = useListing(listingId);
 
   const handleOrderClick = () => {
     setCurrentStep(1);
@@ -75,22 +77,24 @@ export default function OrderBox({ startingPrice }: Props) {
       </div>
 
       {/* Premium badge */}
-      <div className="relative overflow-hidden border-t border-zinc-100 bg-gradient-to-r from-zinc-50 to-white px-6 py-4 flex items-center gap-3">
-        <BadgeCheck size={20} className="text-primary shrink-0" />
-        <div>
-          <Text variant="label-lg" color="textDark">
-            Prémiový partner ROO
-          </Text>
-          <Text variant="caption" color="secondary">
-            Ověřený a prověřený pronajímatel
-          </Text>
+      {listing?.tariff === "premium" && (
+        <div className="relative overflow-hidden border-t border-zinc-100 bg-gradient-to-r from-zinc-50 to-white px-6 py-4 flex items-center gap-3">
+          <BadgeCheck size={20} className="text-primary shrink-0" />
+          <div>
+            <Text variant="label-lg" color="textDark">
+              Prémiový partner ROO
+            </Text>
+            <Text variant="caption" color="secondary">
+              Ověřený a prověřený pronajímatel
+            </Text>
+          </div>
+          <div className="absolute right-0 top-0 h-full flex gap-2 opacity-10 pointer-events-none">
+            <div className="w-2 h-full bg-primary rotate-12 translate-x-1" />
+            <div className="w-2 h-full bg-primary rotate-12" />
+            <div className="w-2 h-full bg-primary rotate-12 -translate-x-1" />
+          </div>
         </div>
-        <div className="absolute right-0 top-0 h-full flex gap-2 opacity-10 pointer-events-none">
-          <div className="w-2 h-full bg-primary rotate-12 translate-x-1" />
-          <div className="w-2 h-full bg-primary rotate-12" />
-          <div className="w-2 h-full bg-primary rotate-12 -translate-x-1" />
-        </div>
-      </div>
+      )}
     </div>
   );
 }

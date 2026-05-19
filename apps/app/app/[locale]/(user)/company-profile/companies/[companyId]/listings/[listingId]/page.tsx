@@ -7,40 +7,30 @@ import EntityRow from "@/app/[locale]/(user)/components/entity-row";
 import InfoSection from "@/app/[locale]/(user)/components/info-section";
 import Loader from "@/app/[locale]/(user)/components/loader";
 import RowContainer from "@/app/[locale]/(user)/components/row-container";
+import EntityComponentTag from "@/app/[locale]/(user)/components/tags/entity-component-tag";
 import ListingStatusTag from "@/app/[locale]/(user)/components/tags/listing-status-tag";
-import Text from "@/app/components/ui/atoms/text";
+import Button from "@/app/components/ui/atoms/button";
 import { confirmActionModalEvents } from "@/app/components/ui/molecules/modals/confirm-action-modal";
 import { useRouter } from "@/app/i18n/navigation";
+import { useFilterOptions } from "@/app/react-query/filters/aggregated-filters/hooks";
 import {
   useDeleteListing,
   useListing,
+  useListingDetail,
   useUpdateListing,
 } from "@/app/react-query/listings/hooks";
+import { useSpacesByListing } from "@/app/react-query/spaces/hooks";
 import { useVariantsByListing } from "@/app/react-query/variants/hooks";
-import {
-  HelpCircle,
-  Package,
-  Shield,
-  Star,
-  TableOfContents,
-  TagIcon,
-  Trash2,
-  Users,
-  Zap,
-} from "lucide-react";
+import { getIdFromRelationshipField } from "@roo/common";
+import { TagIcon, Trash2 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useParams } from "next/navigation";
 import { ControlSection } from "../../../../../components/control-section";
 import { EntertainmentDetails } from "./components/entertainment-details";
 import { GastroDetails } from "./components/gastro-details";
-import { VenueDetails } from "./components/venue-details";
-import { EmptyState } from "@/app/[locale]/(user)/components/empty-state";
 import { ListingCompletion } from "./components/listing-completion";
-import { useTranslations } from "next-intl";
-import EntityCard from "@/app/[locale]/(user)/components/entity-card";
-import EntityComponentTag from "@/app/[locale]/(user)/components/tags/entity-component-tag";
-import Button from "@/app/components/ui/atoms/button";
-import { useSpacesByListing } from "@/app/react-query/spaces/hooks";
 import { SpacesSection } from "./components/spaces-section";
+import { VenueDetails } from "./components/venue-details";
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
@@ -58,9 +48,17 @@ export default function Page() {
   const { mutate: updateListing, isPending: isUpdating } =
     useUpdateListing(companyId);
   const { data: spaces } = useSpacesByListing(listingId);
-  const { mutate: deleteListing } = useDeleteListing(companyId);
-  if (isPending) return <Loader text="Načítám službu..." />;
-  if (!listing) return router.back();
+  const { data: detail, isFetching: isFetchingDetail } = useListingDetail(
+    `listing-${listing?.type ? listing.type : "gastro"}-details`,
+    listing?.detail?.value
+      ? getIdFromRelationshipField(listing?.detail?.value)
+      : "",
+  );
+  const { data: filters } = useFilterOptions();
+  if (isPending || isFetchingDetail) return <Loader text="Načítám službu..." />;
+  if (!listing || !detail) return router.back();
+
+  //filters
 
   const isActive = listing.status === "active";
 
@@ -71,14 +69,43 @@ export default function Page() {
     });
   };
 
-  const handleDeleteConfirm = async () => {
-    await new Promise<void>((resolve, reject) => {
-      deleteListing(listingId, { onSuccess: () => resolve(), onError: reject });
-    });
-    router.back();
+  const handleDeleteConfirm = () => {
+    updateListing(
+      {
+        id: listingId,
+        data: { status: "archived" },
+      },
+      {
+        onSuccess: () => {
+          router.back();
+        },
+      },
+    );
   };
 
-  const listingType = listing.details[0]?.blockType;
+  const openDeleteConfirmModal = () =>
+    confirmActionModalEvents.emit("open", {
+      title: "Smazat službu",
+      description:
+        "Tato akce je nevratná a trvale odstraní tuto službu z platformy.",
+      Icon: Trash2,
+      buttonText: "Smazat službu",
+      buttonVersion: "dangerFull",
+      confirmPhrase: listing.name,
+      whatIsGoingToHappenText: "Opravdu chcete smazat tuto službu?",
+      whatIsGoingToHappenTextColor: "danger",
+      whatIsGoingToHappenList: [
+        "Služba zmizí z katalogu a nebude dohledatelná",
+        "Veškerá data, fotografie a nastavení budou trvale odstraněna",
+        "Platby za tuto službu se přestanou strhávat",
+      ],
+      bgColor: "bg-danger-surface",
+      onConfirmClick: async () => {
+        handleDeleteConfirm();
+      },
+    });
+
+  const listingType = listing.type;
 
   const headerInfoItems = [
     { icon: "Banknote", text: `od ${listing.price.startsAt} Kč` },
@@ -113,12 +140,14 @@ export default function Page() {
           },
         ]
       : []),
-    ...(listing.eventTypes?.length
+    ...(listing.properties.eventTypes?.length
       ? [
           {
             type: "tagList" as const,
             label: "Typy akcí",
-            items: listing.eventTypes,
+            items: listing.properties.eventTypes.map(
+              (et) => filters?.eventTypes?.find((e) => e.id === et)?.name || et,
+            ),
           },
         ]
       : []),
@@ -139,6 +168,36 @@ export default function Page() {
             value: listing.outdoor,
           },
         ]
+      : []),
+    ...(listing.guests?.max != null
+      ? [
+          {
+            type: "text" as const,
+            label: "Max. hostů",
+            value: `${listing.guests.max} osob`,
+          },
+        ]
+      : []),
+    ...(listing.guests?.min != null
+      ? [
+          {
+            type: "text" as const,
+            label: "Min. hostů",
+            value: `${listing.guests.min} osob`,
+          },
+        ]
+      : []),
+    ...(listing.guests?.ztp
+      ? [
+          {
+            type: "boolean" as const,
+            label: "Bezbariérový přístup",
+            value: true,
+          },
+        ]
+      : []),
+    ...(listing.guests?.pets
+      ? [{ type: "boolean" as const, label: "Zvířata vítána", value: true }]
       : []),
   ];
 
@@ -168,6 +227,7 @@ export default function Page() {
       <div className="flex flex-col gap-4">
         <ListingCompletion
           listing={listing}
+          detail={detail}
           companyId={companyId}
           listingId={listingId}
           spacesCount={spaces?.docs?.length || 0}
@@ -202,26 +262,7 @@ export default function Page() {
                 version: "dangerFull",
                 iconLeft: "Trash2",
                 size: "sm",
-                onClick: () =>
-                  confirmActionModalEvents.emit("open", {
-                    title: "Smazat službu",
-                    description:
-                      "Tato akce je nevratná a trvale odstraní tuto službu z platformy.",
-                    Icon: Trash2,
-                    buttonText: "Smazat službu",
-                    buttonVersion: "dangerFull",
-                    confirmPhrase: listing.name,
-                    whatIsGoingToHappenText:
-                      "Opravdu chcete smazat tuto službu?",
-                    whatIsGoingToHappenTextColor: "danger",
-                    whatIsGoingToHappenList: [
-                      "Služba zmizí z katalogu a nebude dohledatelná",
-                      "Veškerá data, fotografie a nastavení budou trvale odstraněna",
-                      "Platby za tuto službu se přestanou strhávat",
-                    ],
-                    bgColor: "bg-danger-surface",
-                    onConfirmClick: handleDeleteConfirm,
-                  }),
+                onClick: openDeleteConfirmModal,
               },
             },
           ]}
@@ -298,38 +339,43 @@ export default function Page() {
             <InfoSection items={basicInfoItems} />
           </DashboardSection>
         )}
-
-        {listing.details.map((block, i) => {
-          if (block.blockType === "venue")
-            return <VenueDetails key={i} block={block} />;
-          if (block.blockType === "gastro")
-            return <GastroDetails key={i} block={block} />;
-          if (block.blockType === "entertainment")
-            return <EntertainmentDetails key={i} block={block} />;
-          return null;
-        })}
-        {listing.technologies?.length && (
+        {listing.type === "entertainment" &&
+          detail &&
+          detail.type === "entertainment" && (
+            <EntertainmentDetails listing={listing} detail={detail} />
+          )}
+        {listing.type === "gastro" && detail && detail.type === "gastro" && (
+          <GastroDetails listing={listing} detail={detail} />
+        )}
+        {listing.type === "venue" && detail && detail.type === "venue" && (
+          <VenueDetails listing={listing} detail={detail} />
+        )}
+        {listing.properties.technologies?.length && (
           <DashboardSection
             title="Technologie"
             icon={"Zap"}
             iconBg="bg-cyan-50"
             iconColor="text-cyan-500"
           >
-            {listing.technologies?.length && (
+            {listing.properties.technologies?.length && (
               <InfoSection
                 items={[
                   {
                     type: "tagList",
                     label: "Vybavení",
-                    items: listing.technologies,
+                    items: listing.properties.technologies.map(
+                      (tech) =>
+                        filters?.technologies?.find((t) => t.id === tech)
+                          ?.name || tech,
+                    ),
                   },
                 ]}
               />
             )}
           </DashboardSection>
         )}
-
-        {listing.rules?.length ? (
+        {/* 
+        {listing.properties.rules?.length ? (
           <DashboardSection
             title="Pravidla"
             icon={"Shield"}
@@ -346,14 +392,14 @@ export default function Page() {
               ]}
             />
           </DashboardSection>
-        ) : null}
+        ) : null} */}
 
         <RowContainer
           icon="User"
           iconColor="text-violet-500"
           iconBgColor="bg-violet-50"
           label="Zaměstnanci"
-          subLabel={`${listing.employees?.length} osob`}
+          subLabel={`${detail.employees?.length} osob`}
           headerRightComponent={
             <Button
               text="Upravit"
@@ -371,8 +417,8 @@ export default function Page() {
             />
           }
           rowComponents={
-            listing.employees?.length
-              ? listing.employees?.map((emp, i) => (
+            detail.employees?.length
+              ? detail.employees?.map((emp, i) => (
                   <EntityRow
                     items={[]}
                     key={i}
@@ -424,10 +470,10 @@ export default function Page() {
               }}
             />
           }
-          subLabel={`${listing?.references?.length} referencí`}
+          subLabel={`${detail?.references?.length} referencí`}
           rowComponents={
-            listing.references?.length
-              ? listing.references?.map((ref, i) => (
+            detail.references?.length
+              ? detail.references?.map((ref, i) => (
                   <EntityRow
                     items={[
                       ...(ref.eventName
@@ -486,7 +532,7 @@ export default function Page() {
           iconColor="text-violet-500"
           iconBgColor="bg-violet-50"
           label="FAQ"
-          subLabel={`Počet otázek:${listing?.faq?.length}`}
+          subLabel={`Počet otázek:${detail?.faq?.length}`}
           headerRightComponent={
             <Button
               text="Upravit"
@@ -504,8 +550,8 @@ export default function Page() {
             />
           }
           rowComponents={
-            listing.faq?.length
-              ? listing.faq?.map((item, i) => (
+            detail.faq?.length
+              ? detail.faq?.map((item, i) => (
                   <EntityRow
                     items={[
                       {

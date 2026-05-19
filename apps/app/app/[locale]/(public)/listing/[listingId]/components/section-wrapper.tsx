@@ -16,7 +16,7 @@ export default function SectionWrapper({
   id,
 }: PropsWithChildren<SectionWrapperProps>) {
   return (
-    <section id={id} className="not-last:border-b w-full py-10 border-zinc-100">
+    <section id={id} className="not-last:border-b w-full py-5 border-zinc-100">
       {(title || subtitle) && (
         <div className="mb-8">
           <div className="flex items-center gap-3 mb-3">

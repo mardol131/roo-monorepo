@@ -1,9 +1,9 @@
 import Text from "@/app/components/ui/atoms/text";
 import { generateMediaUrl } from "@/app/functions/generate-media-url";
-import { Listing } from "@roo/common";
+import { Listing, ListingVenueDetail } from "@roo/common";
 import Image from "next/image";
 
-type Reference = NonNullable<Listing["references"]>[number];
+type Reference = NonNullable<ListingVenueDetail["references"]>[number];
 
 interface Props {
   references: Reference[];

@@ -10,7 +10,7 @@ import ImageInput from "@/app/components/ui/atoms/inputs/images/image-input";
 import Input from "@/app/components/ui/atoms/inputs/input";
 import PhoneInput from "@/app/components/ui/atoms/inputs/phone-input";
 import { uploadFileToCloud } from "@/app/functions/upload-file-to-cloud";
-import { getMediaSchemaFields } from "@/app/validation/schema/media-schema";
+import { optionalMediaSchema } from "@/app/validation/schema/media-schema";
 import { phoneSchema } from "@/app/validation/schema/phone";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { COUNTRY_CODES } from "@roo/common";
@@ -47,7 +47,7 @@ const schema = z.object({
   name: z.string().min(1, "Název firmy je povinný"),
   ico: z.string().min(1, "IČO je povinné"),
   description: z.string().optional().nullable(),
-  logo: z.object(getMediaSchemaFields()).optional().nullable(),
+  logo: z.object(optionalMediaSchema).optional().nullable(),
   email: z.string().min(1, "E-mail je povinný"),
   phone: phoneSchema,
   website: z.string().optional().nullable(),

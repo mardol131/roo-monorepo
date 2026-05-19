@@ -18,6 +18,7 @@ export const Regions: CollectionConfig = {
       name: 'name',
       type: 'text',
       required: true,
+      index: true,
     },
     {
       name: 'slug',
@@ -35,6 +36,10 @@ export const Regions: CollectionConfig = {
       options: COUNTRIES,
       required: true,
     },
+    { name: 'bboxMinLon', type: 'number', required: true },
+    { name: 'bboxMinLat', type: 'number', required: true },
+    { name: 'bboxMaxLon', type: 'number', required: true },
+    { name: 'bboxMaxLat', type: 'number', required: true },
   ],
   hooks: {
     beforeValidate: [

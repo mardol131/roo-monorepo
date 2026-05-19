@@ -18,13 +18,14 @@ import RepeaterField from "@/app/components/ui/atoms/inputs/repeater-field";
 import { Textarea } from "@/app/components/ui/atoms/inputs/textarea";
 import { uploadFileToCloud } from "@/app/functions/upload-file-to-cloud";
 import { useListing } from "@/app/react-query/listings/hooks";
+import { useFilterOptions } from "@/app/react-query/filters/aggregated-filters/hooks";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { CalendarRange, Clock } from "lucide-react";
 import type { Resolver } from "react-hook-form";
 import { Controller, useFieldArray, useForm } from "react-hook-form";
 import { z } from "zod";
 import { createVariantCommonSchema } from "./common-schema";
-import { getOptionalPositiveNumber } from "../../../new/forms/common-schema";
+import { getOptionalPositiveNumber } from "@/app/validation/schema/utils";
 import { relationshipItemSchema } from "@/app/validation/schema/relationship-item-schema";
 
 // ── Color scheme ───────────────────────────────────────────────────────────────
@@ -134,34 +135,48 @@ export default function EditVariantFormGastro({
   defaultValues,
 }: Props) {
   const { data: listing } = useListing(listingId);
-  const gastroDetail = listing?.details.find((d) => d.blockType === "gastro");
+  const { data: filters } = useFilterOptions();
 
-  const toItem = <T extends { id: string; name: string }>(v: string | T) =>
-    typeof v === "string" ? { id: v, name: "" } : { id: v.id, name: v.name };
-
-  const listingEventTypes = (listing?.eventTypes ?? []).map(toItem);
-  const listingCuisines = (
-    gastroDetail?.blockType === "gastro" ? (gastroDetail.cuisines ?? []) : []
-  ).map(toItem);
-  const listingDishTypes = (
-    gastroDetail?.blockType === "gastro" ? (gastroDetail.dishTypes ?? []) : []
-  ).map(toItem);
+  const listingEventTypes = (listing?.properties.eventTypes ?? []).flatMap(
+    (id) => {
+      const found = filters?.eventTypes.find((e) => e.id === id);
+      return found ? [{ id: found.id, name: found.name }] : [];
+    },
+  );
+  const listingCuisines = (listing?.properties.cuisines ?? []).flatMap((id) => {
+    const found = filters?.cuisines.find((e) => e.id === id);
+    return found ? [{ id: found.id, name: found.name }] : [];
+  });
+  const listingDishTypes = (listing?.properties.dishTypes ?? []).flatMap(
+    (id) => {
+      const found = filters?.dishTypes.find((e) => e.id === id);
+      return found ? [{ id: found.id, name: found.name }] : [];
+    },
+  );
   const listingFoodServiceStyles = (
-    gastroDetail?.blockType === "gastro"
-      ? (gastroDetail.foodServiceStyles ?? [])
-      : []
-  ).map(toItem);
+    listing?.properties.foodServiceStyles ?? []
+  ).flatMap((id) => {
+    const found = filters?.foodServiceStyles.find((e) => e.id === id);
+    return found ? [{ id: found.id, name: found.name }] : [];
+  });
   const listingDietaryOptions = (
-    gastroDetail?.blockType === "gastro"
-      ? (gastroDetail.dietaryOptions ?? [])
-      : []
-  ).map(toItem);
-  const listingPersonnel = (
-    gastroDetail?.blockType === "gastro" ? (gastroDetail.personnel ?? []) : []
-  ).map(toItem);
-  const listingNecessities = (
-    gastroDetail?.blockType === "gastro" ? (gastroDetail.necessities ?? []) : []
-  ).map(toItem);
+    listing?.properties.dietaryOptions ?? []
+  ).flatMap((id) => {
+    const found = filters?.dietaryOptions.find((e) => e.id === id);
+    return found ? [{ id: found.id, name: found.name }] : [];
+  });
+  const listingPersonnel = (listing?.properties.personnel ?? []).flatMap(
+    (id) => {
+      const found = filters?.personnel.find((e) => e.id === id);
+      return found ? [{ id: found.id, name: found.name }] : [];
+    },
+  );
+  const listingNecessities = (listing?.properties.necessities ?? []).flatMap(
+    (id) => {
+      const found = filters?.necessities.find((e) => e.id === id);
+      return found ? [{ id: found.id, name: found.name }] : [];
+    },
+  );
 
   const {
     control,

@@ -1,5 +1,4 @@
 import Text from "@/app/components/ui/atoms/text";
-import React from "react";
 
 interface Props {
   description: string;

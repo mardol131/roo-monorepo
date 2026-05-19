@@ -1,7 +1,9 @@
+"use client";
+
 import ItemsSection from "../items-section";
 import SectionWrapper from "../section-wrapper";
-import { ChipList, InfoRow, resolveNames } from "../listing-ui";
-import { Listing } from "@roo/common";
+import { ChipList, InfoRow } from "../listing-ui";
+import { Listing, ListingVenueDetail } from "@roo/common";
 import {
   BedDouble,
   Car,
@@ -11,11 +13,11 @@ import {
   Cpu,
   Dumbbell,
 } from "lucide-react";
-
-type VenueDetail = Extract<Listing["details"][number], { blockType: "venue" }>;
+import { useFilterOptions } from "@/app/react-query/filters/aggregated-filters/hooks";
 
 interface Props {
-  detail: VenueDetail;
+  detail: ListingVenueDetail;
+  listing: Listing;
 }
 
 const vehicleTypeLabels: Record<string, string> = {
@@ -25,11 +27,25 @@ const vehicleTypeLabels: Record<string, string> = {
   bus: "Autobus",
 };
 
-export default function VenueSection({ detail }: Props) {
-  const amenities = resolveNames(detail.amenities ?? []);
-  const services = resolveNames(detail.services ?? []);
-  const technology = resolveNames(detail.technology ?? []);
-  const activities = resolveNames(detail.activities ?? []);
+export default function VenueSection({ detail, listing }: Props) {
+  const { data: filters } = useFilterOptions();
+
+  const amenities = (listing.properties.amenities ?? []).flatMap((id) => {
+    const found = filters?.amenities.find((e) => e.id === id);
+    return found ? [found.name] : [];
+  });
+  const services = (listing.properties.services ?? []).flatMap((id) => {
+    const found = filters?.services.find((e) => e.id === id);
+    return found ? [found.name] : [];
+  });
+  const technology = (listing.properties.technologies ?? []).flatMap((id) => {
+    const found = filters?.technologies.find((e) => e.id === id);
+    return found ? [found.name] : [];
+  });
+  const activities = (listing.properties.activities ?? []).flatMap((id) => {
+    const found = filters?.activities.find((e) => e.id === id);
+    return found ? [found.name] : [];
+  });
 
   const vehicleTypes = (detail.access.vehicleTypes ?? []).map(
     (v: string) => vehicleTypeLabels[v] ?? v,
@@ -178,7 +194,11 @@ export default function VenueSection({ detail }: Props) {
                 />
               )}
             {detail.breakfast.breakfastIsIncludedInPrice && (
-              <InfoRow icon={<Coffee size={16} />} label="Cena" value="V ceně" />
+              <InfoRow
+                icon={<Coffee size={16} />}
+                label="Cena"
+                value="V ceně"
+              />
             )}
           </div>
         </SectionWrapper>

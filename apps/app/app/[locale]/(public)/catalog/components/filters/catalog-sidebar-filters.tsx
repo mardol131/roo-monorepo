@@ -39,6 +39,9 @@ import { CatalogType } from "@/app/data/catalog";
 import MapFilter, { PinProps } from "./map-filter";
 import { useListings } from "@/app/react-query/listings/hooks";
 import { useCities } from "@/app/react-query/cities/hooks";
+import { useDistricts } from "@/app/react-query/districts/hooks";
+import { useRegions } from "@/app/react-query/regions/hooks";
+import { useFilterOptions } from "@/app/react-query/filters/aggregated-filters/hooks";
 
 interface CatalogFiltersProps {
   switchMapViewHandler?: () => void;
@@ -57,6 +60,7 @@ export default function CatalogSidebarFilters({
   const commonDebounceRef = useRef<ReturnType<typeof setTimeout> | undefined>(
     undefined,
   );
+  const { data: filters } = useFilterOptions();
   const params = useSearchParams();
 
   const { data: listings } = useListings();
@@ -184,31 +188,51 @@ export default function CatalogSidebarFilters({
     return filtersArray;
   };
 
-  const cityFilter = generalFiltersFromParams(searchParams).city;
+  const { city: cityFilter, district: districtFilter, region: regionFilter } = generalFiltersFromParams(searchParams);
+
   const { data: cities } = useCities({
     limit: 1,
     query: cityFilter ? { id: { equals: cityFilter } } : undefined,
+    enabled: !!cityFilter,
   });
+  const { data: districts } = useDistricts(
+    districtFilter ? { id: { equals: districtFilter } } : undefined,
+    1,
+    !!districtFilter,
+  );
+  const { data: regions } = useRegions(
+    regionFilter ? { id: { equals: regionFilter } } : undefined,
+    1,
+    !!regionFilter,
+  );
 
-  const city = cityFilter && cities?.docs?.[0] ? cities.docs[0] : undefined;
+  const city = cityFilter ? cities?.docs?.[0] : undefined;
+  const district = districtFilter ? districts?.docs?.[0] : undefined;
+  const region = regionFilter ? regions?.docs?.[0] : undefined;
+
+  const externalBbox = city
+    ? [city.bboxMinLon, city.bboxMinLat, city.bboxMaxLon, city.bboxMaxLat]
+    : district
+      ? [district.bboxMinLon, district.bboxMinLat, district.bboxMaxLon, district.bboxMaxLat]
+      : region
+        ? [region.bboxMinLon, region.bboxMinLat, region.bboxMaxLon, region.bboxMaxLat]
+        : undefined;
 
   const mapPins = useMemo((): PinProps[] => {
     if (!listings?.docs) return [];
     return listings.docs.flatMap((listing) => {
-      const detail = listing.details.find((d) => d.blockType === "venue");
-      if (!detail || detail.blockType !== "venue") return [];
+      if (listing.detail.relationTo !== "listing-venue-details") return [];
+      const { latitude, longitude } = listing.location;
+      if (!latitude || !longitude) return [];
 
       const data: PinProps = {
-        value: {
-          latitude: detail.location.latitude,
-          longitude: detail.location.longitude,
-        },
+        value: { latitude, longitude },
         data: {
           label: listing.name,
-          tags:
-            listing.eventTypes?.flatMap((e) =>
-              typeof e === "object" ? [e.name] : [],
-            ) ?? [],
+          tags: (listing.properties.eventTypes ?? []).flatMap((id) => {
+            const found = filters?.eventTypes.find((e) => e.id === id);
+            return found ? [found.name] : [];
+          }),
           filename: listing.images.coverImage.filename,
           buttonUrl: {
             pathname: "/listing/[listingId]",
@@ -330,15 +354,14 @@ export default function CatalogSidebarFilters({
   const onMapMove = (bbox: [number, number, number, number]) => {
     const searchParams = new URLSearchParams(params.toString());
 
-    if (searchParams.get(GENERAL_PARAM_KEYS.city)) {
-      if (searchParams.get(GENERAL_PARAM_KEYS.bbox)) {
-        searchParams.delete(GENERAL_PARAM_KEYS.bbox);
-        return router.replace(`?${searchParams.toString()}`, { scroll: false });
-      }
-      return;
-    }
-    const [west, south, east, north] = bbox;
+    const hasLocality =
+      searchParams.get(GENERAL_PARAM_KEYS.city) ||
+      searchParams.get(GENERAL_PARAM_KEYS.district) ||
+      searchParams.get(GENERAL_PARAM_KEYS.region);
 
+    if (hasLocality) return;
+
+    const [west, south, east, north] = bbox;
     searchParams.set(
       GENERAL_PARAM_KEYS.bbox,
       `${west},${south},${east},${north}`,
@@ -352,31 +375,23 @@ export default function CatalogSidebarFilters({
       {renderVenueModal()}
       {renderEntertainmentModal()}
       <div className="relative h-full flex flex-col">
-        {/* Mapa */}
-        <div
-          className={`mb-6 rounded-xl overflow-hidden ${mapViewIsActive ? "h-130" : "h-100 bg-linear-to-br from-zinc-50 to-zinc-100 flex items-center justify-center border border-zinc-200"} transition-all ease-in-out`}
-        >
-          <MapFilter
-            pins={mapPins}
-            onMapMove={onMapMove}
-            topRightButton={{
-              text: mapViewIsActive ? "Zavřít" : "Otevřít",
-              onClick: switchMapViewHandler,
-              size: "sm",
-            }}
-            height={"h-full"}
-            externalBbox={
-              city
-                ? [
-                    city.bboxMinLon,
-                    city.bboxMinLat,
-                    city.bboxMaxLon,
-                    city.bboxMaxLat,
-                  ]
-                : undefined
-            }
-          />
-        </div>
+        {type === "venue" && (
+          <div
+            className={`mb-6 rounded-xl overflow-hidden ${mapViewIsActive ? "h-130" : "h-100 bg-linear-to-br from-zinc-50 to-zinc-100 flex items-center justify-center border border-zinc-200"} transition-all ease-in-out`}
+          >
+            <MapFilter
+              pins={mapPins}
+              onMapMove={onMapMove}
+              topRightButton={{
+                text: mapViewIsActive ? "Zavřít" : "Otevřít",
+                onClick: switchMapViewHandler,
+                size: "sm",
+              }}
+              height={"h-full"}
+              externalBbox={externalBbox as [number, number, number, number] | undefined}
+            />
+          </div>
+        )}
 
         {/* Filtry */}
         <div className="bg-white relative pb-10 rounded-xl border border-zinc-200 p-5 overflow-y-auto flex-1">

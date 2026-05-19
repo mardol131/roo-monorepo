@@ -55,7 +55,7 @@ export default function RegisterCompanyPage() {
     }
   }
 
-  const isCompany = user?.type === "company" || switched;
+  const isCompany = user?.roles.includes("company") || switched;
 
   return (
     <main className="flex min-h-[80vh]">

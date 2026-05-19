@@ -12,8 +12,19 @@ import SectionOrderInput, {
 import { Textarea } from "@/app/components/ui/atoms/inputs/textarea";
 import Text from "@/app/components/ui/atoms/text";
 import { uploadFileToCloud } from "@/app/functions/upload-file-to-cloud";
-import { useListing, useUpdateListing } from "@/app/react-query/listings/hooks";
-import { Listing, MediaSchema } from "@roo/common";
+import {
+  useListing,
+  useListingDetail,
+  useUpdateListing,
+  useUpdateListingDetail,
+} from "@/app/react-query/listings/hooks";
+import {
+  Listing,
+  ListingEntertainmentDetail,
+  ListingGastroDetail,
+  ListingVenueDetail,
+  MediaSchema,
+} from "@roo/common";
 import { ChevronDown, ChevronUp, Trash2, X } from "lucide-react";
 import { useParams } from "next/navigation";
 import {
@@ -27,7 +38,9 @@ import { useForm } from "react-hook-form";
 import PageHeading from "@/app/[locale]/(user)/components/page-heading";
 import { globalToastEvents } from "@/app/components/ui/molecules/global-toast";
 
-type CustomSectionBlock = NonNullable<Listing["customSections"]>[number];
+type CustomSectionBlock = NonNullable<
+  ListingVenueDetail["customSections"]
+>[number];
 type CustomSectionBlockType = CustomSectionBlock["blockType"];
 
 type CustomSectionState = {
@@ -288,8 +301,10 @@ const CustomSectionCard = forwardRef<
   );
 });
 
-function initCustomSections(listing: Listing): CustomSectionState[] {
-  return (listing.customSections ?? []).map((s) => ({
+function initCustomSections(
+  detail: ListingVenueDetail | ListingGastroDetail | ListingEntertainmentDetail,
+): CustomSectionState[] {
+  return (detail.customSections ?? []).map((s) => ({
     payloadId: s.id,
     blockName: s.blockName ?? s.id ?? crypto.randomUUID(),
     blockType: s.blockType,
@@ -300,13 +315,13 @@ function initCustomSections(listing: Listing): CustomSectionState[] {
 }
 
 function initOrderItems(
-  listing: Listing,
+  detail: ListingVenueDetail | ListingGastroDetail | ListingEntertainmentDetail,
   customSections: CustomSectionState[],
 ): SectionOrderItem[] {
   const customLabels = Object.fromEntries(
     customSections.map((s) => [s.blockName, s.title || "Vlastní sekce"]),
   );
-  const rawOrder = (listing.sectionOrder ?? []).map((s) => ({
+  const rawOrder = (detail.sectionOrder ?? []).map((s) => ({
     key: s.key,
     id: s.id ?? null,
   }));
@@ -319,8 +334,13 @@ export default function SectionsPage() {
     listingId: string;
   }>();
   const { data: listing, isPending } = useListing(listingId);
-  const { mutate: updateListing, isPending: isSaving } =
-    useUpdateListing(companyId);
+  const { data: detail } = useListingDetail(
+    `listing-${listing?.type || "gastro"}-details`,
+    listingId,
+  );
+
+  const { mutate: updateListingDetail, isPending: detailIsPending } =
+    useUpdateListingDetail(`listing-${listing?.type || "gastro"}-details`);
 
   const [orderItems, setOrderItems] = useState<SectionOrderItem[]>([]);
   const [customSections, setCustomSections] = useState<CustomSectionState[]>(
@@ -331,12 +351,14 @@ export default function SectionsPage() {
 
   const cardRefs = useRef(new Map<string, CardHandle>());
 
+  if (!detail || detailIsPending || !listing || isPending) return <Loader />;
+
   useEffect(() => {
-    if (!listing) return;
-    const sections = initCustomSections(listing);
+    if (!detail) return;
+    const sections = initCustomSections(detail);
     setCustomSections(sections);
-    setOrderItems(initOrderItems(listing, sections));
-  }, [listing]);
+    setOrderItems(initOrderItems(detail, sections));
+  }, [detail]);
 
   if (isPending) return <Loader text="Načítám sekce..." />;
   if (!listing) return null;
@@ -386,9 +408,9 @@ export default function SectionsPage() {
     );
     if (results.some((ok) => !ok)) return;
 
-    updateListing(
+    updateListingDetail(
       {
-        id: listingId,
+        id: detail?.id,
         data: {
           sectionOrder: sectionOrderItemsToPayload(orderItems),
           customSections: customSections.map((s) => ({
@@ -483,7 +505,7 @@ export default function SectionsPage() {
             size="md"
             iconLeft={saved ? "Check" : "Save"}
             onClick={handleSave}
-            disabled={isSaving}
+            disabled={detailIsPending}
           />
         </div>
       </div>

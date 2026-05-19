@@ -29,7 +29,7 @@ export default function OrderStepSelectVariant() {
 
         <div className="flex items-center gap-3">
           <div className="flex-1 h-px bg-zinc-200" />
-          <Text variant="caption" color="secondary">
+          <Text variant="h4" color="secondary">
             nebo
           </Text>
           <div className="flex-1 h-px bg-zinc-200" />

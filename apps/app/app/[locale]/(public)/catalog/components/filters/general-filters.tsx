@@ -10,8 +10,8 @@ import Text from "@/app/components/ui/atoms/text";
 import {
   generalFiltersFromParams,
   generalFiltersToParams,
-  GeneralFilterState,
 } from "./filter-params";
+import { GeneralFilterState } from "./filter-groups";
 
 export default function GeneralFilters() {
   const searchParams = useSearchParams();
@@ -34,8 +34,10 @@ export default function GeneralFilters() {
         <div className="flex flex-col gap-5">
           <FilterLabel icon={MapPin} text="Kde se akce koná" />
           <LocationFilter
-            value={filters.city}
-            onChange={(city) => replaceParams((f) => ({ ...f, city }))}
+            value={{ city: filters.city, district: filters.district, region: filters.region }}
+            onChange={({ city, district, region }) =>
+              replaceParams((f) => ({ ...f, city, district, region, bbox: [] }))
+            }
           />
         </div>
       </div>

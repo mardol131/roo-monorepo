@@ -1,12 +1,12 @@
 import Text from "@/app/components/ui/atoms/text";
-import { Listing } from "@roo/common";
+import { Listing, ListingVenueDetail } from "@roo/common";
 import FAQItem from "./faq-item";
 
-type FAQItem = NonNullable<Listing["faq"]>[number];
+type FAQItem = NonNullable<ListingVenueDetail["faq"]>[number];
 type Group = NonNullable<FAQItem["group"]>;
 
 interface FAQSectionProps {
-  faqs: Listing["faq"];
+  faqs: ListingVenueDetail["faq"];
 }
 
 const groupLabels: Record<Group, string> = {
@@ -17,7 +17,13 @@ const groupLabels: Record<Group, string> = {
   other: "Ostatní",
 };
 
-const groupOrder: Group[] = ["general", "booking", "payment", "cancellation", "other"];
+const groupOrder: Group[] = [
+  "general",
+  "booking",
+  "payment",
+  "cancellation",
+  "other",
+];
 
 export default function FAQSection({ faqs }: FAQSectionProps) {
   if (!faqs || faqs.length === 0) return null;

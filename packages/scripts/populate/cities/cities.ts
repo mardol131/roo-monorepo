@@ -16,6 +16,7 @@ type CityPayload = {
   name: string;
   code: string;
   district: string;
+  region: string;
   country: string;
   latitude: number;
   longitude: number;
@@ -92,27 +93,28 @@ async function login(): Promise<string> {
   return ((await res.json()) as { token: string }).token;
 }
 
+type DistrictEntry = { districtId: string; regionId: string };
 type DistrictMaps = {
-  byCode: Map<string, string>;
-  byName: Map<string, string>;
+  byCode: Map<string, DistrictEntry>;
+  byName: Map<string, DistrictEntry>;
 };
 
 async function fetchDistrictMap(token: string): Promise<DistrictMaps> {
-  const districts: { id: string; code: string; name: string }[] = [];
+  const districts: { id: string; code: string; name: string; region: string }[] = [];
   let page = 1;
   while (true) {
     const res = await fetch(`${config.backendUrl}/api/districts?limit=500&page=${page}`, {
       headers: { Authorization: `JWT ${token}` },
     });
     if (!res.ok) throw new Error(`Failed to fetch districts: ${res.status}`);
-    const data = (await res.json()) as PayloadResponse<{ id: string; code: string; name: string }>;
+    const data = (await res.json()) as PayloadResponse<{ id: string; code: string; name: string; region: string }>;
     if (data.docs) districts.push(...data.docs);
     if (page >= data.totalPages) break;
     page++;
   }
   return {
-    byCode: new Map(districts.map((d) => [d.code, d.id])),
-    byName: new Map(districts.map((d) => [d.name.toLowerCase(), d.id])),
+    byCode: new Map(districts.map((d) => [d.code, { districtId: d.id, regionId: d.region }])),
+    byName: new Map(districts.map((d) => [d.name.toLowerCase(), { districtId: d.id, regionId: d.region }])),
   };
 }
 
@@ -158,10 +160,10 @@ async function main() {
     const batch = rows.slice(i, i + BATCH_SIZE);
     const results = await Promise.allSettled(
       batch.map((row) => {
-        const districtId =
+        const entry =
           districtMap.byCode.get(String(row.okres)) ??
           (row.okres === null ? districtMap.byName.get("hlavní město praha") : undefined);
-        if (!districtId) {
+        if (!entry) {
           skippedNoDistrict++;
           skipped.push({ name: row.nazev, kod: row.kod, okres: row.okres });
           return Promise.resolve("skipped" as const);
@@ -169,7 +171,8 @@ async function main() {
         return upsertCity(token, {
           name: row.nazev,
           code: String(row.kod),
-          district: districtId,
+          district: entry.districtId,
+          region: entry.regionId,
           country: "cz",
           ...calcGeodata(row.geometry.rings),
         });

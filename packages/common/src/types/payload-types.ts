@@ -99,6 +99,9 @@ export interface Config {
     'calendar-events': CalendarEvent;
     'favourite-listings': FavouriteListing;
     'space-types': SpaceType;
+    'listing-entertainment-details': ListingEntertainmentDetail;
+    'listing-gastro-details': ListingGastroDetail;
+    'listing-venue-details': ListingVenueDetail;
     'payload-kv': PayloadKv;
     'payload-jobs': PayloadJob;
     'payload-locked-documents': PayloadLockedDocument;
@@ -138,6 +141,9 @@ export interface Config {
     'calendar-events': CalendarEventsSelect<false> | CalendarEventsSelect<true>;
     'favourite-listings': FavouriteListingsSelect<false> | FavouriteListingsSelect<true>;
     'space-types': SpaceTypesSelect<false> | SpaceTypesSelect<true>;
+    'listing-entertainment-details': ListingEntertainmentDetailsSelect<false> | ListingEntertainmentDetailsSelect<true>;
+    'listing-gastro-details': ListingGastroDetailsSelect<false> | ListingGastroDetailsSelect<true>;
+    'listing-venue-details': ListingVenueDetailsSelect<false> | ListingVenueDetailsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-jobs': PayloadJobsSelect<false> | PayloadJobsSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -215,21 +221,12 @@ export interface District {
   name: string;
   slug: string;
   code: string;
-  region: string | Region;
+  region: string;
   country: 'cz';
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "regions".
- */
-export interface Region {
-  id: string;
-  name: string;
-  slug: string;
-  code: string;
-  country: 'cz';
+  bboxMinLon: number;
+  bboxMinLat: number;
+  bboxMaxLon: number;
+  bboxMaxLat: number;
   updatedAt: string;
   createdAt: string;
 }
@@ -274,6 +271,23 @@ export interface FoodServiceStyle {
   id: string;
   name: string;
   slug: string;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "regions".
+ */
+export interface Region {
+  id: string;
+  name: string;
+  slug: string;
+  code: string;
+  country: 'cz';
+  bboxMinLon: number;
+  bboxMinLat: number;
+  bboxMaxLon: number;
+  bboxMaxLat: number;
   updatedAt: string;
   createdAt: string;
 }
@@ -534,15 +548,63 @@ export interface Variant {
  */
 export interface Listing {
   id: string;
+  tariff: 'basic' | 'premium';
+  type: 'venue' | 'gastro' | 'entertainment';
+  properties: {
+    eventTypes: string[];
+    placeTypes?: string[] | null;
+    gastroRules?: string[] | null;
+    venueRules?: string[] | null;
+    entertainmentRules?: string[] | null;
+    services?: string[] | null;
+    technologies?: string[] | null;
+    amenities?: string[] | null;
+    activities?: string[] | null;
+    cuisines?: string[] | null;
+    dishTypes?: string[] | null;
+    dietaryOptions?: string[] | null;
+    foodServiceStyles?: string[] | null;
+    necessities?: string[] | null;
+    entertainmentTypes?: string[] | null;
+    personnel?: string[] | null;
+  };
+  detail:
+    | {
+        relationTo: 'listing-venue-details';
+        value: string | ListingVenueDetail;
+      }
+    | {
+        relationTo: 'listing-gastro-details';
+        value: string | ListingGastroDetail;
+      }
+    | {
+        relationTo: 'listing-entertainment-details';
+        value: string | ListingEntertainmentDetail;
+      };
+  location: {
+    type: 'regions' | 'exact';
+    latitude?: number | null;
+    longitude?: number | null;
+    address?: string | null;
+    city?: (string | null) | City;
+    districts?: (string | District)[] | null;
+    regions?: (string | Region)[] | null;
+    cities?: (string | City)[] | null;
+  };
   name: string;
   slug: string;
   status: 'active' | 'inactive' | 'disabled' | 'archived';
   company: string | Company;
   description?: string | null;
   shortDescription?: string | null;
-  eventTypes: (string | EventType)[];
   indoor?: boolean | null;
   outdoor?: boolean | null;
+  guests: {
+    min?: number | null;
+    max?: number | null;
+    ztp?: boolean | null;
+    pets?: boolean | null;
+  };
   images: {
     coverImage: {
       filename: string;
@@ -573,50 +635,15 @@ export interface Listing {
   price: {
     startsAt: number;
   };
-  faq?:
-    | {
-        active?: boolean | null;
-        question: string;
-        answer: string;
-        group?: ('general' | 'booking' | 'cancellation' | 'payment' | 'other') | null;
-        id?: string | null;
-      }[]
-    | null;
-  references?:
-    | {
-        image: {
-          filename?: string | null;
-          alt?: string | null;
-          width?: number | null;
-          height?: number | null;
-          size?: number | null;
-          mimeType?: string | null;
-        };
-        eventName: string;
-        description?: string | null;
-        clientName?: string | null;
-        eventType?: (string | null) | EventType;
-        id?: string | null;
-      }[]
-    | null;
-  employees?:
-    | {
-        name: string;
-        role: string;
-        description?: string | null;
-        image: {
-          filename?: string | null;
-          alt?: string | null;
-          width?: number | null;
-          height?: number | null;
-          size?: number | null;
-          mimeType?: string | null;
-        };
-        id?: string | null;
-      }[]
-    | null;
-  rules?: (string | Rule)[] | null;
-  technologies?: (string | Technology)[] | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "listing-venue-details".
+ */
+export interface ListingVenueDetail {
+  id: string;
   customSections?:
     | (
         | {
@@ -693,172 +720,102 @@ export interface Listing {
         id?: string | null;
       }[]
     | null;
-  details: (
+  faq?:
     | {
-        location: {
-          address: string;
-          city: string | City;
-          latitude: number;
-          longitude: number;
-        };
-        placeTypes?: (string | PlaceType)[] | null;
-        spacesType: 'area' | 'building' | 'room';
-        capacity: number;
-        area: number;
-        canBeBookedAsWhole?: boolean | null;
-        hasAccommodation?: boolean | null;
-        accommodationCapacity?: number | null;
-        foodAndDrinkRules?: (string | Rule)[] | null;
-        venueRules?: (string | Rule)[] | null;
-        services?: (string | Service)[] | null;
-        technology?: (string | Technology)[] | null;
-        personnel?: (string | Personnel)[] | null;
-        amenities?: (string | Amenity)[] | null;
-        activities?: (string | Activity)[] | null;
-        access: {
-          vehicleTypes?: ('car' | 'truck' | 'van' | 'bus')[] | null;
-          helpWithLoadingAndUnloading?: boolean | null;
-          loadingRamp?: boolean | null;
-          loadingElevator?: boolean | null;
-          serviceAccess?: boolean | null;
-          serviceArea?: boolean | null;
-        };
-        storage?:
-          | {
-              name: string;
-              area: number;
-              space?: (string | null) | Space;
-              accessedFrom?: (string | null) | Space;
-              id?: string | null;
-            }[]
-          | null;
-        parking: {
-          hasParking?: boolean | null;
-          parkingCapacity?: number | null;
-          parkingIsIncludedInPrice?: boolean | null;
-          parkingPrice?: number | null;
-        };
-        activityAddons?:
-          | {
-              activity: string | Activity;
-              price: number;
-              space?: (string | null) | Space;
-              type: 'indoor' | 'outdoor';
-              id?: string | null;
-            }[]
-          | null;
-        breakfast: {
-          included?: boolean | null;
-          allowAccommodationWithoutBreakfast?: boolean | null;
-          allowMoreBreakfastsThanAccommodation?: boolean | null;
-          breakfastIsIncludedInPrice?: boolean | null;
-          price?: number | null;
-          pricePer?: ('person' | 'booking') | null;
-          /**
-           * Čas, od kterého je snídaně k dispozici (např. 07:00)
-           */
-          timeFrom?: string | null;
-          /**
-           * Čas, do kterého je snídaně k dispozici (např. 10:00)
-           */
-          timeTo?: string | null;
-        };
+        active?: boolean | null;
+        question: string;
+        answer: string;
+        group?: ('general' | 'booking' | 'cancellation' | 'payment' | 'other') | null;
         id?: string | null;
-        blockName?: string | null;
-        blockType: 'venue';
-      }
+      }[]
+    | null;
+  references?:
     | {
-        location: {
-          address?: string | null;
-          region?: (string | Region)[] | null;
-          district?: (string | District)[] | null;
-          city?: (string | City)[] | null;
+        image: {
+          filename?: string | null;
+          alt?: string | null;
+          width?: number | null;
+          height?: number | null;
+          size?: number | null;
+          mimeType?: string | null;
         };
-        cuisines?: (string | Cuisine)[] | null;
-        dishTypes?: (string | DishType)[] | null;
-        dietaryOptions?: (string | DietaryOption)[] | null;
-        foodServiceStyles?: (string | FoodServiceStyle)[] | null;
-        hasAlcoholLicense?: boolean | null;
-        capacity: number;
-        minimumCapacity?: number | null;
-        kidsMenu?: boolean | null;
-        foodAndDrinkRules?: (string | Rule)[] | null;
-        personnel?: (string | Personnel)[] | null;
-        necessities?: (string | Necessity)[] | null;
+        eventName: string;
+        description?: string | null;
+        clientName?: string | null;
+        eventType?: (string | null) | EventType;
         id?: string | null;
-        blockName?: string | null;
-        blockType: 'gastro';
-      }
+      }[]
+    | null;
+  employees?:
     | {
-        location: {
-          address?: string | null;
-          region?: (string | Region)[] | null;
-          district?: (string | District)[] | null;
-          city?: (string | City)[] | null;
-        };
-        entertainmentTypes?: (string | EntertainmentType)[] | null;
-        capacity: number;
-        minimumCapacity?: number | null;
-        audience?: ('adults' | 'kids' | 'seniors')[] | null;
-        setupAndTearDownRules: {
-          setupTime?: number | null;
-          tearDownTime?: number | null;
-        };
-        rules?: (string | Rule)[] | null;
-        personnel?: (string | Personnel)[] | null;
-        necessities?: (string | Necessity)[] | null;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'entertainment';
-      }
-  )[];
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "companies".
- */
-export interface Company {
-  id: string;
-  name: string;
-  slug: string;
-  status: 'active' | 'disabled' | 'archived';
-  ico: string;
-  description?: string | null;
-  logo: {
-    filename?: string | null;
-    alt?: string | null;
-    width?: number | null;
-    height?: number | null;
-    size?: number | null;
-    mimeType?: string | null;
-  };
-  email: string;
-  phone: {
-    countryCode: '420';
-    number: string;
-  };
-  website?: string | null;
-  owner: string | User;
-  billingAddress: {
-    street: string;
-    city: string;
-    postalCode: string;
-    country: string;
-  };
-  vatId?: string | null;
-  collaborators?:
-    | {
-        user: string | User;
-        permissions: {
-          companies?: ('create' | 'edit' | 'delete')[] | null;
-          listings?: ('create' | 'edit' | 'delete' | 'activateCatalog' | 'deactivateCatalog')[] | null;
-          inquiries?: ('accept' | 'delete')[] | null;
+        name: string;
+        role: string;
+        description?: string | null;
+        image: {
+          filename?: string | null;
+          alt?: string | null;
+          width?: number | null;
+          height?: number | null;
+          size?: number | null;
+          mimeType?: string | null;
         };
         id?: string | null;
       }[]
     | null;
+  type: 'venue';
+  spacesType: 'area' | 'building' | 'room';
+  area: number;
+  canBeBookedAsWhole?: boolean | null;
+  hasAccommodation?: boolean | null;
+  accommodationCapacity?: number | null;
+  access: {
+    vehicleTypes?: ('car' | 'truck' | 'van' | 'bus')[] | null;
+    helpWithLoadingAndUnloading?: boolean | null;
+    loadingRamp?: boolean | null;
+    loadingElevator?: boolean | null;
+    serviceAccess?: boolean | null;
+    serviceArea?: boolean | null;
+  };
+  storage?:
+    | {
+        name: string;
+        area: number;
+        space?: (string | null) | Space;
+        accessedFrom?: (string | null) | Space;
+        id?: string | null;
+      }[]
+    | null;
+  parking: {
+    hasParking?: boolean | null;
+    parkingCapacity?: number | null;
+    parkingIsIncludedInPrice?: boolean | null;
+    parkingPrice?: number | null;
+  };
+  activityAddons?:
+    | {
+        activity: string | Activity;
+        price: number;
+        space?: (string | null) | Space;
+        type: 'indoor' | 'outdoor';
+        id?: string | null;
+      }[]
+    | null;
+  breakfast: {
+    included?: boolean | null;
+    allowAccommodationWithoutBreakfast?: boolean | null;
+    allowMoreBreakfastsThanAccommodation?: boolean | null;
+    breakfastIsIncludedInPrice?: boolean | null;
+    price?: number | null;
+    pricePer?: ('person' | 'booking') | null;
+    /**
+     * Čas, od kterého je snídaně k dispozici (např. 07:00)
+     */
+    timeFrom?: string | null;
+    /**
+     * Čas, do kterého je snídaně k dispozici (např. 10:00)
+     */
+    timeTo?: string | null;
+  };
   updatedAt: string;
   createdAt: string;
 }
@@ -867,104 +824,6 @@ export interface Company {
  * via the `definition` "event-types".
  */
 export interface EventType {
-  id: string;
-  name: string;
-  slug: string;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "rules".
- */
-export interface Rule {
-  id: string;
-  name: string;
-  slug: string;
-  type: 'gastro' | 'venue' | 'entertainment';
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "technologies".
- */
-export interface Technology {
-  id: string;
-  name: string;
-  slug: string;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "cities".
- */
-export interface City {
-  id: string;
-  name: string;
-  slug: string;
-  code: string;
-  district: string | District;
-  country: 'cz';
-  latitude: number;
-  longitude: number;
-  bboxMinLon: number;
-  bboxMinLat: number;
-  bboxMaxLon: number;
-  bboxMaxLat: number;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "place-types".
- */
-export interface PlaceType {
-  id: string;
-  name: string;
-  slug: string;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "services".
- */
-export interface Service {
-  id: string;
-  name: string;
-  slug: string;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "personnel".
- */
-export interface Personnel {
-  id: string;
-  name: string;
-  slug: string;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "amenities".
- */
-export interface Amenity {
-  id: string;
-  name: string;
-  slug: string;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "activities".
- */
-export interface Activity {
   id: string;
   name: string;
   slug: string;
@@ -1036,9 +895,418 @@ export interface RoomAmenity {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "rules".
+ */
+export interface Rule {
+  id: string;
+  name: string;
+  slug: string;
+  type: 'gastro' | 'venue' | 'entertainment';
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "activities".
+ */
+export interface Activity {
+  id: string;
+  name: string;
+  slug: string;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "listing-gastro-details".
+ */
+export interface ListingGastroDetail {
+  id: string;
+  customSections?:
+    | (
+        | {
+            title: string;
+            text?: string | null;
+            images: {
+              filename: string;
+              alt?: string | null;
+              width?: number | null;
+              height?: number | null;
+              size?: number | null;
+              mimeType?: string | null;
+              id?: string | null;
+            }[];
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'gallery1';
+          }
+        | {
+            title: string;
+            text?: string | null;
+            images: {
+              filename: string;
+              alt?: string | null;
+              width?: number | null;
+              height?: number | null;
+              size?: number | null;
+              mimeType?: string | null;
+              id?: string | null;
+            }[];
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'gallery2';
+          }
+        | {
+            title: string;
+            text?: string | null;
+            images?:
+              | {
+                  filename: string;
+                  alt?: string | null;
+                  width?: number | null;
+                  height?: number | null;
+                  size?: number | null;
+                  mimeType?: string | null;
+                  id?: string | null;
+                }[]
+              | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'gallery4';
+          }
+        | {
+            title: string;
+            text?: string | null;
+            images: {
+              filename: string;
+              alt?: string | null;
+              width?: number | null;
+              height?: number | null;
+              size?: number | null;
+              mimeType?: string | null;
+              id?: string | null;
+            }[];
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'gallery5';
+          }
+      )[]
+    | null;
+  sectionOrder?:
+    | {
+        key: string;
+        id?: string | null;
+      }[]
+    | null;
+  faq?:
+    | {
+        active?: boolean | null;
+        question: string;
+        answer: string;
+        group?: ('general' | 'booking' | 'cancellation' | 'payment' | 'other') | null;
+        id?: string | null;
+      }[]
+    | null;
+  references?:
+    | {
+        image: {
+          filename?: string | null;
+          alt?: string | null;
+          width?: number | null;
+          height?: number | null;
+          size?: number | null;
+          mimeType?: string | null;
+        };
+        eventName: string;
+        description?: string | null;
+        clientName?: string | null;
+        eventType?: (string | null) | EventType;
+        id?: string | null;
+      }[]
+    | null;
+  employees?:
+    | {
+        name: string;
+        role: string;
+        description?: string | null;
+        image: {
+          filename?: string | null;
+          alt?: string | null;
+          width?: number | null;
+          height?: number | null;
+          size?: number | null;
+          mimeType?: string | null;
+        };
+        id?: string | null;
+      }[]
+    | null;
+  type: 'gastro';
+  hasAlcoholLicense?: boolean | null;
+  kidsMenu?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "listing-entertainment-details".
+ */
+export interface ListingEntertainmentDetail {
+  id: string;
+  customSections?:
+    | (
+        | {
+            title: string;
+            text?: string | null;
+            images: {
+              filename: string;
+              alt?: string | null;
+              width?: number | null;
+              height?: number | null;
+              size?: number | null;
+              mimeType?: string | null;
+              id?: string | null;
+            }[];
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'gallery1';
+          }
+        | {
+            title: string;
+            text?: string | null;
+            images: {
+              filename: string;
+              alt?: string | null;
+              width?: number | null;
+              height?: number | null;
+              size?: number | null;
+              mimeType?: string | null;
+              id?: string | null;
+            }[];
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'gallery2';
+          }
+        | {
+            title: string;
+            text?: string | null;
+            images?:
+              | {
+                  filename: string;
+                  alt?: string | null;
+                  width?: number | null;
+                  height?: number | null;
+                  size?: number | null;
+                  mimeType?: string | null;
+                  id?: string | null;
+                }[]
+              | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'gallery4';
+          }
+        | {
+            title: string;
+            text?: string | null;
+            images: {
+              filename: string;
+              alt?: string | null;
+              width?: number | null;
+              height?: number | null;
+              size?: number | null;
+              mimeType?: string | null;
+              id?: string | null;
+            }[];
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'gallery5';
+          }
+      )[]
+    | null;
+  sectionOrder?:
+    | {
+        key: string;
+        id?: string | null;
+      }[]
+    | null;
+  faq?:
+    | {
+        active?: boolean | null;
+        question: string;
+        answer: string;
+        group?: ('general' | 'booking' | 'cancellation' | 'payment' | 'other') | null;
+        id?: string | null;
+      }[]
+    | null;
+  references?:
+    | {
+        image: {
+          filename?: string | null;
+          alt?: string | null;
+          width?: number | null;
+          height?: number | null;
+          size?: number | null;
+          mimeType?: string | null;
+        };
+        eventName: string;
+        description?: string | null;
+        clientName?: string | null;
+        eventType?: (string | null) | EventType;
+        id?: string | null;
+      }[]
+    | null;
+  employees?:
+    | {
+        name: string;
+        role: string;
+        description?: string | null;
+        image: {
+          filename?: string | null;
+          alt?: string | null;
+          width?: number | null;
+          height?: number | null;
+          size?: number | null;
+          mimeType?: string | null;
+        };
+        id?: string | null;
+      }[]
+    | null;
+  type: 'entertainment';
+  audience?: ('adults' | 'kids' | 'seniors')[] | null;
+  setupAndTearDownRules: {
+    setupTime?: number | null;
+    tearDownTime?: number | null;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "cities".
+ */
+export interface City {
+  id: string;
+  name: string;
+  slug: string;
+  code: string;
+  district: string;
+  region: string;
+  country: 'cz';
+  latitude: number;
+  longitude: number;
+  bboxMinLon: number;
+  bboxMinLat: number;
+  bboxMaxLon: number;
+  bboxMaxLat: number;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "companies".
+ */
+export interface Company {
+  id: string;
+  name: string;
+  slug: string;
+  status: 'active' | 'disabled' | 'archived';
+  ico: string;
+  description?: string | null;
+  logo: {
+    filename?: string | null;
+    alt?: string | null;
+    width?: number | null;
+    height?: number | null;
+    size?: number | null;
+    mimeType?: string | null;
+  };
+  email: string;
+  phone: {
+    countryCode: '420';
+    number: string;
+  };
+  website?: string | null;
+  owner: string | User;
+  billingAddress: {
+    street: string;
+    city: string;
+    postalCode: string;
+    country: string;
+  };
+  vatId?: string | null;
+  collaborators?:
+    | {
+        user: string | User;
+        permissions: {
+          companies?: ('create' | 'edit' | 'delete')[] | null;
+          listings?: ('create' | 'edit' | 'delete' | 'activateCatalog' | 'deactivateCatalog')[] | null;
+          inquiries?: ('accept' | 'delete')[] | null;
+        };
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "personnel".
+ */
+export interface Personnel {
+  id: string;
+  name: string;
+  slug: string;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "services".
+ */
+export interface Service {
+  id: string;
+  name: string;
+  slug: string;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "amenities".
+ */
+export interface Amenity {
+  id: string;
+  name: string;
+  slug: string;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "technologies".
+ */
+export interface Technology {
+  id: string;
+  name: string;
+  slug: string;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "cuisines".
  */
 export interface Cuisine {
+  id: string;
+  name: string;
+  slug: string;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "place-types".
+ */
+export interface PlaceType {
   id: string;
   name: string;
   slug: string;
@@ -1083,28 +1351,17 @@ export interface Event {
     confirmedInquiries?: boolean | null;
     place?: boolean | null;
   };
-  location?:
-    | (
-        | {
-            /**
-             * Vyberte venue z katalogu služeb.
-             */
-            venue?: (string | null) | Listing;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'venue';
-          }
-        | {
-            city: string | City;
-            address?: string | null;
-            spaceType: string | SpaceType;
-            description?: string | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'custom';
-          }
-      )[]
-    | null;
+  location: {
+    type: 'custom' | 'venue';
+    /**
+     * Vyberte venue z katalogu služeb.
+     */
+    venue?: (string | null) | Listing;
+    city?: (string | null) | City;
+    address?: string | null;
+    spaceType?: (string | null) | SpaceType;
+    description?: string | null;
+  };
   guests: {
     adults: number;
     children: number;
@@ -1487,6 +1744,18 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'space-types';
         value: string | SpaceType;
+      } | null)
+    | ({
+        relationTo: 'listing-entertainment-details';
+        value: string | ListingEntertainmentDetail;
+      } | null)
+    | ({
+        relationTo: 'listing-gastro-details';
+        value: string | ListingGastroDetail;
+      } | null)
+    | ({
+        relationTo: 'listing-venue-details';
+        value: string | ListingVenueDetail;
       } | null);
   globalSlug?: string | null;
   user:
@@ -1550,6 +1819,10 @@ export interface DistrictsSelect<T extends boolean = true> {
   code?: T;
   region?: T;
   country?: T;
+  bboxMinLon?: T;
+  bboxMinLat?: T;
+  bboxMaxLon?: T;
+  bboxMaxLat?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1602,6 +1875,10 @@ export interface RegionsSelect<T extends boolean = true> {
   slug?: T;
   code?: T;
   country?: T;
+  bboxMinLon?: T;
+  bboxMinLat?: T;
+  bboxMaxLon?: T;
+  bboxMaxLat?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1896,15 +2173,57 @@ export interface EventTypesSelect<T extends boolean = true> {
  * via the `definition` "listings_select".
  */
 export interface ListingsSelect<T extends boolean = true> {
+  tariff?: T;
+  type?: T;
+  properties?:
+    | T
+    | {
+        eventTypes?: T;
+        placeTypes?: T;
+        gastroRules?: T;
+        venueRules?: T;
+        entertainmentRules?: T;
+        services?: T;
+        technologies?: T;
+        amenities?: T;
+        activities?: T;
+        cuisines?: T;
+        dishTypes?: T;
+        dietaryOptions?: T;
+        foodServiceStyles?: T;
+        necessities?: T;
+        entertainmentTypes?: T;
+        personnel?: T;
+      };
+  detail?: T;
+  location?:
+    | T
+    | {
+        type?: T;
+        latitude?: T;
+        longitude?: T;
+        address?: T;
+        city?: T;
+        districts?: T;
+        regions?: T;
+        cities?: T;
+      };
   name?: T;
   slug?: T;
   status?: T;
   company?: T;
   description?: T;
   shortDescription?: T;
-  eventTypes?: T;
   indoor?: T;
   outdoor?: T;
+  guests?:
+    | T
+    | {
+        min?: T;
+        max?: T;
+        ztp?: T;
+        pets?: T;
+      };
   images?:
     | T
     | {
@@ -1944,272 +2263,6 @@ export interface ListingsSelect<T extends boolean = true> {
     | T
     | {
         startsAt?: T;
-      };
-  faq?:
-    | T
-    | {
-        active?: T;
-        question?: T;
-        answer?: T;
-        group?: T;
-        id?: T;
-      };
-  references?:
-    | T
-    | {
-        image?:
-          | T
-          | {
-              filename?: T;
-              alt?: T;
-              width?: T;
-              height?: T;
-              size?: T;
-              mimeType?: T;
-            };
-        eventName?: T;
-        description?: T;
-        clientName?: T;
-        eventType?: T;
-        id?: T;
-      };
-  employees?:
-    | T
-    | {
-        name?: T;
-        role?: T;
-        description?: T;
-        image?:
-          | T
-          | {
-              filename?: T;
-              alt?: T;
-              width?: T;
-              height?: T;
-              size?: T;
-              mimeType?: T;
-            };
-        id?: T;
-      };
-  rules?: T;
-  technologies?: T;
-  customSections?:
-    | T
-    | {
-        gallery1?:
-          | T
-          | {
-              title?: T;
-              text?: T;
-              images?:
-                | T
-                | {
-                    filename?: T;
-                    alt?: T;
-                    width?: T;
-                    height?: T;
-                    size?: T;
-                    mimeType?: T;
-                    id?: T;
-                  };
-              id?: T;
-              blockName?: T;
-            };
-        gallery2?:
-          | T
-          | {
-              title?: T;
-              text?: T;
-              images?:
-                | T
-                | {
-                    filename?: T;
-                    alt?: T;
-                    width?: T;
-                    height?: T;
-                    size?: T;
-                    mimeType?: T;
-                    id?: T;
-                  };
-              id?: T;
-              blockName?: T;
-            };
-        gallery4?:
-          | T
-          | {
-              title?: T;
-              text?: T;
-              images?:
-                | T
-                | {
-                    filename?: T;
-                    alt?: T;
-                    width?: T;
-                    height?: T;
-                    size?: T;
-                    mimeType?: T;
-                    id?: T;
-                  };
-              id?: T;
-              blockName?: T;
-            };
-        gallery5?:
-          | T
-          | {
-              title?: T;
-              text?: T;
-              images?:
-                | T
-                | {
-                    filename?: T;
-                    alt?: T;
-                    width?: T;
-                    height?: T;
-                    size?: T;
-                    mimeType?: T;
-                    id?: T;
-                  };
-              id?: T;
-              blockName?: T;
-            };
-      };
-  sectionOrder?:
-    | T
-    | {
-        key?: T;
-        id?: T;
-      };
-  details?:
-    | T
-    | {
-        venue?:
-          | T
-          | {
-              location?:
-                | T
-                | {
-                    address?: T;
-                    city?: T;
-                    latitude?: T;
-                    longitude?: T;
-                  };
-              placeTypes?: T;
-              spacesType?: T;
-              capacity?: T;
-              area?: T;
-              canBeBookedAsWhole?: T;
-              hasAccommodation?: T;
-              accommodationCapacity?: T;
-              foodAndDrinkRules?: T;
-              venueRules?: T;
-              services?: T;
-              technology?: T;
-              personnel?: T;
-              amenities?: T;
-              activities?: T;
-              access?:
-                | T
-                | {
-                    vehicleTypes?: T;
-                    helpWithLoadingAndUnloading?: T;
-                    loadingRamp?: T;
-                    loadingElevator?: T;
-                    serviceAccess?: T;
-                    serviceArea?: T;
-                  };
-              storage?:
-                | T
-                | {
-                    name?: T;
-                    area?: T;
-                    space?: T;
-                    accessedFrom?: T;
-                    id?: T;
-                  };
-              parking?:
-                | T
-                | {
-                    hasParking?: T;
-                    parkingCapacity?: T;
-                    parkingIsIncludedInPrice?: T;
-                    parkingPrice?: T;
-                  };
-              activityAddons?:
-                | T
-                | {
-                    activity?: T;
-                    price?: T;
-                    space?: T;
-                    type?: T;
-                    id?: T;
-                  };
-              breakfast?:
-                | T
-                | {
-                    included?: T;
-                    allowAccommodationWithoutBreakfast?: T;
-                    allowMoreBreakfastsThanAccommodation?: T;
-                    breakfastIsIncludedInPrice?: T;
-                    price?: T;
-                    pricePer?: T;
-                    timeFrom?: T;
-                    timeTo?: T;
-                  };
-              id?: T;
-              blockName?: T;
-            };
-        gastro?:
-          | T
-          | {
-              location?:
-                | T
-                | {
-                    address?: T;
-                    region?: T;
-                    district?: T;
-                    city?: T;
-                  };
-              cuisines?: T;
-              dishTypes?: T;
-              dietaryOptions?: T;
-              foodServiceStyles?: T;
-              hasAlcoholLicense?: T;
-              capacity?: T;
-              minimumCapacity?: T;
-              kidsMenu?: T;
-              foodAndDrinkRules?: T;
-              personnel?: T;
-              necessities?: T;
-              id?: T;
-              blockName?: T;
-            };
-        entertainment?:
-          | T
-          | {
-              location?:
-                | T
-                | {
-                    address?: T;
-                    region?: T;
-                    district?: T;
-                    city?: T;
-                  };
-              entertainmentTypes?: T;
-              capacity?: T;
-              minimumCapacity?: T;
-              audience?: T;
-              setupAndTearDownRules?:
-                | T
-                | {
-                    setupTime?: T;
-                    tearDownTime?: T;
-                  };
-              rules?: T;
-              personnel?: T;
-              necessities?: T;
-              id?: T;
-              blockName?: T;
-            };
       };
   updatedAt?: T;
   createdAt?: T;
@@ -2326,6 +2379,7 @@ export interface CitiesSelect<T extends boolean = true> {
   slug?: T;
   code?: T;
   district?: T;
+  region?: T;
   country?: T;
   latitude?: T;
   longitude?: T;
@@ -2441,23 +2495,12 @@ export interface EventsSelect<T extends boolean = true> {
   location?:
     | T
     | {
-        venue?:
-          | T
-          | {
-              venue?: T;
-              id?: T;
-              blockName?: T;
-            };
-        custom?:
-          | T
-          | {
-              city?: T;
-              address?: T;
-              spaceType?: T;
-              description?: T;
-              id?: T;
-              blockName?: T;
-            };
+        type?: T;
+        venue?: T;
+        city?: T;
+        address?: T;
+        spaceType?: T;
+        description?: T;
       };
   guests?:
     | T
@@ -2592,6 +2635,491 @@ export interface FavouriteListingsSelect<T extends boolean = true> {
 export interface SpaceTypesSelect<T extends boolean = true> {
   name?: T;
   slug?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "listing-entertainment-details_select".
+ */
+export interface ListingEntertainmentDetailsSelect<T extends boolean = true> {
+  customSections?:
+    | T
+    | {
+        gallery1?:
+          | T
+          | {
+              title?: T;
+              text?: T;
+              images?:
+                | T
+                | {
+                    filename?: T;
+                    alt?: T;
+                    width?: T;
+                    height?: T;
+                    size?: T;
+                    mimeType?: T;
+                    id?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+        gallery2?:
+          | T
+          | {
+              title?: T;
+              text?: T;
+              images?:
+                | T
+                | {
+                    filename?: T;
+                    alt?: T;
+                    width?: T;
+                    height?: T;
+                    size?: T;
+                    mimeType?: T;
+                    id?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+        gallery4?:
+          | T
+          | {
+              title?: T;
+              text?: T;
+              images?:
+                | T
+                | {
+                    filename?: T;
+                    alt?: T;
+                    width?: T;
+                    height?: T;
+                    size?: T;
+                    mimeType?: T;
+                    id?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+        gallery5?:
+          | T
+          | {
+              title?: T;
+              text?: T;
+              images?:
+                | T
+                | {
+                    filename?: T;
+                    alt?: T;
+                    width?: T;
+                    height?: T;
+                    size?: T;
+                    mimeType?: T;
+                    id?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+      };
+  sectionOrder?:
+    | T
+    | {
+        key?: T;
+        id?: T;
+      };
+  faq?:
+    | T
+    | {
+        active?: T;
+        question?: T;
+        answer?: T;
+        group?: T;
+        id?: T;
+      };
+  references?:
+    | T
+    | {
+        image?:
+          | T
+          | {
+              filename?: T;
+              alt?: T;
+              width?: T;
+              height?: T;
+              size?: T;
+              mimeType?: T;
+            };
+        eventName?: T;
+        description?: T;
+        clientName?: T;
+        eventType?: T;
+        id?: T;
+      };
+  employees?:
+    | T
+    | {
+        name?: T;
+        role?: T;
+        description?: T;
+        image?:
+          | T
+          | {
+              filename?: T;
+              alt?: T;
+              width?: T;
+              height?: T;
+              size?: T;
+              mimeType?: T;
+            };
+        id?: T;
+      };
+  type?: T;
+  audience?: T;
+  setupAndTearDownRules?:
+    | T
+    | {
+        setupTime?: T;
+        tearDownTime?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "listing-gastro-details_select".
+ */
+export interface ListingGastroDetailsSelect<T extends boolean = true> {
+  customSections?:
+    | T
+    | {
+        gallery1?:
+          | T
+          | {
+              title?: T;
+              text?: T;
+              images?:
+                | T
+                | {
+                    filename?: T;
+                    alt?: T;
+                    width?: T;
+                    height?: T;
+                    size?: T;
+                    mimeType?: T;
+                    id?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+        gallery2?:
+          | T
+          | {
+              title?: T;
+              text?: T;
+              images?:
+                | T
+                | {
+                    filename?: T;
+                    alt?: T;
+                    width?: T;
+                    height?: T;
+                    size?: T;
+                    mimeType?: T;
+                    id?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+        gallery4?:
+          | T
+          | {
+              title?: T;
+              text?: T;
+              images?:
+                | T
+                | {
+                    filename?: T;
+                    alt?: T;
+                    width?: T;
+                    height?: T;
+                    size?: T;
+                    mimeType?: T;
+                    id?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+        gallery5?:
+          | T
+          | {
+              title?: T;
+              text?: T;
+              images?:
+                | T
+                | {
+                    filename?: T;
+                    alt?: T;
+                    width?: T;
+                    height?: T;
+                    size?: T;
+                    mimeType?: T;
+                    id?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+      };
+  sectionOrder?:
+    | T
+    | {
+        key?: T;
+        id?: T;
+      };
+  faq?:
+    | T
+    | {
+        active?: T;
+        question?: T;
+        answer?: T;
+        group?: T;
+        id?: T;
+      };
+  references?:
+    | T
+    | {
+        image?:
+          | T
+          | {
+              filename?: T;
+              alt?: T;
+              width?: T;
+              height?: T;
+              size?: T;
+              mimeType?: T;
+            };
+        eventName?: T;
+        description?: T;
+        clientName?: T;
+        eventType?: T;
+        id?: T;
+      };
+  employees?:
+    | T
+    | {
+        name?: T;
+        role?: T;
+        description?: T;
+        image?:
+          | T
+          | {
+              filename?: T;
+              alt?: T;
+              width?: T;
+              height?: T;
+              size?: T;
+              mimeType?: T;
+            };
+        id?: T;
+      };
+  type?: T;
+  hasAlcoholLicense?: T;
+  kidsMenu?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "listing-venue-details_select".
+ */
+export interface ListingVenueDetailsSelect<T extends boolean = true> {
+  customSections?:
+    | T
+    | {
+        gallery1?:
+          | T
+          | {
+              title?: T;
+              text?: T;
+              images?:
+                | T
+                | {
+                    filename?: T;
+                    alt?: T;
+                    width?: T;
+                    height?: T;
+                    size?: T;
+                    mimeType?: T;
+                    id?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+        gallery2?:
+          | T
+          | {
+              title?: T;
+              text?: T;
+              images?:
+                | T
+                | {
+                    filename?: T;
+                    alt?: T;
+                    width?: T;
+                    height?: T;
+                    size?: T;
+                    mimeType?: T;
+                    id?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+        gallery4?:
+          | T
+          | {
+              title?: T;
+              text?: T;
+              images?:
+                | T
+                | {
+                    filename?: T;
+                    alt?: T;
+                    width?: T;
+                    height?: T;
+                    size?: T;
+                    mimeType?: T;
+                    id?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+        gallery5?:
+          | T
+          | {
+              title?: T;
+              text?: T;
+              images?:
+                | T
+                | {
+                    filename?: T;
+                    alt?: T;
+                    width?: T;
+                    height?: T;
+                    size?: T;
+                    mimeType?: T;
+                    id?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+      };
+  sectionOrder?:
+    | T
+    | {
+        key?: T;
+        id?: T;
+      };
+  faq?:
+    | T
+    | {
+        active?: T;
+        question?: T;
+        answer?: T;
+        group?: T;
+        id?: T;
+      };
+  references?:
+    | T
+    | {
+        image?:
+          | T
+          | {
+              filename?: T;
+              alt?: T;
+              width?: T;
+              height?: T;
+              size?: T;
+              mimeType?: T;
+            };
+        eventName?: T;
+        description?: T;
+        clientName?: T;
+        eventType?: T;
+        id?: T;
+      };
+  employees?:
+    | T
+    | {
+        name?: T;
+        role?: T;
+        description?: T;
+        image?:
+          | T
+          | {
+              filename?: T;
+              alt?: T;
+              width?: T;
+              height?: T;
+              size?: T;
+              mimeType?: T;
+            };
+        id?: T;
+      };
+  type?: T;
+  spacesType?: T;
+  area?: T;
+  canBeBookedAsWhole?: T;
+  hasAccommodation?: T;
+  accommodationCapacity?: T;
+  access?:
+    | T
+    | {
+        vehicleTypes?: T;
+        helpWithLoadingAndUnloading?: T;
+        loadingRamp?: T;
+        loadingElevator?: T;
+        serviceAccess?: T;
+        serviceArea?: T;
+      };
+  storage?:
+    | T
+    | {
+        name?: T;
+        area?: T;
+        space?: T;
+        accessedFrom?: T;
+        id?: T;
+      };
+  parking?:
+    | T
+    | {
+        hasParking?: T;
+        parkingCapacity?: T;
+        parkingIsIncludedInPrice?: T;
+        parkingPrice?: T;
+      };
+  activityAddons?:
+    | T
+    | {
+        activity?: T;
+        price?: T;
+        space?: T;
+        type?: T;
+        id?: T;
+      };
+  breakfast?:
+    | T
+    | {
+        included?: T;
+        allowAccommodationWithoutBreakfast?: T;
+        allowMoreBreakfastsThanAccommodation?: T;
+        breakfastIsIncludedInPrice?: T;
+        price?: T;
+        pricePer?: T;
+        timeFrom?: T;
+        timeTo?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
 }

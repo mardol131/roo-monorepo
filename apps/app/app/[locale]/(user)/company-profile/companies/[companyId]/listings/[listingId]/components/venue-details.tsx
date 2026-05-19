@@ -1,11 +1,21 @@
+"use client";
+
 import { DashboardSection } from "@/app/[locale]/(user)/components/dashboard-section";
 import InfoSection from "@/app/[locale]/(user)/components/info-section";
-import { Listing } from "@roo/common";
-import { BedDouble, Building2, Car, MapPin, Shield, Wifi } from "lucide-react";
+import { useCities } from "@/app/react-query/cities/hooks";
+import { useDistricts } from "@/app/react-query/districts/hooks";
+import { useFilterOptions } from "@/app/react-query/filters/aggregated-filters/hooks";
+import { useRegions } from "@/app/react-query/regions/hooks";
+import {
+  City,
+  District,
+  Listing,
+  ListingVenueDetail,
+  PlaceType,
+  Region,
+} from "@roo/common";
 
-type VenueBlock = Extract<Listing["details"][number], { blockType: "venue" }>;
-
-const SPACES_TYPE_LABELS: Record<VenueBlock["spacesType"], string> = {
+const SPACES_TYPE_LABELS: Record<ListingVenueDetail["spacesType"], string> = {
   area: "Areál",
   building: "Budova",
   room: "Místnosti",
@@ -18,220 +28,321 @@ const VEHICLE_LABELS: Record<string, string> = {
   bus: "Autobus",
 };
 
-export function VenueDetails({ block }: { block: VenueBlock }) {
-  const city =
-    typeof block.location.city === "string"
-      ? block.location.city
-      : block.location.city.name;
+function extractIds(
+  items: (string | { id: string })[] | null | undefined,
+): string[] {
+  return (items ?? []).filter(
+    (item): item is string => typeof item === "string",
+  );
+}
+
+function resolveNames<T extends { id: string; name: string }>(
+  items: (string | T)[] | null | undefined,
+  fetchedDocs: T[] | undefined,
+): string[] {
+  return (items ?? []).map((item) =>
+    typeof item === "string"
+      ? (fetchedDocs?.find((f) => f.id === item)?.name ?? item)
+      : item.name,
+  );
+}
+
+export function VenueDetails({
+  listing,
+  detail,
+}: {
+  listing: Listing;
+  detail: ListingVenueDetail;
+}) {
+  const location = listing.location;
+
+  const regionIds = extractIds(location?.regions);
+  const districtIds = extractIds(location?.districts);
+  const cityIds = extractIds(location?.cities);
+  const placeTypeIds = listing.properties.placeTypes;
+
+  const { data: regionsData } = useRegions(
+    regionIds.length ? { id: { in: regionIds } } : undefined,
+    regionIds.length || 10,
+    regionIds.length > 0,
+  );
+  const { data: districtsData } = useDistricts(
+    districtIds.length ? { id: { in: districtIds } } : undefined,
+    districtIds.length || 10,
+    districtIds.length > 0,
+  );
+  const { data: citiesData } = useCities({
+    query: cityIds.length ? { id: { in: cityIds } } : undefined,
+    limit: cityIds.length || 10,
+    enabled: cityIds.length > 0,
+  });
+  const { data: filters } = useFilterOptions();
+
+  const regionNames = resolveNames<Region>(
+    location?.regions,
+    regionsData?.docs,
+  );
+  const districtNames = resolveNames<District>(
+    location?.districts,
+    districtsData?.docs,
+  );
+  const cityNames = resolveNames<City>(location?.cities, citiesData?.docs);
+  const placeTypeNames = resolveNames<PlaceType>(
+    placeTypeIds,
+    filters?.placeTypes,
+  );
+
+  const exactCityName =
+    location?.type === "exact" && location.city
+      ? typeof location.city === "string"
+        ? (citiesData?.docs?.find((c) => c.id === location.city)?.name ??
+          location.city)
+        : location.city.name
+      : null;
+
+  const locationItems = [
+    ...(regionNames.length
+      ? [{ type: "tagList" as const, label: "Kraj", items: regionNames }]
+      : []),
+    ...(districtNames.length
+      ? [{ type: "tagList" as const, label: "Okres", items: districtNames }]
+      : []),
+    ...(cityNames.length
+      ? [{ type: "tagList" as const, label: "Město", items: cityNames }]
+      : []),
+    ...(exactCityName
+      ? [{ type: "text" as const, label: "Město", value: exactCityName }]
+      : []),
+    ...(location?.address
+      ? [{ type: "text" as const, label: "Adresa", value: location.address }]
+      : []),
+    ...(placeTypeNames.length
+      ? [
+          {
+            type: "tagList" as const,
+            label: "Typ místa",
+            items: placeTypeNames,
+          },
+        ]
+      : []),
+  ];
 
   const equipmentItems = [
-    ...(block.amenities?.length
+    ...(listing.properties.amenities?.length
       ? [
           {
             type: "tagList" as const,
             label: "Vybavení",
-            items: block.amenities,
+            items: listing.properties.amenities,
           },
         ]
       : []),
-    ...(block.technology?.length
+    ...(listing.properties.technologies?.length
       ? [
           {
             type: "tagList" as const,
             label: "Technika",
-            items: block.technology,
+            items: listing.properties.technologies,
           },
         ]
       : []),
-    ...(block.services?.length
-      ? [{ type: "tagList" as const, label: "Služby", items: block.services }]
+    ...(listing.properties.services?.length
+      ? [
+          {
+            type: "tagList" as const,
+            label: "Služby",
+            items: listing.properties.services,
+          },
+        ]
       : []),
-    ...(block.activities?.length
+    ...(listing.properties.activities?.length
       ? [
           {
             type: "tagList" as const,
             label: "Aktivity",
-            items: block.activities,
+            items: listing.properties.activities,
           },
         ]
       : []),
-    ...(block.personnel?.length
+    ...(listing.properties.personnel?.length
       ? [
           {
             type: "tagList" as const,
             label: "Personál",
-            items: block.personnel,
+            items: listing.properties.personnel,
           },
         ]
       : []),
   ];
 
   const accessParkingItems = [
-    ...(block.access?.vehicleTypes?.length
+    ...(detail.access?.vehicleTypes?.length
       ? [
           {
             type: "tagList" as const,
             label: "Typy vozidel",
-            items: block.access.vehicleTypes.map((v) => VEHICLE_LABELS[v] ?? v),
+            items: detail.access.vehicleTypes.map(
+              (v) => VEHICLE_LABELS[v] ?? v,
+            ),
           },
         ]
       : []),
-    ...(block.access?.helpWithLoadingAndUnloading != null
+    ...(detail.access?.helpWithLoadingAndUnloading != null
       ? [
           {
             type: "boolean" as const,
             label: "Pomoc s nakládkou",
-            value: block.access.helpWithLoadingAndUnloading,
+            value: detail.access.helpWithLoadingAndUnloading,
           },
         ]
       : []),
-    ...(block.access?.loadingRamp != null
+    ...(detail.access?.loadingRamp != null
       ? [
           {
             type: "boolean" as const,
             label: "Nakládková rampa",
-            value: block.access.loadingRamp,
+            value: detail.access.loadingRamp,
           },
         ]
       : []),
-    ...(block.access?.loadingElevator != null
+    ...(detail.access?.loadingElevator != null
       ? [
           {
             type: "boolean" as const,
             label: "Nákladní výtah",
-            value: block.access.loadingElevator,
+            value: detail.access.loadingElevator,
           },
         ]
       : []),
-    ...(block.access?.serviceAccess != null
+    ...(detail.access?.serviceAccess != null
       ? [
           {
             type: "boolean" as const,
             label: "Servisní vstup",
-            value: block.access.serviceAccess,
+            value: detail.access.serviceAccess,
           },
         ]
       : []),
-    ...(block.access?.serviceArea != null
+    ...(detail.access?.serviceArea != null
       ? [
           {
             type: "boolean" as const,
             label: "Servisní plocha",
-            value: block.access.serviceArea,
+            value: detail.access.serviceArea,
           },
         ]
       : []),
-    ...(block.parking?.hasParking != null
+    ...(detail.parking?.hasParking != null
       ? [
           {
             type: "boolean" as const,
             label: "Parkování",
-            value: block.parking.hasParking,
+            value: detail.parking.hasParking,
           },
         ]
       : []),
-    ...(block.parking?.parkingCapacity
+    ...(detail.parking?.parkingCapacity
       ? [
           {
             type: "text" as const,
             label: "Kapacita parkoviště",
-            value: `${block.parking.parkingCapacity} míst`,
+            value: `${detail.parking.parkingCapacity} míst`,
           },
         ]
       : []),
-    ...(block.parking?.parkingIsIncludedInPrice != null
+    ...(detail.parking?.parkingIsIncludedInPrice != null
       ? [
           {
             type: "boolean" as const,
             label: "Parkování v ceně",
-            value: block.parking.parkingIsIncludedInPrice,
+            value: detail.parking.parkingIsIncludedInPrice,
           },
         ]
       : []),
-    ...(block.parking?.parkingPrice
+    ...(detail.parking?.parkingPrice
       ? [
           {
             type: "text" as const,
             label: "Cena parkování",
-            value: `${block.parking.parkingPrice} Kč`,
+            value: `${detail.parking.parkingPrice} Kč`,
           },
         ]
       : []),
   ];
 
   const accommodationItems = [
-    ...(block.hasAccommodation != null
+    ...(detail.hasAccommodation != null
       ? [
           {
             type: "boolean" as const,
             label: "Ubytování",
-            value: block.hasAccommodation,
+            value: detail.hasAccommodation,
           },
         ]
       : []),
-    ...(block.accommodationCapacity
+    ...(detail.accommodationCapacity
       ? [
           {
             type: "text" as const,
             label: "Kapacita ubytování",
-            value: `${block.accommodationCapacity} lůžek`,
+            value: `${detail.accommodationCapacity} lůžek`,
           },
         ]
       : []),
-    ...(block.breakfast?.included != null
+    ...(detail.breakfast?.included != null
       ? [
           {
             type: "boolean" as const,
             label: "Snídaně",
-            value: block.breakfast.included,
+            value: detail.breakfast.included,
           },
         ]
       : []),
-    ...(block.breakfast?.breakfastIsIncludedInPrice != null
+    ...(detail.breakfast?.breakfastIsIncludedInPrice != null
       ? [
           {
             type: "boolean" as const,
             label: "Snídaně v ceně",
-            value: block.breakfast.breakfastIsIncludedInPrice,
+            value: detail.breakfast.breakfastIsIncludedInPrice,
           },
         ]
       : []),
-    ...(block.breakfast?.price
+    ...(detail.breakfast?.price
       ? [
           {
             type: "text" as const,
             label: "Cena snídaně",
-            value: `${block.breakfast.price} Kč${block.breakfast.pricePer === "person" ? " / osoba" : " / rezervace"}`,
+            value: `${detail.breakfast.price} Kč${detail.breakfast.pricePer === "person" ? " / osoba" : " / rezervace"}`,
           },
         ]
       : []),
-    ...(block.breakfast?.timeFrom && block.breakfast?.timeTo
+    ...(detail.breakfast?.timeFrom && detail.breakfast?.timeTo
       ? [
           {
             type: "text" as const,
             label: "Čas snídaně",
-            value: `${block.breakfast.timeFrom} – ${block.breakfast.timeTo}`,
+            value: `${detail.breakfast.timeFrom} – ${detail.breakfast.timeTo}`,
           },
         ]
       : []),
   ];
 
   const rulesItems = [
-    ...(block.venueRules?.length
+    ...(listing.properties.venueRules?.length
       ? [
           {
             type: "tagList" as const,
             label: "Pravidla prostoru",
-            items: block.venueRules,
+            items: listing.properties.venueRules,
           },
         ]
       : []),
-    ...(block.foodAndDrinkRules?.length
+    ...(listing.properties.gastroRules?.length
       ? [
           {
             type: "tagList" as const,
             label: "Pravidla pro jídlo a pití",
-            items: block.foodAndDrinkRules,
+            items: listing.properties.gastroRules,
           },
         ]
       : []),
@@ -245,21 +356,7 @@ export function VenueDetails({ block }: { block: VenueBlock }) {
         iconBg="bg-blue-50"
         iconColor="text-blue-500"
       >
-        <InfoSection
-          items={[
-            { type: "text", label: "Adresa", value: block.location.address },
-            { type: "text", label: "Město", value: city },
-            ...(block.placeTypes?.length
-              ? [
-                  {
-                    type: "tagList" as const,
-                    label: "Typ místa",
-                    items: block.placeTypes,
-                  },
-                ]
-              : []),
-          ]}
-        />
+        <InfoSection items={locationItems} />
       </DashboardSection>
 
       <DashboardSection
@@ -273,18 +370,13 @@ export function VenueDetails({ block }: { block: VenueBlock }) {
             {
               type: "text",
               label: "Typ prostoru",
-              value: SPACES_TYPE_LABELS[block.spacesType],
+              value: SPACES_TYPE_LABELS[detail.spacesType],
             },
-            {
-              type: "text",
-              label: "Kapacita",
-              value: `${block.capacity} osob`,
-            },
-            { type: "text", label: "Plocha", value: `${block.area} m²` },
+            { type: "text", label: "Plocha", value: `${detail.area} m²` },
             {
               type: "boolean",
               label: "Rezervace celého prostoru",
-              value: block.canBeBookedAsWhole,
+              value: detail.canBeBookedAsWhole,
             },
           ]}
         />

@@ -26,12 +26,16 @@ export default function Catalog({ type }: Props) {
     setMapView(!mapView);
   }, [mapView]);
 
+  const customSearchParams = new URLSearchParams();
+  customSearchParams.set("depth", "0");
+
   const { data: listings } = useListings({
     options: {
       query: createListingsQuery({
         catalogType: type,
         params: params,
       }),
+      searchParams: customSearchParams,
     },
   });
 
@@ -60,7 +64,6 @@ export default function Catalog({ type }: Props) {
               imageUrl={generateMediaUrl(listing.images.coverImage.filename)}
               title={listing.name}
               price={listing.price.startsAt}
-              details={listing.details[0]}
             />
           ))}
         </div>

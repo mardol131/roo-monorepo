@@ -19,6 +19,7 @@ import { Textarea } from "@/app/components/ui/atoms/inputs/textarea";
 import { uploadFileToCloud } from "@/app/functions/upload-file-to-cloud";
 import { useListing } from "@/app/react-query/listings/hooks";
 import { useSpacesByListing } from "@/app/react-query/spaces/hooks";
+import { useFilterOptions } from "@/app/react-query/filters/aggregated-filters/hooks";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { CalendarRange, Clock } from "lucide-react";
 import type { Resolver } from "react-hook-form";
@@ -26,7 +27,7 @@ import { Controller, useFieldArray, useForm } from "react-hook-form";
 import { z } from "zod";
 import { createVariantCommonSchema } from "./common-schema";
 import { relationshipItemSchema } from "@/app/validation/schema/relationship-item-schema";
-import { getOptionalPositiveNumber } from "../../../new/forms/common-schema";
+import { getOptionalPositiveNumber } from "@/app/validation/schema/utils";
 import SpacesCheckboxInput from "@/app/components/ui/atoms/inputs/spaces-checkbox-input";
 import TimeInput from "@/app/components/ui/atoms/inputs/time-input";
 
@@ -156,28 +157,42 @@ export default function EditVariantFormVenue({
 }: Props) {
   const { data: listing } = useListing(listingId);
   const { data: spaces } = useSpacesByListing(listingId);
-  const venueDetail = listing?.details.find((d) => d.blockType === "venue");
+  const { data: filters } = useFilterOptions();
 
-  const toItem = <T extends { id: string; name: string }>(v: string | T) =>
-    typeof v === "string" ? { id: v, name: "" } : { id: v.id, name: v.name };
-
-  const listingEventTypes = (listing?.eventTypes ?? []).map(toItem);
-
-  const listingAmenities = (
-    venueDetail?.blockType === "venue" ? (venueDetail.amenities ?? []) : []
-  ).map(toItem);
-  const listingTechnologies = (
-    venueDetail?.blockType === "venue" ? (venueDetail.technology ?? []) : []
-  ).map(toItem);
-  const listingServices = (
-    venueDetail?.blockType === "venue" ? (venueDetail.services ?? []) : []
-  ).map(toItem);
-  const listingActivities = (
-    venueDetail?.blockType === "venue" ? (venueDetail.activities ?? []) : []
-  ).map(toItem);
-  const listingPersonnel = (
-    venueDetail?.blockType === "venue" ? (venueDetail.personnel ?? []) : []
-  ).map(toItem);
+  const listingEventTypes = (listing?.properties.eventTypes ?? []).flatMap(
+    (id) => {
+      const found = filters?.eventTypes.find((e) => e.id === id);
+      return found ? [{ id: found.id, name: found.name }] : [];
+    },
+  );
+  const listingAmenities = (listing?.properties.amenities ?? []).flatMap(
+    (id) => {
+      const found = filters?.amenities.find((e) => e.id === id);
+      return found ? [{ id: found.id, name: found.name }] : [];
+    },
+  );
+  const listingTechnologies = (listing?.properties.technologies ?? []).flatMap(
+    (id) => {
+      const found = filters?.technologies.find((e) => e.id === id);
+      return found ? [{ id: found.id, name: found.name }] : [];
+    },
+  );
+  const listingServices = (listing?.properties.services ?? []).flatMap((id) => {
+    const found = filters?.services.find((e) => e.id === id);
+    return found ? [{ id: found.id, name: found.name }] : [];
+  });
+  const listingActivities = (listing?.properties.activities ?? []).flatMap(
+    (id) => {
+      const found = filters?.activities.find((e) => e.id === id);
+      return found ? [{ id: found.id, name: found.name }] : [];
+    },
+  );
+  const listingPersonnel = (listing?.properties.personnel ?? []).flatMap(
+    (id) => {
+      const found = filters?.personnel.find((e) => e.id === id);
+      return found ? [{ id: found.id, name: found.name }] : [];
+    },
+  );
 
   const {
     control,
@@ -266,8 +281,8 @@ export default function EditVariantFormVenue({
             inputProps={{
               ...register("shortDescription"),
               placeholder: "Stručný popis varianty (max. 50 znaků)",
-              maxLength: 50,
             }}
+            maxLength={50}
             error={errors.shortDescription?.message}
             isRequired
           />
@@ -279,6 +294,7 @@ export default function EditVariantFormVenue({
               rows: 4,
             }}
             error={errors.description?.message}
+            maxLength={1000}
           />
         </FormSection>
 

@@ -10,10 +10,11 @@ interface BusinessProfileProps {
 }
 
 export default function BusinessProfile({ companyId }: BusinessProfileProps) {
-  const { data: company, isFetching } = useCompany(companyId);
+  const { data: company, isLoading } = useCompany(companyId);
+  console.log("Company data:", company);
   const { data: listings } = useListingsByCompany(companyId ?? "");
 
-  if (isFetching) return null;
+  if (isLoading) return null;
 
   const nameInitials = company?.name
     .split(" ")
@@ -28,7 +29,7 @@ export default function BusinessProfile({ companyId }: BusinessProfileProps) {
         O pronajímateli
       </Text>
       <div className="flex items-center gap-4">
-        <div className="flex-shrink-0">
+        <div className="shrink-0">
           {company?.logo?.filename ? (
             <Image
               src={generateMediaUrl(company.logo.filename)}

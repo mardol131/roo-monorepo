@@ -1,6 +1,6 @@
 import type { CollectionConfig, Field, Where } from 'payload'
-import { variantsCommonFields } from './common-fields/common-fields'
 import { getRecordStatuses } from '@roo/common'
+import { variantsCommonFields } from './utils'
 
 export const venueVariantDetails: Field[] = [
   {

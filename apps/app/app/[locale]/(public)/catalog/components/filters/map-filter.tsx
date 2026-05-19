@@ -42,7 +42,7 @@ type Props = {
   onMapMove?: (bbox: Bbox) => void;
 };
 
-const CZ_BBOX: Bbox = [11.5, 48.0, 19.5, 51.7];
+export const CZ_BBOX: Bbox = [11.5, 48.0, 19.5, 51.7];
 const OVERLAY_PADDING = 0.3;
 
 const getPaddedBounds = (bbox: Bbox, padding: number = OVERLAY_PADDING) => {
@@ -91,8 +91,6 @@ export default function MapFilter({
     const bounds = getPaddedBounds(bbox);
     setActiveBbox(bbox);
     mapRef.current?.getMap().setMaxBounds(bounds);
-
-    if (bbox === CZ_BBOX) return;
     mapRef.current?.fitBounds(
       [
         [bbox[0], bbox[1]],
@@ -117,7 +115,7 @@ export default function MapFilter({
         initialViewState={{
           latitude: (activeBbox[1] + activeBbox[3]) / 2,
           longitude: (activeBbox[0] + activeBbox[2]) / 2,
-          zoom: 6.5,
+          zoom: 0,
           bearing: 0,
           pitch: 0,
         }}
@@ -170,7 +168,7 @@ export default function MapFilter({
           >
             <div className="flex flex-col w-60 -m-3 overflow-hidden rounded-lg">
               {activePin.data.filename ? (
-                <div className="relative w-full h-36 flex-shrink-0">
+                <div className="relative w-full h-36 shrink-0">
                   <Image
                     src={generateMediaUrl(activePin.data.filename)}
                     alt={activePin.data.label}
@@ -200,7 +198,7 @@ export default function MapFilter({
                   <Button
                     text="Otevřít listing"
                     iconLeft="ExternalLink"
-                    size="sm"
+                    size="xs"
                     version="primary"
                     link={activePin.data.buttonUrl}
                     linkTarget="_blank"

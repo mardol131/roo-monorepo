@@ -10,11 +10,7 @@ export const Companies: CollectionConfig = {
   },
   access: {
     create: ({ req }) => !!req.user,
-    read: ({ req }) => {
-      if (!req.user) return false
-      if (req.user.collection === 'admins') return true
-      return { status: { equals: 'active' } }
-    },
+    read: ({ req }) => true,
     update: ({ req }) => {
       if (!req.user) return false
       if (req.user.collection === 'admins') return true
@@ -73,7 +69,6 @@ export const Companies: CollectionConfig = {
       name: 'logo',
       type: 'group',
       fields: getMediaFields(),
-      // Stable object with nullable fields
       required: true,
     },
 

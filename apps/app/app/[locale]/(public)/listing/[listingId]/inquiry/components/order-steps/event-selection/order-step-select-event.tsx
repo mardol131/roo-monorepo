@@ -13,21 +13,27 @@ import Text from "@/app/components/ui/atoms/text";
 import { useOrderStore } from "@/app/store/order-store";
 import EventSelectionButton from "./event-selection-button";
 import InquiryNewEventForm from "./inquiry-new-event-form";
-import { City, Event } from "@roo/common";
+import { Event } from "@roo/common";
 import StepHeading from "../step-heading";
 import * as lucideIcons from "lucide-react";
 import { format } from "date-fns";
 import { useEvents } from "@/app/react-query/events/hooks";
 
 function getLocationLabel(location: Event["location"]): string | null {
-  if (!location || location.length === 0) return null;
-  const custom = location.find((l) => l.blockType === "custom");
-  if (custom && custom.blockType === "custom") {
-    const cityName =
-      typeof custom.city === "string" ? custom.city : custom.city.name;
-    return [cityName, custom.address].filter(Boolean).join(", ");
+  if (!location) return null;
+  if (location.type === "venue") {
+    if (!location.venue) return null;
+    return typeof location.venue === "string"
+      ? location.venue
+      : location.venue.name;
   }
-  return null;
+  const cityName = location.city
+    ? typeof location.city === "string"
+      ? location.city
+      : location.city.name
+    : null;
+  const parts = [cityName, location.address].filter(Boolean);
+  return parts.length > 0 ? parts.join(", ") : null;
 }
 
 export default function OrderStepSelectEvent() {
@@ -46,28 +52,30 @@ export default function OrderStepSelectEvent() {
     }
   };
 
-  const content = () => {
-    if (events?.docs?.length === 0) {
-      return <InquiryNewEventForm />;
-    }
+  const hasExistingEvents = events?.docs && events.docs.length > 0;
 
+  const content = () => {
     return (
       <>
         <div className="flex flex-col gap-6">
-          <div className="grid grid-cols-2 gap-5">
-            <EventSelectionButton
-              icon={CheckSquare2}
-              onClick={() => handleSelectEventType("existing-event")}
-              isActive={eventVariant === "existing-event"}
-              heading="Existující událost"
-              text="Vyberu si událost z těch, které už mám vytvořené"
-            />
+          <div
+            className={`grid ${hasExistingEvents ? "grid-cols-2" : "grid-cols-1"} gap-5`}
+          >
+            {hasExistingEvents && (
+              <EventSelectionButton
+                icon={CheckSquare2}
+                onClick={() => handleSelectEventType("existing-event")}
+                isActive={eventVariant === "existing-event"}
+                heading="Existující událost"
+                text="Vyberu si událost z těch, které už mám vytvořené"
+              />
+            )}
             <EventSelectionButton
               icon={Plus}
               onClick={() => handleSelectEventType("new-event")}
               isActive={eventVariant === "new-event"}
-              heading="Nová událost"
-              text="Vytvořím si novou událost a přidám sem tohoto dodavatele"
+              heading="Kliknětě pro vytvoření události"
+              text="Kliknutím se vám otevře krátký formulář pro vytvoření nové události"
             />
           </div>
         </div>
@@ -96,11 +104,11 @@ export default function OrderStepSelectEvent() {
   };
 
   const { title, description } = useMemo(() => {
-    if (events?.docs?.length === 0) {
+    if (!hasExistingEvents) {
       return {
         title: "Vytvořte novou událost",
         description:
-          "Vytvořte novou událost, do které následně přidáte tohoto dodavatele",
+          "Pro odeslání poptávky je potřeba nejprve vytvořit událost, do které následně přidáte tohoto dodavatele",
       };
     }
     switch (eventVariant) {
@@ -123,7 +131,7 @@ export default function OrderStepSelectEvent() {
             "Zvolte, zda chcete přidat dodavatele do existujícího eventu nebo vytvořit nový",
         };
     }
-  }, [events, eventVariant]);
+  }, [hasExistingEvents, eventVariant]);
 
   return (
     <div>

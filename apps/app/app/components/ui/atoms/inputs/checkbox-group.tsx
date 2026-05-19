@@ -76,7 +76,7 @@ export default function CheckboxGroup({
       {!closed && (
         <>
           {searchable && (
-            <div className="relative">
+            <div className="relative mb-3">
               <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-400 pointer-events-none" />
               <input
                 type="text"

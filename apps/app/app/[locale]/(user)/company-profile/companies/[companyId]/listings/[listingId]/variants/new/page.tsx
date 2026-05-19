@@ -9,7 +9,7 @@ import {
 import { useVariant } from "@/app/react-query/variants/hooks";
 import { MediaSchema, Variant } from "@roo/common";
 import { useParams } from "next/navigation";
-import { toIds, toItem } from "../../edit/components/utils";
+import { toIds, toItem } from "../../../components/utils";
 import VariantFormEntertainment, {
   EntertainmentFormInputs,
 } from "../components/variant-form-entertainment";
@@ -21,6 +21,7 @@ import VariantFormVenue, {
 } from "../components/variant-form-venue";
 import { useCreateListing, useListing } from "@/app/react-query/listings/hooks";
 import { CreateVariantPayload } from "@/app/react-query/variants/fetch";
+import Loader from "@/app/[locale]/(user)/components/loader";
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -174,7 +175,7 @@ export default function EditVariantPage() {
     companyId: string;
   }>();
   const router = useRouter();
-  const { data: listing } = useListing(listingId);
+  const { data: listing, isFetching } = useListing(listingId);
   const { mutate: createVariant } = useCreateVariant({
     onSuccess: () =>
       router.push({
@@ -184,7 +185,7 @@ export default function EditVariantPage() {
       }),
   });
 
-  const blockType = listing?.details[0].blockType;
+  if (isFetching || !listing) return <Loader text="Formulář se načítá" />;
 
   return (
     <main className="w-full">
@@ -193,21 +194,21 @@ export default function EditVariantPage() {
         description="Zde můžete upravit základní informace o vaší variantě, jako jsou popis, cena nebo dostupnost."
       />
 
-      {blockType === "venue" && listing && (
+      {listing.type === "venue" && listing && (
         <VariantFormVenue
           listingId={listingId}
           onSubmit={(data) => createVariant(venuePayload(data, listingId))}
           onCancel={() => router.back()}
         />
       )}
-      {blockType === "gastro" && listing && (
+      {listing.type === "gastro" && listing && (
         <VariantFormGastro
           listingId={listingId}
           onSubmit={(data) => createVariant(gastroPayload(data, listingId))}
           onCancel={() => router.back()}
         />
       )}
-      {blockType === "entertainment" && listing && (
+      {listing.type === "entertainment" && listing && (
         <VariantFormEntertainment
           listingId={listingId}
           onSubmit={(data) =>

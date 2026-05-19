@@ -29,20 +29,23 @@ export default function Breadcrumbs({ items }: Props) {
     useParams();
 
   const { data: listings } = useListing(
-    typeof listingId === "string" ? listingId : "",
+    typeof listingId === "string" ? listingId : undefined,
   );
   const { data: company } = useCompany(
-    typeof companyId === "string" ? companyId : "",
+    typeof companyId === "string" ? companyId : undefined,
   );
-  const { data: events } = useEvent(typeof eventId === "string" ? eventId : "");
+  const { data: events } = useEvent(
+    typeof eventId === "string" ? eventId : undefined,
+  );
   const { data: inquiries } = useListing(
-    typeof inquiryId === "string" ? inquiryId : "",
+    typeof inquiryId === "string" ? inquiryId : undefined,
   );
   const { data: variant } = useVariant(
-    typeof variantId === "string" ? variantId : "",
+    typeof variantId === "string" ? variantId : undefined,
   );
-
-  const { data: space } = useSpace(typeof spaceId === "string" ? spaceId : "");
+  const { data: space } = useSpace(
+    typeof spaceId === "string" ? spaceId : undefined,
+  );
   function formatSegment(segment: string): string {
     if (companyId && segment === companyId) return company?.name ?? segment;
     if (listingId && segment === listingId) return listings?.name ?? segment;
@@ -83,7 +86,7 @@ export default function Breadcrumbs({ items }: Props) {
     (() => {
       const i18nSegments = i18nPathname.split("/").filter(Boolean);
       const segments = pathname.split("/").filter(Boolean);
-      return segments.map((segment, index) => ({
+      return segments.map((_, index) => ({
         label: formatSegment(i18nSegments[index]),
         href: "/" + segments.slice(0, index + 1).join("/"),
       }));

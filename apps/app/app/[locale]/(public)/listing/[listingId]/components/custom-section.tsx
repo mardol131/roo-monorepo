@@ -1,9 +1,11 @@
 import Text from "@/app/components/ui/atoms/text";
 import { generateMediaUrl } from "@/app/functions/generate-media-url";
-import { Listing } from "@roo/common";
+import { Listing, ListingVenueDetail } from "@roo/common";
 import Image from "next/image";
 
-type CustomSectionBlock = NonNullable<Listing["customSections"]>[number];
+type CustomSectionBlock = NonNullable<
+  ListingVenueDetail["customSections"]
+>[number];
 
 interface Props {
   section: CustomSectionBlock;

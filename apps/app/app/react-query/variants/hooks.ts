@@ -22,10 +22,10 @@ export function useVariantsByListing(listingId: string) {
   });
 }
 
-export function useVariant(id: string) {
+export function useVariant(id: string | undefined) {
   return useQuery({
-    queryKey: variantKeys.byId(id),
-    queryFn: () => fetchVariant(id),
+    queryKey: variantKeys.byId(id ?? ""),
+    queryFn: () => fetchVariant(id!),
     enabled: !!id,
   });
 }

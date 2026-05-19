@@ -19,18 +19,18 @@ import { Textarea } from "@/app/components/ui/atoms/inputs/textarea";
 import { useRouter } from "@/app/i18n/navigation";
 import { useCities } from "@/app/react-query/cities/hooks";
 import { useDistricts } from "@/app/react-query/districts/hooks";
-import { useCuisines } from "@/app/react-query/filters/cuisines/hooks";
-import { useDietaryOptions } from "@/app/react-query/filters/dietary-options/hooks";
-import { useDishTypes } from "@/app/react-query/filters/dish-types/hooks";
-import { useEventTypes } from "@/app/react-query/filters/event-types/hooks";
-import { useFoodServiceStyles } from "@/app/react-query/filters/food-service-styles/hooks";
-import { usePersonnel } from "@/app/react-query/filters/personnel/hooks";
-import { useListing, useUpdateListing } from "@/app/react-query/listings/hooks";
+import { useFilterOptions } from "@/app/react-query/filters/aggregated-filters/hooks";
+import {
+  useCreateListing,
+  useCreateListingDetail,
+  useListing,
+  useListingDetail,
+  useUpdateListing,
+  useUpdateListingDetail,
+} from "@/app/react-query/listings/hooks";
 import { useRegions } from "@/app/react-query/regions/hooks";
-import { useNecessities } from "@/app/react-query/specific/necessities/hooks";
-import { useRules } from "@/app/react-query/specific/rules/hooks";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Listing, undefinedToNull } from "@roo/common";
+import { getIdFromRelationshipField, undefinedToNull } from "@roo/common";
 import { uploadFileToCloud } from "@/app/functions/upload-file-to-cloud";
 
 import { useParams } from "next/navigation";
@@ -38,11 +38,7 @@ import { useEffect, useState } from "react";
 import { Controller, useFieldArray, useForm } from "react-hook-form";
 import { z } from "zod";
 import { commonEditListingFieldsSchema } from "./common-schema";
-import { toItem } from "./utils";
-
-// ── TOC groups ────────────────────────────────────────────────────────────────
-
-// ── TOC ───────────────────────────────────────────────────────────────────────
+import { toItem, toIds } from "./utils";
 
 const S: Record<string, TocSection> = {
   basic: {
@@ -77,9 +73,8 @@ const S: Record<string, TocSection> = {
     title: "Nezbytnosti",
     icon: "Package",
   },
-  rules: { id: "section-rules", title: "Pravidla", icon: "ScrollText" },
-  foodAndDrinkRules: {
-    id: "section-food-and-drink-rules",
+  gastroRules: {
+    id: "section-gastro-rules",
     title: "Pravidla pro jídlo a pití",
     icon: "Coffee",
   },
@@ -95,7 +90,7 @@ const S: Record<string, TocSection> = {
 export const GASTRO_FORM_GROUPS: readonly TocGroup[] = [
   {
     label: "Základní",
-    sections: [S.basic, S.price, S.images],
+    sections: [S.basic, S.price, S.images, S.eventTypes],
   },
   {
     label: "Místo působení",
@@ -107,15 +102,19 @@ export const GASTRO_FORM_GROUPS: readonly TocGroup[] = [
   },
   {
     label: "Program a vybavení",
-    sections: [S.eventTypes, S.personnel, S.necessities, S.foodAndDrinkRules],
+    sections: [S.personnel, S.necessities, S.gastroRules],
   },
   {
     label: "Prezentace",
-    sections: [S.rules, S.employees, S.faq, S.references],
+    sections: [S.employees, S.faq, S.references],
   },
 ];
 
-// ── Schema ────────────────────────────────────────────────────────────────────
+const CREATE_GASTRO_GROUPS: readonly TocGroup[] = [
+  { label: "Základní", sections: [S.basic, S.price, S.images, S.eventTypes] },
+  { label: "Místo působení", sections: [S.location] },
+  { label: "Nabídka", sections: [S.capacity, S.cuisines, S.offer, S.extras, S.necessities] },
+];
 
 const itemSchema = z.object({ id: z.string(), name: z.string() });
 
@@ -135,23 +134,18 @@ const schema = z.object({
 
   kidsMenu: z.boolean().default(false),
   hasAlcoholLicense: z.boolean().default(false),
-  foodAndDrinkRules: z.array(itemSchema).default([]),
 });
-
-// ── Types ─────────────────────────────────────────────────────────────────────
 
 export type GastroFormInputs = z.infer<typeof schema>;
 
-// ── Props ─────────────────────────────────────────────────────────────────────
-
 type Props = {
+  type: "create" | "edit";
   onCancel: () => void;
   onFormChange?: (values: GastroFormInputs) => void;
 };
 
-// ── Component ─────────────────────────────────────────────────────────────────
-
-export default function EditGastroListingForm({
+export default function GastroListingForm({
+  type,
   onCancel,
   onFormChange,
 }: Props) {
@@ -159,66 +153,127 @@ export default function EditGastroListingForm({
     listingId: string;
     companyId: string;
   }>();
-  const { data: listing } = useListing(listingId);
+  const { data: listing } = useListing(type === "edit" ? listingId : undefined);
+  const { data: gastroDetail } = useListingDetail(
+    "listing-gastro-details",
+    type === "edit" && listing
+      ? getIdFromRelationshipField(listing.detail.value)
+      : undefined,
+  );
+  const { data: filters } = useFilterOptions();
   const { mutate } = useUpdateListing(companyId);
+  const { mutate: updateDetail } = useUpdateListingDetail(
+    "listing-gastro-details",
+  );
+  const { mutateAsync: createListing } = useCreateListing();
+  const { mutateAsync: createListingDetail } = useCreateListingDetail(
+    "listing-gastro-details",
+  );
   const router = useRouter();
 
-  function onSubmit(data: GastroFormInputs) {
-    const existingDetail = listing?.details.find(
-      (d): d is Extract<Listing["details"][number], { blockType: "gastro" }> =>
-        d.blockType === "gastro",
-    );
+  function onSubmitEdit(data: GastroFormInputs) {
+    if (!gastroDetail) return;
 
-    const payload: Partial<Listing> = {
-      name: data.name,
-      shortDescription: data.shortDescription,
-      description: data.description,
-      eventTypes: data.eventTypes.map((i) => i.id),
-      images: data.images,
-      price: data.price,
-      rules: data.rules.map((i) => i.id),
-      employees: data.employees,
-      faq: data.faq,
-      references: data.references.map((r) => ({
-        ...r,
-        eventType: r.eventType ? r.eventType.id : undefined,
-      })),
-      details: [
-        {
-          ...existingDetail,
-          blockType: "gastro",
-          location: {
-            region: data.location.regions.map((i) => i.id),
-            district: data.location.districts.map((i) => i.id),
-            city: data.location.cities.map((i) => i.id),
-            address: data.location.address,
-          },
-          capacity: data.capacity,
-          minimumCapacity: data.minimumCapacity,
-          cuisines: data.cuisines.map((i) => i.id),
-          dishTypes: data.dishTypes.map((i) => i.id),
-          dietaryOptions: data.dietaryOptions.map((i) => i.id),
-          foodServiceStyles: data.foodServiceStyles.map((i) => i.id),
-          kidsMenu: data.kidsMenu,
-          hasAlcoholLicense: data.hasAlcoholLicense,
-          foodAndDrinkRules: data.foodAndDrinkRules.map((i) => i.id),
-          personnel: data.personnel.map((i) => i.id),
-          necessities: data.necessities.map((i) => i.id),
-        },
-      ],
-    };
-
-    const finalPayload = undefinedToNull(payload);
-    mutate(
+    updateDetail(
       {
-        id: listingId,
-        data: finalPayload,
+        id: gastroDetail.id,
+        data: {
+          hasAlcoholLicense: data.hasAlcoholLicense,
+          kidsMenu: data.kidsMenu,
+          faq: data.faq.map((f) => ({
+            ...f,
+            group: f.groupedBy,
+            groupedBy: undefined,
+          })),
+          employees: data.employees,
+          references: data.references.map((r) => ({
+            ...r,
+            eventType: r.eventType?.id ?? null,
+          })),
+        },
       },
       {
-        onSuccess: () => router.back(),
+        onSuccess: () =>
+          mutate(
+            {
+              id: listingId,
+              data: undefinedToNull({
+                guests: data.guests,
+                name: data.name,
+                shortDescription: data.shortDescription,
+                description: data.description,
+                images: data.images,
+                price: data.price,
+                location: {
+                  type: "regions" as const,
+                  regions: toIds(data.location.regions),
+                  districts: toIds(data.location.districts),
+                  cities: toIds(data.location.cities),
+                  address: data.location.address,
+                },
+                properties: {
+                  eventTypes: toIds(data.eventTypes),
+                  cuisines: toIds(data.cuisines),
+                  dishTypes: toIds(data.dishTypes),
+                  dietaryOptions: toIds(data.dietaryOptions),
+                  foodServiceStyles: toIds(data.foodServiceStyles),
+                  personnel: toIds(data.personnel),
+                  necessities: toIds(data.necessities),
+                  gastroRules: toIds(data.gastroRules),
+                },
+              }),
+            },
+            { onSuccess: () => router.back() },
+          ),
       },
     );
   }
+
+  async function onSubmitCreate(data: GastroFormInputs) {
+    try {
+      const { doc: detail } = await createListingDetail({
+        hasAlcoholLicense: data.hasAlcoholLicense,
+        kidsMenu: data.kidsMenu,
+      });
+      await createListing({
+        type: "gastro",
+        company: companyId,
+        name: data.name,
+        guests: data.guests,
+        images: {
+          coverImage: data.images.coverImage,
+          logo: data.images.logo,
+          gallery: data.images.gallery,
+        },
+        price: { startsAt: data.price.startsAt },
+        location: {
+          type: "regions" as const,
+          address: data.location.address,
+          regions: toIds(data.location.regions),
+          districts: toIds(data.location.districts),
+          cities: toIds(data.location.cities),
+        },
+        properties: {
+          eventTypes: toIds(data.eventTypes),
+          cuisines: toIds(data.cuisines),
+          dishTypes: toIds(data.dishTypes),
+          dietaryOptions: toIds(data.dietaryOptions),
+          foodServiceStyles: toIds(data.foodServiceStyles),
+          necessities: toIds(data.necessities),
+          gastroRules: toIds(data.gastroRules),
+        },
+        detail: { relationTo: "listing-gastro-details", value: detail.id },
+      });
+      router.push({
+        pathname: "/company-profile/companies/[companyId]/listings",
+        params: { companyId },
+      });
+    } catch {
+      alert("Nepodařilo se vytvořit inzerát, zkuste to prosím později.");
+    }
+  }
+
+  const onSubmit = type === "create" ? onSubmitCreate : onSubmitEdit;
 
   const {
     control,
@@ -240,33 +295,12 @@ export default function EditGastroListingForm({
       necessities: [],
       kidsMenu: false,
       hasAlcoholLicense: false,
-      foodAndDrinkRules: [],
-      rules: [],
+      gastroRules: [],
       employees: [],
       faq: [],
       references: [],
+      guests: { ztp: false, pets: false },
     },
-  });
-
-  const { data: eventTypes, isLoading: eventTypesLoading } = useEventTypes({
-    limit: 15,
-  });
-  const { data: personnel, isLoading: personnelLoading } = usePersonnel({
-    limit: 15,
-  });
-  const { data: rules, isLoading: rulesLoading } = useRules({ limit: 15 });
-  const { data: dishTypes, isLoading: dishTypesLoading } = useDishTypes({
-    limit: 15,
-  });
-  const { data: foodAndServiceStyles, isLoading: foodAndServiceStylesLoading } =
-    useFoodServiceStyles({ limit: 15 });
-  const { data: cuisines, isLoading: cuisinesLoading } = useCuisines({
-    limit: 15,
-  });
-  const { data: dietaryOptions, isLoading: dietaryOptionsLoading } =
-    useDietaryOptions({ limit: 15 });
-  const { data: necessities, isLoading: necessitiesLoading } = useNecessities({
-    limit: 15,
   });
 
   useEffect(() => {
@@ -277,54 +311,54 @@ export default function EditGastroListingForm({
   }, [watch, onFormChange]);
 
   useEffect(() => {
-    if (!listing) return;
-    const d = listing.details.find((d) => d.blockType === "gastro");
-    if (!d) return;
-
-    const id = <T extends string | { id: string }>(v: T) =>
-      typeof v === "string" ? v : v.id;
+    if (type !== "edit") return;
+    if (!listing || !gastroDetail) return;
 
     reset({
       name: listing.name,
       shortDescription: listing.shortDescription ?? undefined,
       description: listing.description ?? undefined,
-      eventTypes: listing.eventTypes?.map(toItem) ?? [],
+      eventTypes: listing.properties.eventTypes?.map(toItem) ?? [],
       images: listing.images,
       price: { startsAt: listing.price.startsAt },
       location: {
-        regions: d.location?.region?.map(toItem) ?? [],
-        districts: d.location?.district?.map(toItem) ?? [],
-        cities: d.location?.city?.map(toItem) ?? [],
-        address: d.location?.address ?? undefined,
+        regions: listing.location.regions?.map(toItem) ?? [],
+        districts: listing.location.districts?.map(toItem) ?? [],
+        cities: listing.location.cities?.map(toItem) ?? [],
+        address: listing.location.address ?? undefined,
       },
-      capacity: d.capacity,
-      minimumCapacity: d.minimumCapacity ?? undefined,
-      cuisines: d.cuisines?.map(toItem) ?? [],
-      dishTypes: d.dishTypes?.map(toItem) ?? [],
-      dietaryOptions: d.dietaryOptions?.map(toItem) ?? [],
-      foodServiceStyles: d.foodServiceStyles?.map(toItem) ?? [],
-      personnel: d.personnel?.map(toItem) ?? [],
-      necessities: d.necessities?.map(toItem) ?? [],
-      kidsMenu: d.kidsMenu ?? false,
-      hasAlcoholLicense: d.hasAlcoholLicense ?? false,
-      foodAndDrinkRules: d.foodAndDrinkRules?.map(toItem) ?? [],
-      rules: listing.rules?.map(toItem) ?? [],
+      guests: {
+        min: listing.guests?.min ?? undefined,
+        max: listing.guests?.max ?? 0,
+        ztp: listing.guests?.ztp ?? false,
+        pets: listing.guests?.pets ?? false,
+      },
+      cuisines: listing.properties.cuisines?.map(toItem) ?? [],
+      dishTypes: listing.properties.dishTypes?.map(toItem) ?? [],
+      dietaryOptions: listing.properties.dietaryOptions?.map(toItem) ?? [],
+      foodServiceStyles:
+        listing.properties.foodServiceStyles?.map(toItem) ?? [],
+      personnel: listing.properties.personnel?.map(toItem) ?? [],
+      necessities: listing.properties.necessities?.map(toItem) ?? [],
+      kidsMenu: gastroDetail.kidsMenu ?? false,
+      hasAlcoholLicense: gastroDetail.hasAlcoholLicense ?? false,
+      gastroRules: listing.properties.gastroRules?.map(toItem) ?? [],
       employees:
-        listing.employees?.map((e) => ({
+        gastroDetail.employees?.map((e) => ({
           name: e.name,
           role: e.role,
           description: e.description ?? undefined,
           image: e.image,
         })) ?? [],
       faq:
-        listing.faq?.map((f) => ({
+        gastroDetail.faq?.map((f) => ({
           active: f.active ?? true,
           question: f.question,
           answer: f.answer,
-          groupedBy: f.groupedBy ?? "general",
+          groupedBy: f.group ?? "general",
         })) ?? [],
       references:
-        listing.references?.map((r) => ({
+        gastroDetail.references?.map((r) => ({
           image: r.image,
           eventName: r.eventName ?? undefined,
           description: r.description ?? undefined,
@@ -332,7 +366,7 @@ export default function EditGastroListingForm({
           eventType: r.eventType ? toItem(r.eventType) : undefined,
         })) ?? [],
     });
-  }, [listing, reset]);
+  }, [type, listing, gastroDetail, reset]);
 
   const employeesFieldArray = useFieldArray({ control, name: "employees" });
   const faqFieldArray = useFieldArray({ control, name: "faq" });
@@ -345,7 +379,7 @@ export default function EditGastroListingForm({
   const [districtSearch, setDistrictSearch] = useState("");
   const [citySearch, setCitySearch] = useState("");
 
-  const { data: regionsData } = useRegions(undefined, 20);
+  const { data: regionsData } = useRegions(undefined, 9000);
   const { data: districtsData } = useDistricts(
     regionsValue?.length || districtSearch
       ? {
@@ -368,6 +402,9 @@ export default function EditGastroListingForm({
         : undefined,
   });
 
+  const tocGroups =
+    type === "create" ? CREATE_GASTRO_GROUPS : GASTRO_FORM_GROUPS;
+
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="flex gap-6">
       <div className="flex flex-col w-full gap-4">
@@ -379,6 +416,7 @@ export default function EditGastroListingForm({
           subtitle={S.basic.subTitle}
           color="text-listing"
           surfaceColor="bg-listing-surface"
+          error={!!errors.name}
         >
           <Input
             label="Název"
@@ -389,23 +427,27 @@ export default function EditGastroListingForm({
             error={errors.name?.message}
             isRequired
           />
-          <Input
-            label="Krátký popis"
-            inputProps={{
-              ...register("shortDescription"),
-              placeholder: "Prémiový catering pro všechny typy akcí.",
-            }}
-            error={errors.shortDescription?.message}
-          />
-          <Textarea
-            label="Popis"
-            inputProps={{
-              ...register("description"),
-              rows: 4,
-              placeholder: "Detailní popis služby...",
-            }}
-            error={errors.description?.message}
-          />
+          {type === "edit" && (
+            <>
+              <Input
+                label="Krátký popis"
+                inputProps={{
+                  ...register("shortDescription"),
+                  placeholder: "Prémiový catering pro všechny typy akcí.",
+                }}
+                error={errors.shortDescription?.message}
+              />
+              <Textarea
+                label="Popis"
+                inputProps={{
+                  ...register("description"),
+                  rows: 4,
+                  placeholder: "Detailní popis služby...",
+                }}
+                error={errors.description?.message}
+              />
+            </>
+          )}
         </FormSection>
 
         {/* ── 2. Cena ───────────────────────────────────────────────────────────── */}
@@ -416,6 +458,7 @@ export default function EditGastroListingForm({
           subtitle={S.price.subTitle}
           color="text-listing"
           surfaceColor="bg-listing-surface"
+          error={!!errors.price?.startsAt}
         >
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Input
@@ -489,6 +532,33 @@ export default function EditGastroListingForm({
           />
         </FormSection>
 
+        {/* ── 8. Typy akcí ─────────────────────────────────────────────────────── */}
+        <FormSection
+          id={S.eventTypes.id}
+          icon={S.eventTypes.icon}
+          title={S.eventTypes.title}
+          subtitle={S.eventTypes.subTitle}
+          color="text-listing"
+          surfaceColor="bg-listing-surface"
+          error={!!errors.eventTypes}
+        >
+          <Controller
+            control={control}
+            name="eventTypes"
+            render={({ field }) => (
+              <CheckboxGroup
+                items={filters?.eventTypes ?? []}
+                value={field.value ?? []}
+                onChange={field.onChange}
+                checkColor="text-listing"
+                searchable
+                isRequired
+                error={errors.eventTypes?.message}
+              />
+            )}
+          />
+        </FormSection>
+
         {/* ── 4. Místo působení ─────────────────────────────────────────────────── */}
         <FormSection
           id={S.location.id}
@@ -511,6 +581,7 @@ export default function EditGastroListingForm({
                 checkColor="text-listing"
                 searchable
                 isRequired
+                error={errors.location?.regions?.message}
               />
             )}
           />
@@ -572,28 +643,29 @@ export default function EditGastroListingForm({
           subtitle={S.capacity.subTitle}
           color="text-listing"
           surfaceColor="bg-listing-surface"
+          error={!!errors.guests?.max || !!errors.guests?.min}
         >
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Input
-              label="Max. kapacita (osob)"
+              label="Max. počet hostů (osob)"
+              isRequired
               inputProps={{
-                ...register("capacity"),
+                ...register("guests.max"),
                 type: "number",
                 min: 1,
                 placeholder: "200",
               }}
-              error={errors.capacity?.message}
-              isRequired
+              error={errors.guests?.max?.message}
             />
             <Input
-              label="Min. kapacita (osob)"
+              label="Min. počet hostů (osob)"
               inputProps={{
-                ...register("minimumCapacity"),
+                ...register("guests.min"),
                 type: "number",
                 min: 1,
                 placeholder: "10",
               }}
-              error={errors.minimumCapacity?.message}
+              error={errors.guests?.min?.message}
             />
           </div>
         </FormSection>
@@ -612,7 +684,7 @@ export default function EditGastroListingForm({
             name="cuisines"
             render={({ field }) => (
               <CheckboxGroup
-                items={cuisines?.docs ?? []}
+                items={filters?.cuisines ?? []}
                 value={field.value ?? []}
                 onChange={field.onChange}
                 checkColor="text-listing"
@@ -637,7 +709,7 @@ export default function EditGastroListingForm({
             render={({ field }) => (
               <CheckboxGroup
                 label="Typy jídel"
-                items={dishTypes?.docs ?? []}
+                items={filters?.dishTypes ?? []}
                 value={field.value ?? []}
                 onChange={field.onChange}
                 checkColor="text-listing"
@@ -651,7 +723,7 @@ export default function EditGastroListingForm({
             render={({ field }) => (
               <CheckboxGroup
                 label="Dietní možnosti"
-                items={dietaryOptions?.docs ?? []}
+                items={filters?.dietaryOptions ?? []}
                 value={field.value ?? []}
                 onChange={field.onChange}
                 checkColor="text-listing"
@@ -665,7 +737,7 @@ export default function EditGastroListingForm({
             render={({ field }) => (
               <CheckboxGroup
                 label="Styl servisu"
-                items={foodAndServiceStyles?.docs ?? []}
+                items={filters?.foodServiceStyles ?? []}
                 value={field.value ?? []}
                 onChange={field.onChange}
                 checkColor="text-listing"
@@ -715,53 +787,31 @@ export default function EditGastroListingForm({
           </div>
         </FormSection>
 
-        {/* ── 8. Typy akcí ─────────────────────────────────────────────────────── */}
-        <FormSection
-          id={S.eventTypes.id}
-          icon={S.eventTypes.icon}
-          title={S.eventTypes.title}
-          subtitle={S.eventTypes.subTitle}
-          color="text-listing"
-          surfaceColor="bg-listing-surface"
-        >
-          <Controller
-            control={control}
-            name="eventTypes"
-            render={({ field }) => (
-              <CheckboxGroup
-                items={eventTypes?.docs ?? []}
-                value={field.value ?? []}
-                onChange={field.onChange}
-                checkColor="text-listing"
-                searchable
-              />
-            )}
-          />
-        </FormSection>
-
         {/* ── 9. Personál ───────────────────────────────────────────────────────── */}
-        <FormSection
-          id={S.personnel.id}
-          icon={S.personnel.icon}
-          title={S.personnel.title}
-          subtitle={S.personnel.subTitle}
-          color="text-listing"
-          surfaceColor="bg-listing-surface"
-        >
-          <Controller
-            control={control}
-            name="personnel"
-            render={({ field }) => (
-              <CheckboxGroup
-                items={personnel?.docs ?? []}
-                value={field.value ?? []}
-                onChange={field.onChange}
-                checkColor="text-listing"
-                searchable
-              />
-            )}
-          />
-        </FormSection>
+        {type === "edit" && (
+          <FormSection
+            id={S.personnel.id}
+            icon={S.personnel.icon}
+            title={S.personnel.title}
+            subtitle={S.personnel.subTitle}
+            color="text-listing"
+            surfaceColor="bg-listing-surface"
+          >
+            <Controller
+              control={control}
+              name="personnel"
+              render={({ field }) => (
+                <CheckboxGroup
+                  items={filters?.personnel ?? []}
+                  value={field.value ?? []}
+                  onChange={field.onChange}
+                  checkColor="text-listing"
+                  searchable
+                />
+              )}
+            />
+          </FormSection>
+        )}
 
         {/* ── 10. Nezbytnosti ───────────────────────────────────────────────────── */}
         <FormSection
@@ -777,7 +827,7 @@ export default function EditGastroListingForm({
             name="necessities"
             render={({ field }) => (
               <CheckboxGroup
-                items={necessities?.docs ?? []}
+                items={filters?.necessities ?? []}
                 value={field.value ?? []}
                 onChange={field.onChange}
                 checkColor="text-listing"
@@ -788,292 +838,281 @@ export default function EditGastroListingForm({
         </FormSection>
 
         {/* ── 11. Pravidla ──────────────────────────────────────────────────────── */}
-        <FormSection
-          id={S.rules.id}
-          icon={S.rules.icon}
-          title={S.rules.title}
-          subtitle={S.rules.subTitle}
-          color="text-listing"
-          surfaceColor="bg-listing-surface"
-        >
-          <Controller
-            control={control}
-            name="rules"
-            render={({ field }) => (
-              <CheckboxGroup
-                items={rules?.docs ?? []}
-                value={field.value ?? []}
-                onChange={field.onChange}
-                checkColor="text-listing"
-                searchable
-              />
-            )}
-          />
-        </FormSection>
-
-        {/* ── 11. Pravidla pro jídlo a pití ───────────────────────────────────────────── */}
-        <FormSection
-          id={S.foodAndDrinkRules.id}
-          icon={S.foodAndDrinkRules.icon}
-          title={S.foodAndDrinkRules.title}
-          subtitle={S.foodAndDrinkRules.subTitle}
-          color="text-listing"
-          surfaceColor="bg-listing-surface"
-        >
-          <Controller
-            control={control}
-            name="foodAndDrinkRules"
-            render={({ field }) => (
-              <CheckboxGroup
-                items={rules?.docs ?? []}
-                value={field.value ?? []}
-                onChange={field.onChange}
-                checkColor="text-listing"
-                searchable
-              />
-            )}
-          />
-        </FormSection>
+        {type === "edit" && (
+          <FormSection
+            id={S.gastroRules.id}
+            icon={S.gastroRules.icon}
+            title={S.gastroRules.title}
+            subtitle={S.gastroRules.subTitle}
+            color="text-listing"
+            surfaceColor="bg-listing-surface"
+          >
+            <Controller
+              control={control}
+              name="gastroRules"
+              render={({ field }) => (
+                <CheckboxGroup
+                  items={
+                    filters?.rules.filter((item) => item.type === "gastro") ??
+                    []
+                  }
+                  value={field.value ?? []}
+                  onChange={field.onChange}
+                  checkColor="text-listing"
+                  searchable
+                />
+              )}
+            />
+          </FormSection>
+        )}
 
         {/* ── 12. Zaměstnanci ───────────────────────────────────────────────────── */}
-        <FormSection
-          id={S.employees.id}
-          icon={S.employees.icon}
-          title={S.employees.title}
-          subtitle={S.employees.subTitle}
-          color="text-listing"
-          surfaceColor="bg-listing-surface"
-        >
-          <RepeaterField
-            label="Zaměstnanci"
-            fields={employeesFieldArray.fields}
-            onAppend={() =>
-              employeesFieldArray.append({
-                name: "",
-                role: "",
-                description: "",
-                image: {},
-              })
-            }
-            onRemove={employeesFieldArray.remove}
-            addButtonLabel="Přidat zaměstnance"
-            renderItem={(_item, index) => (
-              <div className="flex flex-col gap-3">
-                <div className="grid grid-cols-2 gap-3">
+        {type === "edit" && (
+          <FormSection
+            id={S.employees.id}
+            icon={S.employees.icon}
+            title={S.employees.title}
+            subtitle={S.employees.subTitle}
+            color="text-listing"
+            surfaceColor="bg-listing-surface"
+          >
+            <RepeaterField
+              label="Zaměstnanci"
+              fields={employeesFieldArray.fields}
+              onAppend={() =>
+                employeesFieldArray.append({
+                  name: "",
+                  role: "",
+                  description: "",
+                  image: {},
+                })
+              }
+              onRemove={employeesFieldArray.remove}
+              addButtonLabel="Přidat zaměstnance"
+              renderItem={(_item, index) => (
+                <div className="flex flex-col gap-3">
+                  <div className="grid grid-cols-2 gap-3">
+                    <Controller
+                      control={control}
+                      name={`employees.${index}.image`}
+                      render={({ field }) => (
+                        <ImageInput
+                          label="Fotografie"
+                          value={field.value}
+                          onChange={(filename) =>
+                            field.onChange(filename ?? "")
+                          }
+                          onUpload={uploadFileToCloud}
+                        />
+                      )}
+                    />
+                    <div className="flex flex-col gap-3">
+                      <Input
+                        label="Jméno"
+                        inputProps={{
+                          ...register(`employees.${index}.name`),
+                          placeholder: "Jan Novák",
+                        }}
+                        error={errors.employees?.[index]?.name?.message}
+                      />
+                      <Input
+                        label="Role"
+                        inputProps={{
+                          ...register(`employees.${index}.role`),
+                          placeholder: "DJ",
+                        }}
+                        error={errors.employees?.[index]?.role?.message}
+                      />
+                    </div>
+                  </div>
+                  <Textarea
+                    label="Popis"
+                    inputProps={{
+                      ...register(`employees.${index}.description`),
+                      rows: 2,
+                      placeholder: "Krátký popis zaměstnance...",
+                    }}
+                    error={errors.employees?.[index]?.description?.message}
+                  />
+                </div>
+              )}
+            />
+          </FormSection>
+        )}
+
+        {/* ── 13. FAQ ───────────────────────────────────────────────────────────── */}
+        {type === "edit" && (
+          <FormSection
+            id={S.faq.id}
+            icon={S.faq.icon}
+            title={S.faq.title}
+            subtitle={S.faq.subTitle}
+            color="text-listing"
+            surfaceColor="bg-listing-surface"
+          >
+            <RepeaterField
+              label="Často kladené otázky"
+              fields={faqFieldArray.fields}
+              onAppend={() =>
+                faqFieldArray.append({
+                  active: true,
+                  question: "",
+                  answer: "",
+                  groupedBy: "general",
+                })
+              }
+              onRemove={faqFieldArray.remove}
+              addButtonLabel="Přidat otázku"
+              renderItem={(_item, index) => (
+                <div className="flex flex-col gap-3">
+                  <Input
+                    label="Otázka"
+                    inputProps={{
+                      ...register(`faq.${index}.question`),
+                      placeholder: "Jaká je minimální objednávka?",
+                    }}
+                    error={errors.faq?.[index]?.question?.message}
+                  />
+                  <Textarea
+                    label="Odpověď"
+                    inputProps={{
+                      ...register(`faq.${index}.answer`),
+                      rows: 3,
+                      placeholder: "Minimální objednávka je...",
+                    }}
+                    error={errors.faq?.[index]?.answer?.message}
+                  />
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <Controller
+                      control={control}
+                      name={`faq.${index}.groupedBy`}
+                      render={({ field }) => (
+                        <SelectInput
+                          label="Kategorie"
+                          items={[
+                            { value: "general", label: "Obecné" },
+                            { value: "booking", label: "Rezervace" },
+                            { value: "cancellation", label: "Storno" },
+                            { value: "payment", label: "Platba" },
+                            { value: "other", label: "Ostatní" },
+                          ]}
+                          value={field.value ?? "general"}
+                          onChange={(e) => field.onChange(e.target.value)}
+                        />
+                      )}
+                    />
+                    <Controller
+                      control={control}
+                      name={`faq.${index}.active`}
+                      render={({ field }) => (
+                        <div className="flex items-end pb-2">
+                          <Checkbox
+                            checked={field.value ?? true}
+                            onChange={field.onChange}
+                            label="Aktivní"
+                            checkColor="text-listing"
+                          />
+                        </div>
+                      )}
+                    />
+                  </div>
+                </div>
+              )}
+            />
+          </FormSection>
+        )}
+
+        {/* ── 14. Reference ─────────────────────────────────────────────────────── */}
+        {type === "edit" && (
+          <FormSection
+            id={S.references.id}
+            icon={S.references.icon}
+            title={S.references.title}
+            subtitle={S.references.subTitle}
+            color="text-listing"
+            surfaceColor="bg-listing-surface"
+            error={!!errors.references}
+          >
+            <RepeaterField
+              label="Reference"
+              fields={referencesFieldArray.fields}
+              onAppend={() =>
+                referencesFieldArray.append({
+                  image: {},
+                  eventName: "",
+                  description: "",
+                  clientName: "",
+                  eventType: undefined,
+                })
+              }
+              onRemove={referencesFieldArray.remove}
+              addButtonLabel="Přidat referenci"
+              renderItem={(_item, index) => (
+                <div className="flex flex-col gap-3">
                   <Controller
                     control={control}
-                    name={`employees.${index}.image`}
+                    name={`references.${index}.image`}
                     render={({ field }) => (
                       <ImageInput
-                        label="Fotografie"
+                        label="Obrázek"
                         value={field.value}
                         onChange={(filename) => field.onChange(filename ?? "")}
                         onUpload={uploadFileToCloud}
                       />
                     )}
                   />
-                  <div className="flex flex-col gap-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <Input
-                      label="Jméno"
+                      label="Název akce"
                       inputProps={{
-                        ...register(`employees.${index}.name`),
+                        ...register(`references.${index}.eventName`),
+                        placeholder: "Firemní večírek ABC",
+                      }}
+                      error={errors.references?.[index]?.eventName?.message}
+                    />
+                    <Input
+                      label="Jméno klienta"
+                      inputProps={{
+                        ...register(`references.${index}.clientName`),
                         placeholder: "Jan Novák",
                       }}
-                      error={errors.employees?.[index]?.name?.message}
-                    />
-                    <Input
-                      label="Role"
-                      inputProps={{
-                        ...register(`employees.${index}.role`),
-                        placeholder: "DJ",
-                      }}
-                      error={errors.employees?.[index]?.role?.message}
+                      error={errors.references?.[index]?.clientName?.message}
                     />
                   </div>
-                </div>
-                <Textarea
-                  label="Popis"
-                  inputProps={{
-                    ...register(`employees.${index}.description`),
-                    rows: 2,
-                    placeholder: "Krátký popis zaměstnance...",
-                  }}
-                  error={errors.employees?.[index]?.description?.message}
-                />
-              </div>
-            )}
-          />
-        </FormSection>
-
-        {/* ── 13. FAQ ───────────────────────────────────────────────────────────── */}
-        <FormSection
-          id={S.faq.id}
-          icon={S.faq.icon}
-          title={S.faq.title}
-          subtitle={S.faq.subTitle}
-          color="text-listing"
-          surfaceColor="bg-listing-surface"
-        >
-          <RepeaterField
-            label="Často kladené otázky"
-            fields={faqFieldArray.fields}
-            onAppend={() =>
-              faqFieldArray.append({
-                active: true,
-                question: "",
-                answer: "",
-                groupedBy: "general",
-              })
-            }
-            onRemove={faqFieldArray.remove}
-            addButtonLabel="Přidat otázku"
-            renderItem={(_item, index) => (
-              <div className="flex flex-col gap-3">
-                <Input
-                  label="Otázka"
-                  inputProps={{
-                    ...register(`faq.${index}.question`),
-                    placeholder: "Jaká je minimální objednávka?",
-                  }}
-                  error={errors.faq?.[index]?.question?.message}
-                />
-                <Textarea
-                  label="Odpověď"
-                  inputProps={{
-                    ...register(`faq.${index}.answer`),
-                    rows: 3,
-                    placeholder: "Minimální objednávka je...",
-                  }}
-                  error={errors.faq?.[index]?.answer?.message}
-                />
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <Input
+                    label="Popis"
+                    inputProps={{
+                      ...register(`references.${index}.description`),
+                      placeholder: "Krátký popis akce nebo spolupráce...",
+                    }}
+                    error={errors.references?.[index]?.description?.message}
+                  />
                   <Controller
                     control={control}
-                    name={`faq.${index}.groupedBy`}
+                    name={`references.${index}.eventType`}
                     render={({ field }) => (
-                      <SelectInput
-                        label="Kategorie"
-                        items={[
-                          { value: "general", label: "Obecné" },
-                          { value: "booking", label: "Rezervace" },
-                          { value: "cancellation", label: "Storno" },
-                          { value: "payment", label: "Platba" },
-                          { value: "other", label: "Ostatní" },
-                        ]}
-                        value={field.value ?? "general"}
-                        onChange={(e) => field.onChange(e.target.value)}
+                      <SearchInput
+                        label="Typ akce"
+                        placeholder="Vyberte typ akce..."
+                        options={filters?.eventTypes ?? []}
+                        onSelect={field.onChange}
+                        onClear={() => field.onChange(null)}
+                        ref={field.ref}
+                        name={field.name}
+                        onBlur={field.onBlur}
+                        selectedOption={
+                          filters?.eventTypes?.find(
+                            (et) => et.id === field.value?.id,
+                          ) ?? undefined
+                        }
                       />
                     )}
                   />
-                  <Controller
-                    control={control}
-                    name={`faq.${index}.active`}
-                    render={({ field }) => (
-                      <div className="flex items-end pb-2">
-                        <Checkbox
-                          checked={field.value ?? true}
-                          onChange={field.onChange}
-                          label="Aktivní"
-                          checkColor="text-listing"
-                        />
-                      </div>
-                    )}
-                  />
                 </div>
-              </div>
-            )}
-          />
-        </FormSection>
-
-        {/* ── 14. Reference ─────────────────────────────────────────────────────── */}
-        <FormSection
-          id={S.references.id}
-          icon={S.references.icon}
-          title={S.references.title}
-          subtitle={S.references.subTitle}
-          color="text-listing"
-          surfaceColor="bg-listing-surface"
-          error={!!errors.references}
-        >
-          <RepeaterField
-            label="Reference"
-            fields={referencesFieldArray.fields}
-            onAppend={() =>
-              referencesFieldArray.append({
-                image: {},
-                eventName: "",
-                description: "",
-                clientName: "",
-                eventType: undefined,
-              })
-            }
-            onRemove={referencesFieldArray.remove}
-            addButtonLabel="Přidat referenci"
-            renderItem={(_item, index) => (
-              <div className="flex flex-col gap-3">
-                <Controller
-                  control={control}
-                  name={`references.${index}.image`}
-                  render={({ field }) => (
-                    <ImageInput
-                      label="Obrázek"
-                      value={field.value}
-                      onChange={(filename) => field.onChange(filename ?? "")}
-                      onUpload={uploadFileToCloud}
-                    />
-                  )}
-                />
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <Input
-                    label="Název akce"
-                    inputProps={{
-                      ...register(`references.${index}.eventName`),
-                      placeholder: "Firemní večírek ABC",
-                    }}
-                    error={errors.references?.[index]?.eventName?.message}
-                  />
-                  <Input
-                    label="Jméno klienta"
-                    inputProps={{
-                      ...register(`references.${index}.clientName`),
-                      placeholder: "Jan Novák",
-                    }}
-                    error={errors.references?.[index]?.clientName?.message}
-                  />
-                </div>
-                <Input
-                  label="Popis"
-                  inputProps={{
-                    ...register(`references.${index}.description`),
-                    placeholder: "Krátký popis akce nebo spolupráce...",
-                  }}
-                  error={errors.references?.[index]?.description?.message}
-                />
-                <Controller
-                  control={control}
-                  name={`references.${index}.eventType`}
-                  render={({ field }) => (
-                    <SearchInput
-                      label="Typ akce"
-                      placeholder="Vyberte typ akce..."
-                      options={eventTypes?.docs ?? []}
-                      onSelect={field.onChange}
-                      onClear={() => field.onChange(null)}
-                      ref={field.ref}
-                      name={field.name}
-                      onBlur={field.onBlur}
-                      selectedOption={
-                        eventTypes?.docs?.find(
-                          (et) => et.id === field.value?.id,
-                        ) ?? undefined
-                      }
-                    />
-                  )}
-                />
-              </div>
-            )}
-          />
-        </FormSection>
+              )}
+            />
+          </FormSection>
+        )}
 
         {/* ── Submit ────────────────────────────────────────────────────────────── */}
         <div className="flex justify-end gap-3 pt-2">
@@ -1084,7 +1123,7 @@ export default function EditGastroListingForm({
             version="plain"
           />
           <Button
-            text="Uložit úpravy"
+            text={type === "create" ? "Vytvořit listing" : "Uložit úpravy"}
             version="listingFull"
             htmlType="submit"
           />
@@ -1094,7 +1133,7 @@ export default function EditGastroListingForm({
         textColor="text-listing"
         dotColor="text-listing"
         surfaceColor="bg-listing-surface"
-        groups={GASTRO_FORM_GROUPS}
+        groups={tocGroups}
         sticky={true}
         buttonVersion="listingFull"
         buttonText="Uložení"

@@ -1,0 +1,62 @@
+import { Endpoint } from 'payload'
+
+export const getFiltersAndSpecifics: Endpoint = {
+  path: '/filter-options',
+  method: 'get',
+  handler: async (req) => {
+    const [
+      cuisines,
+      amenities,
+      activities,
+      dietaryOptions,
+      dishTypes,
+      entertainmentTypes,
+      eventTypes,
+      foodServiceStyles,
+      personnel,
+      placeTypes,
+      services,
+      technologies,
+      necessities,
+      roomAmenities,
+      rules,
+      spaceTypes,
+    ] = await Promise.all([
+      req.payload.find({ collection: 'cuisines', limit: 1000, depth: 0 }),
+      req.payload.find({ collection: 'amenities', limit: 1000, depth: 0 }),
+      req.payload.find({ collection: 'activities', limit: 1000, depth: 0 }),
+      req.payload.find({ collection: 'dietary-options', limit: 1000, depth: 0 }),
+      req.payload.find({ collection: 'dish-types', limit: 1000, depth: 0 }),
+      req.payload.find({ collection: 'entertainment-types', limit: 1000, depth: 0 }),
+      req.payload.find({ collection: 'event-types', limit: 1000, depth: 0 }),
+      req.payload.find({ collection: 'food-service-styles', limit: 1000, depth: 0 }),
+      req.payload.find({ collection: 'personnel', limit: 1000, depth: 0 }),
+      req.payload.find({ collection: 'place-types', limit: 1000, depth: 0 }),
+      req.payload.find({ collection: 'services', limit: 1000, depth: 0 }),
+      req.payload.find({ collection: 'technologies', limit: 1000, depth: 0 }),
+      req.payload.find({ collection: 'necessities', limit: 1000, depth: 0 }),
+      req.payload.find({ collection: 'room-amenities', limit: 1000, depth: 0 }),
+      req.payload.find({ collection: 'rules', limit: 1000, depth: 0 }),
+      req.payload.find({ collection: 'space-types', limit: 1000, depth: 0 }),
+    ])
+
+    return Response.json({
+      cuisines: cuisines.docs,
+      amenities: amenities.docs,
+      activities: activities.docs,
+      dietaryOptions: dietaryOptions.docs,
+      dishTypes: dishTypes.docs,
+      entertainmentTypes: entertainmentTypes.docs,
+      eventTypes: eventTypes.docs,
+      foodServiceStyles: foodServiceStyles.docs,
+      personnel: personnel.docs,
+      placeTypes: placeTypes.docs,
+      services: services.docs,
+      technologies: technologies.docs,
+      necessities: necessities.docs,
+      roomAmenities: roomAmenities.docs,
+      rules: rules.docs,
+      spaceTypes: spaceTypes.docs,
+    })
+  },
+}

@@ -32,9 +32,15 @@ export const Cities: CollectionConfig = {
     },
     {
       name: 'district',
-      type: 'relationship',
-      relationTo: 'districts',
+      type: 'text',
       required: true,
+      index: true,
+    },
+    {
+      name: 'region',
+      type: 'text',
+      required: true,
+      index: true,
     },
     {
       name: 'country',
@@ -51,10 +57,17 @@ export const Cities: CollectionConfig = {
   ],
   hooks: {
     beforeValidate: [
-      async ({ data }) => {
+      async ({ data, req }) => {
         if (!data) return
         if (data.name) {
           data.slug = slugify(data.name)
+        }
+        if (data.district && !data.region) {
+          const district = await req.payload.findByID({
+            collection: 'districts',
+            id: data.district,
+          })
+          data.region = district.region
         }
       },
     ],

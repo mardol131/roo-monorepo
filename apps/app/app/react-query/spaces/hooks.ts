@@ -23,10 +23,10 @@ export function useSpacesByListing(listingId: string) {
   });
 }
 
-export function useSpace(id: string) {
+export function useSpace(id: string | undefined) {
   return useQuery({
-    queryKey: spaceKeys.byId(id),
-    queryFn: () => fetchSpace(id),
+    queryKey: spaceKeys.byId(id ?? ""),
+    queryFn: () => fetchSpace(id!),
     enabled: !!id,
   });
 }

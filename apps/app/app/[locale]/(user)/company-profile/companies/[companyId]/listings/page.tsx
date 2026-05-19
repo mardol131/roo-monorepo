@@ -79,17 +79,17 @@ export default function page() {
               items={[
                 {
                   icon: "MapPin",
-                  content: t(`listings.type.${listing.details[0].blockType}`),
+                  content: t(`listings.type.${listing.type}`),
                 },
                 {
                   icon: "Banknote",
                   content: `${listing.price.startsAt} Kč`,
                 },
-                ...(listing.details[0]?.location?.address
+                ...(listing.location?.address
                   ? [
                       {
                         icon: "MapPin",
-                        content: listing.details[0].location.address,
+                        content: listing.location.address,
                       } as const,
                     ]
                   : []),

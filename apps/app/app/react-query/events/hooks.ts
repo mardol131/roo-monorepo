@@ -23,10 +23,11 @@ export function useEvents() {
   });
 }
 
-export function useEvent(id: string) {
+export function useEvent(id: string | undefined) {
   return useQuery({
-    queryKey: eventKeys.byId(id),
-    queryFn: () => fetchEventById(id),
+    queryKey: eventKeys.byId(id ?? ""),
+    queryFn: () => fetchEventById(id!),
+    enabled: !!id,
   });
 }
 

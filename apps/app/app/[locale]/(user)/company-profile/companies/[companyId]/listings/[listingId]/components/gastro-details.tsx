@@ -1,124 +1,171 @@
+"use client";
+
 import { DashboardSection } from "@/app/[locale]/(user)/components/dashboard-section";
 import InfoSection from "@/app/[locale]/(user)/components/info-section";
-import { Listing } from "@roo/common";
-import { MapPin, Users, Utensils } from "lucide-react";
+import { useCities } from "@/app/react-query/cities/hooks";
+import { useDistricts } from "@/app/react-query/districts/hooks";
+import { useRegions } from "@/app/react-query/regions/hooks";
+import {
+  City,
+  District,
+  Listing,
+  ListingGastroDetail,
+  Region,
+} from "@roo/common";
 
-type GastroBlock = Extract<Listing["details"][number], { blockType: "gastro" }>;
+function extractIds(
+  items: (string | { id: string })[] | null | undefined,
+): string[] {
+  return (items ?? []).filter(
+    (item): item is string => typeof item === "string",
+  );
+}
 
-export function GastroDetails({ block }: { block: GastroBlock }) {
-  const locationItems = block.location
+function resolveNames<T extends { id: string; name: string }>(
+  items: (string | T)[] | null | undefined,
+  fetchedDocs: T[] | undefined,
+): string[] {
+  return (items ?? []).map((item) =>
+    typeof item === "string"
+      ? (fetchedDocs?.find((f) => f.id === item)?.name ?? item)
+      : item.name,
+  );
+}
+
+export function GastroDetails({
+  listing,
+  detail,
+}: {
+  listing: Listing;
+  detail: ListingGastroDetail;
+}) {
+  const location = listing.location;
+
+  const regionIds = extractIds(location?.regions);
+  const districtIds = extractIds(location?.districts);
+  const cityIds = extractIds(location?.cities);
+
+  const { data: regionsData } = useRegions(
+    regionIds.length ? { id: { in: regionIds } } : undefined,
+    regionIds.length || 10,
+    regionIds.length > 0,
+  );
+  const { data: districtsData } = useDistricts(
+    districtIds.length ? { id: { in: districtIds } } : undefined,
+    districtIds.length || 10,
+    districtIds.length > 0,
+  );
+  const { data: citiesData } = useCities({
+    query: cityIds.length ? { id: { in: cityIds } } : undefined,
+    limit: cityIds.length || 10,
+    enabled: cityIds.length > 0,
+  });
+
+  const regionNames = resolveNames<Region>(
+    location?.regions,
+    regionsData?.docs,
+  );
+  const districtNames = resolveNames<District>(
+    location?.districts,
+    districtsData?.docs,
+  );
+  const cityNames = resolveNames<City>(location?.cities, citiesData?.docs);
+
+  const exactCityName =
+    location?.type === "exact" && location.city
+      ? typeof location.city === "string"
+        ? (citiesData?.docs?.find((c) => c.id === location.city)?.name ??
+          location.city)
+        : location.city.name
+      : null;
+
+  const locationItems = location
     ? [
-        ...(block.location.region?.length
-          ? [
-              {
-                type: "tagList" as const,
-                label: "Kraj",
-                items: block.location.region,
-              },
-            ]
+        ...(regionNames.length
+          ? [{ type: "tagList" as const, label: "Kraj", items: regionNames }]
           : []),
-        ...(block.location.district?.length
-          ? [
-              {
-                type: "tagList" as const,
-                label: "Okres",
-                items: block.location.district,
-              },
-            ]
+        ...(districtNames.length
+          ? [{ type: "tagList" as const, label: "Okres", items: districtNames }]
           : []),
-        ...(block.location.city?.length
-          ? [
-              {
-                type: "tagList" as const,
-                label: "Město",
-                items: block.location.city,
-              },
-            ]
+        ...(cityNames.length
+          ? [{ type: "tagList" as const, label: "Město", items: cityNames }]
           : []),
-        ...(block.location.address
+        ...(exactCityName
+          ? [{ type: "text" as const, label: "Město", value: exactCityName }]
+          : []),
+        ...(location.address
           ? [
               {
                 type: "text" as const,
                 label: "Adresa",
-                value: block.location.address,
+                value: location.address,
               },
             ]
           : []),
       ]
     : [];
 
-  const capacityItems = [
-    {
-      type: "text" as const,
-      label: "Maximální kapacita",
-      value: `${block.capacity} osob`,
-    },
-    ...(block.minimumCapacity
+  const offerItems = [
+    ...(listing.properties.cuisines?.length
       ? [
           {
-            type: "text" as const,
-            label: "Minimální kapacita",
-            value: `${block.minimumCapacity} osob`,
+            type: "tagList" as const,
+            label: "Kuchyně",
+            items: listing.properties.cuisines,
           },
         ]
       : []),
-  ];
-
-  const offerItems = [
-    ...(block.cuisines?.length
-      ? [{ type: "tagList" as const, label: "Kuchyně", items: block.cuisines }]
-      : []),
-    ...(block.dishTypes?.length
+    ...(listing.properties.dishTypes?.length
       ? [
           {
             type: "tagList" as const,
             label: "Typy pokrmů",
-            items: block.dishTypes,
+            items: listing.properties.dishTypes,
           },
         ]
       : []),
-    ...(block.dietaryOptions?.length
+    ...(listing.properties.dietaryOptions?.length
       ? [
           {
             type: "tagList" as const,
             label: "Dietní možnosti",
-            items: block.dietaryOptions,
+            items: listing.properties.dietaryOptions,
           },
         ]
       : []),
-    ...(block.foodServiceStyles?.length
+    ...(listing.properties.foodServiceStyles?.length
       ? [
           {
             type: "tagList" as const,
             label: "Styl servisu",
-            items: block.foodServiceStyles,
+            items: listing.properties.foodServiceStyles,
           },
         ]
       : []),
     {
       type: "boolean" as const,
       label: "Alkoholová licence",
-      value: block.hasAlcoholLicense,
+      value: detail.hasAlcoholLicense,
     },
-    { type: "boolean" as const, label: "Dětské menu", value: block.kidsMenu },
+    { type: "boolean" as const, label: "Dětské menu", value: detail.kidsMenu },
   ];
 
   const personnelItems = [
-    ...(block.personnel?.length
+    ...(listing.properties.personnel?.length
       ? [
           {
             type: "tagList" as const,
             label: "Personál",
-            items: block.personnel,
+            items: listing.properties.personnel,
           },
         ]
       : []),
-    ...(block.necessities?.length
+    ...(listing.properties.necessities?.length
       ? [
           {
             type: "tagList" as const,
             label: "Technické požadavky",
-            items: block.necessities,
+            items: listing.properties.necessities,
           },
         ]
       : []),
@@ -136,15 +183,6 @@ export function GastroDetails({ block }: { block: GastroBlock }) {
           <InfoSection items={locationItems} />
         </DashboardSection>
       )}
-
-      <DashboardSection
-        title="Kapacita"
-        icon={"Users"}
-        iconBg="bg-listing-surface"
-        iconColor="text-listing"
-      >
-        <InfoSection items={capacityItems} />
-      </DashboardSection>
 
       <DashboardSection
         title="Nabídka"

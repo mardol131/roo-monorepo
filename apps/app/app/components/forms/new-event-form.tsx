@@ -15,14 +15,16 @@ import Button, { ButtonProps } from "@/app/components/ui/atoms/button";
 import InputLabel from "@/app/components/ui/atoms/input-label";
 import { useRouter } from "@/app/i18n/navigation";
 import { useCities } from "@/app/react-query/cities/hooks";
-import { useCreateEvent } from "@/app/react-query/events/hooks";
+import { useCreateEvent, useUpdateEvent } from "@/app/react-query/events/hooks";
 import { useEventTypes } from "@/app/react-query/filters/event-types/hooks";
 import { useSpaceTypes } from "@/app/react-query/specific/space-types/hooks";
-import { Event as RooEvent } from "@roo/common";
-import { Building2, MapPin } from "lucide-react";
+import { Event } from "@roo/common";
+import { Building2, Info, MapPin } from "lucide-react";
 import { useState } from "react";
 import { Controller, FieldErrors, Resolver, useForm } from "react-hook-form";
 import Text from "../ui/atoms/text";
+import { useFilterOptions } from "@/app/react-query/filters/aggregated-filters/hooks";
+import { AlertSection } from "../ui/molecules/alert-section";
 
 // ── TOC ────────────────────────────────────────────────────────────────────────
 
@@ -102,11 +104,53 @@ const resolver: Resolver<FormInputs> = (values) => {
 
 // ── Form ───────────────────────────────────────────────────────────────────────
 
+export type { FormInputs as EventFormInputs };
+
+function eventToFormInputs(event: Event): Partial<FormInputs> {
+  const loc = event.location;
+  const isCustom = loc?.type === "custom";
+
+  return {
+    name: event.name,
+    icon: event.icon ?? undefined,
+    eventType:
+      typeof event.eventType === "string"
+        ? { id: event.eventType, name: "" }
+        : { id: event.eventType.id, name: event.eventType.name },
+    budget: event.budget ?? undefined,
+    startDate: event.date.start,
+    endDate: event.date.end,
+    guests: {
+      adults: event.guests.adults,
+      children: event.guests.children,
+      ztp: event.guests.ztp ?? false,
+      pets: event.guests.pets ?? false,
+    },
+    locationType: loc?.type ?? "custom",
+    locationCity:
+      isCustom && loc?.city
+        ? typeof loc.city === "string"
+          ? { id: loc.city, name: "" }
+          : { id: loc.city.id, name: loc.city.name }
+        : undefined,
+    locationAddress: isCustom ? (loc?.address ?? undefined) : undefined,
+    locationSpaceType:
+      isCustom && loc?.spaceType
+        ? typeof loc.spaceType === "string"
+          ? { id: loc.spaceType, name: "" }
+          : { id: loc.spaceType.id, name: loc.spaceType.name }
+        : undefined,
+    locationDescription: isCustom ? (loc?.description ?? undefined) : undefined,
+  };
+}
+
 interface NewEventFormProps {
-  onSuccess?: (event: RooEvent) => void;
+  onSuccess?: (event: Event) => void;
   onCancel?: () => void;
   hideToc?: boolean;
-  compact?: boolean;
+  type?: "create-full" | "create-compact" | "edit";
+  edditedEvent?: Event;
+  hasConfirmedInquiries?: boolean;
   bgSurfaceColor?: string;
   bgColor?: string;
   textColor?: string;
@@ -118,7 +162,9 @@ export default function NewEventForm({
   onSuccess,
   onCancel,
   hideToc = false,
-  compact = false,
+  type = "create-full",
+  edditedEvent,
+  hasConfirmedInquiries = false,
   bgSurfaceColor = "bg-event-surface",
   bgColor = "bg-event",
   textColor = "text-event",
@@ -139,34 +185,44 @@ export default function NewEventForm({
       icon: "Calendar",
       locationType: "custom",
       guests: { adults: 0, children: 0, ztp: false, pets: false },
+      ...(edditedEvent ? eventToFormInputs(edditedEvent) : {}),
     },
   });
+
+  const { data: filters } = useFilterOptions();
 
   const [eventTypeQuery, setEventTypeQuery] = useState("");
   const [cityQuery, setCityQuery] = useState("");
 
   const { data: eventTypes } = useEventTypes({
-    limit: 15,
-    query: {
-      name: { contains: eventTypeQuery },
-    },
+    limit: 20,
+    query: eventTypeQuery ? { name: { contains: eventTypeQuery } } : undefined,
   });
   const { data: cities } = useCities({
     limit: 15,
     query: cityQuery ? { name: { contains: cityQuery } } : undefined,
   });
 
-  const { data: spaceTypes } = useSpaceTypes({
-    limit: 15,
-    query: cityQuery ? { name: { contains: cityQuery } } : undefined,
-  });
-
   const { mutate: createEvent } = useCreateEvent();
+  const { mutate: updateEvent } = useUpdateEvent({});
 
   const startDate = watch("startDate");
   const locationType = watch("locationType");
 
-  const onSubmit = (data: FormInputs) => {
+  const locked = type === "edit" && hasConfirmedInquiries;
+
+  const buildLocation = (data: FormInputs) =>
+    data.locationType === "custom"
+      ? {
+          type: "custom" as const,
+          city: data.locationCity!.id,
+          address: data.locationAddress,
+          spaceType: data.locationSpaceType?.id,
+          description: data.locationDescription,
+        }
+      : { type: "venue" as const };
+
+  const onCreateSubmit = (data: FormInputs) => {
     createEvent(
       {
         name: data.name,
@@ -176,18 +232,7 @@ export default function NewEventForm({
         date: { start: data.startDate, end: data.endDate },
         guests: data.guests,
         sharing: {},
-        location:
-          data.locationType === "custom"
-            ? [
-                {
-                  blockType: "custom",
-                  city: data.locationCity!.id,
-                  address: data.locationAddress,
-                  spaceType: data.locationSpaceType?.id ?? "other",
-                  description: data.locationDescription,
-                },
-              ]
-            : [{ blockType: "venue" }],
+        location: buildLocation(data),
         status: "active",
       },
       {
@@ -195,14 +240,46 @@ export default function NewEventForm({
           if (onSuccess) {
             onSuccess(doc);
           } else {
+            router.push({ pathname: "/user-profile/events" });
+          }
+        },
+      },
+    );
+  };
+
+  const onUpdateSubmit = (data: FormInputs) => {
+    if (!edditedEvent) return;
+    updateEvent(
+      {
+        id: edditedEvent.id,
+        data: {
+          name: data.name,
+          icon: data.icon,
+          eventType: data.eventType.id,
+          budget: data.budget,
+          date: { start: data.startDate, end: data.endDate },
+          guests: data.guests,
+          location: buildLocation(data),
+        },
+      },
+      {
+        onSuccess: (doc) => {
+          if (onSuccess) {
+            onSuccess(doc);
+          } else {
             router.push({
-              pathname: "/user-profile/events",
+              pathname: "/user-profile/events/[eventId]",
+              params: {
+                eventId: edditedEvent.id,
+              },
             });
           }
         },
       },
     );
   };
+
+  const onSubmit = type === "edit" ? onUpdateSubmit : onCreateSubmit;
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="flex gap-6">
@@ -221,7 +298,9 @@ export default function NewEventForm({
           color={textColor}
           surfaceColor={bgSurfaceColor}
         >
-          <div className={`flex gap-4 ${!compact ? "flex-col" : ""}`}>
+          <div
+            className={`flex gap-4 ${type !== "create-compact" ? "flex-col" : ""}`}
+          >
             <div className="w-full">
               <Input
                 label="Název události"
@@ -233,7 +312,7 @@ export default function NewEventForm({
                 error={errors.name?.message}
               />
             </div>
-            {!compact && (
+            {type !== "create-compact" && (
               <Controller
                 name="icon"
                 control={control}
@@ -291,7 +370,7 @@ export default function NewEventForm({
               />
             </div>
           </div>
-          {compact && (
+          {type === "create-compact" && (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <Controller
                 name="startDate"
@@ -325,77 +404,8 @@ export default function NewEventForm({
             </div>
           )}
         </FormSection>
-        {/* ── 2. Termín konání ───────────────────────────────────────────────── */}
-        {!compact && (
-          <FormSection
-            error={!!errors.startDate?.message || !!errors.endDate?.message}
-            id={S.dates.id}
-            icon={S.dates.icon}
-            title={S.dates.title}
-            subtitle={S.dates.subTitle}
-            color={textColor}
-            surfaceColor={bgSurfaceColor}
-          >
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <Controller
-                name="startDate"
-                control={control}
-                render={({ field }) => (
-                  <DateTimeInput
-                    containerRef={field.ref}
-                    isRequired
-                    label="Začátek události"
-                    value={field.value}
-                    onChange={field.onChange}
-                    error={errors.startDate?.message}
-                  />
-                )}
-              />
-              <Controller
-                name="endDate"
-                control={control}
-                render={({ field }) => (
-                  <DateTimeInput
-                    isRequired
-                    containerRef={field.ref}
-                    label="Konec události"
-                    value={field.value}
-                    onChange={field.onChange}
-                    min={startDate}
-                    error={errors.endDate?.message}
-                  />
-                )}
-              />
-            </div>
-          </FormSection>
-        )}
-
-        {/* ── 3. Hosté ───────────────────────────────────────────────────────── */}
-        <FormSection
-          error={!!errors.guests}
-          id={S.guests.id}
-          icon={S.guests.icon}
-          title={S.guests.title}
-          subtitle={S.guests.subTitle}
-          color={textColor}
-          surfaceColor={bgSurfaceColor}
-        >
-          <Controller
-            name="guests"
-            control={control}
-            render={({ field }) => (
-              <GuestsInput
-                isRequired
-                label="Počet hostů"
-                value={field.value}
-                onChange={field.onChange}
-                error={errors.guests?.adults?.message}
-              />
-            )}
-          />
-        </FormSection>
         {/* ── 4. Rozpočet ────────────────────────────────────────────────────── */}
-        {!compact && (
+        {type !== "create-compact" && (
           <FormSection
             error={!!errors.budget?.message}
             id={S.budget.id}
@@ -416,146 +426,235 @@ export default function NewEventForm({
             />
           </FormSection>
         )}
+        {locked && (
+          <AlertSection
+            icon={Info}
+            iconBg="bg-amber-100"
+            iconColor="text-amber-600"
+            borderColor="border-zinc-200"
+            bgColor="bg-amber-50"
+            title="Část polí nelze upravit"
+            text="Termín, počet hostů a místo konání jsou zamčeny, protože událost má potvrzené poptávky. Změna by mohla narušit plánování dodavatelů."
+          />
+        )}
+        {/* ── 2. Termín konání ───────────────────────────────────────────────── */}
+        {type !== "create-compact" && (
+          <div
+            className={locked ? "pointer-events-none opacity-50" : undefined}
+          >
+            <FormSection
+              error={!!errors.startDate?.message || !!errors.endDate?.message}
+              id={S.dates.id}
+              icon={S.dates.icon}
+              title={S.dates.title}
+              subtitle={S.dates.subTitle}
+              color={textColor}
+              surfaceColor={bgSurfaceColor}
+            >
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <Controller
+                  name="startDate"
+                  control={control}
+                  render={({ field }) => (
+                    <DateTimeInput
+                      containerRef={field.ref}
+                      isRequired
+                      label="Začátek události"
+                      value={field.value}
+                      onChange={field.onChange}
+                      error={errors.startDate?.message}
+                    />
+                  )}
+                />
+                <Controller
+                  name="endDate"
+                  control={control}
+                  render={({ field }) => (
+                    <DateTimeInput
+                      isRequired
+                      containerRef={field.ref}
+                      label="Konec události"
+                      value={field.value}
+                      onChange={field.onChange}
+                      min={startDate}
+                      error={errors.endDate?.message}
+                    />
+                  )}
+                />
+              </div>
+            </FormSection>
+          </div>
+        )}
+
+        {/* ── 3. Hosté ───────────────────────────────────────────────────────── */}
+        <div className={locked ? "pointer-events-none opacity-50" : undefined}>
+          <FormSection
+            error={!!errors.guests}
+            id={S.guests.id}
+            icon={S.guests.icon}
+            title={S.guests.title}
+            subtitle={S.guests.subTitle}
+            color={textColor}
+            surfaceColor={bgSurfaceColor}
+          >
+            <Controller
+              name="guests"
+              control={control}
+              render={({ field }) => (
+                <GuestsInput
+                  isRequired
+                  label="Počet hostů"
+                  value={field.value}
+                  onChange={field.onChange}
+                  error={errors.guests?.adults?.message}
+                />
+              )}
+            />
+          </FormSection>
+        </div>
 
         {/* ── 5. Místo konání ────────────────────────────────────────────────── */}
-        <FormSection
-          error={
-            !!(
-              errors.locationCity?.root?.message ?? errors.locationCity?.message
-            ) ||
-            !!errors.locationSpaceType?.message ||
-            !!errors.locationType?.message
-          }
-          id={S.location.id}
-          icon={S.location.icon}
-          title={S.location.title}
-          subtitle={S.location.subTitle}
-          color={textColor}
-          surfaceColor={bgSurfaceColor}
-        >
-          <Controller
-            control={control}
-            name="locationType"
-            render={({ field }) => (
-              <div className="flex flex-col gap-2">
-                <InputLabel label="Typ místa" isRequired />
-                <div className="flex flex-col sm:flex-row gap-3">
-                  {(
-                    [
-                      {
-                        value: "custom",
-                        label: "Vlastní místo",
-                        description:
-                          "Zadejte adresu nebo popis vlastního místa",
-                        icon: MapPin,
-                      },
-                      {
-                        value: "venue",
-                        label: "Místo z katalogu",
-                        description:
-                          "Najdete si místo přímo v katalogu služeb. Jakmile zadáte poptávku a firma poptávku přijme, můžete ji nastavit jako místo konání události.",
-                        icon: Building2,
-                      },
-                    ] as const
-                  ).map((option) => (
-                    <button
-                      key={option.value}
-                      type="button"
-                      onClick={() => field.onChange(option.value)}
-                      className={`flex-1 px-4 py-3 rounded-xl border-2 text-left transition-colors ${
-                        field.value === option.value
-                          ? `${borderColor} ${bgSurfaceColor}`
-                          : "border-zinc-200 bg-white hover:border-zinc-300"
-                      }`}
-                    >
-                      <div className="flex items-center gap-2 mb-1">
-                        <option.icon
-                          className={`w-4 h-4 ${textColor} shrink-0`}
-                        />
-                        <Text variant="label-lg" color="textDark">
-                          {option.label}
+        <div className={locked ? "pointer-events-none opacity-50" : undefined}>
+          <FormSection
+            error={
+              !!(
+                errors.locationCity?.root?.message ??
+                errors.locationCity?.message
+              ) ||
+              !!errors.locationSpaceType?.message ||
+              !!errors.locationType?.message
+            }
+            id={S.location.id}
+            icon={S.location.icon}
+            title={S.location.title}
+            subtitle={S.location.subTitle}
+            color={textColor}
+            surfaceColor={bgSurfaceColor}
+          >
+            <Controller
+              control={control}
+              name="locationType"
+              render={({ field }) => (
+                <div className="flex flex-col gap-2">
+                  <InputLabel label="Typ místa" isRequired />
+                  <div className="flex flex-col sm:flex-row gap-3">
+                    {(
+                      [
+                        {
+                          value: "custom",
+                          label: "Vlastní místo",
+                          description:
+                            "Zadejte adresu nebo popis vlastního místa",
+                          icon: MapPin,
+                        },
+                        {
+                          value: "venue",
+                          label: "Místo z katalogu",
+                          description:
+                            "Najdete si místo přímo v katalogu služeb. Jakmile zadáte poptávku a firma poptávku přijme, můžete ji nastavit jako místo konání události.",
+                          icon: Building2,
+                        },
+                      ] as const
+                    ).map((option) => (
+                      <button
+                        key={option.value}
+                        type="button"
+                        onClick={() => field.onChange(option.value)}
+                        className={`flex-1 px-4 py-3 rounded-xl border-2 text-left transition-colors ${
+                          field.value === option.value
+                            ? `${borderColor} ${bgSurfaceColor}`
+                            : "border-zinc-200 bg-white hover:border-zinc-300"
+                        }`}
+                      >
+                        <div className="flex items-center gap-2 mb-1">
+                          <option.icon
+                            className={`w-4 h-4 ${textColor} shrink-0`}
+                          />
+                          <Text variant="label-lg" color="textDark">
+                            {option.label}
+                          </Text>
+                        </div>
+                        <Text variant="label" color="textLight">
+                          {option.description}
                         </Text>
-                      </div>
-                      <Text variant="label" color="textLight">
-                        {option.description}
-                      </Text>
-                    </button>
-                  ))}
+                      </button>
+                    ))}
+                  </div>
                 </div>
-              </div>
+              )}
+            />
+
+            {locationType === "custom" && (
+              <>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <Controller
+                    name="locationCity"
+                    control={control}
+                    render={({ field }) => (
+                      <SearchInput
+                        label="Město"
+                        isRequired
+                        placeholder="Vyberte město"
+                        options={cities?.docs ?? []}
+                        selectedOption={field.value ?? undefined}
+                        onSelect={field.onChange}
+                        onClear={() => field.onChange(null)}
+                        error={
+                          errors.locationCity?.root?.message ??
+                          errors.locationCity?.message
+                        }
+                        onSearchQueryChange={setCityQuery}
+                        type="dropdown"
+                        ref={field.ref}
+                        name={field.name}
+                        onBlur={field.onBlur}
+                      />
+                    )}
+                  />
+                  <Input
+                    label="Adresa"
+                    inputProps={{
+                      ...register("locationAddress"),
+                      placeholder: "Ulice a číslo popisné",
+                    }}
+                    error={errors.locationAddress?.message}
+                  />
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <Controller
+                    name="locationSpaceType"
+                    control={control}
+                    render={({ field }) => (
+                      <SearchInput
+                        label="Typ prostoru"
+                        isRequired
+                        placeholder="Vyberte typ prostoru"
+                        options={filters?.spaceTypes ?? []}
+                        selectedOption={field.value ?? undefined}
+                        error={errors.locationSpaceType?.message}
+                        type="dropdown"
+                        onSelect={field.onChange}
+                        onClear={() => field.onChange(null)}
+                        ref={field.ref}
+                        name={field.name}
+                        onBlur={field.onBlur}
+                      />
+                    )}
+                  />
+
+                  <Input
+                    label="Popis místa"
+                    inputProps={{
+                      ...register("locationDescription"),
+                      placeholder: "Zahrada u rodinného domu…",
+                    }}
+                    error={errors.locationDescription?.message}
+                  />
+                </div>
+              </>
             )}
-          />
-
-          {locationType === "custom" && (
-            <>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <Controller
-                  name="locationCity"
-                  control={control}
-                  render={({ field }) => (
-                    <SearchInput
-                      label="Město"
-                      isRequired
-                      placeholder="Vyberte město"
-                      options={cities?.docs ?? []}
-                      selectedOption={field.value ?? undefined}
-                      onSelect={field.onChange}
-                      onClear={() => field.onChange(null)}
-                      error={
-                        errors.locationCity?.root?.message ??
-                        errors.locationCity?.message
-                      }
-                      onSearchQueryChange={setCityQuery}
-                      type="dropdown"
-                      ref={field.ref}
-                      name={field.name}
-                      onBlur={field.onBlur}
-                    />
-                  )}
-                />
-                <Input
-                  label="Adresa"
-                  inputProps={{
-                    ...register("locationAddress"),
-                    placeholder: "Ulice a číslo popisné",
-                  }}
-                  error={errors.locationAddress?.message}
-                />
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <Controller
-                  name="locationSpaceType"
-                  control={control}
-                  render={({ field }) => (
-                    <SearchInput
-                      label="Typ prostoru"
-                      isRequired
-                      placeholder="Vyberte typ prostoru"
-                      options={spaceTypes?.docs ?? []}
-                      selectedOption={field.value ?? undefined}
-                      error={errors.locationSpaceType?.message}
-                      type="dropdown"
-                      onSelect={field.onChange}
-                      onClear={() => field.onChange(null)}
-                      ref={field.ref}
-                      name={field.name}
-                      onBlur={field.onBlur}
-                    />
-                  )}
-                />
-
-                <Input
-                  label="Popis místa"
-                  inputProps={{
-                    ...register("locationDescription"),
-                    placeholder: "Zahrada u rodinného domu…",
-                  }}
-                  error={errors.locationDescription?.message}
-                />
-              </div>
-            </>
-          )}
-        </FormSection>
+          </FormSection>
+        </div>
         {/* ── Submit ────────────────────────────────────────────────────────── */}
         <div className="flex justify-end gap-3 pt-2">
           <Button
@@ -565,7 +664,7 @@ export default function NewEventForm({
             version="plain"
           />
           <Button
-            text="Vytvořit událost"
+            text={type === "edit" ? "Uložit změny" : "Vytvořit událost"}
             version={buttonColor}
             htmlType="submit"
           />
@@ -579,7 +678,7 @@ export default function NewEventForm({
           dotColor={bgColor}
           surfaceColor={bgSurfaceColor}
           buttonVersion={buttonColor}
-          buttonText="Vytvořit událost"
+          buttonText={type === "edit" ? "Uložit změny" : "Vytvořit událost"}
           sticky
         />
       )}

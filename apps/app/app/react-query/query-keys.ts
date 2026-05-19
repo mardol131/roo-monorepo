@@ -8,6 +8,11 @@ export const listingKeys = {
   byCompany: (companyId: string) => ["listings", "company", companyId] as const,
 };
 
+export const listingDetailKeys = {
+  byId: (collection: string, id: string) =>
+    ["listing-detail", collection, id] as const,
+};
+
 export const companyKeys = {
   all: () => ["companies"] as const,
   byId: (id: string) => ["companies", id] as const,
@@ -141,4 +146,8 @@ export const spaceTypesKeys = {
 
 export const rulesKeys = {
   all: (query?: Where, limit?: number) => ["rules", query, limit] as const,
+};
+
+export const filterOptionsKeys = {
+  all: () => ["filter-options"] as const,
 };

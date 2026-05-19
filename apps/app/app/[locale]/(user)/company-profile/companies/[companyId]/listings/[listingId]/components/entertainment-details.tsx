@@ -1,12 +1,17 @@
+"use client";
+
 import { DashboardSection } from "@/app/[locale]/(user)/components/dashboard-section";
 import InfoSection from "@/app/[locale]/(user)/components/info-section";
-import { Listing } from "@roo/common";
-import { Clock, MapPin, Music, Users } from "lucide-react";
-
-type EntertainmentBlock = Extract<
-  Listing["details"][number],
-  { blockType: "entertainment" }
->;
+import { useCities } from "@/app/react-query/cities/hooks";
+import { useDistricts } from "@/app/react-query/districts/hooks";
+import { useRegions } from "@/app/react-query/regions/hooks";
+import {
+  City,
+  District,
+  Listing,
+  ListingEntertainmentDetail,
+  Region,
+} from "@roo/common";
 
 const AUDIENCE_LABELS: Record<string, string> = {
   adults: "Dospělí",
@@ -14,103 +19,125 @@ const AUDIENCE_LABELS: Record<string, string> = {
   seniors: "Senioři",
 };
 
-export function EntertainmentDetails({ block }: { block: EntertainmentBlock }) {
-  const locationItems = block.location
+function extractIds(
+  items: (string | { id: string })[] | null | undefined,
+): string[] {
+  return (items ?? []).filter(
+    (item): item is string => typeof item === "string",
+  );
+}
+
+function resolveNames<T extends { id: string; name: string }>(
+  items: (string | T)[] | null | undefined,
+  fetchedDocs: T[] | undefined,
+): string[] {
+  return (items ?? []).map((item) =>
+    typeof item === "string"
+      ? (fetchedDocs?.find((f) => f.id === item)?.name ?? item)
+      : item.name,
+  );
+}
+
+export function EntertainmentDetails({
+  listing,
+  detail,
+}: {
+  listing: Listing;
+  detail: ListingEntertainmentDetail;
+}) {
+  const location = listing.location;
+
+  const regionIds = extractIds(location?.regions);
+  const districtIds = extractIds(location?.districts);
+  const cityIds = extractIds(location?.cities);
+
+  const { data: regionsData } = useRegions(
+    regionIds.length ? { id: { in: regionIds } } : undefined,
+    regionIds.length || 10,
+    regionIds.length > 0,
+  );
+  const { data: districtsData } = useDistricts(
+    districtIds.length ? { id: { in: districtIds } } : undefined,
+    districtIds.length || 10,
+    districtIds.length > 0,
+  );
+  const { data: citiesData } = useCities({
+    query: cityIds.length ? { id: { in: cityIds } } : undefined,
+    limit: cityIds.length || 10,
+    enabled: cityIds.length > 0,
+  });
+
+  const regionNames = resolveNames<Region>(
+    location?.regions,
+    regionsData?.docs,
+  );
+  const districtNames = resolveNames<District>(
+    location?.districts,
+    districtsData?.docs,
+  );
+  const cityNames = resolveNames<City>(location?.cities, citiesData?.docs);
+
+  const locationItems = location
     ? [
-        ...(block.location.region?.length
-          ? [
-              {
-                type: "tagList" as const,
-                label: "Kraj",
-                items: block.location.region,
-              },
-            ]
+        ...(regionNames.length
+          ? [{ type: "tagList" as const, label: "Kraj", items: regionNames }]
           : []),
-        ...(block.location.district?.length
-          ? [
-              {
-                type: "tagList" as const,
-                label: "Okres",
-                items: block.location.district,
-              },
-            ]
+        ...(districtNames.length
+          ? [{ type: "tagList" as const, label: "Okres", items: districtNames }]
           : []),
-        ...(block.location.city?.length
-          ? [
-              {
-                type: "tagList" as const,
-                label: "Město",
-                items: block.location.city,
-              },
-            ]
+        ...(cityNames.length
+          ? [{ type: "tagList" as const, label: "Město", items: cityNames }]
           : []),
-        ...(block.location.address
+        ...(location.address
           ? [
               {
                 type: "text" as const,
                 label: "Adresa",
-                value: block.location.address,
+                value: location.address,
               },
             ]
           : []),
       ]
     : [];
 
-  const capacityItems = [
-    {
-      type: "text" as const,
-      label: "Maximální kapacita",
-      value: `${block.capacity} osob`,
-    },
-    ...(block.minimumCapacity
-      ? [
-          {
-            type: "text" as const,
-            label: "Minimální kapacita",
-            value: `${block.minimumCapacity} osob`,
-          },
-        ]
-      : []),
-  ];
-
   const programItems = [
-    ...(block.entertainmentTypes?.length
+    ...(listing.properties.entertainmentTypes?.length
       ? [
           {
             type: "tagList" as const,
             label: "Typy programu",
-            items: block.entertainmentTypes,
+            items: listing.properties.entertainmentTypes,
           },
         ]
       : []),
-    ...(block.audience?.length
+    ...(detail.audience?.length
       ? [
           {
             type: "tagList" as const,
             label: "Cílové publikum",
-            items: block.audience.map((a) => AUDIENCE_LABELS[a] ?? a),
+            items: detail.audience.map((a) => AUDIENCE_LABELS[a] ?? a),
           },
         ]
       : []),
   ];
 
-  const logisticsItems = block.setupAndTearDownRules
+  const logisticsItems = detail.setupAndTearDownRules
     ? [
-        ...(block.setupAndTearDownRules.setupTime != null
+        ...(detail.setupAndTearDownRules.setupTime != null
           ? [
               {
                 type: "text" as const,
                 label: "Čas přípravy",
-                value: `${block.setupAndTearDownRules.setupTime} min`,
+                value: `${detail.setupAndTearDownRules.setupTime} min`,
               },
             ]
           : []),
-        ...(block.setupAndTearDownRules.tearDownTime != null
+        ...(detail.setupAndTearDownRules.tearDownTime != null
           ? [
               {
                 type: "text" as const,
                 label: "Čas úklidu",
-                value: `${block.setupAndTearDownRules.tearDownTime} min`,
+                value: `${detail.setupAndTearDownRules.tearDownTime} min`,
               },
             ]
           : []),
@@ -118,21 +145,21 @@ export function EntertainmentDetails({ block }: { block: EntertainmentBlock }) {
     : [];
 
   const personnelItems = [
-    ...(block.personnel?.length
+    ...(listing.properties.personnel?.length
       ? [
           {
             type: "tagList" as const,
             label: "Personál",
-            items: block.personnel,
+            items: listing.properties.personnel,
           },
         ]
       : []),
-    ...(block.necessities?.length
+    ...(listing.properties.necessities?.length
       ? [
           {
             type: "tagList" as const,
             label: "Technické požadavky",
-            items: block.necessities,
+            items: listing.properties.necessities,
           },
         ]
       : []),
@@ -150,15 +177,6 @@ export function EntertainmentDetails({ block }: { block: EntertainmentBlock }) {
           <InfoSection items={locationItems} />
         </DashboardSection>
       )}
-
-      <DashboardSection
-        title="Kapacita"
-        icon={"Users"}
-        iconBg="bg-listing-surface"
-        iconColor="text-listing"
-      >
-        <InfoSection items={capacityItems} />
-      </DashboardSection>
 
       {programItems.length > 0 && (
         <DashboardSection

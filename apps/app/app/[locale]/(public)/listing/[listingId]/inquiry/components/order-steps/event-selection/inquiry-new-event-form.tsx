@@ -15,7 +15,7 @@ export default function InquiryNewEventForm() {
           setEventVariant("existing-event");
         }}
         onCancel={() => setEventVariant(null)}
-        compact
+        type="create-compact"
         bgSurfaceColor="bg-primary-surface"
         bgColor="bg-primary"
         textColor="text-primary"

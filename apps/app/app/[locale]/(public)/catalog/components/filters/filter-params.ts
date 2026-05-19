@@ -1,17 +1,14 @@
 import {
-  GastroFilterState,
-  VenueFilterState,
-  EntertainmentFilterState,
-  EMPTY_GASTRO_FILTERS,
-  EMPTY_VENUE_FILTERS,
-  EMPTY_ENTERTAINMENT_FILTERS,
+  COMMON_PARAM_KEYS,
   CommonFilterState,
+  ENTERTAINMENT_PARAM_KEYS,
+  EntertainmentFilterState,
+  GASTRO_PARAM_KEYS,
+  GastroFilterState,
   GENERAL_PARAM_KEYS,
   GeneralFilterState,
-  COMMON_PARAM_KEYS,
-  GASTRO_PARAM_KEYS,
   VENUE_PARAM_KEYS,
-  ENTERTAINMENT_PARAM_KEYS,
+  VenueFilterState,
 } from "./filter-groups";
 
 // ─── Helpers ────────────────────────────────────────────────────────────────────
@@ -48,6 +45,8 @@ export function generalFiltersFromParams(
 ): GeneralFilterState {
   return {
     city: p.get(GENERAL_PARAM_KEYS.city) ?? "",
+    district: p.get(GENERAL_PARAM_KEYS.district) ?? "",
+    region: p.get(GENERAL_PARAM_KEYS.region) ?? "",
     dateFrom: p.get(GENERAL_PARAM_KEYS.dateFrom) ?? "",
     dateTo: p.get(GENERAL_PARAM_KEYS.dateTo) ?? "",
     adults: Number(p.get(GENERAL_PARAM_KEYS.adults)) || 1,
@@ -64,6 +63,10 @@ export function generalFiltersToParams(
 ) {
   if (f.city) params.set(GENERAL_PARAM_KEYS.city, f.city);
   else params.delete(GENERAL_PARAM_KEYS.city);
+  if (f.district) params.set(GENERAL_PARAM_KEYS.district, f.district);
+  else params.delete(GENERAL_PARAM_KEYS.district);
+  if (f.region) params.set(GENERAL_PARAM_KEYS.region, f.region);
+  else params.delete(GENERAL_PARAM_KEYS.region);
   if (f.dateFrom) params.set(GENERAL_PARAM_KEYS.dateFrom, f.dateFrom);
   else params.delete(GENERAL_PARAM_KEYS.dateFrom);
   if (f.dateTo) params.set(GENERAL_PARAM_KEYS.dateTo, f.dateTo);

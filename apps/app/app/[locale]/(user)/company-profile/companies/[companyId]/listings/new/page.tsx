@@ -6,10 +6,12 @@ import { Listing, LucideIcons } from "@roo/common";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import IconCard from "./components/icon-card";
-import NewListingForm from "./forms/new-listing-form";
+import VenueListingForm from "../components/venue-listing-form";
+import GastroListingForm from "../components/gastro-listing-form";
+import EntertainmentListingForm from "../components/entertainment-listing-form";
 
 const LISTING_TYPES: {
-  type: Listing["details"][0]["blockType"];
+  type: Listing["type"];
   label: string;
   description: string;
   icon: LucideIcons;
@@ -36,9 +38,9 @@ const LISTING_TYPES: {
 
 export default function NewListingPage() {
   const router = useRouter();
-  const [selectedType, setSelectedType] = useState<
-    Listing["details"][0]["blockType"] | null
-  >(null);
+  const [selectedType, setSelectedType] = useState<Listing["type"] | null>(
+    null,
+  );
 
   if (!selectedType) {
     return (
@@ -77,7 +79,30 @@ export default function NewListingPage() {
         text="Zpět na výběr typu služby"
         size="sm"
       />
-      <NewListingForm type={selectedType} onCancel={() => router.back()} />
+      {selectedType === "venue" && (
+        <VenueListingForm
+          type="create"
+          onCancel={() => {
+            setSelectedType(null);
+          }}
+        />
+      )}
+      {selectedType === "gastro" && (
+        <GastroListingForm
+          type="create"
+          onCancel={() => {
+            setSelectedType(null);
+          }}
+        />
+      )}
+      {selectedType === "entertainment" && (
+        <EntertainmentListingForm
+          type="create"
+          onCancel={() => {
+            setSelectedType(null);
+          }}
+        />
+      )}
     </main>
   );
 }

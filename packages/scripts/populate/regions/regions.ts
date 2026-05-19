@@ -2,20 +2,39 @@ import { config } from "../config";
 
 const CUZK_URL = "https://ags.cuzk.cz/arcgis/rest/services/RUIAN/MapServer/17/query";
 
-type CuzkRegion = { kod: number; nazev: string };
+type CuzkRegion = { kod: number; nazev: string; geometry: { rings: number[][][] } };
 
 async function fetchRegionsFromCuzk(): Promise<CuzkRegion[]> {
   const params = new URLSearchParams({
     where: "platido IS NULL",
     outFields: "kod,nazev",
-    returnGeometry: "false",
+    returnGeometry: "true",
+    outSR: "4326",
     f: "json",
   });
   const res = await fetch(`${CUZK_URL}?${params}`);
   if (!res.ok) throw new Error(`ČÚZK request failed: ${res.status}`);
-  const data = await res.json() as { features?: { attributes: CuzkRegion }[] };
+  const data = await res.json() as {
+    features?: { attributes: Omit<CuzkRegion, "geometry">; geometry: CuzkRegion["geometry"] }[];
+  };
   if (!data.features?.length) throw new Error("No features returned — check layer ID");
-  return data.features.map((f) => f.attributes);
+  return data.features.map((f) => ({ ...f.attributes, geometry: f.geometry }));
+}
+
+function calcGeodata(rings: number[][][]) {
+  let minLon = Infinity, maxLon = -Infinity;
+  let minLat = Infinity, maxLat = -Infinity;
+
+  for (const ring of rings) {
+    for (const [lon, lat] of ring) {
+      if (lon < minLon) minLon = lon;
+      if (lon > maxLon) maxLon = lon;
+      if (lat < minLat) minLat = lat;
+      if (lat > maxLat) maxLat = lat;
+    }
+  }
+
+  return { bboxMinLon: minLon, bboxMinLat: minLat, bboxMaxLon: maxLon, bboxMaxLat: maxLat };
 }
 
 async function login(): Promise<string> {
@@ -28,9 +47,19 @@ async function login(): Promise<string> {
   return ((await res.json()) as { token: string }).token;
 }
 
+type RegionPayload = {
+  name: string;
+  code: string;
+  country: string;
+  bboxMinLon: number;
+  bboxMinLat: number;
+  bboxMaxLon: number;
+  bboxMaxLat: number;
+};
+
 async function upsertRegion(
   token: string,
-  region: { name: string; code: string; country: string },
+  region: RegionPayload,
 ): Promise<"created" | "updated"> {
   const headers = { "Content-Type": "application/json", Authorization: `JWT ${token}` };
 
@@ -72,6 +101,7 @@ async function main() {
         name: row.nazev,
         code: String(row.kod),
         country: "cz",
+        ...calcGeodata(row.geometry.rings),
       });
       action === "created" ? created++ : updated++;
       console.log(`  ${action === "created" ? "✓" : "↺"} ${row.nazev} [${action}]`);

@@ -27,6 +27,9 @@ export const routing = defineRouting({
     "/user-profile/events/[eventId]": {
       cs: "/ucet/moje-udalosti/[eventId]",
     },
+    "/user-profile/events/[eventId]/edit": {
+      cs: "/ucet/moje-udalosti/[eventId]/upravit-udalost",
+    },
     "/user-profile/events/[eventId]/[inquiryId]": {
       cs: "/ucet/moje-udalosti/[eventId]/[inquiryId]",
     },

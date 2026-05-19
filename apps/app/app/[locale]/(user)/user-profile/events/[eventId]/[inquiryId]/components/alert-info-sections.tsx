@@ -24,7 +24,7 @@ export default function AlertInfoSections({
             iconBg="bg-zinc-100"
             iconColor="text-zinc-500"
             borderColor="border-zinc-200"
-            title="Čekáme na vyjádření firmy"
+            title="Čeká se na vyjádření firmy"
             text="Poptávka byla odeslána. Nyní čekáme, až ji firma posoudí a potvrdí. Poté budete vyzváni k finálnímu odsouhlasení. V tuto chvíli je stále možné měnit podmínky poptávky, případně ji zrušit."
             bgColor="bg-white"
           />
