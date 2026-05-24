@@ -42,7 +42,7 @@ export default function page() {
   const { data: event } = useEvent(
     getIdFromRelationshipField(inquiry?.event || ""),
   );
-  const t = useTranslations();
+  const t = useTranslations("global");
   const { mutate: patchInquiry } = useUpdateInquiry({
     listingId: getIdFromRelationshipField(inquiry?.listing || ""),
   });

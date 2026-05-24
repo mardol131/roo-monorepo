@@ -64,7 +64,7 @@ export default function RegisterForm({
 }: Props) {
   const [submitted, setSubmitted] = useState(false);
   const [serverError, setServerError] = useState<string | undefined>();
-  const t = useTranslations();
+  const t = useTranslations("global");
 
   const {
     register,

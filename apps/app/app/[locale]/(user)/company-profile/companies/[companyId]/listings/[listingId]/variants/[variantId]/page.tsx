@@ -31,7 +31,7 @@ export default function Page() {
   const { data: variant, isPending } = useVariant(variantId);
   const { mutate: updateVariant, isPending: isUpdating } = useUpdateVariant();
   const router = useRouter();
-  const t = useTranslations("variants");
+  const t = useTranslations("global.variants");
 
   if (isPending) return <Loader text="Načítám variantu..." />;
   if (!variant) return router.back();

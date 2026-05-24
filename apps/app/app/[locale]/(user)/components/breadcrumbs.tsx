@@ -23,7 +23,7 @@ type Props = {
 export default function Breadcrumbs({ items }: Props) {
   const pathname = usePathname();
   const i18nPathname = useI18nPathname();
-  const t = useTranslations();
+  const t = useTranslations("global");
 
   const { listingId, companyId, eventId, inquiryId, variantId, spaceId } =
     useParams();

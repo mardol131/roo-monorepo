@@ -1,4 +1,4 @@
-import LandingSectionWrapper from "@/app/components/ui/sections/landing-section-wrapper";
+import { HomepageSectionWrapper } from "@/app/components/ui/sections/landing-section-wrapper";
 import HeroSection from "./components/hero-section";
 import ListingTypeBanner from "./components/listing-type-banner";
 import Banner from "@/app/components/ui/molecules/banner";
@@ -147,7 +147,7 @@ const mockEntertainment: CardItem[] = [
 ];
 
 export async function generateMetadata() {
-  const t = await getTranslations("pages.public.homepage");
+  const t = await getTranslations("pages.homepage.metadata");
   return {
     title: t("title"), // výsledek: "Název stránky | AppName"
   };
@@ -166,7 +166,7 @@ export default function page({}: Props) {
       >
         <HeroSection />
       </div>
-      <LandingSectionWrapper>
+      <HomepageSectionWrapper>
         <div className="grid grid-cols-3 max-md:flex flex-col gap-6">
           <ListingTypeBanner
             imageUrl="https://images.unsplash.com/photo-1519167758481-83f550bb49b3"
@@ -187,14 +187,14 @@ export default function page({}: Props) {
             link={{ pathname: "/catalog/entertainment" }}
           />
         </div>
-      </LandingSectionWrapper>
-      <LandingSectionWrapper>
+      </HomepageSectionWrapper>
+      <HomepageSectionWrapper>
         <StatsSection />
-      </LandingSectionWrapper>
-      <LandingSectionWrapper>
+      </HomepageSectionWrapper>
+      <HomepageSectionWrapper>
         <HowItWorksSection />
-      </LandingSectionWrapper>
-      <LandingSectionWrapper>
+      </HomepageSectionWrapper>
+      <HomepageSectionWrapper>
         <div className="flex flex-col gap-14">
           <CardsSection
             title="Populární místa"
@@ -216,11 +216,11 @@ export default function page({}: Props) {
             subtitle="Procházej akce podle svých zájmů"
           />
         </div>
-      </LandingSectionWrapper>{" "}
-      <LandingSectionWrapper>
+      </HomepageSectionWrapper>{" "}
+      <HomepageSectionWrapper>
         <FilterTagsSection />
-      </LandingSectionWrapper>
-      <LandingSectionWrapper>
+      </HomepageSectionWrapper>
+      <HomepageSectionWrapper>
         <Banner
           image="https://images.unsplash.com/photo-1492684223066-81342ee5ff30"
           title="Speciální nabídka"
@@ -228,7 +228,7 @@ export default function page({}: Props) {
           buttonText="Zjistit více"
           link="/catalog"
         />
-      </LandingSectionWrapper>
+      </HomepageSectionWrapper>
     </div>
   );
 }

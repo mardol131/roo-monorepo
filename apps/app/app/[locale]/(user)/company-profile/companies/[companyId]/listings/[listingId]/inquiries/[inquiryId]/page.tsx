@@ -7,8 +7,8 @@ import DashboardHeader from "@/app/[locale]/(user)/components/dashboard-header";
 import InquiryTimeline from "@/app/[locale]/(user)/components/inquiry-timeline";
 import Loader from "@/app/[locale]/(user)/components/loader";
 import VariantSection from "@/app/[locale]/(user)/components/variant-section";
-import { INQUIRY_STATUS } from "@/app/data/inquiry";
 import { confirmActionModalEvents } from "@/app/components/ui/molecules/modals/confirm-action-modal";
+import { INQUIRY_STATUS } from "@/app/data/inquiry";
 import {
   useInquiriesByEvent,
   useInquiry,
@@ -18,23 +18,18 @@ import {
   aggregateInquiryStatus,
   getIdFromRelationshipField,
 } from "@roo/common";
-import { format } from "date-fns";
-import { cs } from "date-fns/locale";
-import { Check, Coins, HandshakeIcon, Package, X } from "lucide-react";
+import { Check, Package, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useParams } from "next/navigation";
 
-import EventSharingCard from "./components/event-sharing-card";
-import InquiryDetails from "../../../../../../../components/inquiry-details";
-import { AlertSection } from "@/app/components/ui/molecules/alert-section";
-import { useChatMessagesByInquiry } from "@/app/react-query/chat-messages/hooks";
-import { useEffect, useState } from "react";
-import { PriceChangeModal } from "@/app/components/ui/molecules/modals/price-change-modal";
-import { VariantVenueDetails } from "@/app/[locale]/(user)/components/variant-venue-details";
-import { VariantGastroDetails } from "@/app/[locale]/(user)/components/variant-gastro-details";
 import { VariantEntertainmentDetails } from "@/app/[locale]/(user)/components/variant-entertainment-details";
-import AlertsSectionGroup from "./components/alerts-section-group";
+import { VariantGastroDetails } from "@/app/[locale]/(user)/components/variant-gastro-details";
+import { VariantVenueDetails } from "@/app/[locale]/(user)/components/variant-venue-details";
 import { SingleInputModal } from "@/app/components/ui/molecules/modals/single-input-modal";
+import { useEffect, useState } from "react";
+import InquiryDetails from "../../../../../../../components/inquiry-details";
+import AlertsSectionGroup from "./components/alerts-section-group";
+import EventSharingCard from "./components/event-sharing-card";
 
 export default function page() {
   const { companyId, listingId, inquiryId } = useParams<{
@@ -46,7 +41,7 @@ export default function page() {
   const { data: inquiry, isPending } = useInquiry(inquiryId, {
     refetchInterval: 60_000,
   });
-  const t = useTranslations();
+  const t = useTranslations("global");
   const [priceChangeModalOpen, setPriceChangeModalOpen] = useState(false);
   const { mutate: patchInquiry } = useUpdateInquiry({ listingId });
   const { data: inquiriesByEvent } = useInquiriesByEvent(

@@ -1,0 +1,83 @@
+{
+  "hero": {
+    "badge": "Ceník",
+    "heading": "Transparentní ceny bez překvapení",
+    "subheading": "Pro firmy je Roo zdarma. Pro dodavatele jedno jednoduché předplatné — žádné provize, žádné skryté poplatky."
+  },
+  "audienceCards": {
+    "organizer": {
+      "label": "Pro organizátory",
+      "heading": "Hledám dodavatele",
+      "price": "Zdarma",
+      "description": "Roo je pro firmy a organizátory zcela bez poplatku. Cenu řešíte přímo s dodavatelem."
+    },
+    "supplier": {
+      "label": "Pro dodavatele",
+      "heading": "Nabízím služby",
+      "price": "200 Kč / měs",
+      "description": "Jedno předplatné za aktivní inzerát. Žádné provize, veškerý příjem z zakázek je váš."
+    }
+  },
+  "forOrganizers": {
+    "badge": "Pro organizátory",
+    "heading": "Hledáte dodavatele? Neplatíte nic.",
+    "subheading": "Roo je pro firmy a organizátory zcela zdarma. Cenu řešíte přímo s dodavatelem — Roo do platby nevstupuje.",
+    "feature1": {
+      "title": "Registrace zdarma",
+      "description": "Vytvoření účtu, procházení dodavatelů i odesílání poptávek je zcela bez poplatku."
+    },
+    "feature2": {
+      "title": "Platíte přímo dodavateli",
+      "description": "Cenu za službu sjednáte přímo s dodavatelem. Roo nevybírá žádnou provizi ani zprostředkovatelský poplatek."
+    },
+    "feature3": {
+      "title": "Žádné skryté podmínky",
+      "description": "Neplatíte za počet poptávek, za komunikaci ani za uzavřené zakázky. Roo vydělává na předplatném dodavatelů, ne na vás."
+    }
+  },
+  "forSuppliers": {
+    "badge": "Pro dodavatele",
+    "heading": "Jedno předplatné, neomezené možnosti",
+    "subheading": "Žádné provize z každé zakázky. Platíte pevnou částku za měsíc a veškeré příjmy jsou vaše.",
+    "planName": "Aktivní inzerát",
+    "payDescription": "Platíte pevnou měsíční částku — a to je vše. Bez provizí, bez poplatků za poptávky, bez skrytých podmínek. Kolik zakázek získáte, tolik vyděláte.",
+    "payNote": "Fakturujeme měsíčně nebo ročně. Předplatné lze kdykoliv zrušit.",
+    "feature1": "Aktivní inzerát viditelný firmám v celé ČR",
+    "feature2": "Neomezený počet přijatých poptávek",
+    "feature3": "Firemní profil s fotogalerií a referencemi",
+    "feature4": "Přímá komunikace s organizátory",
+    "feature5": "Hodnocení a recenze zakázek",
+    "feature6": "Žádné provize z uzavřených zakázek",
+    "cta": "Vytvořit inzerát"
+  },
+  "faq": {
+    "badge": "Časté dotazy",
+    "heading": "Otázky k ceníku",
+    "q1": {
+      "question": "Opravdu je Roo pro firmy zdarma?",
+      "answer": "Ano, zcela. Registrace, vyhledávání dodavatelů i odesílání poptávek je zdarma. Roo nevybírá žádnou provizi z uzavřených zakázek — cenu za službu platíte přímo dodavateli."
+    },
+    "q2": {
+      "question": "Proč platí za Roo dodavatelé a ne organizátoři?",
+      "answer": "Protože dodavatelé z platformy přímo profitují — získávají zakázky, které by jinak nenašli. Organizátoři jsou naši zákazníci, které chceme přilákat, ne odradit poplatkem."
+    },
+    "q3": {
+      "question": "Musím jako dodavatel platit provizi z každé zakázky?",
+      "answer": "Ne. Platíte pouze měsíční předplatné za aktivní inzerát. Veškerý příjem z zakázek je váš — bez provize, bez poplatků za poptávky, bez dalších podmínek."
+    },
+    "q4": {
+      "question": "Mohu předplatné kdykoliv zrušit?",
+      "answer": "Ano. Předplatné můžete zrušit kdykoliv, bez výpovědní doby. Po zrušení zůstane inzerát aktivní do konce zaplaceného období."
+    },
+    "q5": {
+      "question": "Je aktuální cena konečná?",
+      "answer": "Aktuální cena je zvýhodněná cena pro první dodavatele, kteří na Roo vstupují. Cena může být v budoucnu upravena — o každé změně vás předem informujeme."
+    }
+  },
+  "cta": {
+    "heading": "Připraveni začít?",
+    "subheading": "Dodavatelé: vytvořte inzerát a začněte přijímat poptávky. Organizátoři: hledejte zdarma.",
+    "primaryCta": "Vytvořit inzerát",
+    "secondaryCta": "Hledat dodavatele"
+  }
+}

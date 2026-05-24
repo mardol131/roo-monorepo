@@ -1,0 +1,111 @@
+{
+  "hero": {
+    "badge": "Pro organizátory akcí",
+    "heading": "Naplánujte firemní akci bez zbytečné námahy",
+    "subheading": "Roo je pro vás zcela zdarma. Najděte dodavatele, domluvte detaily a potvrďte zakázku — vše z jednoho místa, bez provize a bez skrytých poplatků."
+  },
+  "scrollSteps": {
+    "badge": "Jak to funguje",
+    "heading": "Od nápadu k hotové akci",
+    "subheading": "Čtyři kroky, které vás dovedou od první myšlenky k potvrzené rezervaci.",
+    "step1": {
+      "title": "Zaregistrujte se a vytvořte akci",
+      "description": "Registrace je zdarma a nezabere víc než minutu. Vytvořte novou akci — zadejte název, datum, přibližný počet hostů a typ události. Akce slouží jako přehledný organizér, ke kterému přiřadíte všechny poptávky.",
+      "image": "https://images.unsplash.com/photo-1540317580384-e5d43616b9aa?auto=format&fit=crop&w=900&q=80"
+    },
+    "step2": {
+      "title": "Procházejte katalog a najděte dodavatele",
+      "description": "V katalogu Roo najdete cateringy, poskytovatele zábavy i prostory k pronájmu. Filtrujte podle lokality, kapacity nebo termínu. U každého dodavatele vidíte fotografie, popis nabídky a dostupnost — než cokoli odešlete.",
+      "image": "https://images.unsplash.com/photo-1528605248644-14dd04022da1?auto=format&fit=crop&w=900&q=80"
+    },
+    "step3": {
+      "title": "Odešlete poptávku a komunikujte přímo",
+      "description": "Zaujal vás dodavatel? Odešlete poptávku přímo z jeho profilu — uveďte termín, počet hostů a případné požadavky. Komunikace probíhá v aplikaci, celá konverzace zůstane uložená. Můžete oslovit více dodavatelů najednou a porovnat jejich nabídky.",
+      "image": "https://images.unsplash.com/photo-1553775927-a071d5a06c73?auto=format&fit=crop&w=900&q=80"
+    },
+    "step4": {
+      "title": "Potvrďte výběr a připravte akci",
+      "description": "Vybrali jste dodavatele? Potvrďte rezervaci v aplikaci. Platbu řešíte přímo s dodavatelem — Roo si nebere žádnou provizi a nevstupuje do platebního procesu. Zbývá jen připravit skvělou akci.",
+      "image": "https://images.unsplash.com/photo-1511795409834-ef04bbd61622?auto=format&fit=crop&w=900&q=80"
+    }
+  },
+  "benefits": {
+    "heading": "Proč organizátoři volí Roo",
+    "subheading": "Méně e-mailů, méně tabulek, méně stresu. Vše pro vaši akci na jednom místě — a celé zdarma.",
+    "benefit1": {
+      "title": "Zdarma, bez provize, bez skrytých poplatků",
+      "description": "Roo je pro organizátory zcela zdarma. Neúčtujeme žádnou provizi z rezervace ani žádné skryté poplatky. Platba probíhá výhradně mezi vámi a dodavatelem — přesně tak, jak se domluvíte.",
+      "image": "https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?auto=format&fit=crop&w=800&q=80"
+    },
+    "benefit2": {
+      "title": "Všechny poptávky a dodavatelé na jednom místě",
+      "description": "Plánujete akci s cateringem, kapelou i prostorem? Všechny poptávky ke každé akci najdete pohromadě. Žádné hledání v e-mailech, žádné tabulky s kontakty — vše přehledně v aplikaci.",
+      "image": "https://images.unsplash.com/photo-1531403009284-440f080d1e12?auto=format&fit=crop&w=800&q=80"
+    },
+    "benefit3": {
+      "title": "Prověření dodavatelé zaměření na firemní akce",
+      "description": "V katalogu Roo najdete výhradně dodavatele, kteří pracují s firemními klienty. Nejde o soukromé osoby z inzertního portálu — jsou to profesionálové zvyklí na firemní požadavky a termíny.",
+      "image": "https://images.unsplash.com/photo-1556761175-b413da4baf72?auto=format&fit=crop&w=800&q=80"
+    }
+  },
+  "features": {
+    "badge": "Co v Roo najdete",
+    "heading": "Vše pro organizaci firemní akce",
+    "subheading": "Jednoduchý nástroj, který z plánování akce odstraní zbytečný chaos.",
+    "feature1": {
+      "title": "Správa akcí",
+      "description": "Vytvořte akci a přiřaďte k ní všechny poptávky. Přehled termínů, stavů a dodavatelů vždy po ruce."
+    },
+    "feature2": {
+      "title": "Katalog dodavatelů",
+      "description": "Gastro, zábava, prostory — filtrujte podle lokality, kapacity a dostupnosti. Vše na jednom místě."
+    },
+    "feature3": {
+      "title": "Přímá komunikace",
+      "description": "Pište dodavatelům přímo v aplikaci. Celá konverzace zůstane uložená jako podklad pro přípravu akce."
+    },
+    "feature4": {
+      "title": "Přehled poptávek",
+      "description": "Vidíte stav každé poptávky — čekající, potvrzená, odmítnutá. Žádná nejistota, co se s poptávkou děje."
+    },
+    "feature5": {
+      "title": "Oblíbení dodavatelé",
+      "description": "Uložte si dodavatele, kteří vás zaujali, a vraťte se k nim při příštím plánování."
+    },
+    "feature6": {
+      "title": "Zcela zdarma",
+      "description": "Pro organizátory je Roo bez poplatků. Registrace, poptávky, komunikace i správa akcí — vše zdarma."
+    }
+  },
+  "faq": {
+    "badge": "Časté dotazy",
+    "heading": "Máte otázky?",
+    "subheading": "Nejčastější věci, které se nás organizátoři ptají před registrací.",
+    "q1": {
+      "question": "Je Roo pro organizátory opravdu zdarma?",
+      "answer": "Ano, pro organizátory a firmy hledající dodavatele je Roo zcela zdarma. Registrace, procházení katalogu, odesílání poptávek i komunikace s dodavateli — vše bez poplatku. Neúčtujeme žádnou provizi ani zprostředkovatelský poplatek z rezervace."
+    },
+    "q2": {
+      "question": "Jak probíhá platba za službu dodavatele?",
+      "answer": "Platba probíhá výhradně přímo mezi vámi a dodavatelem — hotově, převodem nebo kartou, přesně tak, jak se domluvíte. Roo do platebního procesu nevstupuje a nebere žádnou provizi. Cena, kterou vám dodavatel sdělí, je cena, kterou zaplatíte."
+    },
+    "q3": {
+      "question": "Mohu oslovit více dodavatelů najednou?",
+      "answer": "Ano, bez omezení. Můžete paralelně komunikovat s několika dodavateli, porovnávat jejich nabídky a ceny. Až se rozhodnete, ostatním konverzace jednoduše uzavřete. Dodavatelé nevědí, kolik dalších oslovujete."
+    },
+    "q4": {
+      "question": "Co když dodavatel na poptávku neodpoví?",
+      "answer": "Pokud dodavatel neodpoví do přiměřené doby, doporučujeme oslovit dalšího — v katalogu vždy najdete alternativy. Neaktivní dodavatele průběžně sledujeme a v případě opakovaných problémů jejich profil omezujeme."
+    },
+    "q5": {
+      "question": "Mohu plánovat více akcí najednou?",
+      "answer": "Ano. V Roo si vytvoříte libovolný počet akcí, ke každé přiřadíte vlastní poptávky a dodavatele. Plánujete vánoční večírek, teambuilding i konferenci najednou? Vše přehledně oddělené pod samostatnými akcemi."
+    }
+  },
+  "cta": {
+    "heading": "Začněte plánovat svou první akci",
+    "subheading": "Registrace je zdarma a nezabere víc než minutu. Žádná provize, žádné závazky.",
+    "primaryCta": "Zaregistrovat se zdarma",
+    "secondaryCta": "Přečíst FAQ"
+  }
+}

@@ -103,6 +103,7 @@ export interface Config {
     'listing-entertainment-details': ListingEntertainmentDetail;
     'listing-gastro-details': ListingGastroDetail;
     'listing-venue-details': ListingVenueDetail;
+    'roadmap-items': RoadmapItem;
     'payload-kv': PayloadKv;
     'payload-jobs': PayloadJob;
     'payload-locked-documents': PayloadLockedDocument;
@@ -146,6 +147,7 @@ export interface Config {
     'listing-entertainment-details': ListingEntertainmentDetailsSelect<false> | ListingEntertainmentDetailsSelect<true>;
     'listing-gastro-details': ListingGastroDetailsSelect<false> | ListingGastroDetailsSelect<true>;
     'listing-venue-details': ListingVenueDetailsSelect<false> | ListingVenueDetailsSelect<true>;
+    'roadmap-items': RoadmapItemsSelect<false> | RoadmapItemsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-jobs': PayloadJobsSelect<false> | PayloadJobsSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -1522,6 +1524,19 @@ export interface Invitation {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "roadmap-items".
+ */
+export interface RoadmapItem {
+  id: string;
+  name: string;
+  description?: string | null;
+  votes?: number | null;
+  status?: ('planned' | 'in-progress' | 'completed') | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -1775,6 +1790,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'listing-venue-details';
         value: string | ListingVenueDetail;
+      } | null)
+    | ({
+        relationTo: 'roadmap-items';
+        value: string | RoadmapItem;
       } | null);
   globalSlug?: string | null;
   user:
@@ -3149,6 +3168,18 @@ export interface ListingVenueDetailsSelect<T extends boolean = true> {
         timeFrom?: T;
         timeTo?: T;
       };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "roadmap-items_select".
+ */
+export interface RoadmapItemsSelect<T extends boolean = true> {
+  name?: T;
+  description?: T;
+  votes?: T;
+  status?: T;
   updatedAt?: T;
   createdAt?: T;
 }

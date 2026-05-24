@@ -1,0 +1,106 @@
+{
+  "hero": {
+    "badge": "Partnerský program",
+    "heading": "Inzerujte na Roo zdarma. Naše podmínka? Pojďme to ukázat světu společně.",
+    "subheading": "Vybereme si partnery, se kterými vytvoříme společný obsah — příspěvky, reels nebo case study. Vy dostanete bezplatný inzerát, my autentický příběh pro naše publikum."
+  },
+  "exchange": {
+    "heading": "Férová výměna, ne jednostranná dohoda",
+    "subheading": "Nejde o to, že vám dáme slevu výměnou za lajk. Jde o skutečnou spolupráci — vaše příběhy a zákulisí výměnou za viditelnost, na kterou byste jinak čekali.",
+    "benefit1": {
+      "title": "Co získáte vy",
+      "description": "Bezplatný aktivní inzerát na Roo po dobu trvání spolupráce. Váš profil uvidí firmy, které aktivně hledají dodavatele pro firemní akce. Žádná podmínka počtu zakázek, žádné skryté poplatky — inzerát je váš po celou dobu partnerství.",
+      "image": "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=800&q=80"
+    },
+    "benefit2": {
+      "title": "Co vytvoříme společně",
+      "description": "Společně připravíme obsah, který bude mluvit za vás — zákulisní video z přípravy akce, příspěvek na LinkedIn nebo Instagram, case study s reálnými čísly. Obsah zveřejníme na našich kanálech i vašich, abychom oslovili co největší publikum.",
+      "image": "https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?auto=format&fit=crop&w=800&q=80"
+    },
+    "benefit3": {
+      "title": "Proč to děláme",
+      "description": "Roo teprve roste. Místo abychom utráceli za reklamu, raději investujeme do partnerů, kteří umí svůj příběh vyprávět. Autentický obsah od skutečných dodavatelů přesvědčí nové zákazníky víc než jakýkoliv banner.",
+      "image": "https://images.unsplash.com/photo-1559136555-9303baea8ebd?auto=format&fit=crop&w=800&q=80"
+    }
+  },
+  "steps": {
+    "badge": "Jak spolupráce probíhá",
+    "heading": "Čtyři kroky k bezplatnému inzerátu",
+    "step1": {
+      "title": "Napište nám",
+      "description": "Pošlete nám e-mail nebo zprávu s krátkým popisem vaší firmy a co nabízíte. Nemusíte mít připravený žádný plán — stačí zájem a ochota se ukázat."
+    },
+    "step2": {
+      "title": "Domluvíme podmínky",
+      "description": "Pobavíme se o tom, co by dávalo smysl pro obě strany — jaký typ obsahu, kdy, na jakých platformách. Hledáme formy, které vám nepřidají práci navíc, ale přirozeně zapadnou do toho, co už děláte."
+    },
+    "step3": {
+      "title": "Vytvoříte profil a inzerát",
+      "description": "Zaregistrujete se na Roo, vytvoříte firemní profil a přidáte inzerát své služby. Aktivujeme ho zdarma po dobu spolupráce — ihned začnete přijímat poptávky."
+    },
+    "step4": {
+      "title": "Zveřejníme obsah společně",
+      "description": "Podle domluvy připravíme obsah — zákulisní pohled, příspěvek po akci nebo krátký rozhovor. Zveřejníme ho na Roo i vašich kanálech. A pokud se spolupráce osvědčí, rádi ji prodloužíme."
+    }
+  },
+  "formats": {
+    "badge": "Formáty spolupráce",
+    "heading": "Co konkrétně hledáme",
+    "subheading": "Nepotřebujeme dokonalou produkci. Potřebujeme autentické příběhy od lidí, kteří svou práci milují.",
+    "format1": {
+      "title": "Zákulisní video nebo reel",
+      "description": "Ukažte přípravu akce, nakládku catering krabic, zvukovou zkoušku nebo nastavování sálu. Krátké, surové, autentické."
+    },
+    "format2": {
+      "title": "Příspěvek na sociálních sítích",
+      "description": "Zmínka o Roo na vašem Instagramu nebo LinkedIn profilu — jak jste se na platformu dostali a co vám přináší."
+    },
+    "format3": {
+      "title": "Case study nebo rozhovor",
+      "description": "Společně sepíšeme krátký příběh o vaší firmě a jedné konkrétní zakázce. Zveřejníme ho na Roo blogu a sdílíme na sociálních sítích."
+    },
+    "format4": {
+      "title": "Fotografie z akce",
+      "description": "Pošlete nám fotky z akce, kterou jste realizovali — se svolením zákazníka. Použijeme je jako ukázku toho, co Roo partneři umí."
+    },
+    "format5": {
+      "title": "Sdílení obsahu Roo",
+      "description": "Sdílení našich příspěvků o platformě nebo partnerském programu na vašich kanálech. Jednoduchá forma, která funguje pro menší firmy."
+    },
+    "format6": {
+      "title": "Vlastní nápad",
+      "description": "Máte jiný nápad, jak to uchopit? Rádi si ho poslechneme. Hledáme kreativní lidi, ne jen ty, kdo splní zadání."
+    }
+  },
+  "faq": {
+    "badge": "Časté dotazy",
+    "heading": "Jak to celé funguje?",
+    "subheading": "Nejčastější otázky k partnerskému programu.",
+    "q1": {
+      "question": "Jak dlouho trvá bezplatný inzerát?",
+      "answer": "Délka závisí na domluvené spolupráci. Standardně aktivujeme inzerát na 3 měsíce výměnou za jeden nebo dva formáty obsahu. Pokud se spolupráce osvědčí a máme zájem pokračovat, prodloužíme ho."
+    },
+    "q2": {
+      "question": "Musím mít velké publikum na sociálních sítích?",
+      "answer": "Ne. Velikost sledovanosti není podmínkou. Zajímá nás autenticita a kvalita obsahu, ne čísla. Firma se 300 followersy, která tvoří poctivý obsah, je pro nás cennější než účet s tisíci sledovateli bez zapojení."
+    },
+    "q3": {
+      "question": "Kdo tvoří obsah — my nebo vy?",
+      "answer": "Záleží na domluvě. U zákulisních videí a fotek tvoříte vy, protože jste na místě. U case study a rozhovorů pracujeme společně — my napíšeme, vy zkontrolujete a schválíte. Nikdy nezveřejníme nic, s čím nesouhlasíte."
+    },
+    "q4": {
+      "question": "Co když se mi obsah nebude líbit?",
+      "answer": "Před zveřejněním vám vše ukážeme ke schválení. Máte právo veto — nic nevyjde ven bez vašeho souhlasu. Naším cílem je obsah, na který budete hrdí, ne jen plnění podmínek smlouvy."
+    },
+    "q5": {
+      "question": "Jak se přihlásím?",
+      "answer": "Napište nám na partnerstvi@roo.cz s krátkým popisem vaší firmy. Odpovídáme do 3 pracovních dnů a domluvíme krátký úvodní hovor, kde probereme detaily."
+    }
+  },
+  "cta": {
+    "heading": "Máte zájem? Napište nám.",
+    "subheading": "Přihlášky posílejte na partnerstvi@roo.cz. Odpovídáme do 3 pracovních dnů.",
+    "primaryCta": "Napsat nám",
+    "secondaryCta": "Přečíst FAQ"
+  }
+}

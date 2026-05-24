@@ -1,16 +1,20 @@
 import {
   getCollection,
   getCollectionItem,
+  GetCollectionParams,
   patchCollectionItem,
   PatchData,
   postCollectionItem,
 } from "@/app/functions/api/general";
-import type { Event, Where } from "@roo/common";
+import type { Event } from "@roo/common";
 
-export async function fetchEvents() {
+export async function fetchEvents(options?: GetCollectionParams) {
+  const { query, limit, sort = "-createdAt" } = options ?? {};
   const res = await getCollection({
     collection: "events",
-    sort: "-createdAt",
+    query,
+    limit,
+    sort,
   });
   if (!res) throw new Error("Failed to fetch events");
   return res;

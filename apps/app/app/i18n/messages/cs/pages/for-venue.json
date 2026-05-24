@@ -1,0 +1,136 @@
+{
+  "hero": {
+    "badge": "Pro prostory a místa konání",
+    "heading": "Pronajměte svůj prostor firmám, které ho hledají",
+    "subheading": "Přidejte svůj prostor do Roo a nechte zákazníky přicházet za vámi — firmy, které hledají místo na firemní akci, teambuilding nebo konferenci, vás najdou samy.",
+    "primaryCta": "Začít zdarma",
+    "secondaryCta": "Zjistit více"
+  },
+  "steps": {
+    "badge": "Jak to funguje",
+    "heading": "Začněte přijímat rezervace za tři kroky",
+    "step1": {
+      "title": "Zaregistrujte se",
+      "description": "Vyplňte základní informace o vašem prostoru a provozovateli. Zabere to méně než 5 minut."
+    },
+    "step2": {
+      "title": "Vytvořte inzerát prostoru",
+      "description": "Popište svůj prostor — kapacitu, vybavení, dostupnost, možnosti uspořádání a vše, co firmy potřebují vědět."
+    },
+    "step3": {
+      "title": "Přijímejte poptávky",
+      "description": "Firmy vám píšou přímo přes Roo. Vy odpovídáte, domluvíte detaily a potvrdíte rezervaci."
+    }
+  },
+  "benefits": {
+    "heading": "Proč majitelé prostor volí Roo",
+    "subheading": "Firmy aktivně hledají místa na své akce. Buďte tam, kde poptávají.",
+    "benefit1": {
+      "title": "Poptávky chodí samy",
+      "description": "Inzerát vytvoříte jednou a rezervační poptávky od firem chodí průběžně. Žádné obvolávání, žádné studené kontakty."
+    },
+    "benefit2": {
+      "title": "Všechny rezervace na jednom místě",
+      "description": "Vidíte stav každé rezervace, termíny i komunikaci s klientem — přehledně a bez rizika, že něco přehlédnete."
+    },
+    "benefit3": {
+      "title": "Tým ví, co má dělat",
+      "description": "Přidejte recepci, správce nebo event koordinátory a sdílejte správu rezervací bez zbytečného chaosu."
+    }
+  },
+  "features": {
+    "badge": "Co získáte",
+    "heading": "Nástroj navržený pro pronajímatele prostor",
+    "subheading": "Od zasedacích místností po velké sály a venkovní areály — Roo se přizpůsobí vašemu provozu.",
+    "feature1": {
+      "title": "Viditelnost u správných zákazníků",
+      "description": "Váš prostor uvidí firmy, které aktivně hledají místo konání na konkrétní termín a typ akce."
+    },
+    "feature2": {
+      "title": "Poptávky na jednom místě",
+      "description": "Přijímejte a spravujte veškerou komunikaci s klienty v aplikaci — bez e-mailového chaosu."
+    },
+    "feature3": {
+      "title": "Přehled obsazenosti prostoru",
+      "description": "Kalendář rezervací, abyste věděli, kdy je prostor volný a kdy obsazený, a nikdy nepřijali dva termíny najednou."
+    },
+    "feature4": {
+      "title": "Přehled pronajímatele",
+      "description": "Statistiky poptávek, přehled aktivních inzerátů a stav každé rezervace na jednom místě."
+    },
+    "feature5": {
+      "title": "Týmová spolupráce",
+      "description": "Přidejte kolegy — recepce vidí rezervace, koordinátor detaily akce, majitel vše. Každý jen to, co potřebuje."
+    },
+    "feature6": {
+      "title": "Více prostor pod jedním účtem",
+      "description": "Provozujete víc sálů nebo poboček? Spravujte všechny prostory pod jedním účtem."
+    }
+  },
+  "comparison": {
+    "badge": "Proč Roo?",
+    "heading": "S Roo vs. bez Roo",
+    "subheading": "Srovnejte, jak se mění obsazování termínů, když máte správný nástroj.",
+    "ourLabel": "S Roo",
+    "theirLabel": "Bez Roo",
+    "our1": "Zákazníci vás najdou samy — inzerát pracuje za vás nonstop",
+    "our2": "Všechny poptávky a zprávy na jednom místě, nic se neztratí",
+    "our3": "Kalendář obsazenosti bez rizika překrývajících se rezervací",
+    "our4": "Přístup k firmám, které aktivně hledají prostor na akci",
+    "our5": "Přehled o tom, kolik zákazníků váš profil vidělo a poptalo",
+    "their1": "Studené kontakty, obvolávání a doufání v doporučení",
+    "their2": "Poptávky rozprášené přes e-mail, telefon a sociální sítě",
+    "their3": "Termíny v tabulkách a kalendářích náchylných k chybám",
+    "their4": "Odkázáni jen na vlastní síť kontaktů a dosah",
+    "their5": "Žádná data o tom, kdo a kdy o váš prostor projevil zájem"
+  },
+  "pricing": {
+    "badge": "Ceník",
+    "heading": "Platíte až za zveřejněný inzerát.",
+    "subheading": "Registrace, nastavení profilu i příprava inzerátu jsou zdarma. Platíte teprve za aktivně inzerovaný prostor.",
+    "planName": "Aktivní inzerát prostoru",
+    "feature1": "Neomezený počet poptávek a zpráv",
+    "feature2": "Přehledný kalendář rezervací a termínů",
+    "feature3": "Přehled pronajímatele se statistikami",
+    "feature4": "Týmová správa s více uživateli",
+    "feature5": "Více prostor pod jedním účtem",
+    "feature6": "Prioritní zákaznická podpora",
+    "payNote": "Registrace, nastavení firmy i vytváření inzerátů jsou zdarma. Platíte až ve chvíli, kdy se rozhodnete inzerát zveřejnit a přijímat poptávky.",
+    "cta": "Začít zdarma"
+  },
+  "faq": {
+    "badge": "Časté dotazy",
+    "heading": "Máte otázky?",
+    "subheading": "Nejčastější věci, které se nás majitelé prostor ptají před registrací.",
+    "q1": {
+      "question": "Je Roo pro pronajímatele prostor zdarma?",
+      "answer": "Registrace, nastavení profilu firmy i vytváření inzerátů jsou zcela zdarma a bez závazků. Platíte až tehdy, kdy se sami rozhodnete inzerát zveřejnit a začít přijímat poptávky. Vše si tedy můžete v klidu prohlédnout a vyzkoušet dřív, než cokoliv zaplatíte."
+    },
+    "q2": {
+      "question": "Jak se zákazníci dostanou k mému prostoru?",
+      "answer": "Váš prostor je viditelný v katalogu Roo, kde firmy aktivně hledají místa konání pro své akce. Zákazníci vás vyhledají sami podle kapacity, lokality, vybavení nebo typu akce a napíší vám přímo přes aplikaci."
+    },
+    "q3": {
+      "question": "Mohu inzerovat víc prostor nebo sálů?",
+      "answer": "Ano. Pod jedním účtem můžete spravovat více prostor — například konferenční sál a zároveň venkovní terasu, nebo pobočky na různých místech. Každý prostor má vlastní profil, fotografie a kalendář dostupnosti."
+    },
+    "q4": {
+      "question": "Jak funguje platba za zveřejněný inzerát?",
+      "answer": "Platba probíhá měsíčně za každý aktivní inzerát zvlášť. Pokud inzerát deaktivujete, přestanete za něj platit. Žádné roční závazky ani skryté poplatky — platíte jen za to, co skutečně využíváte."
+    },
+    "q5": {
+      "question": "Co se stane s inzerátem, když ho deaktivuji?",
+      "answer": "Deaktivovaný inzerát přestane být viditelný v katalogu a přestanou přicházet nové poptávky. Vaše data, fotografie a nastavení zůstanou uložené — inzerát můžete kdykoli znovu aktivovat bez nutnosti vše zadávat znovu."
+    },
+    "q6": {
+      "question": "Potřebuji k registraci technické znalosti?",
+      "answer": "Vůbec ne. Roo je navržené tak, aby ho zvládl každý — stačí vyplnit základní údaje o prostoru a nahrát fotografie. Celá registrace zabere méně než 5 minut. Pokud byste si přesto nevěděli rady, náš tým vám rád pomůže."
+    }
+  },
+  "cta": {
+    "heading": "Připraveni na první firemní rezervaci?",
+    "subheading": "Registrace je zdarma a nezavazuje vás k ničemu. Vystavte svůj prostor a nechte zákazníky přicházet za vámi.",
+    "primaryCta": "Zaregistrovat se zdarma",
+    "secondaryCta": "Mám otázku"
+  }
+}

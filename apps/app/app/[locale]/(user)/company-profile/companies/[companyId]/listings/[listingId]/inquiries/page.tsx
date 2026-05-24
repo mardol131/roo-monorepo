@@ -11,7 +11,7 @@ import { useInquiriesByListing } from "@/app/react-query/inquiries/hooks";
 import { icons } from "lucide-react";
 
 export default function page() {
-  const t = useTranslations();
+  const t = useTranslations("global");
 
   const { listingId, companyId } = useParams<{
     listingId: string;

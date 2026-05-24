@@ -1,21 +1,6 @@
 {
-  "Root": {
+  "root": {
     "appName": "Roo"
-  },
-  "pages": {
-    "public": {
-      "homepage": {
-        "title": "Naplánujte celý event na jednom místě"
-      }
-    },
-    "user": {
-      "companyProfile": {
-        "page": {},
-        "contentWrapper": {},
-        "companies": {},
-        "profileSettings": {}
-      }
-    }
   },
   "listings": {
     "singular": "Služba",
@@ -99,6 +84,47 @@
   "phone": {
     "countryCodes": {
       "420": "+420"
+    }
+  },
+  "footer": {
+    "brand": {
+      "description": "Naplánujte celý firemní event na jednom místě."
+    },
+    "sections": {
+      "roo": {
+        "title": "Společnost",
+        "about": "O nás",
+        "careers": "Kariéra",
+        "blog": "Blog",
+        "contact": "Kontakty"
+      },
+      "help": {
+        "title": "Pomoc",
+        "support": "Centrum podpory",
+        "faq": "FAQ",
+        "pricing": "Ceník",
+        "howItWorksForUser": "Jak to funguje"
+      },
+      "company": {
+        "title": "Pro dodavatele",
+        "gastro": "Gastro",
+        "entertainment": "Zábava",
+        "venue": "Prostory",
+        "howItWorksForCompany": "Jak začít inzerovat",
+        "partnership": "Partnerství"
+      }
+    },
+    "newsletter": {
+      "heading": "Zůstaňte v obraze",
+      "subheading": "Přihlaste se na newsletter a dostávejte novinky o nových akcích.",
+      "placeholder": "Váš email...",
+      "submitLabel": "Odebírat"
+    },
+    "bottom": {
+      "rights": "Všechna práva vyhrazena.",
+      "privacy": "Soukromí",
+      "terms": "Podmínky služby",
+      "cookies": "Cookies"
     }
   },
   "breadcrumbs": {

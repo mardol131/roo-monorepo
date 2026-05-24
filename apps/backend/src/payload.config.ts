@@ -47,6 +47,7 @@ import { ListingEntertainmentDetails } from './collections/listings/listing-ente
 import { ListingGastroDetails } from './collections/listings/listing-gastro-details'
 import { ListingVenueDetails } from './collections/listings/listing-venue-details'
 import { getFiltersAndSpecifics } from './endpoints/get-filters-and-specific/get-filters-and-specifics'
+import { RoadmapItems } from './collections/roadmap-items'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -109,6 +110,7 @@ export default buildConfig({
     ListingEntertainmentDetails,
     ListingGastroDetails,
     ListingVenueDetails,
+    RoadmapItems,
   ],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || '',

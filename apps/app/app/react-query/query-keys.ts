@@ -5,7 +5,8 @@ import { Where } from "@roo/common";
 export const listingKeys = {
   all: (query?: Where, limit?: number) => ["listings", query, limit] as const,
   byId: (id: string) => ["listings", id] as const,
-  byCompany: (companyId: string) => ["listings", "company", companyId] as const,
+  byCompany: (companyId: string, query?: Where, limit?: number) =>
+    ["listings", "company", companyId, query, limit] as const,
 };
 
 export const listingDetailKeys = {
@@ -21,12 +22,12 @@ export const invitationKeys = {
 };
 
 export const companyKeys = {
-  all: () => ["companies"] as const,
+  all: (query?: Where, limit?: number) => ["companies", query, limit] as const,
   byId: (id: string) => ["companies", id] as const,
 };
 
 export const inquiryKeys = {
-  all: () => ["inquiries"] as const,
+  all: (query?: Where, limit?: number) => ["inquiries", query, limit] as const,
   byId: (id: string) => ["inquiries", id] as const,
   byListing: (listingId: string) =>
     ["inquiries", "listing", listingId] as const,
@@ -56,7 +57,7 @@ export const chatMessageKeys = {
 };
 
 export const eventKeys = {
-  all: () => ["events"] as const,
+  all: (query?: Where, limit?: number) => ["events", query, limit] as const,
   byId: (id: string) => ["events", id] as const,
 };
 

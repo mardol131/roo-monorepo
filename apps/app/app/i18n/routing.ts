@@ -14,6 +14,28 @@ export const routing = defineRouting({
     "/listing/[listingId]": { cs: "/inzerat/[listingId]" },
     "/listing/[listingId]/inquiry": { cs: "/inzerat/[listingId]/poptavka" },
 
+    // legal
+    "/gdpr": { cs: "/gdpr" },
+    "/cookies": { cs: "/cookies" },
+    "/terms-and-conditions": { cs: "/obchodni-podminky" },
+
+    // landing pages
+    "/pages/for-gastro": { cs: "/stranky/pro-gastro" },
+    "/pages/for-venue": { cs: "/stranky/pro-mista" },
+    "/pages/for-entertainment": { cs: "/stranky/pro-zabavu" },
+    "/pages/faq": { cs: "/stranky/casto-kladene-otazky" },
+    "/pages/contact": { cs: "/stranky/kontakt" },
+    "/pages/about": { cs: "/stranky/o-nas" },
+    "/pages/pricing": { cs: "/stranky/cenik" },
+    "/pages/partnership": { cs: "/stranky/partnerstvi" },
+    "/pages/how-it-works-for-company": {
+      cs: "/stranky/jak-to-funguje-pro-dodavatele",
+    },
+    "/pages/how-it-works-for-user": {
+      cs: "/stranky/jak-to-funguje-pro-uzivatele",
+    },
+    "/pages/support": { cs: "/stranky/podpora" },
+
     // authorization
     "/login": { cs: "/prihlaseni" },
     "/register": { cs: "/registrace" },

@@ -5,6 +5,7 @@ import {
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
+import { GetCollectionParams } from "@/app/functions/api/general";
 import { companyKeys } from "../query-keys";
 import {
   createCompany,
@@ -15,10 +16,12 @@ import {
   UpdateCompanyPayload,
 } from "./fetch";
 
-export function useCompanies() {
+export function useCompanies({
+  options,
+}: { options?: GetCollectionParams } = {}) {
   return useQuery({
-    queryKey: companyKeys.all(),
-    queryFn: () => fetchCompanies(),
+    queryKey: companyKeys.all(options?.query, options?.limit),
+    queryFn: () => fetchCompanies(options),
   });
 }
 

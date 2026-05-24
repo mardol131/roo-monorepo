@@ -14,7 +14,7 @@ export const Companies: CollectionConfig = {
   endpoints: [membersInviteEndpoint, verifyMemberEndpoint],
   access: {
     create: ({ req }) => !!req.user,
-    read: ({ req }) => true,
+    read: () => true,
     update: ({ req }) => {
       if (!req.user) return false
       if (req.user.collection === 'admins') return true

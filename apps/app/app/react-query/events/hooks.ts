@@ -1,4 +1,4 @@
-import { PatchData } from "@/app/functions/api/general";
+import { GetCollectionParams, PatchData } from "@/app/functions/api/general";
 import type { Event } from "@roo/common";
 import {
   useMutation,
@@ -16,10 +16,12 @@ import {
   updateChecklist,
 } from "./fetch";
 
-export function useEvents() {
+export function useEvents({
+  options,
+}: { options?: GetCollectionParams } = {}) {
   return useQuery({
-    queryKey: eventKeys.all(),
-    queryFn: () => fetchEvents(),
+    queryKey: eventKeys.all(options?.query, options?.limit),
+    queryFn: () => fetchEvents(options),
   });
 }
 

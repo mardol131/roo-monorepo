@@ -18,7 +18,7 @@ import { useParams } from "next/navigation";
 
 export default function page() {
   const { companyId } = useParams<{ companyId: string }>();
-  const t = useTranslations();
+  const t = useTranslations("global");
 
   const { data: listings, isLoading } = useListingsByCompany(companyId);
 

@@ -47,7 +47,7 @@ export default function page() {
 
   const router = useRouter();
 
-  const t = useTranslations();
+  const t = useTranslations("global");
 
   const { data: inquiries } = useInquiries();
 

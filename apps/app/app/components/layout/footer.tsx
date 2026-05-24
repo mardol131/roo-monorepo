@@ -2,39 +2,55 @@
 
 import React from "react";
 import { Facebook, Instagram, Twitter, Linkedin, Mail } from "lucide-react";
-import { usePathname } from "next/navigation";
+import { useTranslations } from "next-intl";
+import { IntlLink, Link } from "@/app/i18n/navigation";
+import Text from "../ui/atoms/text";
 
-type Props = {};
-
-export default function Footer({}: Props) {
+export default function Footer() {
   const currentYear = new Date().getFullYear();
+  const t = useTranslations("global.footer");
+  const appName = useTranslations("global.root")("appName");
 
-  const footerLinks = [
+  const footerLinks: {
+    title: string;
+    links: { label: string; href: IntlLink }[];
+  }[] = [
     {
-      title: "Společnost",
+      title: t("sections.help.title"),
       links: [
-        { label: "O nás", href: "#" },
-        { label: "Kariéra", href: "#" },
-        { label: "Blog", href: "#" },
-        { label: "Kontakty", href: "#" },
+        { label: t("sections.help.pricing"), href: "/pages/pricing" },
+        { label: t("sections.help.faq"), href: "/pages/faq" },
+        { label: t("sections.help.support"), href: "/pages/support" },
+        {
+          label: t("sections.help.howItWorksForUser"),
+          href: "/pages/how-it-works-for-user",
+        },
       ],
     },
     {
-      title: "Pomoc",
+      title: t("sections.company.title"),
       links: [
-        { label: "Centrum podpory", href: "#" },
-        { label: "FAQ", href: "#" },
-        { label: "Bezpečnost", href: "#" },
-        { label: "Podmínky", href: "#" },
+        { label: t("sections.company.gastro"), href: "/pages/for-gastro" },
+        {
+          label: t("sections.company.entertainment"),
+          href: "/pages/for-entertainment",
+        },
+        { label: t("sections.company.venue"), href: "/pages/for-venue" },
+        {
+          label: t("sections.company.howItWorksForCompany"),
+          href: "/pages/how-it-works-for-company",
+        },
+        {
+          label: t("sections.company.partnership"),
+          href: "/pages/partnership",
+        },
       ],
     },
     {
-      title: "Zařízení",
+      title: t("sections.roo.title"),
       links: [
-        { label: "Web app", href: "#" },
-        { label: "Mobilní app", href: "#" },
-        { label: "Desktop app", href: "#" },
-        { label: "API", href: "#" },
+        { label: t("sections.roo.about"), href: "/pages/about" },
+        { label: t("sections.roo.contact"), href: "/pages/contact" },
       ],
     },
   ];
@@ -46,22 +62,33 @@ export default function Footer({}: Props) {
     { icon: Linkedin, href: "#", label: "LinkedIn" },
   ];
 
-  const pathname = usePathname();
-  const isInUserProfile = pathname.startsWith("/user-profile");
+  const bottomLinks: { label: string; href: IntlLink }[] = [
+    { label: t("bottom.privacy"), href: "/gdpr" },
+    { label: t("bottom.terms"), href: "/terms-and-conditions" },
+    { label: t("bottom.cookies"), href: "/cookies" },
+  ];
 
   return (
     <footer className="bg-zinc-900 text-white pt-10 pb-6 flex justify-center">
       <div className={`max-w-content w-full px-4`}>
-        {/* Main Footer Content */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
-          {/* Brand Section */}
           <div className="lg:col-span-2">
-            <span className="text-sm font-semibold text-white tracking-wide">
-              EventHub
-            </span>
-            <p className="text-xs text-zinc-400 mt-2 mb-4 leading-relaxed">
-              Objevujte a sdílejte nejlepší zážitky v Praze.
-            </p>
+            <div className="flex flex-col">
+              <Text
+                variant="label-lg"
+                color="white"
+                className="font-semibold tracking-wide"
+              >
+                {appName}
+              </Text>
+              <Text
+                variant="caption"
+                color="textLight"
+                className="mt-2 mb-4 leading-relaxed"
+              >
+                {t("brand.description")}
+              </Text>
+            </div>
             <div className="flex gap-2">
               {socialLinks.map((social) => {
                 const Icon = social.icon;
@@ -79,21 +106,23 @@ export default function Footer({}: Props) {
             </div>
           </div>
 
-          {/* Links Sections */}
           {footerLinks.map((section) => (
             <div key={section.title}>
-              <p className="text-xs font-semibold text-white mb-3">
+              <Text variant="label" className="font-semibold" color="white">
                 {section.title}
-              </p>
+              </Text>
               <ul className="space-y-2">
                 {section.links.map((link) => (
                   <li key={link.label}>
-                    <a
-                      href={link.href}
-                      className="text-xs text-zinc-400 hover:text-rose-400 transition-colors"
-                    >
-                      {link.label}
-                    </a>
+                    <Link href={link.href}>
+                      <Text
+                        variant="label"
+                        className="font-semibold"
+                        color="textLight"
+                      >
+                        {link.label}
+                      </Text>
+                    </Link>
                   </li>
                 ))}
               </ul>
@@ -101,44 +130,47 @@ export default function Footer({}: Props) {
           ))}
         </div>
 
-        {/* Newsletter Section */}
         <div className="border-y border-zinc-800 py-6 mb-6">
           <div className="flex flex-col md:flex-row md:items-center gap-4">
-            <div className="flex-1">
-              <p className="text-sm font-semibold text-white">
-                Zůstaňte v obraze
-              </p>
-              <p className="text-xs text-zinc-400 mt-0.5">
-                Přihlaste se na newsletter a dostávejte novinky o nových akcích.
-              </p>
+            <div className="flex-1 flex flex-col">
+              <Text variant="label-lg" color="white" className="font-semibold">
+                {t("newsletter.heading")}
+              </Text>
+              <Text variant="caption" color="textLight" className="mt-0.5">
+                {t("newsletter.subheading")}
+              </Text>
             </div>
             <div className="flex gap-2 md:w-72">
               <input
                 type="email"
-                placeholder="Váš email..."
+                placeholder={t("newsletter.placeholder")}
                 className="flex-1 px-3 py-2 text-xs rounded-lg bg-zinc-800 text-white placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-rose-500 transition-all"
               />
-              <button className="px-3 py-2 bg-rose-500 text-white rounded-lg hover:bg-rose-600 transition-colors">
+              <button
+                aria-label={t("newsletter.submitLabel")}
+                className="px-3 py-2 bg-rose-500 text-white rounded-lg hover:bg-rose-600 transition-colors"
+              >
                 <Mail size={14} />
               </button>
             </div>
           </div>
         </div>
 
-        {/* Bottom Section */}
         <div className="flex flex-col md:flex-row justify-between items-center gap-3">
-          <p className="text-xs text-zinc-500">
-            © {currentYear} EventHub. Všechna práva vyhrazena.
-          </p>
+          <Text variant="caption" color="textLight">
+            © {currentYear} {appName}. {t("bottom.rights")}
+          </Text>
           <div className="flex gap-5">
-            {["Soukromí", "Podmínky služby", "Cookies"].map((label) => (
-              <a
-                key={label}
-                href="#"
+            {bottomLinks.map((link) => (
+              <Link
+                key={link.label}
+                href={link.href as any}
                 className="text-xs text-zinc-500 hover:text-zinc-300 transition-colors"
               >
-                {label}
-              </a>
+                <Text variant="caption" color="textLight">
+                  {link.label}
+                </Text>
+              </Link>
             ))}
           </div>
         </div>

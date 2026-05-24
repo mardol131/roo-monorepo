@@ -1,0 +1,63 @@
+{
+  "hero": {
+    "badge": "O nás",
+    "heading": "Věříme, že skvělé firemní akce by neměly stát na náhodě",
+    "subheading": "Roo vzniklo z frustrace — plánování firemní akce bylo vždy zbytečně složité. Rozhodli jsme se to změnit."
+  },
+  "manifesto": {
+    "quote": "Propojujeme firmy s dodavateli, kteří si zakázky zaslouží — a odstraňujeme vše, co stojí mezi dobrým nápadem a skvělou akcí."
+  },
+  "story": {
+    "heading": "Proč jsme Roo postavili",
+    "part1": {
+      "title": "Problém, který jsme sami zažili",
+      "description": "Organizátoři trávili hodiny hledáním dodavatelů přes Google, volali naslepo, posílali desítky e-mailů a stejně nevěděli, jestli dostanou odpověď. Na druhé straně skvělí dodavatelé čekali na zakázky, o kterých vůbec nevěděli. Tohle nedávalo smysl.",
+      "image": "https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&w=800&q=80"
+    },
+    "part2": {
+      "title": "Náš přístup: jednoduchost na prvním místě",
+      "description": "Nechtěli jsme stavět další složitý nástroj. Roo je záměrně jednoduché — pro organizátory je zdarma, pro dodavatele přímočaré. Žádná provize, žádné skryté poplatky, žádná zbytečná složitost. Jen propojení lidí, kteří se potřebují najít.",
+      "image": "https://images.unsplash.com/photo-1553775927-a071d5a06c73?auto=format&fit=crop&w=800&q=80"
+    },
+    "part3": {
+      "title": "Budujeme ekosystém, ne jen aplikaci",
+      "description": "Roo není jen marketplace. Je to místo, kde firmy nacházejí dodavatele, kterým věří, a dodavatelé budují svoji reputaci zakázkou po zakázce. Čím více se platforma používá, tím lépe funguje pro všechny.",
+      "image": "https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=800&q=80"
+    }
+  },
+  "values": {
+    "badge": "Naše hodnoty",
+    "heading": "Na čem nám záleží",
+    "subheading": "Principy, podle kterých stavíme Roo a rozhodujeme se každý den.",
+    "value1": {
+      "title": "Jednoduchost",
+      "description": "Každá funkce, kterou přidáme, musí problém řešit — ne vytvářet nový. Složitost je nepřítel."
+    },
+    "value2": {
+      "title": "Férovost",
+      "description": "Organizátoři platí dodavatelům přímo, bez provize. Dodavatelé platí za viditelnost, ne za každou zakázku. Každý ví, co platí."
+    },
+    "value3": {
+      "title": "Důvěra",
+      "description": "Propojujeme lidi, kteří si navzájem věří. Profily, komunikace i hodnocení jsou navržené tak, aby bylo snadné se rozhodnout správně."
+    },
+    "value4": {
+      "title": "Zaměření",
+      "description": "Roo slouží firemním akcím — a nic víc. Nerozptylujeme se. Díky tomu jsme lepší v tom jednom, co děláme."
+    },
+    "value5": {
+      "title": "Otevřenost",
+      "description": "Nasloucháme uživatelům, dodavatelům i organizátorům. Nejlepší nápady na vylepšení Roo přicházejí od lidí, kteří ho každý den používají."
+    },
+    "value6": {
+      "title": "Lokální znalost",
+      "description": "Začínáme v České republice, kde rozumíme trhu, kultuře i potřebám. Globální ambice, lokální kořeny."
+    }
+  },
+  "cta": {
+    "heading": "Chcete být součástí Roo?",
+    "subheading": "Ať jste dodavatel nebo organizátor — jste vítáni. Registrace je zdarma.",
+    "primaryCta": "Zaregistrovat se",
+    "secondaryCta": "Často kladené otázky"
+  }
+}

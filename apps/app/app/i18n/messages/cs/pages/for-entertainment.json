@@ -1,0 +1,136 @@
+{
+  "hero": {
+    "badge": "Pro poskytovatele zábavy",
+    "heading": "Získejte firemní akce, které vás hledají",
+    "subheading": "Přidejte svou nabídku do Roo a nechte zákazníky přicházet za vámi — firmy, které shání zábavu na teambuildingové akce, firemní večírky nebo konference, vás najdou samy.",
+    "primaryCta": "Začít zdarma",
+    "secondaryCta": "Zjistit více"
+  },
+  "steps": {
+    "badge": "Jak to funguje",
+    "heading": "Začněte přijímat zakázky za tři kroky",
+    "step1": {
+      "title": "Zaregistrujte se",
+      "description": "Vyplňte základní informace o vaší firmě a nabídce. Zabere to méně než 5 minut."
+    },
+    "step2": {
+      "title": "Vytvořte nabídku",
+      "description": "Popište své služby — druh zábavy, kapacitu publika, dostupnost a vše, co firmy potřebují vědět."
+    },
+    "step3": {
+      "title": "Přijímejte poptávky",
+      "description": "Firmy vám píšou přímo přes Roo. Vy odpovídáte, domluvíte detaily a potvrdíte zakázku."
+    }
+  },
+  "benefits": {
+    "heading": "Proč poskytovatelé zábavy volí Roo",
+    "subheading": "Firmy aktivně hledají zábavu na své akce. Buďte tam, kde poptávají.",
+    "benefit1": {
+      "title": "Zakázky chodí samy",
+      "description": "Nabídku vytvoříte jednou a poptávky od firem chodí průběžně. Žádné obvolávání, žádné studené kontakty."
+    },
+    "benefit2": {
+      "title": "Všechny akce na jednom místě",
+      "description": "Vidíte stav každé zakázky, termíny i komunikaci s klientem — přehledně a bez rizika, že něco přehlédnete."
+    },
+    "benefit3": {
+      "title": "Tým ví, co má dělat",
+      "description": "Přidejte kolegy nebo spolupracující umělce a sdílejte správu zakázek bez zbytečného chaosu."
+    }
+  },
+  "features": {
+    "badge": "Co získáte",
+    "heading": "Nástroj navržený pro poskytovatele zábavy",
+    "subheading": "Od kapel a DJů po escape rooms a interaktivní programy — Roo se přizpůsobí vašemu byznysu.",
+    "feature1": {
+      "title": "Viditelnost u správných zákazníků",
+      "description": "Váš profil uvidí firmy, které aktivně hledají zábavu na konkrétní termín a typ akce."
+    },
+    "feature2": {
+      "title": "Poptávky na jednom místě",
+      "description": "Přijímejte a spravujte veškerou komunikaci s klienty v aplikaci — bez e-mailového chaosu."
+    },
+    "feature3": {
+      "title": "Přehled termínů akcí",
+      "description": "Kalendář zakázek, abyste věděli, kde a kdy váš tým vystupuje, a nikdy nepřijali dva termíny najednou."
+    },
+    "feature4": {
+      "title": "Dashboard dodavatele",
+      "description": "Statistiky poptávek, přehled aktivních nabídek a stav každé zakázky na jednom místě."
+    },
+    "feature5": {
+      "title": "Týmová spolupráce",
+      "description": "Přidejte kolegy — každý vidí jen to, co potřebuje. Umělec termíny, koordinátor zakázky, majitel vše."
+    },
+    "feature6": {
+      "title": "Více nabídek a profilů",
+      "description": "Nabízíte kapelu i DJský set? Spravujte více nabídek pod jedním účtem."
+    }
+  },
+  "comparison": {
+    "badge": "Proč Roo?",
+    "heading": "S Roo vs. bez Roo",
+    "subheading": "Srovnejte, jak se mění shánění zakázek, když máte správný nástroj.",
+    "ourLabel": "S Roo",
+    "theirLabel": "Bez Roo",
+    "our1": "Zákazníci vás najdou samy — profil pracuje za vás nonstop",
+    "our2": "Všechny poptávky a zprávy na jednom místě, nic se neztratí",
+    "our3": "Kalendář zakázek bez rizika překrývajících se termínů",
+    "our4": "Přístup ke zákazníkům, kteří aktivně poptávají zábavu na akce",
+    "our5": "Přehled o tom, kolik zákazníků váš profil vidělo a poptalo",
+    "their1": "Studené kontakty, obvolávání a doufání v doporučení",
+    "their2": "Poptávky rozprášené přes e-mail, telefon a sociální sítě",
+    "their3": "Termíny v tabulkách a kalendářích náchylných k chybám",
+    "their4": "Odkázáni jen na vlastní síť kontaktů a dosah",
+    "their5": "Žádná data o tom, kdo a kdy o vaši nabídku projevil zájem"
+  },
+  "pricing": {
+    "badge": "Ceník",
+    "heading": "Platíte až za zveřejněnou nabídku.",
+    "subheading": "Registrace, nastavení profilu i příprava nabídky jsou zdarma. Platíte teprve za aktivní inzerát.",
+    "planName": "Aktivní nabídka",
+    "feature1": "Neomezený počet poptávek a zpráv",
+    "feature2": "Přehledný kalendář akcí a termínů",
+    "feature3": "Dashboard dodavatele se statistikami",
+    "feature4": "Týmová správa s více uživateli",
+    "feature5": "Více nabídek a profilů pod jedním účtem",
+    "feature6": "Prioritní zákaznická podpora",
+    "payNote": "Registrace, nastavení firmy i vytváření nabídek jsou zdarma. Platíte až ve chvíli, kdy se rozhodnete nabídku zveřejnit a přijímat poptávky.",
+    "cta": "Začít zdarma"
+  },
+  "faq": {
+    "badge": "Časté dotazy",
+    "heading": "Máte otázky?",
+    "subheading": "Nejčastější věci, které se nás poskytovatelé zábavy ptají před registrací.",
+    "q1": {
+      "question": "Je Roo pro poskytovatele zábavy zdarma?",
+      "answer": "Registrace, nastavení profilu firmy i vytváření nabídek jsou zcela zdarma a bez závazků. Platíte až tehdy, kdy se sami rozhodnete nabídku zveřejnit a začít přijímat poptávky. Vše si tedy můžete v klidu prohlédnout a vyzkoušet dřív, než cokoliv zaplatíte."
+    },
+    "q2": {
+      "question": "Jak se k mé nabídce dostanou zákazníci?",
+      "answer": "Váš profil a nabídky jsou viditelné v katalogu Roo, kde firmy aktivně hledají zábavu a program pro své akce. Zákazníci vás vyhledají sami podle druhu zábavy, lokality nebo kapacity publika a napíší vám přímo přes aplikaci."
+    },
+    "q3": {
+      "question": "Mohu mít víc nabídek nebo profilů?",
+      "answer": "Ano. Pod jedním účtem můžete spravovat více nabídek — například živou kapelu a zároveň DJský set, nebo různé typy programů. Každá nabídka má vlastní profil, fotografie a dostupnost."
+    },
+    "q4": {
+      "question": "Jak funguje platba za zveřejněnou nabídku?",
+      "answer": "Platba probíhá měsíčně za každou aktivní nabídku zvlášť. Pokud nabídku deaktivujete, přestanete za ni platit. Žádné roční závazky ani skryté poplatky — platíte jen za to, co skutečně využíváte."
+    },
+    "q5": {
+      "question": "Co se stane s nabídkou, když ji deaktivuji?",
+      "answer": "Deaktivovaná nabídka přestane být viditelná v katalogu a přestanou přicházet nové poptávky. Vaše data, fotografie a nastavení zůstanou uložené — nabídku můžete kdykoli znovu aktivovat bez nutnosti vše zadávat znovu."
+    },
+    "q6": {
+      "question": "Potřebuji k registraci technické znalosti?",
+      "answer": "Vůbec ne. Roo je navržené tak, aby ho zvládl každý — stačí vyplnit základní údaje o firmě a nahrát fotografie. Celá registrace zabere méně než 5 minut. Pokud byste si přesto nevěděli rady, náš tým vám rád pomůže."
+    }
+  },
+  "cta": {
+    "heading": "Připraveni na první firemní akci?",
+    "subheading": "Registrace je zdarma a nezavazuje vás k ničemu. Vystavte svou nabídku a nechte zákazníky přicházet za vámi.",
+    "primaryCta": "Zaregistrovat se zdarma",
+    "secondaryCta": "Mám otázku"
+  }
+}

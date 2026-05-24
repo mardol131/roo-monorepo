@@ -41,7 +41,7 @@ export default function Page() {
     companyId: string;
     listingId: string;
   }>();
-  const t = useTranslations();
+  const t = useTranslations("global");
   const router = useRouter();
   const { data: listing, isPending } = useListing(listingId);
   const { data: variants } = useVariantsByListing(listingId);

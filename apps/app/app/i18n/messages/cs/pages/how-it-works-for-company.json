@@ -1,0 +1,111 @@
+{
+  "hero": {
+    "badge": "Pro dodavatele",
+    "heading": "Jak Roo funguje pro dodavatele",
+    "subheading": "Od registrace po první zakázku — celý proces je jednoduchý a přímočarý. Vytvořte profil, vystavte nabídku a nechte firmy přicházet za vámi."
+  },
+  "scrollSteps": {
+    "badge": "Průběh spolupráce",
+    "heading": "Od registrace po potvrzenou zakázku",
+    "subheading": "Čtyři kroky, které vás dovedou od prvního přihlášení k první zakázce.",
+    "step1": {
+      "title": "Vytvořte firemní profil",
+      "description": "Zaregistrujte se zdarma a vyplňte základní informace o vaší firmě — název, kontaktní údaje, popis a fotografie. Profil je vaše vizitka, ze které zákazníci posuzují, zda vás chtějí oslovit. Čím úplnější, tím lépe.",
+      "image": "https://images.unsplash.com/photo-1600880292203-757bb62b4baf?auto=format&fit=crop&w=900&q=80"
+    },
+    "step2": {
+      "title": "Přidejte nabídku své služby",
+      "description": "Vytvořte inzerát — popište, co nabízíte, pro jaké akce se hodíte, v jakých lokalitách působíte a za jakých podmínek pracujete. Nahrajte fotografie, nastavte dostupnost a ceník. Inzerát uvidí firmy, které aktivně hledají dodavatele jako vy.",
+      "image": "https://images.unsplash.com/photo-1542744173-8e7e53415bb0?auto=format&fit=crop&w=900&q=80"
+    },
+    "step3": {
+      "title": "Přijímejte a vyřizujte poptávky",
+      "description": "Firmy vás najdou v katalogu a odešlou poptávku. Dostanete notifikaci, přečtete si detaily — termín, počet hostů, typ akce — a odpovíte přímo v aplikaci. Veškerá komunikace probíhá na jednom místě, nic se neztratí.",
+      "image": "https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=900&q=80"
+    },
+    "step4": {
+      "title": "Potvrďte zakázku a připravte se",
+      "description": "Po dohodě na detailech zakázku potvrdíte v aplikaci. Termín se zapíše do kalendáře, komunikace zůstane uložená jako podklad. Žádné e-maily navíc, žádné papíry — vše na jednom místě.",
+      "image": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=900&q=80"
+    }
+  },
+  "benefits": {
+    "heading": "Proč to dodavatelé oceňují",
+    "subheading": "Roo nenahrazuje vaši práci — jen vám zajistí, aby vás ti správní zákazníci našli.",
+    "benefit1": {
+      "title": "Poptávky od firem, ne soukromých osob",
+      "description": "Roo je zaměřené výhradně na B2B — firemní akce, teambuildingy, konference a večírky. Zákazníci, kteří vás osloví, mají jasný záměr a rozpočet.",
+      "image": "https://images.unsplash.com/photo-1551818255-e6e10975bc17?auto=format&fit=crop&w=800&q=80"
+    },
+    "benefit2": {
+      "title": "Vše pod kontrolou v jedné aplikaci",
+      "description": "Poptávky, zprávy, kalendář dostupnosti a správa týmu — vše na jednom místě. Žádné přepínání mezi e-mailem, tabulkami a kalendáři.",
+      "image": "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=800&q=80"
+    },
+    "benefit3": {
+      "title": "Zakázky bez obvolávání a studených kontaktů",
+      "description": "Profil pracuje za vás nepřetržitě. Zákazníci vás najdou sami, přečtou si nabídku a napíšou — vy reagujete jen na relevantní poptávky.",
+      "image": "https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=800&q=80"
+    }
+  },
+  "features": {
+    "badge": "Co v Roo najdete",
+    "heading": "Vše, co potřebujete ke správě zakázek",
+    "subheading": "Jednoduchý nástroj navržený tak, aby vám šetřil čas a přinášel relevantnější zakázky.",
+    "feature1": {
+      "title": "Firemní profil a inzeráty",
+      "description": "Vytvořte přehledný profil firmy a k němu libovolný počet inzerátů — každý pro jiný typ služby nebo lokalitu."
+    },
+    "feature2": {
+      "title": "Správa poptávek",
+      "description": "Všechny příchozí poptávky na jednom místě. Přijměte, odmítněte nebo si vyžádejte více informací — vše přímo v aplikaci."
+    },
+    "feature3": {
+      "title": "Zprávy se zákazníky",
+      "description": "Komunikujte se zákazníky přes integrovaný chat. Celá historie konverzace je uložená a dostupná kdykoli."
+    },
+    "feature4": {
+      "title": "Kalendář dostupnosti",
+      "description": "Nastavte, kdy jste k dispozici. Zákazníci uvidí vaši dostupnost před odesláním poptávky — méně odmítnutí, relevantnější dotazy."
+    },
+    "feature5": {
+      "title": "Varianty a balíčky",
+      "description": "Přidejte k inzerátu varianty — různé balíčky, kapacity nebo sezónní nabídky. Každá varianta s vlastní cenou a popisem."
+    },
+    "feature6": {
+      "title": "Tým a správa přístupu",
+      "description": "Přidejte kolegy a nastavte jim role. Každý vidí jen to, co potřebuje — koordinátor poptávky, majitel vše."
+    }
+  },
+  "faq": {
+    "badge": "Časté dotazy",
+    "heading": "Máte otázky?",
+    "subheading": "Nejčastější věci, které se nás dodavatelé ptají před registrací.",
+    "q1": {
+      "question": "Je Roo pro dodavatele zdarma?",
+      "answer": "Registrace, nastavení profilu i vytváření inzerátů jsou zcela zdarma. Platíte až ve chvíli, kdy se rozhodnete inzerát zveřejnit a přijímat poptávky. Vše si můžete v klidu prohlédnout a vyzkoušet dřív, než cokoliv zaplatíte."
+    },
+    "q2": {
+      "question": "Jak rychle začnu dostávat poptávky?",
+      "answer": "Záleží na kategorii, lokalitě a kvalitě inzerátu. Inzeráty s fotografiemi, podrobným popisem a nastavenou dostupností dostávají poptávky výrazně rychleji. Doporučujeme vyplnit profil co nejúplněji hned na začátku."
+    },
+    "q3": {
+      "question": "Mohu mít více inzerátů nebo profilů?",
+      "answer": "Ano, bez omezení. Pod jedním účtem spravujete více firem i více inzerátů. Každý inzerát má vlastní profil, fotografie, dostupnost a ceník."
+    },
+    "q4": {
+      "question": "Co se stane, když poptávku odmítnu?",
+      "answer": "Zákazník dostane notifikaci o odmítnutí a může oslovit jiného dodavatele. Odmítnuté poptávky nijak nepoškozují váš profil — pokud uvede důvod odmítnutí (termín, kapacita), zákazník to ocení."
+    },
+    "q5": {
+      "question": "Jak funguje platba za inzerát?",
+      "answer": "Platba je měsíční, za každý aktivní (zveřejněný) inzerát zvlášť. Pokud inzerát deaktivujete, platba se v dalším období neúčtuje. Žádné roční závazky, žádné skryté poplatky."
+    }
+  },
+  "cta": {
+    "heading": "Připraveni na první zakázku?",
+    "subheading": "Registrace je zdarma a nezavazuje vás k ničemu. Vystavte nabídku a nechte zákazníky přicházet za vámi.",
+    "primaryCta": "Zaregistrovat se zdarma",
+    "secondaryCta": "Přečíst FAQ"
+  }
+}

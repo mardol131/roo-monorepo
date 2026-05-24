@@ -1,7 +1,5 @@
 # MVP todo
 
-- Přidat emaily
-
 # Landing pages
 
 - Pro dodavatele
@@ -47,6 +45,7 @@
 
 - Přidat podmínky
 - Přidat GDPR
+- Cookies
 
 ## Emaily
 

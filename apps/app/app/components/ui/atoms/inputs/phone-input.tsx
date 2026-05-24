@@ -30,7 +30,7 @@ export default function PhoneInput({
   phoneNumberProps,
   countryCodeName,
 }: Props) {
-  const t = useTranslations("phone.countryCodes");
+  const t = useTranslations("global.phone.countryCodes");
   return (
     <div className={`w-full ${disabled ? "opacity-50" : ""}`}>
       <InputLabel label={label} isRequired={isRequired} />

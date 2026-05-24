@@ -1,0 +1,36 @@
+{
+  "hero": {
+    "badge": "Kontakt",
+    "heading": "Jsme tu pro vás",
+    "subheading": "Máte otázku, nápad nebo potřebujete pomoc? Napište nám — odpovídáme zpravidla do jednoho pracovního dne."
+  },
+  "general": {
+    "badge": "Kontaktní informace",
+    "heading": "Jak nás kontaktovat",
+    "item1": {
+      "label": "Obecný dotaz",
+      "value": "hello@roo.cz",
+      "note": "Pro obecné dotazy, zpětnou vazbu nebo jen pokud se chcete pozdravit."
+    },
+    "item2": {
+      "label": "Zákaznická podpora",
+      "value": "podpora@roo.cz",
+      "note": "Technické problémy, otázky k účtu nebo fakturaci. Odpovídáme do 1 pracovního dne."
+    },
+    "item3": {
+      "label": "Obchod a partnerství",
+      "value": "partnerstvi@roo.cz",
+      "note": "Zájem o spolupráci, mediální dotazy nebo obchodní nabídky."
+    },
+    "item4": {
+      "label": "Sídlo společnosti",
+      "value": "Praha, Česká republika",
+      "note": "Osobní schůzky po domluvě."
+    },
+    "item5": {
+      "label": "Pracovní doba podpory",
+      "value": "Po–Pá, 9:00–17:00",
+      "note": "Na zprávy mimo pracovní dobu odpovídáme první pracovní den."
+    }
+  }
+}

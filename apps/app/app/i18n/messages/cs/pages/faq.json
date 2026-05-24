@@ -1,0 +1,213 @@
+{
+  "hero": {
+    "badge": "Nápověda",
+    "heading": "Časté dotazy",
+    "subheading": "Vše, co potřebujete vědět o Roo. Nenašli jste odpověď? Napište nám."
+  },
+  "groups": {
+    "general": {
+      "title": "Obecné",
+      "questions": {
+        "q1": {
+          "question": "Co je Roo?",
+          "answer": "Roo je platforma, která propojuje firmy hledající dodavatele pro firemní akce s poskytovateli služeb — cateringy, poskytovateli zábavy a pronajímateli prostor. Firmy zde snadno najdou a osloví ověřené dodavatele, dodavatelé zase získají přístup k novým zakázkám bez obvolávání."
+        },
+        "q2": {
+          "question": "Pro koho je Roo určené?",
+          "answer": "Roo má dvě strany. Na jedné jsou firmy a organizátoři eventů, kteří hledají dodavatele na firemní akce, teambuildingy, konference nebo večírky. Na druhé straně jsou dodavatelé — cateringy, kapely, DJové, poskytovatelé zábavy nebo pronajímatelé sálů a prostor — kteří chtějí získávat firemní zakázky."
+        },
+        "q3": {
+          "question": "Jak se Roo liší od jiných platforem?",
+          "answer": "Roo se zaměřuje výhradně na B2B segment — firemní akce a zakázky. Nejde o klasický marketplace pro soukromé osoby. Díky tomu jsou poptávky relevantnější, komunikace profesionálnější a celý proces přizpůsobený potřebám firem i dodavatelů."
+        },
+        "q4": {
+          "question": "Je Roo dostupné v celé ČR?",
+          "answer": "Ano. Roo funguje po celé České republice. Dodavatelé mohou specifikovat, v jakých lokalitách nebo regionech působí, a firmy pak hledají podle místa konání akce."
+        }
+      }
+    },
+    "registration": {
+      "title": "Registrace a účet",
+      "questions": {
+        "q1": {
+          "question": "Jak se zaregistruji?",
+          "answer": "Klikněte na tlačítko Zaregistrovat se a vyplňte základní údaje — jméno, e-mail a heslo. Pokud jste dodavatel, pokračujete vytvořením firemního profilu. Registrace zabere méně než 5 minut."
+        },
+        "q2": {
+          "question": "Mohu mít jeden účet pro více firem?",
+          "answer": "Ano. Pod jedním uživatelským účtem můžete spravovat více firemních profilů. Stačí v nastavení přidat další firmu nebo přijmout pozvánku do existující."
+        },
+        "q3": {
+          "question": "Jak přidám další členy týmu?",
+          "answer": "V nastavení firemního profilu najdete sekci Členové týmu. Zadejte e-mailovou adresu kolegy a zvolte jeho roli. Kolega obdrží pozvánku a po přijetí získá přístup k firemnímu účtu."
+        },
+        "q4": {
+          "question": "Jak změním e-mail nebo heslo?",
+          "answer": "Přihlaste se do aplikace, přejděte do Nastavení účtu a zde můžete změnit e-mail i heslo. Pokud jste zapomněli heslo, použijte funkci Zapomenuté heslo na přihlašovací stránce."
+        },
+        "q5": {
+          "question": "Jak zruším svůj účet?",
+          "answer": "Účet lze zrušit v nastavení profilu. Pokud máte aktivní inzeráty nebo otevřené poptávky, budete vyzváni k jejich uzavření před smazáním. Smazání účtu je nevratné — veškerá data budou trvale odstraněna."
+        }
+      }
+    },
+    "listings": {
+      "title": "Nabídky a inzeráty",
+      "questions": {
+        "q1": {
+          "question": "Jak vytvořím inzerát?",
+          "answer": "Po přihlášení přejděte do firemního profilu a klikněte na Přidat nabídku. Vyplňte název, popis, fotografie, dostupnost a ceník. Inzerát můžete kdykoli upravit, než ho zveřejníte."
+        },
+        "q2": {
+          "question": "Kolik inzerátů mohu mít?",
+          "answer": "Počet inzerátů není omezený. Každý aktivní (zveřejněný) inzerát se účtuje zvlášť. Inzeráty ve stavu konceptu nebo deaktivované jsou zdarma a bez poplatku."
+        },
+        "q3": {
+          "question": "Co je rozdíl mezi aktivním a deaktivovaným inzerátem?",
+          "answer": "Aktivní inzerát je viditelný v katalogu Roo a mohou na něj přicházet poptávky. Za aktivní inzerát se platí měsíční poplatek. Deaktivovaný inzerát není viditelný zákazníkům, nepřijímá poptávky a neúčtuje se za něj žádný poplatek. Veškerá data a nastavení zůstanou zachována."
+        },
+        "q4": {
+          "question": "Jak nahraji fotografie k inzerátu?",
+          "answer": "V editaci inzerátu klikněte na sekci Fotografie a nahrajte soubory ve formátu JPG nebo PNG. Doporučujeme fotografie v horizontálním formátu a rozlišení alespoň 1200 × 800 px. Titulní fotografie se zobrazuje jako první v katalogu."
+        },
+        "q5": {
+          "question": "Mohu mít víc variant jedné nabídky?",
+          "answer": "Ano. K inzerátu lze přidat varianty — například různé balíčky, kapacity nebo sezónní nabídky. Každá varianta může mít vlastní popis, cenu a dostupnost."
+        },
+        "q6": {
+          "question": "Jak funguje dostupnost inzerátu?",
+          "answer": "V nastavení inzerátu nebo varianty můžete definovat dostupné dny a časy. Zákazníci pak při poptávce vidí, zda je váš termín volný. Pokud dostupnost nenastavíte, zákazníci vás mohou oslovit s libovolným termínem a vy dostupnost potvrdíte v konverzaci."
+        }
+      }
+    },
+    "inquiries": {
+      "title": "Poptávky a komunikace",
+      "questions": {
+        "q1": {
+          "question": "Jak funguje poptávka?",
+          "answer": "Zákazník najde váš inzerát v katalogu a odešle poptávku. Obdržíte notifikaci a celou komunikaci s zákazníkem vedete přímo v aplikaci Roo — od prvního kontaktu přes upřesnění detailů až po potvrzení zakázky."
+        },
+        "q2": {
+          "question": "Jak rychle musím na poptávku odpovědět?",
+          "answer": "Žádný pevný limit neexistuje, ale doporučujeme odpovídat do 24 hodin. Rychlá reakce zvyšuje pravděpodobnost, že zákazník zakázku potvrdí právě u vás. Zákazníci mohou oslovit více dodavatelů najednou."
+        },
+        "q3": {
+          "question": "Mohu poptávku odmítnout?",
+          "answer": "Ano. Poptávku můžete odmítnout, například pokud termín není dostupný nebo zakázka nesedí vaší kapacitě. Zákazníkovi doporučujeme napsat krátké vysvětlení — zvyšuje to vaši důvěryhodnost pro příští poptávky."
+        },
+        "q4": {
+          "question": "Kde probíhá veškerá komunikace se zákazníkem?",
+          "answer": "Veškerá komunikace probíhá v sekci Zprávy v aplikaci Roo. Nedoporučujeme přesouvat komunikaci do e-mailu nebo jiných kanálů — v aplikaci máte historii konverzace na jednom místě a obě strany jsou chráněny podmínkami platformy."
+        },
+        "q5": {
+          "question": "Mohu jako zákazník oslovit více dodavatelů najednou?",
+          "answer": "Ano. Neexistuje žádné omezení počtu poptávek, které můžete odeslat. Dodavatelé o tom nevědí a každý reaguje na základě vlastního uvážení. Po výběru vhodného dodavatele ostatním poptávky jednoduše uzavřete."
+        }
+      }
+    },
+    "pricing": {
+      "title": "Platby a ceník",
+      "questions": {
+        "q1": {
+          "question": "Kolik stojí registrace?",
+          "answer": "Registrace, nastavení firemního profilu i vytváření inzerátů jsou zcela zdarma a bez závazků. Platíte až ve chvíli, kdy se rozhodnete inzerát zveřejnit a přijímat poptávky."
+        },
+        "q2": {
+          "question": "Jak se účtuje poplatek za aktivní inzerát?",
+          "answer": "Poplatek se účtuje měsíčně za každý aktivní (zveřejněný) inzerát zvlášť. Fakturace probíhá automaticky na začátku každého fakturačního období. Pokud inzerát deaktivujete, poplatek za něj se v dalším období nebude účtovat."
+        },
+        "q3": {
+          "question": "Jaké platební metody jsou dostupné?",
+          "answer": "Přijímáme platby kartou (Visa, Mastercard) a bankovním převodem. Platby jsou zabezpečené a zpracovávány přes certifikovaného platebního partnera. Faktury jsou dostupné ke stažení v nastavení účtu."
+        },
+        "q4": {
+          "question": "Mohu kdykoli zrušit předplatné?",
+          "answer": "Ano. Inzerát lze deaktivovat nebo smazat kdykoli bez storno poplatků. Předplatné se neobnoví v dalším fakturačním období. Za aktuální období se poplatek nevrací."
+        },
+        "q5": {
+          "question": "Existuje roční předplatné se slevou?",
+          "answer": "Ano, při platbě za rok dopředu nabízíme zvýhodněnou cenu. Aktuální výši slevy najdete na stránce ceníku nebo vám ji sdělíme na vyžádání přes zákaznickou podporu."
+        },
+        "q6": {
+          "question": "Potřebuji fakturu s DPH?",
+          "answer": "Faktury s DPH vystavujeme automaticky. Po zadání IČO a DIČ v nastavení fakturace budou všechny doklady vystavovány na vaši firmu. Faktury jsou dostupné ke stažení ve formátu PDF přímo v aplikaci."
+        }
+      }
+    },
+    "forSuppliers": {
+      "title": "Pro dodavatele",
+      "questions": {
+        "q1": {
+          "question": "Jak mě zákazníci najdou v katalogu?",
+          "answer": "Váš profil a inzeráty jsou viditelné ve vyhledávání a katalogu Roo. Zákazníci filtrují podle kategorie (gastro, zábava, prostory), lokality, kapacity nebo data akce. Čím podrobnější a kvalitnější je váš inzerát, tím lépe se zobrazuje."
+        },
+        "q2": {
+          "question": "Mohu spravovat více nabídek pod jedním účtem?",
+          "answer": "Ano. Pod jedním firemním účtem můžete spravovat libovolný počet inzerátů. Například catering s food truckem a kamennou provozovnou, nebo venue s více sály — každý jako samostatný inzerát s vlastním profilem, fotografiemi a ceníkem."
+        },
+        "q3": {
+          "question": "Jak mohu zlepšit viditelnost svého inzerátu?",
+          "answer": "Klíčové faktory jsou kvalitní fotografie, podrobný a přesný popis, vyplněná dostupnost a rychlé odpovídání na poptávky. Profily s kompletními informacemi a pozitivní historií komunikace se zobrazují výše ve vyhledávání."
+        },
+        "q4": {
+          "question": "Dostanu upozornění na novou poptávku?",
+          "answer": "Ano. O každé nové poptávce vás informujeme e-mailem i push notifikací v aplikaci. V nastavení notifikací si můžete zvolit, jaké typy upozornění chcete dostávat a jakými kanály."
+        },
+        "q5": {
+          "question": "Mohu na správě účtu spolupracovat s kolegy?",
+          "answer": "Ano. Do firemního účtu lze přidat více uživatelů s různými rolemi. Například majitel vidí vše včetně fakturace, koordinátor spravuje poptávky a konverzace, a asistent pouze nahlíží na kalendář termínů."
+        }
+      }
+    },
+    "forOrganizers": {
+      "title": "Pro organizátory",
+      "questions": {
+        "q1": {
+          "question": "Jak najdu dodavatele na svou akci?",
+          "answer": "Přejděte do katalogu a filtrujte podle kategorie (gastro, zábava, prostory), lokality a data akce. U každého dodavatele najdete profil, fotografie, popis nabídky a přehled dostupnosti. Zaujal vás? Odešlete poptávku přímo z jeho profilu."
+        },
+        "q2": {
+          "question": "Je používání Roo pro organizátory zdarma?",
+          "answer": "Ano, pro organizátory a firmy hledající dodavatele je Roo zcela zdarma. Registrace, procházení katalogu, odesílání poptávek i komunikace s dodavateli — vše bez poplatku."
+        },
+        "q3": {
+          "question": "Mohu oslovit více dodavatelů najednou?",
+          "answer": "Ano, neexistuje žádné omezení. Můžete paralelně komunikovat s několika dodavateli, porovnávat jejich nabídky a až po rozhodnutí ostatní konverzace uzavřít. Dodavatelé o vašich ostatních poptávkách nevědí."
+        },
+        "q4": {
+          "question": "Jak probíhá potvrzení rezervace?",
+          "answer": "Rezervace probíhá dohodou v konverzaci — dodavatel potvrdí termín, kapacitu a podmínky, vy jako organizátor potvrzení přijmete. Celá komunikace je zaznamenána v aplikaci a slouží jako podklad pro přípravu akce."
+        },
+        "q5": {
+          "question": "Co když dodavatel na mou poptávku neodpoví?",
+          "answer": "Pokud dodavatel neodpoví do přiměřené doby, doporučujeme oslovit dalšího. V katalogu vždy najdete alternativy. Neaktivní nebo pomalu reagující dodavatele hodnotíme a v případě opakovaného problému jejich profil omezujeme."
+        }
+      }
+    },
+    "technical": {
+      "title": "Technická podpora",
+      "questions": {
+        "q1": {
+          "question": "Funguje Roo na mobilu?",
+          "answer": "Ano. Roo je plně responzivní a funguje v mobilním prohlížeči na iOS i Androidu. Mobilní aplikaci plánujeme — sledujte novinky na našem webu nebo se přihlaste k odběru newsletteru."
+        },
+        "q2": {
+          "question": "Jaké prohlížeče jsou podporované?",
+          "answer": "Roo funguje ve všech moderních prohlížečích — Chrome, Firefox, Safari a Edge. Pro nejlepší zážitek doporučujeme používat aktuální verzi prohlížeče."
+        },
+        "q3": {
+          "question": "Narazil jsem na chybu, co mám dělat?",
+          "answer": "Kontaktujte zákaznickou podporu přes formulář v aplikaci nebo e-mailem. Uveďte prosím popis problému, kdy k němu došlo a na jakém zařízení a prohlížeči jste ho zaznamenali. Chyby řešíme přednostně."
+        },
+        "q4": {
+          "question": "Jak jsou chráněna moje data?",
+          "answer": "Veškerá data jsou uložena na zabezpečených serverech v EU v souladu s GDPR. Platební informace jsou zpracovávány certifikovaným platebním partnerem a nikdy nejsou ukládány na našich serverech. Přečtěte si naše Zásady ochrany soukromí pro více informací."
+        },
+        "q5": {
+          "question": "Mohu exportovat svá data?",
+          "answer": "Ano. Na vyžádání vám připravíme export vašich dat ve strojově čitelném formátu. Kontaktujte zákaznickou podporu a export vyřídíme do 30 dnů v souladu s GDPR."
+        }
+      }
+    }
+  }
+}

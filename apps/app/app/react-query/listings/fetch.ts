@@ -35,13 +35,18 @@ export async function fetchAllListings(options?: GetCollectionParams) {
 
 export async function fetchListingsByCompany(
   companyId: string,
-  headers?: Record<string, string>,
+  options?: GetCollectionParams,
 ) {
+  const companyFilter = { company: { equals: companyId } };
+  const mergedQuery = options?.query
+    ? { and: [companyFilter, options.query] }
+    : companyFilter;
   const res = await getCollection({
     collection: "listings",
-    query: { company: { equals: companyId } },
-    sort: "-createdAt",
-    headers,
+    query: mergedQuery,
+    limit: options?.limit,
+    sort: options?.sort ?? "-createdAt",
+    headers: options?.headers,
   });
   if (!res) throw new Error("Failed to fetch listings");
   return res;

@@ -1,15 +1,21 @@
 import {
   getCollection,
   getCollectionItem,
+  GetCollectionParams,
   patchCollectionItem,
   postCollectionItem,
 } from "@/app/functions/api/general";
 import { Company, PayloadResponse } from "@roo/common";
 
-export async function fetchCompanies(): Promise<PayloadResponse<Company>> {
+export async function fetchCompanies(
+  options?: GetCollectionParams,
+): Promise<PayloadResponse<Company>> {
+  const { query, limit, sort = "-createdAt" } = options ?? {};
   const res = await getCollection({
     collection: "companies",
-    sort: "-createdAt",
+    query,
+    limit,
+    sort,
   });
   if (!res) throw new Error("Failed to fetch companies");
   return res;

@@ -43,17 +43,18 @@ export function useListings({
   });
 }
 
-export function useListingsByCompany(companyId: string) {
+export function useListingsByCompany(
+  companyId: string,
+  options?: GetCollectionParams,
+) {
   return useQuery({
-    queryKey: listingKeys.byCompany(companyId),
-    queryFn: () => fetchListingsByCompany(companyId),
+    queryKey: listingKeys.byCompany(companyId, options?.query, options?.limit),
+    queryFn: () => fetchListingsByCompany(companyId, options),
     enabled: !!companyId,
   });
 }
 
 export function useListing(id: string | undefined) {
-  const queryClient = useQueryClient();
-
   return useQuery({
     queryKey: listingKeys.byId(id ?? ""),
     queryFn: () => fetchListing(id!),

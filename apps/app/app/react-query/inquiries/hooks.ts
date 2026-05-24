@@ -7,16 +7,13 @@ import {
 import {
   getIdFromRelationshipField,
   Inquiry,
-  Listing,
-  Where,
 } from "@roo/common";
-import { PatchData } from "@/app/functions/api/general";
-import { companyKeys, inquiryKeys, listingKeys } from "../query-keys";
+import { GetCollectionParams, PatchData } from "@/app/functions/api/general";
+import { inquiryKeys, listingKeys } from "../query-keys";
 import {
   createInquiry,
   fetchInquiries,
   fetchInquiriesByListing,
-  FetchInquiriesOptions,
   fetchInquiry,
   updateInquiry,
 } from "./fetch";
@@ -29,28 +26,33 @@ export function useInquiriesByListing(listingId: string) {
   });
 }
 
-export function useInquiries(options?: { refetchInterval?: number }) {
+export function useInquiries({
+  options,
+  refetchInterval,
+}: { options?: GetCollectionParams; refetchInterval?: number } = {}) {
   return useQuery({
-    queryKey: inquiryKeys.all(),
-    queryFn: () => fetchInquiries(),
-    refetchInterval: options?.refetchInterval,
+    queryKey: inquiryKeys.all(options?.query, options?.limit),
+    queryFn: () => fetchInquiries(options),
+    refetchInterval,
   });
 }
 
 export function useInquiriesByEvent(
   eventId: string,
-  options?: FetchInquiriesOptions & { refetchInterval?: number },
+  opts?: GetCollectionParams & { refetchInterval?: number },
 ) {
+  const { refetchInterval, ...collectionParams } = opts ?? {};
   return useQuery({
     queryKey: inquiryKeys.byEvent(eventId),
     queryFn: () =>
       fetchInquiries({
-        query: { event: { equals: eventId }, ...options?.query },
-        limit: options?.limit,
-        sortBy: options?.sortBy,
+        ...collectionParams,
+        query: collectionParams.query
+          ? { and: [{ event: { equals: eventId } }, collectionParams.query] }
+          : { event: { equals: eventId } },
       }),
     enabled: !!eventId,
-    refetchInterval: options?.refetchInterval,
+    refetchInterval,
   });
 }
 
