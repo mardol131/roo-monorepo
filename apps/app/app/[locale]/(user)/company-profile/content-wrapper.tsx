@@ -55,6 +55,14 @@ export default function ContentWrapper({ children }: PropsWithChildren) {
         icon: "Settings",
       },
       {
+        label: "Tým",
+        href: {
+          pathname: "/company-profile/companies/[companyId]/team",
+          params: { companyId },
+        },
+        icon: "Users",
+      },
+      {
         label: "Služby",
         href: {
           pathname: "/company-profile/companies/[companyId]/listings",
@@ -187,14 +195,14 @@ export default function ContentWrapper({ children }: PropsWithChildren) {
           buttons={[
             {
               text: "Odejít",
-              size: "sm",
+              size: "xs",
               version: "plain",
               iconLeft: "ExternalLink",
               link: "/homepage",
             },
             {
               text: "Nastavení",
-              size: "sm",
+              size: "xs",
               version: "plain",
               iconLeft: "Settings",
               link: "/company-profile/profile-settings",

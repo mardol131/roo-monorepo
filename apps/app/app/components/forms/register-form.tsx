@@ -29,6 +29,9 @@ type Props = {
   buttonVersion?: ButtonProps["version"];
   buttonText?: string;
   buttonIconLeft?: ButtonProps["iconLeft"];
+  defaultEmail?: string;
+  redirectTo?: string;
+  hideAlertSection?: boolean;
 };
 
 const formSchema = zod
@@ -45,7 +48,8 @@ const formSchema = zod
     marketing: zod.boolean(),
   })
   .refine((data) => data.password === data.passwordConfirm, {
-    message: "Hesla se neshodují",
+    path: ["passwordConfirm"],
+    error: "Hesla se neshodují",
   });
 
 export default function RegisterForm({
@@ -54,6 +58,9 @@ export default function RegisterForm({
   buttonVersion = "secondary",
   buttonText = "Registrovat",
   buttonIconLeft = "User",
+  redirectTo,
+  hideAlertSection = false,
+  defaultEmail,
 }: Props) {
   const [submitted, setSubmitted] = useState(false);
   const [serverError, setServerError] = useState<string | undefined>();
@@ -71,8 +78,11 @@ export default function RegisterForm({
       phone: { countryCode: "420", number: "" },
       legal: false,
       marketing: false,
+      email: defaultEmail ?? undefined,
     },
   });
+
+  console.log("errors", errors);
 
   async function onSubmit(data: RegisterFormValues) {
     setServerError(undefined);
@@ -87,6 +97,7 @@ export default function RegisterForm({
         marketingConsent: data.marketing,
         gdprConsent: data.legal,
         termsOfUseConsent: data.legal,
+        redirectTo,
       });
 
       if (!res.ok) {
@@ -127,13 +138,25 @@ export default function RegisterForm({
             registraci.
           </Text>
         </div>
+        {redirectTo && (
+          <Text variant="body-sm" color="textLight" className="mt-2">
+            Po ověření e-mailu a přihlášení se vraťte na{" "}
+            <a
+              href={redirectTo}
+              className="font-medium text-zinc-900 hover:underline"
+            >
+              přijetí pozvánky
+            </a>
+            .
+          </Text>
+        )}
       </div>
     );
   }
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
-      {accountType === "company" && (
+      {!hideAlertSection && accountType === "company" && (
         <AlertSection
           icon={Building2}
           iconBg="bg-company-surface"
@@ -169,6 +192,7 @@ export default function RegisterForm({
       <Input
         label="E-mail"
         isRequired
+        disabled={!!defaultEmail}
         error={errors.email?.message}
         inputProps={{
           ...register("email", {

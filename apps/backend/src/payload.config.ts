@@ -15,7 +15,7 @@ import { EventTypes } from './collections/filters/event-types'
 import { Listings } from './collections/listings/listings'
 import { Spaces } from './collections/spaces'
 import { Personnel } from './collections/filters/personnel'
-import { Companies } from './collections/companies'
+import { Companies } from './collections/companies/companies'
 import { Cities } from './collections/locality/cities'
 
 import { PlaceTypes } from './collections/filters/place-types'
@@ -37,6 +37,7 @@ import { DietaryOptions } from './collections/filters/dietary-options'
 import { FoodServiceStyle } from './collections/filters/food-service-style'
 import { CalendarEvents } from './collections/calendar-events'
 import { FavouriteListings } from './collections/favourite-listings'
+import { Invitations } from './collections/invitations'
 
 import { SpaceTypes } from './collections/specific/space-types'
 import { uploadFileToCloud } from './endpoints/upload-file-to-cloud/upload-file-to-cloud'
@@ -103,6 +104,7 @@ export default buildConfig({
     Inquiries,
     CalendarEvents,
     FavouriteListings,
+    Invitations,
     SpaceTypes,
     ListingEntertainmentDetails,
     ListingGastroDetails,

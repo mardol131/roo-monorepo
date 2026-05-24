@@ -3,11 +3,7 @@
 import Button from "@/app/components/ui/atoms/button";
 import { loginModalEvents } from "@/app/components/ui/molecules/modals/login-modal/login-modal";
 
-type Props = {
-  redirectTo?: string;
-};
-
-export default function LoginButton({ redirectTo }: Props) {
+export default function LoginButton() {
   return (
     <Button
       version="primary"

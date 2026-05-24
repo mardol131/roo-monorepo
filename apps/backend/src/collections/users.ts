@@ -9,6 +9,23 @@ export const Users: CollectionConfig = {
   },
   auth: {
     tokenExpiration: 60 * 60 * 24, // 1 day
+    verify: {
+      generateEmailHTML: ({ req, token }) => {
+        const redirectTo = req.data?.redirectTo as string | undefined
+        const baseUrl = process.env.NEXT_PUBLIC_WEBSITE_URL ?? 'http://localhost:3000'
+        const url = new URL(`${baseUrl}/user-verification`)
+        url.searchParams.set('emailVerificationToken', token)
+        if (redirectTo) url.searchParams.set('redirectTo', redirectTo)
+        console.log(req.data)
+        console.log(url.toString())
+
+        return `
+          <p>Potvrďte svůj účet kliknutím na odkaz níže:</p>
+          <a href="${url.toString()}">Ověřit účet</a>
+          <p>Odkaz je platný 24 hodin.</p>
+        `
+      },
+    },
   },
   access: {
     create: () => true,

@@ -45,14 +45,14 @@ export default function ContentWrapper({ children }: PropsWithChildren) {
           buttons={[
             {
               text: "Odejít",
-              size: "sm",
+              size: "xs",
               version: "plain",
               iconLeft: "ExternalLink",
               link: "/homepage",
             },
             {
               text: "Nastavení",
-              size: "sm",
+              size: "xs",
               version: "plain",
               iconLeft: "Settings",
               link: "/user-profile/profile-settings",

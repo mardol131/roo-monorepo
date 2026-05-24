@@ -19,11 +19,12 @@ export async function registerUser({
   firstName,
   lastName,
   phone,
-  type,
+  roles,
   gdprConsent,
   termsOfUseConsent,
   marketingConsent,
-}: Omit<User, "id" | "updatedAt" | "createdAt">) {
+  redirectTo,
+}: Omit<User, "id" | "updatedAt" | "createdAt"> & { redirectTo?: string }) {
   const response = await fetch(`${apiUrl}/api/users`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -33,15 +34,27 @@ export async function registerUser({
       password,
       firstName,
       lastName,
-      type,
+      roles,
       phone,
       gdprConsent,
       termsOfUseConsent,
       marketingConsent,
+      redirectTo,
     }),
   });
 
   return response;
+}
+
+export async function verifyUsersEmail(token: string) {
+  const res = await fetch(`${apiUrl}/api/users/verify/${token}`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+
+  return res;
 }
 
 export async function changeEmail(userId: string, email: string) {

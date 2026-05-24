@@ -19,6 +19,10 @@ export const routing = defineRouting({
     "/register": { cs: "/registrace" },
     "/register-company": { cs: "/registrace-firemniho-uctu" },
     "/password-reset": { cs: "/obnoveni-hesla" },
+    "/user-verification": { cs: "/overeni-uzivatele" },
+
+    // invite
+    "/companies/members/invite": { cs: "/firma/pozvani-clena" },
 
     // user profile
     "/user-profile": { cs: "/ucet" },
@@ -50,6 +54,9 @@ export const routing = defineRouting({
     //// legal, company data
     "/company-profile/companies/[companyId]": {
       cs: "/firemni-ucet/firmy/[companyId]",
+    },
+    "/company-profile/companies/[companyId]/team": {
+      cs: "/firemni-ucet/firmy/[companyId]/tym",
     },
     "/company-profile/companies/[companyId]/edit": {
       cs: "/firemni-ucet/firmy/[companyId]/upravit",

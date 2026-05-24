@@ -1,12 +1,10 @@
 # MVP todo
 
-- Přidat multiaccount práva, zatím stačí na úpravu všeho. Později přidat dělení pravomocí na úpravu různých věcí.
+- Přidat emaily
 
 # Landing pages
 
-- Pro Entertainment
-- Pro Gastro
-- Pro Zábavu
+- Pro dodavatele
 - Stránka podmínek a spolupráce pro dodavatele
 
 ## Kolekce
@@ -19,15 +17,11 @@
 
 - Filtrovací queries
 
-### Inzerát
-
-## Objednávání eventu
-
-## Texty
-
-## Images
-
 ## ADMIN SEKCE
+
+## Kolekce
+
+- nastavit správné queries, aby se zobrazovaly jen recordy, se kterými může uživatel pracovat
 
 ## Ovládání poptávky
 
@@ -64,6 +58,7 @@
 - Email o přijetí poptávky objednatel
 - Email o blížícím se eventu dodavatel
 - Email o blížícím se eventu objednatel
+- Email práva ke company
 
 ## Kalendář
 

@@ -1,13 +1,17 @@
 import type { CollectionConfig } from 'payload'
-import { getPhoneField } from './common-fields/phone'
+import { getPhoneField } from '../common-fields/phone'
 import { getRecordStatuses, slugify } from '@roo/common'
-import { getMediaFields } from './common-fields/common-fields'
+import { getMediaFields } from '../common-fields/common-fields'
+import { memberRoleField } from '../common-fields/member-permissions'
+import { membersInviteEndpoint } from './endpoints/members/invite'
+import { verifyMemberEndpoint } from './endpoints/members/verify'
 
 export const Companies: CollectionConfig = {
   slug: 'companies',
   admin: {
     useAsTitle: 'name',
   },
+  endpoints: [membersInviteEndpoint, verifyMemberEndpoint],
   access: {
     create: ({ req }) => !!req.user,
     read: ({ req }) => true,
@@ -131,7 +135,7 @@ export const Companies: CollectionConfig = {
 
     // Collaboration fields
     {
-      name: 'collaborators',
+      name: 'members',
       type: 'array',
       fields: [
         {
@@ -140,44 +144,7 @@ export const Companies: CollectionConfig = {
           relationTo: 'users',
           required: true,
         },
-        {
-          name: 'permissions',
-          type: 'group',
-          required: true,
-          fields: [
-            {
-              name: 'companies',
-              type: 'select',
-              hasMany: true,
-              options: [
-                { label: 'Vytvářet', value: 'create' },
-                { label: 'Upravovat', value: 'edit' },
-                { label: 'Mazat', value: 'delete' },
-              ],
-            },
-            {
-              name: 'listings',
-              type: 'select',
-              hasMany: true,
-              options: [
-                { label: 'Vytvářet', value: 'create' },
-                { label: 'Upravovat', value: 'edit' },
-                { label: 'Mazat', value: 'delete' },
-                { label: 'Aktivovat katalog', value: 'activateCatalog' },
-                { label: 'Deaktivovat katalog', value: 'deactivateCatalog' },
-              ],
-            },
-            {
-              name: 'inquiries',
-              type: 'select',
-              hasMany: true,
-              options: [
-                { label: 'Označit jako přijaté', value: 'accept' },
-                { label: 'Mazat', value: 'delete' },
-              ],
-            },
-          ],
-        },
+        memberRoleField,
       ],
     },
   ],

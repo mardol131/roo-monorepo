@@ -98,6 +98,7 @@ export interface Config {
     inquiries: Inquiry;
     'calendar-events': CalendarEvent;
     'favourite-listings': FavouriteListing;
+    invitations: Invitation;
     'space-types': SpaceType;
     'listing-entertainment-details': ListingEntertainmentDetail;
     'listing-gastro-details': ListingGastroDetail;
@@ -140,6 +141,7 @@ export interface Config {
     inquiries: InquiriesSelect<false> | InquiriesSelect<true>;
     'calendar-events': CalendarEventsSelect<false> | CalendarEventsSelect<true>;
     'favourite-listings': FavouriteListingsSelect<false> | FavouriteListingsSelect<true>;
+    invitations: InvitationsSelect<false> | InvitationsSelect<true>;
     'space-types': SpaceTypesSelect<false> | SpaceTypesSelect<true>;
     'listing-entertainment-details': ListingEntertainmentDetailsSelect<false> | ListingEntertainmentDetailsSelect<true>;
     'listing-gastro-details': ListingGastroDetailsSelect<false> | ListingGastroDetailsSelect<true>;
@@ -327,6 +329,8 @@ export interface User {
   resetPasswordExpiration?: string | null;
   salt?: string | null;
   hash?: string | null;
+  _verified?: boolean | null;
+  _verificationToken?: string | null;
   loginAttempts?: number | null;
   lockUntil?: string | null;
   sessions?:
@@ -1233,14 +1237,10 @@ export interface Company {
     country: string;
   };
   vatId?: string | null;
-  collaborators?:
+  members?:
     | {
         user: string | User;
-        permissions: {
-          companies?: ('create' | 'edit' | 'delete')[] | null;
-          listings?: ('create' | 'edit' | 'delete' | 'activateCatalog' | 'deactivateCatalog')[] | null;
-          inquiries?: ('accept' | 'delete')[] | null;
-        };
+        role: 'editor' | 'manager';
         id?: string | null;
       }[]
     | null;
@@ -1507,6 +1507,21 @@ export interface FavouriteListing {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "invitations".
+ */
+export interface Invitation {
+  id: string;
+  token: string;
+  email: string;
+  company: string | Company;
+  role: 'editor' | 'manager';
+  status: 'pending' | 'accepted' | 'cancelled';
+  invitedBy: string | User;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -1742,6 +1757,10 @@ export interface PayloadLockedDocument {
         value: string | FavouriteListing;
       } | null)
     | ({
+        relationTo: 'invitations';
+        value: string | Invitation;
+      } | null)
+    | ({
         relationTo: 'space-types';
         value: string | SpaceType;
       } | null)
@@ -1918,6 +1937,8 @@ export interface UsersSelect<T extends boolean = true> {
   resetPasswordExpiration?: T;
   salt?: T;
   hash?: T;
+  _verified?: T;
+  _verificationToken?: T;
   loginAttempts?: T;
   lockUntil?: T;
   sessions?:
@@ -2354,17 +2375,11 @@ export interface CompaniesSelect<T extends boolean = true> {
         country?: T;
       };
   vatId?: T;
-  collaborators?:
+  members?:
     | T
     | {
         user?: T;
-        permissions?:
-          | T
-          | {
-              companies?: T;
-              listings?: T;
-              inquiries?: T;
-            };
+        role?: T;
         id?: T;
       };
   updatedAt?: T;
@@ -2625,6 +2640,20 @@ export interface CalendarEventsSelect<T extends boolean = true> {
 export interface FavouriteListingsSelect<T extends boolean = true> {
   user?: T;
   listing?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "invitations_select".
+ */
+export interface InvitationsSelect<T extends boolean = true> {
+  token?: T;
+  email?: T;
+  company?: T;
+  role?: T;
+  status?: T;
+  invitedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }

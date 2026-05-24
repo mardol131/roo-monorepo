@@ -35,24 +35,23 @@ export function Textarea({
         maxLength={maxLength}
         className={`w-full text-sm px-3 py-2.5 border bg-white ${error ? "border-red-500" : "border-zinc-300"} rounded-lg focus:outline-none focus:ring-2 focus:ring-zinc-900 focus:border-transparent resize-none`}
       />
-      {error ||
-        (maxLength && (
-          <div className="flex justify-between items-start mt-1 min-h-5">
-            {error && (
-              <div>
-                <ErrorText error={error} />
-              </div>
-            )}
-            {maxLength !== undefined && (
-              <Text
-                variant="caption"
-                color={charCount >= maxLength ? "danger" : "textLight"}
-              >
-                {charCount}/{maxLength}
-              </Text>
-            )}
-          </div>
-        ))}
+      {error && (
+        <div>
+          <ErrorText error={error} />
+        </div>
+      )}
+      {maxLength && (
+        <div className="flex justify-between items-start mt-1 min-h-5">
+          {maxLength !== undefined && (
+            <Text
+              variant="caption"
+              color={charCount >= maxLength ? "danger" : "textLight"}
+            >
+              {charCount}/{maxLength}
+            </Text>
+          )}
+        </div>
+      )}
     </div>
   );
 }

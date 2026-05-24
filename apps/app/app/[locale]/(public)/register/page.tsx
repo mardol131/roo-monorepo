@@ -21,7 +21,19 @@ const PERKS = [
   },
 ];
 
-export default function RegisterPage() {
+type Props = {
+  searchParams: Promise<{
+    redirectTo?: string;
+    accountType?: string;
+    email?: string;
+  }>;
+};
+
+export default async function RegisterPage({ searchParams }: Props) {
+  const { redirectTo, accountType, email } = await searchParams;
+  const resolvedAccountType =
+    accountType === "company" || accountType === "user" ? accountType : "user";
+
   return (
     <main className="flex min-h-[80vh]">
       {/* ── Left — form ─────────────────────────────────────────── */}
@@ -38,7 +50,13 @@ export default function RegisterPage() {
             </Text>
           </div>
 
-          <RegisterForm accountType="user" buttonVersion="primary" />
+          <RegisterForm
+            hideAlertSection
+            accountType={resolvedAccountType}
+            buttonVersion="primary"
+            redirectTo={redirectTo}
+            defaultEmail={email}
+          />
 
           <div className="mt-6 flex items-start gap-2">
             <div className="flex-1 h-px bg-zinc-100" />

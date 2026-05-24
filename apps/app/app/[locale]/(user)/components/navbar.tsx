@@ -58,7 +58,7 @@ export default function Navbar({ buttons }: { buttons?: ButtonProps[] }) {
 
       <Button
         text="Odhlásit"
-        size="sm"
+        size="xs"
         version="plain"
         iconLeft="LogOut"
         onClick={handleLogout}

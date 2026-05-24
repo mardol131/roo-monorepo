@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { EmptyState, EmptyStateProps } from "./empty-state";
 import TabFilter from "./tab-filter";
+import Text from "@/app/components/ui/atoms/text";
 
 type Filter = { label: string; value: string };
 
@@ -13,6 +14,8 @@ type Props = {
   filterFn?: (item: unknown, activeFilter: string) => boolean;
   renderItem: (item: unknown) => React.ReactNode;
   emptyState: EmptyStateProps;
+  title?: string;
+  subtitle?: string;
 };
 
 export default function CardContainer({
@@ -22,6 +25,8 @@ export default function CardContainer({
   filterFn,
   renderItem,
   emptyState,
+  title,
+  subtitle,
 }: Props) {
   const [activeFilter, setActiveFilter] = useState(
     defaultFilter ?? filters?.[0]?.value ?? "all",
@@ -34,6 +39,16 @@ export default function CardContainer({
 
   return (
     <>
+      {title && subtitle && (
+        <div className="max-w-user-profile-content mb-4">
+          <Text variant="h4" color="textDark" className="font-bold">
+            {title}
+          </Text>
+          <Text variant="label-lg" color="secondary" className="mt-3">
+            {subtitle}
+          </Text>
+        </div>
+      )}
       {filters && filters.length > 0 && (
         <TabFilter
           tabs={filters}

@@ -13,6 +13,13 @@ export const listingDetailKeys = {
     ["listing-detail", collection, id] as const,
 };
 
+export const invitationKeys = {
+  byCompany: (companyId?: string) =>
+    companyId
+      ? (["invitations", "company", companyId] as const)
+      : (["invitations", "company"] as const),
+};
+
 export const companyKeys = {
   all: () => ["companies"] as const,
   byId: (id: string) => ["companies", id] as const,
