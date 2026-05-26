@@ -1,42 +1,5 @@
-import { fetchCompany } from "@/app/react-query/companies/fetch";
-import { companyKeys, listingKeys } from "@/app/react-query/query-keys";
-import {
-  dehydrate,
-  HydrationBoundary,
-  QueryClient,
-} from "@tanstack/react-query";
-import { cookies } from "next/headers";
 import { PropsWithChildren } from "react";
-import ContentWrapper from "../../content-wrapper";
-import { fetchListingsByCompany } from "@/app/react-query/listings/fetch";
 
-type Props = {
-  params: Promise<{ companyId: string }>;
-};
-
-export default async function layout({
-  children,
-  params,
-}: PropsWithChildren<Props>) {
-  const { companyId } = await params;
-  const cookieStore = await cookies();
-  const cookieHeader = { Cookie: cookieStore.toString() };
-
-  const queryClient = new QueryClient();
-
-  await queryClient.prefetchQuery({
-    queryKey: companyKeys.byId(companyId),
-    queryFn: () => fetchCompany(companyId),
-  });
-
-  await queryClient.prefetchQuery({
-    queryKey: listingKeys.byCompany(companyId),
-    queryFn: () => fetchListingsByCompany(companyId, cookieHeader),
-  });
-
-  return (
-    <HydrationBoundary state={dehydrate(queryClient)}>
-      {children}
-    </HydrationBoundary>
-  );
+export default async function layout({ children }: PropsWithChildren) {
+  return <>{children}</>;
 }

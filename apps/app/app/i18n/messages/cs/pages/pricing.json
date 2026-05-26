@@ -14,7 +14,7 @@
     "supplier": {
       "label": "Pro dodavatele",
       "heading": "Nabízím služby",
-      "price": "200 Kč / měs",
+      "priceUnit": "Kč / měs",
       "description": "Jedno předplatné za aktivní inzerát. Žádné provize, veškerý příjem z zakázek je váš."
     }
   },

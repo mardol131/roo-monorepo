@@ -4,11 +4,10 @@ import CardContainer from "@/app/[locale]/(user)/components/card-container";
 import EntityCard from "@/app/[locale]/(user)/components/entity-card";
 import Loader from "@/app/[locale]/(user)/components/loader";
 import PageHeading from "@/app/[locale]/(user)/components/page-heading";
-import Text from "@/app/components/ui/atoms/text";
-import AddTeamMemberModal, {
-  MemberRole,
-} from "@/app/components/ui/molecules/modals/add-team-member-modal";
-import { companyMemberInvite } from "@/app/functions/api/companies";
+import { canEditCompany } from "@/app/[locale]/(user)/utils/companies";
+import AddTeamMemberModal from "@/app/components/ui/molecules/modals/add-team-member-modal";
+import EditTeamMemberRoleModal from "@/app/components/ui/molecules/modals/edit-team-member-role-modal";
+import { useAuth } from "@/app/context/auth/auth-context";
 import { useRouter } from "@/app/i18n/navigation";
 import {
   useCompany,
@@ -18,11 +17,18 @@ import {
   usePendingInvitationsByCompany,
   useUpdateInvitation,
 } from "@/app/react-query/invitations/hooks";
-import { Company, Invitation, User } from "@roo/common";
+import { Company, CompanyMemberRoles, Invitation, User } from "@roo/common";
+import { useTranslations } from "next-intl";
 import { useParams } from "next/navigation";
 import { useState } from "react";
 
 type TeamMember = NonNullable<Company["members"]>[number];
+
+type EditingMember = {
+  id: string;
+  name: string;
+  role: CompanyMemberRoles;
+};
 
 export default function page() {
   const { companyId } = useParams<{ companyId: string }>();
@@ -30,9 +36,13 @@ export default function page() {
   const { mutate: updateCompany } = useUpdateCompany();
   const { data: invitations } = usePendingInvitationsByCompany(companyId);
   const { mutate: updateInvitation } = useUpdateInvitation();
-
+  const g = useTranslations("global");
+  const { user } = useAuth();
   const router = useRouter();
   const [addUserModalOpen, setAddUserModalOpen] = useState(false);
+  const [editingMember, setEditingMember] = useState<EditingMember | null>(
+    null,
+  );
 
   if (isLoading) return <Loader text="Načítají se členové týmu..." />;
   if (!company) return router.back();
@@ -54,26 +64,32 @@ export default function page() {
       <PageHeading
         heading="Váš tým"
         description="Přehled všech členů, kteří mají přístup k této firmě."
-        button={{
-          text: "Přidat člena",
-          version: "companyFull",
-          size: "sm",
-          iconLeft: "Plus",
-          onClick: () => setAddUserModalOpen(true),
-        }}
+        button={
+          canEditCompany(company, user?.id)
+            ? {
+                text: "Přidat člena",
+                version: "companyFull",
+                size: "sm",
+                iconLeft: "Plus",
+                onClick: () => setAddUserModalOpen(true),
+              }
+            : undefined
+        }
       />
       <CardContainer
         items={company.members ?? []}
         emptyState={{
           text: "Zatím žádní členové",
           subtext: "Pozvěte kolegy, aby mohli spravovat firmu společně s vámi.",
-          button: {
-            text: "Přidat člena",
-            version: "companyFull",
-            size: "sm",
-            iconLeft: "Plus",
-            onClick: () => setAddUserModalOpen(true),
-          },
+          button: canEditCompany(company, user?.id)
+            ? {
+                text: "Přidat člena",
+                version: "companyFull",
+                size: "sm",
+                iconLeft: "Plus",
+                onClick: () => setAddUserModalOpen(true),
+              }
+            : undefined,
           icon: "Users",
         }}
         renderItem={(item) => {
@@ -87,7 +103,7 @@ export default function page() {
           const email =
             typeof member.user === "string" ? undefined : user.email;
 
-          const roleLabel = member.role === "manager" ? "Správce" : "Editor";
+          const roleLabel = g(`companies.members.role.${member.role}`);
 
           return (
             <EntityCard
@@ -95,12 +111,28 @@ export default function page() {
               icon="UserRound"
               label={name}
               iconColor="text-company"
+              rightIcon="Pen"
+              hideRightIcon={!canEditCompany(company, user?.id)}
               iconBackgroundColor="bg-company-surface"
               items={[
                 ...(email ? [{ icon: "Mail" as const, content: email }] : []),
                 { icon: "Shield" as const, content: roleLabel },
               ]}
-              deleteEntityHandler={() => handleDeleteMember(member.id ?? "")}
+              onClick={
+                canEditCompany(company, user?.id)
+                  ? () =>
+                      setEditingMember({
+                        id: member.id ?? "",
+                        name,
+                        role: member.role,
+                      })
+                  : undefined
+              }
+              deleteEntityHandler={
+                canEditCompany(company, user?.id)
+                  ? () => handleDeleteMember(member.id ?? "")
+                  : undefined
+              }
             />
           );
         }}
@@ -120,8 +152,7 @@ export default function page() {
             renderItem={(item) => {
               const invitation = item as Invitation;
 
-              const roleLabel =
-                invitation.role === "manager" ? "Správce" : "Editor";
+              const roleLabel = g(`companies.members.role.${invitation.role}`);
 
               return (
                 <EntityCard
@@ -130,7 +161,6 @@ export default function page() {
                   label={invitation.email}
                   iconColor="text-company"
                   iconBackgroundColor="bg-company-surface"
-                  hideLinkIcon
                   deleteEntityHandler={() =>
                     updateInvitationStatus(invitation.id, "cancelled")
                   }
@@ -150,6 +180,13 @@ export default function page() {
         isOpen={addUserModalOpen}
         onClose={() => setAddUserModalOpen(false)}
         companyId={companyId}
+      />
+      <EditTeamMemberRoleModal
+        isOpen={!!editingMember}
+        onClose={() => setEditingMember(null)}
+        companyId={companyId}
+        member={editingMember}
+        allMembers={company.members ?? []}
       />
     </main>
   );

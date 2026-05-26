@@ -1,6 +1,6 @@
 import { getRecordStatuses } from '@roo/common'
 import type { CollectionConfig } from 'payload'
-import { getMediaFields } from './common-fields/common-fields'
+import { getMediaFields } from './common/common-fields'
 
 export const Spaces: CollectionConfig = {
   slug: 'spaces',

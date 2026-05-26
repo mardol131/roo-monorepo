@@ -1,14 +1,8 @@
-import {
-  dehydrate,
-  HydrationBoundary,
-  QueryClient,
-} from "@tanstack/react-query";
+import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import { Metadata } from "next";
 import { NextIntlClientProvider } from "next-intl";
 import { ReactNode } from "react";
 import { AuthProvider } from "./context/auth/auth-context";
-import { fetchFavouriteListings } from "./react-query/favourite-listings/fetch";
-import { favouriteListingKeys } from "./react-query/query-keys";
 import { ReactQueryProvider } from "./react-query/react-query-provider";
 import "./styles/global.css";
 
@@ -19,13 +13,6 @@ export default async function RootLayout({
 }: Readonly<{
   children: ReactNode;
 }>) {
-  const queryClient = new QueryClient();
-
-  await queryClient.prefetchQuery({
-    queryKey: favouriteListingKeys.all(),
-    queryFn: () => fetchFavouriteListings(),
-  });
-
   return (
     <html lang="cs">
       <head>
@@ -34,11 +21,7 @@ export default async function RootLayout({
       <body className={`text-on-dark`}>
         <NextIntlClientProvider>
           <ReactQueryProvider>
-            <AuthProvider>
-              <HydrationBoundary state={dehydrate(queryClient)}>
-                {children}
-              </HydrationBoundary>
-            </AuthProvider>
+            <AuthProvider>{children}</AuthProvider>
           </ReactQueryProvider>
         </NextIntlClientProvider>
       </body>

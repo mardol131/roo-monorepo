@@ -1,9 +1,12 @@
 # MVP todo
 
+- Zkontrolovat texty
+
 # Landing pages
 
-- Pro dodavatele
-- Stránka podmínek a spolupráce pro dodavatele
+- Přidat podmínky
+- Přidat GDPR
+- Cookies
 
 ## Kolekce
 
@@ -18,8 +21,6 @@
 ## ADMIN SEKCE
 
 ## Kolekce
-
-- nastavit správné queries, aby se zobrazovaly jen recordy, se kterými může uživatel pracovat
 
 ## Ovládání poptávky
 
@@ -41,12 +42,6 @@
 - Přepínání active režimu po zaplacení
 - Vypnutí active režimu
 
-## Obchodní podmínky
-
-- Přidat podmínky
-- Přidat GDPR
-- Cookies
-
 ## Emaily
 
 - Verifikační email
@@ -58,8 +53,6 @@
 - Email o blížícím se eventu dodavatel
 - Email o blížícím se eventu objednatel
 - Email práva ke company
-
-## Kalendář
 
 #################################################################
 

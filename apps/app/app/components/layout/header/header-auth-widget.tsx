@@ -15,6 +15,7 @@ import { useEffect, useRef, useState } from "react";
 import { loginModalEvents } from "@/app/components/ui/molecules/modals/login-modal/login-modal";
 import Button from "../../ui/atoms/button";
 import { getInitials } from "@roo/common";
+import { useTranslations } from "next-intl";
 
 export default function HeaderAuthWidget({
   onNavigate,
@@ -22,6 +23,7 @@ export default function HeaderAuthWidget({
   onNavigate?: () => void;
 }) {
   const { user, isLoading, isAuthenticated, logout } = useAuth();
+  const t = useTranslations("global.header.auth");
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -42,7 +44,7 @@ export default function HeaderAuthWidget({
     return (
       <>
         <Button
-          text="Přihlásit se"
+          text={t("login")}
           onClick={() => {
             onNavigate?.();
             loginModalEvents.emit("open", undefined);
@@ -51,7 +53,7 @@ export default function HeaderAuthWidget({
           version="plain"
         />
         <Button
-          text="Registrovat se"
+          text={t("register")}
           onClick={onNavigate}
           link={{
             pathname: "/register",
@@ -111,7 +113,7 @@ export default function HeaderAuthWidget({
           >
             <Settings className="w-4 h-4 text-zinc-400 shrink-0" />
             <Text variant="label-lg" color="textDark">
-              Administrace
+              {t("userAdmin")}
             </Text>
           </Link>
           <Link
@@ -124,7 +126,7 @@ export default function HeaderAuthWidget({
           >
             <Calendar className="w-4 h-4 text-zinc-400 shrink-0" />
             <Text variant="label-lg" color="textDark">
-              Moje události
+              {t("myEvents")}
             </Text>
           </Link>
           <Link
@@ -137,7 +139,7 @@ export default function HeaderAuthWidget({
           >
             <Star className="w-4 h-4 text-zinc-400 shrink-0" />
             <Text variant="label-lg" color="textDark">
-              Oblíbené
+              {t("favourites")}
             </Text>
           </Link>
 
@@ -145,7 +147,7 @@ export default function HeaderAuthWidget({
             <>
               <div className="border-t border-zinc-100 mt-1 pt-1 mb-1">
                 <Text variant="caption" color="secondary" className="px-3 py-1">
-                  Firma
+                  {t("supplierSection")}
                 </Text>
                 <Link
                   href={{ pathname: "/company-profile/companies" }}
@@ -157,20 +159,7 @@ export default function HeaderAuthWidget({
                 >
                   <Building2 className="w-4 h-4 text-zinc-400 shrink-0" />
                   <Text variant="label-lg" color="textDark">
-                    Moje firmy
-                  </Text>
-                </Link>
-                <Link
-                  href={{ pathname: "/company-profile" }}
-                  onClick={() => {
-                    setOpen(false);
-                    onNavigate?.();
-                  }}
-                  className="flex items-center gap-2.5 px-3 py-2 hover:bg-zinc-50 transition-colors"
-                >
-                  <Settings className="w-4 h-4 text-zinc-400 shrink-0" />
-                  <Text variant="label-lg" color="textDark">
-                    Nastavení firmy
+                    {t("companyAdmin")}
                   </Text>
                 </Link>
               </div>
@@ -189,7 +178,7 @@ export default function HeaderAuthWidget({
             >
               <LogOut className="w-4 h-4 shrink-0 text-danger" />
               <Text variant="label-lg" color="danger">
-                Odhlásit se
+                {t("logout")}
               </Text>
             </button>
           </div>

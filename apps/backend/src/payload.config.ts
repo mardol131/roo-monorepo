@@ -57,6 +57,8 @@ export const getQueueName = (name: 'monthlyNotificationsQueue') => {
 }
 
 export default buildConfig({
+  serverURL: process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3001',
+  sharp,
   jobs: {
     shouldAutoRun: () => true,
     autoRun: [

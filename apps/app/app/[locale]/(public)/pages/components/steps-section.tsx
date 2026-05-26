@@ -1,6 +1,8 @@
 "use client";
 
+import Button from "@/app/components/ui/atoms/button";
 import Text from "@/app/components/ui/atoms/text";
+import { IntlLink } from "@/app/i18n/navigation";
 import SectionHeading from "./section-heading";
 import { useEffect, useRef, useState } from "react";
 
@@ -28,6 +30,7 @@ type Props = {
   subheading?: string;
   steps: Step[];
   columns?: 2 | 3 | 4;
+  cta?: { text: string; href: IntlLink };
 };
 
 export default function StepsSection({
@@ -36,6 +39,7 @@ export default function StepsSection({
   subheading,
   steps,
   columns = 3,
+  cta,
 }: Props) {
   const [visible, setVisible] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -107,6 +111,12 @@ export default function StepsSection({
           );
         })}
       </div>
+
+      {cta && (
+        <div className="flex justify-center mt-8">
+          <Button text={cta.text} version="primary" size="lg" link={cta.href} />
+        </div>
+      )}
     </div>
   );
 }

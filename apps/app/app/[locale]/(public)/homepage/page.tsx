@@ -188,9 +188,7 @@ export default function page({}: Props) {
           />
         </div>
       </HomepageSectionWrapper>
-      <HomepageSectionWrapper>
-        <StatsSection />
-      </HomepageSectionWrapper>
+
       <HomepageSectionWrapper>
         <HowItWorksSection />
       </HomepageSectionWrapper>
@@ -216,7 +214,10 @@ export default function page({}: Props) {
             subtitle="Procházej akce podle svých zájmů"
           />
         </div>
-      </HomepageSectionWrapper>{" "}
+      </HomepageSectionWrapper>
+      <HomepageSectionWrapper>
+        <StatsSection />
+      </HomepageSectionWrapper>
       <HomepageSectionWrapper>
         <FilterTagsSection />
       </HomepageSectionWrapper>

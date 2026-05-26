@@ -17,9 +17,12 @@ import RowContainer from "../../../components/row-container";
 import { SummaryCard } from "../../../components/summary-card";
 import ListingStatusTag from "../../../components/tags/listing-status-tag";
 import { CompletionWidget } from "../../../components/completion-widget";
+import { useAuth } from "@/app/context/auth/auth-context";
+import { canEditCompany } from "../../../utils/companies";
 
 export default function page() {
   const { companyId } = useParams<{ companyId: string }>();
+  const { user } = useAuth();
 
   const { data: company, isLoading: isCompanyLoading } = useCompany(companyId);
   const { data: listings, isLoading: isListingsLoading } =
@@ -62,15 +65,19 @@ export default function page() {
             ? [{ icon: "Globe", text: company.website.replace("https://", "") }]
             : []),
         ]}
-        button={{
-          link: {
-            pathname: `/company-profile/companies/[companyId]/edit`,
-            params: { companyId },
-          },
-          iconLeft: "Plus",
-          text: "Upravit firmu",
-          size: "sm",
-        }}
+        button={
+          canEditCompany(company, user?.id)
+            ? {
+                link: {
+                  pathname: `/company-profile/companies/[companyId]/edit`,
+                  params: { companyId },
+                },
+                iconLeft: "Plus",
+                text: "Upravit firmu",
+                size: "sm",
+              }
+            : undefined
+        }
       />
 
       <div className="flex flex-col gap-5">

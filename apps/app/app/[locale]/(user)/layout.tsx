@@ -1,5 +1,6 @@
 import { getServerUser } from "@/app/functions/auth/get-server-user";
 import { redirect } from "@/app/i18n/navigation";
+import { getLocale } from "next-intl/server";
 import { headers } from "next/headers";
 import React from "react";
 
@@ -9,6 +10,7 @@ type Props = {
 
 export default async function layout({ children }: Props) {
   const user = await getServerUser();
+  const locale = await getLocale();
 
   if (!user) {
     const headerStore = await headers();
@@ -22,7 +24,7 @@ export default async function layout({ children }: Props) {
           reasonForRequiredLogin: "not_logged_in",
         },
       },
-      locale: "cs",
+      locale: locale,
     });
   }
 

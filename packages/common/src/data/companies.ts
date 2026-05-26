@@ -1,10 +1,11 @@
 /**
  * Role členů firmy. Vlastník firmy (owner) je nad těmito rolemi a má vždy plný přístup.
  *
- * editor  — vytváření a úpravy inzerátů a poptávek; bez mazání, bez aktivace v katalogu
- * manager — vše výše + mazání a aktivace inzerátů v katalogu; nemůže upravovat firmu samotnou
+ * admin   — stejná práva jako owner; může editovat firmu, spravovat členy a vše s listingy
+ * manager — správa listingů (vytváření, úpravy, mazání, aktivace); nemůže upravovat firmu ani členy
+ * editor  — pouze úpravy existujících listingů; bez vytváření, mazání, aktivace a přístupu k firmě
  */
-export type CompanyMemberRoles = "editor" | "manager";
+export type CompanyMemberRoles = "admin" | "manager" | "editor";
 
 export function getCompanyMemberRole(roles: CompanyMemberRoles[]) {
   return roles;

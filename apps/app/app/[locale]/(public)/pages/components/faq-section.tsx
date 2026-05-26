@@ -1,6 +1,8 @@
 "use client";
 
+import Button from "@/app/components/ui/atoms/button";
 import Text from "@/app/components/ui/atoms/text";
+import { IntlLink } from "@/app/i18n/navigation";
 import SectionHeading from "./section-heading";
 import { ChevronDown } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
@@ -15,6 +17,7 @@ type Props = {
   heading: string;
   subheading?: string;
   items: FaqItem[];
+  cta?: { text: string; href: IntlLink };
 };
 
 function FaqRow({ item, index }: { item: FaqItem; index: number }) {
@@ -57,7 +60,7 @@ function FaqRow({ item, index }: { item: FaqItem; index: number }) {
   );
 }
 
-export default function FaqSection({ badge, heading, subheading, items }: Props) {
+export default function FaqSection({ badge, heading, subheading, items, cta }: Props) {
   const [visible, setVisible] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -98,6 +101,12 @@ export default function FaqSection({ badge, heading, subheading, items }: Props)
           ))}
         </ul>
       </div>
+
+      {cta && (
+        <div className="flex justify-center mt-8">
+          <Button text={cta.text} version="primary" size="lg" link={cta.href} />
+        </div>
+      )}
     </div>
   );
 }

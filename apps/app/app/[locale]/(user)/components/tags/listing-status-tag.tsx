@@ -39,7 +39,7 @@ export default function ListingStatusTag({ status }: Props) {
 
   return (
     <EntityComponentTag
-      text={t(`listings.status.${status}`)}
+      text={t(`global.listings.status.${status}`)}
       bgColor={bgColor}
       textColor={textColor}
       icon={icon(status)}

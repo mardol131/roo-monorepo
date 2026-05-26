@@ -15,7 +15,7 @@ export const createInviteForCompanyMember: Endpoint = {
       return Response.json({ error: 'Invalid request' }, { status: 400 })
     }
     const data = await req.json()
-    const { email, companyId } = data ?? {}
+    const { email, companyId, role } = data ?? {}
 
     if (!email || !companyId) {
       return Response.json({ error: 'Chybí email nebo companyId' }, { status: 400 })
@@ -69,12 +69,13 @@ export const createInviteForCompanyMember: Endpoint = {
 
     await req.payload.create({
       collection: 'invitations',
+      draft: false,
       data: {
         token,
         email,
         company: companyId,
-        status: 'pending' as never,
-        expiresAt: expiresAt.toISOString(),
+        role,
+        status: 'pending',
         invitedBy: req.user.id,
       },
     })

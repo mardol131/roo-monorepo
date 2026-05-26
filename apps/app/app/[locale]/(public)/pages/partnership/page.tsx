@@ -6,6 +6,7 @@ import CenteredHeroSection from "../components/centered-hero-section";
 import CtaSection from "../components/cta-section";
 import FaqSection from "../components/faq-section";
 import FeaturesSection from "../components/features-section";
+import ManifestoSection from "../components/manifesto-section";
 import StepsSection from "../components/steps-section";
 
 export default async function page() {
@@ -53,6 +54,7 @@ export default async function page() {
           columns={2}
           badge={t("steps.badge")}
           heading={t("steps.heading")}
+          cta={{ text: t("cta.primaryCta"), href: { pathname: "/pages/contact" } }}
           steps={[
             {
               title: t("steps.step1.title"),
@@ -72,6 +74,10 @@ export default async function page() {
             },
           ]}
         />
+      </LandingSectionWrapper>
+
+      <LandingSectionWrapper>
+        <ManifestoSection quote="Věříme, že nejlepší spolupráce vzniká tehdy, když obě strany sdílí stejné hodnoty. Rádi bychom s vámi budovali něco, na co budeme oba hrdí." />
       </LandingSectionWrapper>
 
       <LandingSectionWrapper>

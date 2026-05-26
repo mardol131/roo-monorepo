@@ -1,6 +1,6 @@
 import { adminOrApiKeyAuth } from '@/functions/ACL'
 import type { CollectionConfig } from 'payload'
-import { getPhoneField } from './common-fields/phone'
+import { getPhoneField } from './common/phone'
 
 export const Users: CollectionConfig = {
   slug: 'users',
@@ -71,6 +71,10 @@ export const Users: CollectionConfig = {
         }
         return true
       },
+    },
+    {
+      name: 'lastRoadmapVoteAt',
+      type: 'date',
     },
     {
       name: 'marketingConsent',

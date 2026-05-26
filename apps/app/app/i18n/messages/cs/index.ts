@@ -1,4 +1,5 @@
-import global from "./global.json";
+import global from "./global/global.json";
+import errorMessages from "./global/error-messages.json";
 import homepage from "./pages/homepage.json";
 import forGastro from "./pages/for-gastro.json";
 import forEntertainment from "./pages/for-entertainment.json";
@@ -10,9 +11,13 @@ import about from "./pages/about.json";
 import contact from "./pages/contact.json";
 import partnership from "./pages/partnership.json";
 import pricing from "./pages/pricing.json";
+import roadmap from "./pages/roadmap.json";
+import addTeamMemberModal from "./components/add-team-member.modal.json";
+import editTeamMemberRoleModal from "./components/edit-team-member-role.modal.json";
 
 export default {
   global,
+  errorMessages,
   pages: {
     homepage,
     forGastro,
@@ -25,5 +30,10 @@ export default {
     contact,
     partnership,
     pricing,
+    roadmap,
+  },
+  components: {
+    addTeamMemberModal,
+    editTeamMemberRoleModal,
   },
 };

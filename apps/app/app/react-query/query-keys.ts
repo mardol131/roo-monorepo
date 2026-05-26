@@ -65,6 +65,10 @@ export const favouriteListingKeys = {
   all: () => ["favouriteListings"] as const,
 };
 
+export const roadmapItemsKeys = {
+  all: () => ["roadmapItems"] as const,
+};
+
 // Locality
 
 export const regionsKeys = {

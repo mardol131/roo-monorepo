@@ -211,17 +211,30 @@ export default function Page() {
         name={listing.name}
         nameSideComponent={<ListingStatusTag status={listing.status} />}
         infoItems={headerInfoItems}
-        button={{
-          text: "Upravit",
-          size: "sm",
-          version: "listingFull",
-          iconLeft: "Pencil",
-          link: {
-            pathname:
-              "/company-profile/companies/[companyId]/listings/[listingId]/edit",
-            params: { companyId, listingId },
+        buttons={[
+          {
+            text: "Odkaz",
+            size: "sm",
+            version: "plain",
+            iconLeft: "Link",
+            linkTarget: "_blank",
+            link: {
+              pathname: "/listing/[listingId]",
+              params: { listingId },
+            },
           },
-        }}
+          {
+            text: "Upravit",
+            size: "sm",
+            version: "listingFull",
+            iconLeft: "Pencil",
+            link: {
+              pathname:
+                "/company-profile/companies/[companyId]/listings/[listingId]/edit",
+              params: { companyId, listingId },
+            },
+          },
+        ]}
       />
 
       <div className="flex flex-col gap-4">

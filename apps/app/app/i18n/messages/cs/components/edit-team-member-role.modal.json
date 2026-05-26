@@ -1,0 +1,17 @@
+{
+  "header": "Upravit roli člena",
+  "roleLabel": "Role",
+  "roles": {
+    "admin": {
+      "description": "Má plná práva ke všem funkcím včetně správy členů a úpravě firmy. Stejná práva jako vlastník firmy."
+    },
+    "manager": {
+      "description": "Může vše včetně mazání a aktivace inzerátů v katalogu. Nemůže upravovat firmu a přidávat nové členy."
+    },
+    "editor": {
+      "description": "Může upravovat existující inzeráty. Nemůže inzeráty vytvářet, mazat ani aktivovat v katalogu."
+    }
+  },
+  "cancel": "Zrušit",
+  "submit": "Uložit změny"
+}

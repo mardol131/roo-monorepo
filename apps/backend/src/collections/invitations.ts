@@ -1,5 +1,5 @@
 import type { CollectionConfig, Where } from 'payload'
-import { memberRoleField } from './common-fields/member-permissions'
+import { memberRoleField } from './common/member-permissions'
 
 export const Invitations: CollectionConfig = {
   slug: 'invitations',

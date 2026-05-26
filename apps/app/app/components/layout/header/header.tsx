@@ -1,36 +1,41 @@
 "use client";
 
-import { IntlLink, Link } from "@/app/i18n/navigation";
-import { Gamepad2, MapPin, Menu, UtensilsCrossed, X } from "lucide-react";
-import Image from "next/image";
-import logo from "@/public/logo.png";
-import { useEffect, useState } from "react";
-import HeaderAuthWidget from "./header-auth-widget";
 import { useAuth } from "@/app/context/auth/auth-context";
+import { IntlLink, Link } from "@/app/i18n/navigation";
+import logo from "@/public/logo.png";
+import { Balloon, MapPin, Menu, UtensilsCrossed, X } from "lucide-react";
+import { useTranslations } from "next-intl";
+import Image from "next/image";
+import { useState } from "react";
 import Text from "../../ui/atoms/text";
-
-const NAV_ITEMS: { label: string; href: IntlLink; icon: React.ElementType }[] =
-  [
-    {
-      label: "Místa",
-      icon: MapPin,
-      href: { pathname: "/catalog/venue" },
-    },
-    {
-      label: "Gastro",
-      icon: UtensilsCrossed,
-      href: { pathname: "/catalog/gastro" },
-    },
-    {
-      label: "Zábava",
-      icon: Gamepad2,
-      href: { pathname: "/catalog/entertainment" },
-    },
-  ];
+import HeaderAuthWidget from "./header-auth-widget";
 
 export default function Header() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const auth = useAuth();
+  const t = useTranslations("global.header");
+
+  const NAV_ITEMS: {
+    label: string;
+    href: IntlLink;
+    icon: React.ElementType;
+  }[] = [
+    {
+      label: t("nav.venue"),
+      icon: MapPin,
+      href: { pathname: "/catalog/venue" },
+    },
+    {
+      label: t("nav.gastro"),
+      icon: UtensilsCrossed,
+      href: { pathname: "/catalog/gastro" },
+    },
+    {
+      label: t("nav.entertainment"),
+      icon: Balloon,
+      href: { pathname: "/catalog/entertainment" },
+    },
+  ];
 
   const userIsNotLoggedInOrDoesNotHaveCompany =
     !auth.user || !auth.user.roles.includes("company");
@@ -69,7 +74,7 @@ export default function Header() {
                 href="/register-company"
                 className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium text-zinc-500 hover:text-zinc-900 hover:bg-zinc-50 transition-colors"
               >
-                <Text variant="label-lg">Staňte se dodavatelem</Text>
+                <Text variant="label-lg">{t("supplierCta")}</Text>
               </Link>
               <div className="hidden md:block w-px h-4 bg-zinc-200 mx-1" />
             </>
@@ -119,7 +124,7 @@ export default function Header() {
             onClick={() => setMobileOpen(false)}
             className="flex items-center gap-2 px-3 py-2.5 text-sm font-medium text-zinc-700 hover:bg-zinc-50 rounded-lg transition-colors"
           >
-            Staňte se dodavatelem
+            {t("supplierCta")}
           </Link>
 
           <div className="border-t border-zinc-100 mt-1.5 pt-1.5 flex flex-col gap-0.5">

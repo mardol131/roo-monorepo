@@ -1,0 +1,20 @@
+{
+  "hero": {
+    "badge": "Roadmap",
+    "heading": "Co chystáme",
+    "subheading": "Sleduj vývoj platformy a hlasuj pro funkce, které ti nejvíce chybí."
+  },
+  "inProgress": {
+    "heading": "Na čem pracujeme"
+  },
+  "planned": {
+    "heading": "V plánu"
+  },
+  "completed": {
+    "heading": "Dokončené"
+  },
+  "vote": "Hlasovat",
+  "voted": "Hlasováno",
+  "empty": "Zatím žádné položky",
+  "nextVote": "Další hlas můžeš dát až po datu {date}"
+}

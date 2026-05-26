@@ -1,19 +1,21 @@
 import Text from "@/app/components/ui/atoms/text";
 import { confirmActionModalEvents } from "@/app/components/ui/molecules/modals/confirm-action-modal";
 import { Link, IntlLink } from "@/app/i18n/navigation";
+import { LucideIcons } from "@roo/common";
 import { de } from "date-fns/locale";
-import { ChevronRight, icons, Trash2 } from "lucide-react";
+import * as lucideIcons from "lucide-react";
 import { ReactNode } from "react";
 
 type Item =
   | {
-      icon: keyof typeof icons;
+      icon: LucideIcons;
       content?: string | null;
     }
   | undefined;
 
 type Props = {
-  icon: keyof typeof icons;
+  icon: LucideIcons;
+  rightIcon?: LucideIcons;
   iconColor: string;
   iconBackgroundColor: string;
   label: string;
@@ -23,13 +25,14 @@ type Props = {
   labelComponent?: ReactNode;
   rightComponent?: ReactNode;
   onClick?: () => void;
-  hideLinkIcon?: boolean;
+  hideRightIcon?: boolean;
   deleteEntityHandler?: (e: React.MouseEvent<HTMLButtonElement>) => void;
   plain?: boolean;
 };
 
 export default function EntityCard({
   icon,
+  rightIcon,
   iconColor,
   iconBackgroundColor,
   label,
@@ -38,12 +41,15 @@ export default function EntityCard({
   target,
   labelComponent,
   rightComponent,
-  hideLinkIcon = false,
+  hideRightIcon = false,
   onClick,
   deleteEntityHandler,
   plain = false,
 }: Props) {
-  const Icon = icons[icon];
+  const Icon = lucideIcons[icon] as React.ElementType;
+  const RightIcon = rightIcon
+    ? (lucideIcons[rightIcon] as React.ElementType)
+    : null;
 
   const content = (
     <div
@@ -71,7 +77,7 @@ export default function EntityCard({
           {items
             .filter((item) => item !== undefined)
             .map((item, i) => {
-              const ItemIcon = icons[item.icon];
+              const ItemIcon = lucideIcons[item.icon] as React.ElementType;
               return (
                 <span
                   key={i}
@@ -86,9 +92,12 @@ export default function EntityCard({
       </div>
 
       {rightComponent}
-      {!hideLinkIcon && (
-        <ChevronRight className="w-4 h-4 text-zinc-400 group-hover:text-zinc-600 transition-colors shrink-0" />
-      )}
+      {!hideRightIcon &&
+        (RightIcon ? (
+          <RightIcon className="w-4 h-4 text-zinc-400 group-hover:text-zinc-600 transition-colors shrink-0" />
+        ) : (
+          <lucideIcons.ChevronRight className="w-4 h-4 text-zinc-400 group-hover:text-zinc-600 transition-colors shrink-0" />
+        ))}
     </div>
   );
 
@@ -104,7 +113,7 @@ export default function EntityCard({
             className="cursor-pointer"
             onClick={deleteEntityHandler}
           >
-            <Trash2 className="w-5 h-5 text-zinc-400 hover:text-danger smooth" />
+            <lucideIcons.Trash2 className="w-5 h-5 text-zinc-400 hover:text-danger smooth" />
           </button>
         )}
       </div>
@@ -120,7 +129,7 @@ export default function EntityCard({
           className="cursor-pointer"
           onClick={deleteEntityHandler}
         >
-          <Trash2 className="w-5 h-5 text-zinc-400 hover:text-danger smooth" />
+          <lucideIcons.Trash2 className="w-5 h-5 text-zinc-400 hover:text-danger smooth" />
         </button>
       )}
     </div>

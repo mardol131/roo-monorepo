@@ -12,6 +12,7 @@ import ComparisonSection from "../components/comparison-section";
 import CtaSection from "../components/cta-section";
 import FaqSection from "../components/faq-section";
 import FeaturesSection from "../components/features-section";
+import ManifestoSection from "../components/manifesto-section";
 import PricingSection from "../components/pricing-section";
 import StepsSection from "../components/steps-section";
 
@@ -39,6 +40,7 @@ export default async function page() {
         <StepsSection
           badge={t("steps.badge")}
           heading={t("steps.heading")}
+          cta={{ text: t("hero.primaryCta"), href: { pathname: "/register-company" } }}
           steps={[
             {
               title: t("steps.step1.title"),
@@ -57,9 +59,14 @@ export default async function page() {
       </LandingSectionWrapper>
 
       <LandingSectionWrapper>
+        <ManifestoSection quote="Každý sál si zaslouží správné akce. Každá akce si zaslouží správné místo. My tenhle match usnadňujeme." />
+      </LandingSectionWrapper>
+
+      <LandingSectionWrapper>
         <BenefitsSection
           heading={t("benefits.heading")}
           subheading={t("benefits.subheading")}
+          cta={{ text: t("hero.primaryCta"), href: { pathname: "/register-company" } }}
           benefits={[
             {
               image:

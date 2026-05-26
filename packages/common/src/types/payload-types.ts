@@ -103,6 +103,7 @@ export interface Config {
     'listing-entertainment-details': ListingEntertainmentDetail;
     'listing-gastro-details': ListingGastroDetail;
     'listing-venue-details': ListingVenueDetail;
+    'roadmap-items': RoadmapItem;
     'payload-kv': PayloadKv;
     'payload-jobs': PayloadJob;
     'payload-locked-documents': PayloadLockedDocument;
@@ -146,6 +147,7 @@ export interface Config {
     'listing-entertainment-details': ListingEntertainmentDetailsSelect<false> | ListingEntertainmentDetailsSelect<true>;
     'listing-gastro-details': ListingGastroDetailsSelect<false> | ListingGastroDetailsSelect<true>;
     'listing-venue-details': ListingVenueDetailsSelect<false> | ListingVenueDetailsSelect<true>;
+    'roadmap-items': RoadmapItemsSelect<false> | RoadmapItemsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-jobs': PayloadJobsSelect<false> | PayloadJobsSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -319,6 +321,7 @@ export interface User {
   roles: ('user' | 'company')[];
   gdprConsent: boolean;
   termsOfUseConsent: boolean;
+  lastRoadmapVoteAt?: string | null;
   marketingConsent?: boolean | null;
   loginToken?: string | null;
   loginTokenExpiration?: string | null;
@@ -598,6 +601,7 @@ export interface Listing {
   name: string;
   slug: string;
   status: 'active' | 'inactive' | 'disabled' | 'archived';
+  subscriptionActive?: boolean | null;
   company: string | Company;
   description?: string | null;
   shortDescription?: string | null;
@@ -724,6 +728,7 @@ export interface ListingVenueDetail {
         id?: string | null;
       }[]
     | null;
+  listing: string | Listing;
   faq?:
     | {
         active?: boolean | null;
@@ -1002,6 +1007,7 @@ export interface ListingGastroDetail {
         id?: string | null;
       }[]
     | null;
+  listing: string | Listing;
   faq?:
     | {
         active?: boolean | null;
@@ -1132,6 +1138,7 @@ export interface ListingEntertainmentDetail {
         id?: string | null;
       }[]
     | null;
+  listing: string | Listing;
   faq?:
     | {
         active?: boolean | null;
@@ -1240,7 +1247,7 @@ export interface Company {
   members?:
     | {
         user: string | User;
-        role: 'editor' | 'manager';
+        role: 'admin' | 'manager' | 'editor';
         id?: string | null;
       }[]
     | null;
@@ -1514,9 +1521,22 @@ export interface Invitation {
   token: string;
   email: string;
   company: string | Company;
-  role: 'editor' | 'manager';
+  role: 'admin' | 'manager' | 'editor';
   status: 'pending' | 'accepted' | 'cancelled';
   invitedBy: string | User;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "roadmap-items".
+ */
+export interface RoadmapItem {
+  id: string;
+  name: string;
+  description?: string | null;
+  votes?: number | null;
+  status?: ('planned' | 'in-progress' | 'completed') | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1775,6 +1795,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'listing-venue-details';
         value: string | ListingVenueDetail;
+      } | null)
+    | ({
+        relationTo: 'roadmap-items';
+        value: string | RoadmapItem;
       } | null);
   globalSlug?: string | null;
   user:
@@ -1927,6 +1951,7 @@ export interface UsersSelect<T extends boolean = true> {
   roles?: T;
   gdprConsent?: T;
   termsOfUseConsent?: T;
+  lastRoadmapVoteAt?: T;
   marketingConsent?: T;
   loginToken?: T;
   loginTokenExpiration?: T;
@@ -2232,6 +2257,7 @@ export interface ListingsSelect<T extends boolean = true> {
   name?: T;
   slug?: T;
   status?: T;
+  subscriptionActive?: T;
   company?: T;
   description?: T;
   shortDescription?: T;
@@ -2758,6 +2784,7 @@ export interface ListingEntertainmentDetailsSelect<T extends boolean = true> {
         key?: T;
         id?: T;
       };
+  listing?: T;
   faq?:
     | T
     | {
@@ -2906,6 +2933,7 @@ export interface ListingGastroDetailsSelect<T extends boolean = true> {
         key?: T;
         id?: T;
       };
+  listing?: T;
   faq?:
     | T
     | {
@@ -3049,6 +3077,7 @@ export interface ListingVenueDetailsSelect<T extends boolean = true> {
         key?: T;
         id?: T;
       };
+  listing?: T;
   faq?:
     | T
     | {
@@ -3149,6 +3178,18 @@ export interface ListingVenueDetailsSelect<T extends boolean = true> {
         timeFrom?: T;
         timeTo?: T;
       };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "roadmap-items_select".
+ */
+export interface RoadmapItemsSelect<T extends boolean = true> {
+  name?: T;
+  description?: T;
+  votes?: T;
+  status?: T;
   updatedAt?: T;
   createdAt?: T;
 }

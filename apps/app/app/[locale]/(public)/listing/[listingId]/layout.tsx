@@ -5,6 +5,7 @@ import {
   HydrationBoundary,
   QueryClient,
 } from "@tanstack/react-query";
+import { cookies } from "next/headers";
 import { PropsWithChildren } from "react";
 
 type Props = {
@@ -16,11 +17,13 @@ export default async function layout({
   params,
 }: PropsWithChildren<Props>) {
   const { listingId } = await params;
+  const cookieStore = await cookies();
+  const cookieHeader = { Cookie: cookieStore.toString() };
 
   const queryClient = new QueryClient();
   queryClient.prefetchQuery({
     queryKey: listingKeys.byId(listingId),
-    queryFn: () => fetchCompanies(),
+    queryFn: () => fetchCompanies({ headers: cookieHeader }),
   });
 
   return (

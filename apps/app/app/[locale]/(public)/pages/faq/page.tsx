@@ -1,6 +1,7 @@
 import { LandingSectionWrapper } from "@/app/components/ui/sections/landing-section-wrapper";
 import { getTranslations } from "next-intl/server";
 import CenteredHeroSection from "../components/centered-hero-section";
+import CtaSection from "../components/cta-section";
 import FaqContent from "./faq-content";
 
 export default async function page() {
@@ -102,6 +103,14 @@ export default async function page() {
       />
       <LandingSectionWrapper>
         <FaqContent groups={faqGroups} />
+      </LandingSectionWrapper>
+      <LandingSectionWrapper>
+        <CtaSection
+          heading="Připraveni začít?"
+          subheading="Zaregistrujte se zdarma a začněte plánovat akce nebo prezentujte svůj prostor."
+          primaryCta={{ text: "Registrace zdarma", href: "/register" }}
+          secondaryCta={{ text: "Jsem dodavatel", href: "/register-company" }}
+        />
       </LandingSectionWrapper>
     </>
   );

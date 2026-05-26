@@ -6,7 +6,9 @@ export const Admins: CollectionConfig = {
   admin: {
     useAsTitle: 'email',
   },
-  auth: true,
+  auth: {
+    tokenExpiration: 60 * 60 * 24 * 7, // 7 days
+  },
   access: {
     create: async ({ req }) => {
       return adminOrApiKeyAuth(req)

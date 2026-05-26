@@ -36,7 +36,9 @@ export default async function page() {
           supplier={{
             label: t("audienceCards.supplier.label"),
             heading: t("audienceCards.supplier.heading"),
-            price: t("audienceCards.supplier.price"),
+            price: `${ROO_LISTING_DISCOUNTED_PRICE_PER_MONTH} ${t("audienceCards.supplier.priceUnit")}`,
+            originalPrice: `${ROO_LISTING_PRICE_PER_MONTH} ${t("audienceCards.supplier.priceUnit")}`,
+            discountPercent: ROO_LISTING_DISCOUNT_PERCENT,
             description: t("audienceCards.supplier.description"),
             anchorId: "pro-dodavatele",
           }}

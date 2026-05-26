@@ -56,6 +56,14 @@
     "status": {
       "active": "Aktivní",
       "inactive": "Neaktivní"
+    },
+    "members": {
+      "role": {
+        "owner": "Vlastník",
+        "admin": "Administrátor",
+        "manager": "Manažer",
+        "editor": "Editor"
+      }
     }
   },
   "variants": {
@@ -86,6 +94,24 @@
       "420": "+420"
     }
   },
+  "header": {
+    "nav": {
+      "venue": "Místa",
+      "gastro": "Gastro",
+      "entertainment": "Zábava"
+    },
+    "supplierCta": "Staňte se dodavatelem",
+    "auth": {
+      "login": "Přihlásit se",
+      "register": "Registrovat se",
+      "logout": "Odhlásit se",
+      "myEvents": "Moje události",
+      "favourites": "Oblíbené",
+      "userAdmin": "Administrace",
+      "companyAdmin": "Administrace",
+      "supplierSection": "Dodavatel"
+    }
+  },
   "footer": {
     "brand": {
       "description": "Naplánujte celý firemní event na jednom místě."
@@ -94,13 +120,11 @@
       "roo": {
         "title": "Společnost",
         "about": "O nás",
-        "careers": "Kariéra",
-        "blog": "Blog",
-        "contact": "Kontakty"
+        "roadmap": "Na čem pracujeme"
       },
       "help": {
         "title": "Pomoc",
-        "support": "Centrum podpory",
+        "contact": "Kontakty",
         "faq": "FAQ",
         "pricing": "Ceník",
         "howItWorksForUser": "Jak to funguje"
@@ -122,7 +146,7 @@
     },
     "bottom": {
       "rights": "Všechna práva vyhrazena.",
-      "privacy": "Soukromí",
+      "privacy": "Ochrana osobních údajů",
       "terms": "Podmínky služby",
       "cookies": "Cookies"
     }

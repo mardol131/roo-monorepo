@@ -1,4 +1,4 @@
-import { MemberRole } from "@/app/components/ui/molecules/modals/add-team-member-modal";
+import { CompanyMemberRoles } from "@roo/common";
 
 export async function companyMemberVerify(companyMemberInviteToken: string) {
   const res = await fetch(
@@ -15,7 +15,7 @@ export async function companyMemberVerify(companyMemberInviteToken: string) {
 
 export async function companyMemberInvite(
   email: string,
-  role: MemberRole,
+  role: CompanyMemberRoles,
   companyId: string,
 ) {
   const res = await fetch(

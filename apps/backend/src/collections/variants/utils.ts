@@ -1,6 +1,6 @@
 import { getRecordStatuses } from '@roo/common'
 import { Access, Field, Where } from 'payload'
-import { getMediaFields, priceField } from '../common-fields/common-fields'
+import { getMediaFields, priceField } from '../common/common-fields'
 
 export const variantsAccessControl: {
   create: Access

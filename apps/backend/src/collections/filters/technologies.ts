@@ -1,6 +1,6 @@
 import { adminOrApiKeyAuth } from '@/functions/ACL'
 import type { CollectionConfig } from 'payload'
-import { getFiltersFields } from '../common-fields/filters-fields'
+import { getFiltersFields } from '../common/filters-fields'
 
 export const Technologies: CollectionConfig = {
   slug: 'technologies',

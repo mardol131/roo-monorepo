@@ -9,9 +9,12 @@ import { useListing } from "@/app/react-query/listings/hooks";
 import { useCompany } from "@/app/react-query/companies/hooks";
 import { useParams } from "next/navigation";
 import Navbar from "../components/navbar";
+import { canEditCompany } from "../utils/companies";
+import { useAuth } from "@/app/context/auth/auth-context";
 
 export default function ContentWrapper({ children }: PropsWithChildren) {
   const pathname = usePathname();
+  const { user } = useAuth();
 
   const { companyId, listingId } = useParams<{
     companyId?: string;
@@ -46,14 +49,18 @@ export default function ContentWrapper({ children }: PropsWithChildren) {
         icon: "LayoutDashboard",
       },
 
-      {
-        label: "Detailní nastavení firmy",
-        href: {
-          pathname: "/company-profile/companies/[companyId]/edit",
-          params: { companyId },
-        },
-        icon: "Settings",
-      },
+      ...(canEditCompany(company, user?.id)
+        ? [
+            {
+              label: "Detailní nastavení firmy",
+              href: {
+                pathname: "/company-profile/companies/[companyId]/edit",
+                params: { companyId },
+              },
+              icon: "Settings",
+            } as const,
+          ]
+        : []),
       {
         label: "Tým",
         href: {

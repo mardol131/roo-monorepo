@@ -1,6 +1,8 @@
 "use client";
 
+import Button from "@/app/components/ui/atoms/button";
 import Text from "@/app/components/ui/atoms/text";
+import { IntlLink } from "@/app/i18n/navigation";
 import SectionHeading from "./section-heading";
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
@@ -16,6 +18,7 @@ type Props = {
   heading: string;
   subheading?: string;
   benefits: [Benefit, Benefit, Benefit];
+  cta?: { text: string; href: IntlLink };
 };
 
 export default function BenefitsSection({
@@ -23,6 +26,7 @@ export default function BenefitsSection({
   heading,
   subheading,
   benefits,
+  cta,
 }: Props) {
   const [visible, setVisible] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -85,6 +89,12 @@ export default function BenefitsSection({
           );
         })}
       </div>
+
+      {cta && (
+        <div className="flex justify-center mt-8">
+          <Button text={cta.text} version="primary" size="lg" link={cta.href} />
+        </div>
+      )}
     </div>
   );
 }

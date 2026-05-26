@@ -6,5 +6,5 @@ export const memberRoleField: SelectField = {
   type: 'select',
   required: true,
   defaultValue: 'editor',
-  options: getCompanyMemberRole(['editor', 'manager']),
+  options: getCompanyMemberRole(['admin', 'manager', 'editor']),
 }

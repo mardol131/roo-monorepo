@@ -35,6 +35,7 @@ export const routing = defineRouting({
       cs: "/stranky/jak-to-funguje-pro-uzivatele",
     },
     "/pages/support": { cs: "/stranky/podpora" },
+    "/pages/roadmap": { cs: "/stranky/roadmapa" },
 
     // authorization
     "/login": { cs: "/prihlaseni" },

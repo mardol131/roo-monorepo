@@ -1,0 +1,25 @@
+{
+  "header": "Přidat člena týmu",
+  "emailLabel": "E-mail uživatele",
+  "emailPlaceholder": "jan@firma.cz",
+  "roleLabel": "Role",
+  "roles": {
+    "admin": {
+      "description": "Má plná práva ke všem funkcím včetně správy členů a úpravě firmy. Stejná práva jako vlastník firmy."
+    },
+    "manager": {
+      "description": "Může vše včetně mazání a aktivace inzerátů v katalogu. Nemůže upravovat firmu a přidávat nové členy."
+    },
+    "editor": {
+      "description": "Může upravovat existující inzeráty. Nemůže inzeráty vytvářet, mazat ani aktivovat v katalogu."
+    }
+  },
+  "success": {
+    "header": "Pozvánka odeslána",
+    "title": "Pozvánka byla úspěšně odeslána",
+    "description": "Člen týmu obdrží e-mail s odkazem pro přijetí pozvánky.",
+    "close": "Zavřít"
+  },
+  "cancel": "Zrušit",
+  "submit": "Přidat člena"
+}

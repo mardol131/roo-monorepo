@@ -12,51 +12,27 @@ import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { companyMemberInvite } from "@/app/functions/api/companies";
 import { invitationKeys } from "@/app/react-query/query-keys";
+import { CompanyMemberRoles, getCompanyMemberRole } from "@roo/common";
+import { useTranslations } from "next-intl";
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 
-export type MemberRole = "editor" | "manager";
-
 type FormData = {
   email: string;
-  role: MemberRole;
+  role: CompanyMemberRoles;
 };
 
 // ── Schema ─────────────────────────────────────────────────────────────────────
 
 const schema = yup
   .object({
-    email: yup
-      .string()
-      .email("Zadejte platný e-mail")
-      .required("E-mail je povinný"),
+    email: yup.string().email("emailInvalid").required("emailRequired"),
     role: yup
       .string()
-      .oneOf(["editor", "manager"] as const)
+      .oneOf(getCompanyMemberRole(["admin", "manager", "editor"]))
       .required(),
   })
   .required();
-
-// ── Role options ───────────────────────────────────────────────────────────────
-
-const ROLE_OPTIONS: {
-  value: MemberRole;
-  label: string;
-  description: string;
-}[] = [
-  {
-    value: "editor",
-    label: "Editor",
-    description:
-      "Může vytvářet a upravovat inzeráty a poptávky. Nemůže nic mazat ani aktivovat inzeráty v katalogu.",
-  },
-  {
-    value: "manager",
-    label: "Správce",
-    description:
-      "Může vše včetně mazání a aktivace inzerátů v katalogu. Nemůže mazat firmu.",
-  },
-];
 
 // ── Component ──────────────────────────────────────────────────────────────────
 
@@ -71,6 +47,10 @@ export default function AddTeamMemberModal({
   onClose,
   companyId,
 }: Props) {
+  const t = useTranslations("components.addTeamMemberModal");
+  const g = useTranslations("global");
+  const e = useTranslations("errorMessages");
+
   const queryClient = useQueryClient();
   const [status, setStatus] = useState<"idle" | "submitting" | "success">(
     "idle",
@@ -105,15 +85,39 @@ export default function AddTeamMemberModal({
       setErrorMessage(result.error);
       setStatus("idle");
     } else {
-      queryClient.invalidateQueries({ queryKey: invitationKeys.byCompany(companyId) });
+      queryClient.invalidateQueries({
+        queryKey: invitationKeys.byCompany(companyId),
+      });
       setStatus("success");
     }
   };
 
+  const roleOptions: {
+    value: CompanyMemberRoles;
+    label: string;
+    description: string;
+  }[] = [
+    {
+      value: "admin",
+      label: g("companies.members.role.admin"),
+      description: t("roles.admin.description"),
+    },
+    {
+      value: "manager",
+      label: g("companies.members.role.manager"),
+      description: t("roles.manager.description"),
+    },
+    {
+      value: "editor",
+      label: g("companies.members.role.editor"),
+      description: t("roles.editor.description"),
+    },
+  ];
+
   if (status === "success") {
     return (
       <ModalLayout
-        header="Pozvánka odeslána"
+        header={t("success.header")}
         isOpen={isOpen}
         onClose={handleClose}
         maxWidth="max-w-lg"
@@ -124,14 +128,14 @@ export default function AddTeamMemberModal({
           </div>
           <div className="flex flex-col items-center gap-1 text-center">
             <Text variant="label-lg" color="textDark" className="font-semibold">
-              Pozvánka byla úspěšně odeslána
+              {t("success.title")}
             </Text>
             <Text variant="body-sm" color="textLight">
-              Člen týmu obdrží e-mail s odkazem pro přijetí pozvánky.
+              {t("success.description")}
             </Text>
           </div>
           <Button
-            text="Zavřít"
+            text={t("success.close")}
             version="primary"
             htmlType="button"
             onClick={handleClose}
@@ -143,7 +147,7 @@ export default function AddTeamMemberModal({
 
   return (
     <ModalLayout
-      header="Přidat člena týmu"
+      header={t("header")}
       isOpen={isOpen}
       onClose={handleClose}
       maxWidth="max-w-lg"
@@ -151,26 +155,30 @@ export default function AddTeamMemberModal({
     >
       <form onSubmit={handleSubmit(submit)} className="flex flex-col gap-6">
         <Input
-          label="E-mail uživatele"
+          label={t("emailLabel")}
           isRequired
           inputProps={{
             ...register("email"),
             type: "email",
-            placeholder: "jan@firma.cz",
           }}
-          error={errors.email?.message}
+          placeholder={t("emailPlaceholder")}
+          error={
+            errors.email?.message
+              ? e(errors.email.message as "emailInvalid" | "emailRequired")
+              : undefined
+          }
         />
 
         <div className="flex flex-col gap-3">
           <Text variant="label-lg" color="textDark" className="font-semibold">
-            Role
+            {t("roleLabel")}
           </Text>
           <Controller
             name="role"
             control={control}
             render={({ field }) => (
               <div className="flex flex-col gap-2">
-                {ROLE_OPTIONS.map((option) => {
+                {roleOptions.map((option) => {
                   const selected = field.value === option.value;
                   return (
                     <button
@@ -217,14 +225,14 @@ export default function AddTeamMemberModal({
 
         <div className="flex justify-end gap-2 pt-2 border-t border-zinc-100">
           <Button
-            text="Zrušit"
+            text={t("cancel")}
             version="plain"
             htmlType="button"
             onClick={handleClose}
             disabled={status === "submitting"}
           />
           <Button
-            text="Přidat člena"
+            text={t("submit")}
             version="primary"
             htmlType="submit"
             iconLeft="UserPlus"

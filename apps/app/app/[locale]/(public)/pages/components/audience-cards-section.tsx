@@ -8,6 +8,8 @@ type AudienceCard = {
   label: string;
   heading: string;
   price: string;
+  originalPrice?: string;
+  discountPercent?: number;
   description: string;
   anchorId: string;
 };
@@ -36,7 +38,7 @@ function Card({
   return (
     <button
       onClick={handleClick}
-      className="group text-left w-full rounded-3xl border border-zinc-100 bg-zinc-50 px-8 py-8 flex flex-col gap-6 hover:border-zinc-200 hover:bg-white transition-all duration-300"
+      className="group text-left w-full rounded-3xl border border-zinc-100 cursor-pointer bg-zinc-50 px-8 py-8 flex flex-col gap-6 hover:scale-102 smooth"
       style={{
         opacity: visible ? 1 : 0,
         transform: visible ? "translateY(0)" : "translateY(20px)",
@@ -46,7 +48,11 @@ function Card({
     >
       <div className="flex items-start justify-between gap-4">
         <div className="flex flex-col gap-1.5">
-          <Text variant="label" color="textLight" className="uppercase tracking-widest text-xs">
+          <Text
+            variant="label"
+            color="textLight"
+            className="uppercase tracking-widest text-xs"
+          >
             {card.label}
           </Text>
           <Text variant="display-2xl" color="textDark">
@@ -64,18 +70,30 @@ function Card({
         </div>
       </div>
 
-      <div
-        className={`inline-flex w-fit items-end gap-1.5 rounded-2xl px-5 py-3 ${
-          accent === "company" ? "bg-company-surface" : "bg-emerald-100"
-        }`}
-      >
-        <span
-          className={`text-4xl font-black leading-none tabular-nums ${
-            accent === "company" ? "text-company" : "text-emerald-700"
+      <div className="flex items-center gap-3 flex-wrap">
+        <div
+          className={`inline-flex w-fit items-end gap-1.5 rounded-2xl px-5 py-3 ${
+            accent === "company" ? "bg-company-surface" : "bg-emerald-100"
           }`}
         >
-          {card.price}
-        </span>
+          <span
+            className={`text-4xl font-black leading-none tabular-nums ${
+              accent === "company" ? "text-company" : "text-emerald-700"
+            }`}
+          >
+            {card.price}
+          </span>
+        </div>
+        {card.originalPrice && card.discountPercent && (
+          <div className="flex items-center gap-2">
+            <span className="text-lg text-zinc-400 line-through tabular-nums">
+              {card.originalPrice}
+            </span>
+            <span className="text-xs font-bold text-white bg-red-500 rounded-full px-2 py-1 leading-none">
+              -{card.discountPercent}%
+            </span>
+          </div>
+        )}
       </div>
 
       <Text variant="body" color="textLight">

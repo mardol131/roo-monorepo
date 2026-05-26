@@ -49,7 +49,7 @@ const STATUS_STYLES: Record<
 };
 
 export default function InquiryStatusTag({ status }: Props) {
-  const t = useTranslations("inquiries.status_actions");
+  const t = useTranslations("global.inquiries.status_actions");
   const detailedStatus = getDetailedStatus(status);
   const { bgColor, textColor, icon } = STATUS_STYLES[detailedStatus];
 

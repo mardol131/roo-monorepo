@@ -20,11 +20,11 @@ export default function Footer() {
       links: [
         { label: t("sections.help.pricing"), href: "/pages/pricing" },
         { label: t("sections.help.faq"), href: "/pages/faq" },
-        { label: t("sections.help.support"), href: "/pages/support" },
         {
           label: t("sections.help.howItWorksForUser"),
           href: "/pages/how-it-works-for-user",
         },
+        { label: t("sections.help.contact"), href: "/pages/contact" },
       ],
     },
     {
@@ -50,7 +50,7 @@ export default function Footer() {
       title: t("sections.roo.title"),
       links: [
         { label: t("sections.roo.about"), href: "/pages/about" },
-        { label: t("sections.roo.contact"), href: "/pages/contact" },
+        { label: t("sections.roo.roadmap"), href: "/pages/roadmap" },
       ],
     },
   ];

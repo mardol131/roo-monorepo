@@ -54,6 +54,7 @@ export default async function page() {
         <BenefitsSection
           heading={t("benefits.heading")}
           subheading={t("benefits.subheading")}
+          cta={{ text: t("cta.primaryCta"), href: "/register-company" }}
           benefits={[
             {
               image: t("benefits.benefit1.image"),
