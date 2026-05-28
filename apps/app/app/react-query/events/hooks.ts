@@ -18,10 +18,12 @@ import {
 
 export function useEvents({
   options,
-}: { options?: GetCollectionParams } = {}) {
+  enabled,
+}: { options?: GetCollectionParams; enabled?: boolean } = {}) {
   return useQuery({
     queryKey: eventKeys.all(options?.query, options?.limit),
     queryFn: () => fetchEvents(options),
+    enabled,
   });
 }
 

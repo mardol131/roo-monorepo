@@ -39,8 +39,8 @@
 
 - Napojit na stripe
 - Stripe webhook
-- Přepínání active režimu po zaplacení
-- Vypnutí active režimu
+- Přepínání subscriptionActive režimu po zaplacení
+- Vypnutí subscriptionActive režimu
 
 ## Emaily
 
@@ -73,8 +73,17 @@
 - Odesílání hromadného mailu hostům
 - Vytvoření landing page pro event
 - Public eventy, na které se budou moci lidé hlásit
--
+
+# Platby
+
+- platební účty kvůli předvyplňování faktur
+- Odesílání faktur zákazníkům přes portál
+- Vyžádání platby předem
+
+# Hondě dopředu
+
+- Escrow pro platby
 
 # Blog
 
-- Připravit pro Ondru
+- Připravit

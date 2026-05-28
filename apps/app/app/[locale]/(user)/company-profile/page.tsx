@@ -158,17 +158,6 @@ export default function page() {
               subtext:
                 "Abyste mohli začít nabízet služby, musíte nejprve vytvořit firmu, která je bude nabízet. Klikněte na tlačítko níže.",
             }}
-            headerRightComponent={
-              <Button
-                text="Přidat firmu"
-                version="primary"
-                size="sm"
-                iconLeft="Plus"
-                link={{
-                  pathname: "/company-profile/companies/new",
-                }}
-              />
-            }
           />
         )}
       </div>

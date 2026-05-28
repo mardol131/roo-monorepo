@@ -5,9 +5,19 @@ import { aggregateInquiryStatus } from "@roo/common";
 import PageHeading from "../../components/page-heading";
 import InquiryList from "./components/inquiry-list";
 import InquirySummary from "./components/inquiry-summary";
+import { useAuth } from "@/app/context/auth/auth-context";
 
 export default function page() {
-  const { data: inquiries } = useInquiries({ refetchInterval: 60_000 });
+  const { user } = useAuth();
+  const { data: inquiries } = useInquiries({
+    options: {
+      query: {
+        user: { equals: user?.id },
+      },
+    },
+    enabled: !!user?.id,
+    refetchInterval: 60_000,
+  });
 
   const total = inquiries?.docs?.length;
   const pending = inquiries?.docs?.filter(

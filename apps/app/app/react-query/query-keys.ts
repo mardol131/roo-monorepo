@@ -22,6 +22,7 @@ export const invitationKeys = {
 };
 
 export const companyKeys = {
+  root: () => ["companies"] as const,
   all: (query?: Where, limit?: number) => ["companies", query, limit] as const,
   byId: (id: string) => ["companies", id] as const,
 };
@@ -32,6 +33,8 @@ export const inquiryKeys = {
   byListing: (listingId: string) =>
     ["inquiries", "listing", listingId] as const,
   byEvent: (eventId: string) => ["inquiries", "event", eventId] as const,
+  acceptedByEvent: (eventId: string) =>
+    ["inquiries", "event", eventId, "accepted"] as const,
 };
 
 export const variantKeys = {
@@ -67,6 +70,10 @@ export const favouriteListingKeys = {
 
 export const roadmapItemsKeys = {
   all: () => ["roadmapItems"] as const,
+};
+
+export const userNotificationKeys = {
+  all: () => ["userNotifications"] as const,
 };
 
 // Locality

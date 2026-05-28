@@ -199,6 +199,7 @@ export default function page() {
         inquiry={inquiry}
         acceptInquiryHandler={acceptInquiryHandler}
       />
+      <InquiryDetails inquiry={inquiry} listing={listing} />
       <div
         className={`flex flex-col gap-6 w-full ${aggregatedStatus === "cancelled" ? "opacity-50 pointer-events-none cursor-default" : ""}`}
       >
@@ -260,7 +261,6 @@ export default function page() {
           inquiryId={inquiry.id}
           listingId={getIdFromRelationshipField(inquiry?.listing || "")}
         />
-        <InquiryDetails inquiry={inquiry} />
         {typeof inquiry.variant !== "string" && inquiry.variant && (
           <>
             <VariantSection

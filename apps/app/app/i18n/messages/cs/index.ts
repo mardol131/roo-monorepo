@@ -14,6 +14,7 @@ import pricing from "./pages/pricing.json";
 import roadmap from "./pages/roadmap.json";
 import addTeamMemberModal from "./components/add-team-member.modal.json";
 import editTeamMemberRoleModal from "./components/edit-team-member-role.modal.json";
+import spacesTypeChangeModal from "./components/spaces-type-change-modal.json";
 
 export default {
   global,
@@ -35,5 +36,6 @@ export default {
   components: {
     addTeamMemberModal,
     editTeamMemberRoleModal,
+    spacesTypeChangeModal,
   },
 };

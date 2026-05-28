@@ -39,8 +39,14 @@ function getVenueGroups(
   companyId: string,
   listingId: string,
   spacesCount?: number,
+  variantsCount?: number,
 ): CompletionGroup[] {
   const h = (section: string) => editHref(companyId, listingId, section);
+  const variantsHref: IntlLink = {
+    pathname:
+      "/company-profile/companies/[companyId]/listings/[listingId]/variants",
+    params: { companyId, listingId },
+  };
 
   return [
     {
@@ -70,6 +76,7 @@ function getVenueGroups(
         {
           label: "Prostory",
           filled: spacesCount != null && spacesCount > 0,
+          relevant: spacesCount == null || spacesCount > 0,
           editHref: {
             pathname:
               "/company-profile/companies/[companyId]/listings/[listingId]/spaces",
@@ -77,9 +84,10 @@ function getVenueGroups(
           },
         },
         {
-          label: "FAQ",
-          filled: !!detail.faq?.length,
-          editHref: h("section-faq"),
+          label: "Varianty",
+          filled: variantsCount != null && variantsCount > 0,
+          relevant: variantsCount == null || variantsCount > 0,
+          editHref: variantsHref,
         },
       ],
     },
@@ -100,8 +108,41 @@ function getVenueGroups(
       ],
     },
     {
-      label: "Nabídka a vybavení",
+      label: "Podmínky",
       weight: 2,
+      fields: [
+        {
+          label: "Parkování",
+          filled: detail.parking?.hasParking != null,
+          editHref: h("section-parking"),
+        },
+        {
+          label: "Pravidla",
+          filled: !!listing.properties.venueRules?.length,
+          editHref: h("section-rules"),
+        },
+      ],
+    },
+    {
+      label: "Prezentace",
+      weight: 3,
+      fields: [
+        {
+          label: "Zaměstnanci",
+          filled: !!detail.employees?.length,
+          editHref: h("section-employees"),
+        },
+        {
+          label: "FAQ",
+          filled: !!detail.faq?.length,
+          editHref: h("section-faq"),
+        },
+      ],
+    },
+    {
+      label: "Aktivity a vybavení",
+      weight: 0,
+      bonus: true,
       fields: [
         {
           label: "Aktivity",
@@ -112,11 +153,6 @@ function getVenueGroups(
           label: "Služby",
           filled: !!listing.properties.services?.length,
           editHref: h("section-services"),
-        },
-        {
-          label: "Personál",
-          filled: !!listing.properties.personnel?.length,
-          editHref: h("section-personnel"),
         },
         {
           label: "Vybavení",
@@ -132,17 +168,13 @@ function getVenueGroups(
     },
     {
       label: "Logistika",
-      weight: 2,
+      weight: 0,
+      bonus: true,
       fields: [
         {
           label: "Přístup a zásobování",
           filled: !!detail.access?.vehicleTypes?.length,
           editHref: h("section-access"),
-        },
-        {
-          label: "Parkování",
-          filled: detail.parking?.hasParking != null,
-          editHref: h("section-parking"),
         },
         {
           label: "Sklad",
@@ -157,22 +189,19 @@ function getVenueGroups(
           editHref: h("section-breakfast"),
           relevant: detail.hasAccommodation === true,
         },
-        {
-          label: "Pravidla",
-          filled: !!listing.properties.venueRules?.length,
-          editHref: h("section-rules"),
-        },
       ],
     },
     {
       label: "Prezentace",
-      weight: 1,
+      weight: 0,
+      bonus: true,
       fields: [
         {
-          label: "Zaměstnanci",
-          filled: !!detail.employees?.length,
-          editHref: h("section-employees"),
+          label: "Personál",
+          filled: !!listing.properties.personnel?.length,
+          editHref: h("section-personnel"),
         },
+
         {
           label: "Reference",
           filled: !!detail.references?.length,
@@ -188,8 +217,14 @@ function getGastroGroups(
   detail: ListingGastroDetail,
   companyId: string,
   listingId: string,
+  variantsCount?: number,
 ): CompletionGroup[] {
   const h = (section: string) => editHref(companyId, listingId, section);
+  const variantsHref: IntlLink = {
+    pathname:
+      "/company-profile/companies/[companyId]/listings/[listingId]/variants",
+    params: { companyId, listingId },
+  };
 
   return [
     {
@@ -216,17 +251,18 @@ function getGastroGroups(
           filled: isLocationFilled(listing.location),
           editHref: h("section-location"),
         },
+        {
+          label: "Varianty",
+          filled: variantsCount != null && variantsCount > 0,
+          relevant: variantsCount == null || variantsCount > 0,
+          editHref: variantsHref,
+        },
       ],
     },
     {
       label: "Fotografie",
       weight: 2,
       fields: [
-        {
-          label: "Logo",
-          filled: !!listing.images.logo?.filename,
-          editHref: h("section-images"),
-        },
         {
           label: "Galerie",
           filled: !!listing.images.gallery?.length,
@@ -244,6 +280,39 @@ function getGastroGroups(
           editHref: h("section-cuisines"),
         },
         {
+          label: "Alkohol",
+          filled: detail.hasAlcoholLicense != null,
+          editHref: h("section-extras"),
+        },
+        {
+          label: "Dětské menu",
+          filled: detail.kidsMenu != null,
+          editHref: h("section-extras"),
+        },
+      ],
+    },
+    {
+      label: "Prezentace",
+      weight: 3,
+      fields: [
+        {
+          label: "Zaměstnanci",
+          filled: !!detail.employees?.length,
+          editHref: h("section-employees"),
+        },
+        {
+          label: "FAQ",
+          filled: !!detail.faq?.length,
+          editHref: h("section-faq"),
+        },
+      ],
+    },
+    {
+      label: "Detaily nabídky",
+      weight: 0,
+      bonus: true,
+      fields: [
+        {
           label: "Typy jídel",
           filled: !!listing.properties.dishTypes?.length,
           editHref: h("section-offer"),
@@ -258,21 +327,12 @@ function getGastroGroups(
           filled: !!listing.properties.foodServiceStyles?.length,
           editHref: h("section-offer"),
         },
-        {
-          label: "Alkohol",
-          filled: detail.hasAlcoholLicense != null,
-          editHref: h("section-extras"),
-        },
-        {
-          label: "Dětské menu",
-          filled: detail.kidsMenu != null,
-          editHref: h("section-extras"),
-        },
       ],
     },
     {
       label: "Podmínky",
-      weight: 2,
+      weight: 0,
+      bonus: true,
       fields: [
         {
           label: "Personál",
@@ -293,17 +353,13 @@ function getGastroGroups(
     },
     {
       label: "Prezentace",
-      weight: 1,
+      weight: 0,
+      bonus: true,
       fields: [
         {
-          label: "Zaměstnanci",
-          filled: !!detail.employees?.length,
-          editHref: h("section-employees"),
-        },
-        {
-          label: "FAQ",
-          filled: !!detail.faq?.length,
-          editHref: h("section-faq"),
+          label: "Logo",
+          filled: !!listing.images.logo?.filename,
+          editHref: h("section-images"),
         },
         {
           label: "Reference",
@@ -320,8 +376,14 @@ function getEntertainmentGroups(
   detail: ListingEntertainmentDetail,
   companyId: string,
   listingId: string,
+  variantsCount?: number,
 ): CompletionGroup[] {
   const h = (section: string) => editHref(companyId, listingId, section);
+  const variantsHref: IntlLink = {
+    pathname:
+      "/company-profile/companies/[companyId]/listings/[listingId]/variants",
+    params: { companyId, listingId },
+  };
 
   return [
     {
@@ -348,17 +410,18 @@ function getEntertainmentGroups(
           filled: isLocationFilled(listing.location),
           editHref: h("section-location"),
         },
+        {
+          label: "Varianty",
+          filled: variantsCount != null && variantsCount > 0,
+          relevant: variantsCount == null || variantsCount > 0,
+          editHref: variantsHref,
+        },
       ],
     },
     {
       label: "Fotografie",
       weight: 2,
       fields: [
-        {
-          label: "Logo",
-          filled: !!listing.images.logo?.filename,
-          editHref: h("section-images"),
-        },
         {
           label: "Galerie",
           filled: !!listing.images.gallery?.length,
@@ -380,6 +443,29 @@ function getEntertainmentGroups(
           filled: !!detail.audience?.length,
           editHref: h("section-audience"),
         },
+      ],
+    },
+    {
+      label: "Prezentace",
+      weight: 3,
+      fields: [
+        {
+          label: "Zaměstnanci",
+          filled: !!detail.employees?.length,
+          editHref: h("section-employees"),
+        },
+        {
+          label: "FAQ",
+          filled: !!detail.faq?.length,
+          editHref: h("section-faq"),
+        },
+      ],
+    },
+    {
+      label: "Logistika a podmínky",
+      weight: 0,
+      bonus: true,
+      fields: [
         {
           label: "Logistika",
           filled: detail.setupAndTearDownRules?.setupTime != null,
@@ -404,17 +490,13 @@ function getEntertainmentGroups(
     },
     {
       label: "Prezentace",
-      weight: 1,
+      weight: 0,
+      bonus: true,
       fields: [
         {
-          label: "Zaměstnanci",
-          filled: !!detail.employees?.length,
-          editHref: h("section-employees"),
-        },
-        {
-          label: "FAQ",
-          filled: !!detail.faq?.length,
-          editHref: h("section-faq"),
+          label: "Logo",
+          filled: !!listing.images.logo?.filename,
+          editHref: h("section-images"),
         },
         {
           label: "Reference",
@@ -432,6 +514,7 @@ type Props = {
   companyId: string;
   listingId: string;
   spacesCount?: number;
+  variantsCount?: number;
 };
 
 export function ListingCompletion({
@@ -440,31 +523,23 @@ export function ListingCompletion({
   companyId,
   listingId,
   spacesCount,
+  variantsCount,
 }: Props) {
-  let groups: CompletionGroup[];
+  let groups: CompletionGroup[] | null = null;
 
-  if (listing.type === "venue") {
-    groups = getVenueGroups(
-      listing,
-      detail as ListingVenueDetail,
-      companyId,
-      listingId,
-      spacesCount,
-    );
-  } else if (listing.type === "gastro") {
-    groups = getGastroGroups(
-      listing,
-      detail as ListingGastroDetail,
-      companyId,
-      listingId,
-    );
-  } else {
-    groups = getEntertainmentGroups(
-      listing,
-      detail as ListingEntertainmentDetail,
-      companyId,
-      listingId,
-    );
+  if (listing.type === "venue" && detail.type === "venue") {
+    groups = getVenueGroups(listing, detail, companyId, listingId, spacesCount, variantsCount);
+  } else if (listing.type === "gastro" && detail.type === "gastro") {
+    groups = getGastroGroups(listing, detail, companyId, listingId, variantsCount);
+  } else if (
+    listing.type === "entertainment" &&
+    detail.type === "entertainment"
+  ) {
+    groups = getEntertainmentGroups(listing, detail, companyId, listingId, variantsCount);
+  }
+
+  if (!groups) {
+    return null;
   }
 
   return <CompletionWidget groups={groups} title="Dokončení služby" />;

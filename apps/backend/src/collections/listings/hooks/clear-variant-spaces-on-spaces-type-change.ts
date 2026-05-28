@@ -1,12 +1,11 @@
 import type { CollectionAfterChangeHook } from 'payload'
-import type { Listing } from '@/payload-types'
+import type { Listing, Variant } from '@/payload-types'
 
 /**
  * Pokud se změní typ prostorů (spacesType) na detailu listingu,
- * deaktivuje všechny existující spaces tohoto listingu.
- * Nový spacesType vyžaduje čistý stav — staré spaces jsou nekompatibilní.
+ * vymaže includedSpaces ze všech variant tohoto listingu.
  */
-export const syncSpacesOnDetailTypeChange: CollectionAfterChangeHook<Listing> = async ({
+export const clearVariantSpacesOnSpacesTypeChange: CollectionAfterChangeHook<Listing> = async ({
   doc,
   previousDoc,
   req,
@@ -43,10 +42,26 @@ export const syncSpacesOnDetailTypeChange: CollectionAfterChangeHook<Listing> = 
 
     if (!newSpacesType || newSpacesType === prevSpacesType) return
 
-    await req.payload.update({
-      collection: 'spaces',
+    const variants = await req.payload.find({
+      collection: 'variants',
       where: { listing: { equals: doc.id } },
-      data: { status: 'disabled' },
+      limit: 1000,
     })
+
+    await Promise.all(
+      variants.docs.map((variant) => {
+        const updatedDetails: Variant['details'] = variant.details?.map((block) => {
+          if (block.blockType === 'venue') {
+            return { ...block, includedSpaces: [] }
+          }
+          return block
+        })
+        return req.payload.update({
+          collection: 'variants',
+          id: variant.id,
+          data: { details: updatedDetails },
+        })
+      }),
+    )
   }
 }

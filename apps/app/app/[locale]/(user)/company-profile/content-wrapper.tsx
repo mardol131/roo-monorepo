@@ -9,9 +9,9 @@ import { useListing } from "@/app/react-query/listings/hooks";
 import { useCompany } from "@/app/react-query/companies/hooks";
 import { useParams } from "next/navigation";
 import Navbar from "../components/navbar";
-import { canEditCompany } from "../utils/companies";
+import { canEditCompany } from "../../../functions/utils/companies";
 import { useAuth } from "@/app/context/auth/auth-context";
-import { hasInquiryCompanyRights } from "../utils/inquiries";
+import { hasInquiryUpdateCompanyRights } from "../../../functions/utils/inquiries";
 
 export default function ContentWrapper({ children }: PropsWithChildren) {
   const pathname = usePathname();
@@ -28,7 +28,16 @@ export default function ContentWrapper({ children }: PropsWithChildren) {
   const sidebarProps: SidebarProps = {
     mainMenuItems: [
       { label: "Přehled", href: "/company-profile", icon: "LayoutDashboard" },
-      { label: "Firmy", href: "/company-profile/companies", icon: "Building2" },
+      {
+        label: "Firmy",
+        href: "/company-profile/companies",
+        icon: "Building2",
+      },
+      {
+        label: "Firemní členství",
+        href: "/company-profile/member-companies",
+        icon: "FileKey",
+      },
       {
         label: "Přidat firmu",
         href: "/company-profile/companies/new",
@@ -132,20 +141,16 @@ export default function ContentWrapper({ children }: PropsWithChildren) {
             },
             icon: "Wallpaper",
           },
-          ...(hasInquiryCompanyRights({ company, userId: user?.id })
-            ? [
-                {
-                  label: "Poptávky",
-                  href: {
-                    pathname:
-                      "/company-profile/companies/[companyId]/listings/[listingId]/inquiries",
-                    params: { companyId, listingId },
-                  },
-                  icon: "MessageSquare",
-                } as const,
-              ]
-            : []),
-          ...(hasInquiryCompanyRights({ company, userId: user?.id })
+          {
+            label: "Poptávky",
+            href: {
+              pathname:
+                "/company-profile/companies/[companyId]/listings/[listingId]/inquiries",
+              params: { companyId, listingId },
+            },
+            icon: "MessageSquare",
+          },
+          ...(hasInquiryUpdateCompanyRights({ company, userId: user?.id })
             ? [
                 {
                   label: "Zprávy",
@@ -158,19 +163,15 @@ export default function ContentWrapper({ children }: PropsWithChildren) {
                 } as const,
               ]
             : []),
-          ...(hasInquiryCompanyRights({ company, userId: user?.id })
-            ? [
-                {
-                  label: "Kalendář",
-                  href: {
-                    pathname:
-                      "/company-profile/companies/[companyId]/listings/[listingId]/calendar",
-                    params: { companyId, listingId },
-                  },
-                  icon: "Calendar",
-                } as const,
-              ]
-            : []),
+          {
+            label: "Kalendář",
+            href: {
+              pathname:
+                "/company-profile/companies/[companyId]/listings/[listingId]/calendar",
+              params: { companyId, listingId },
+            },
+            icon: "Calendar",
+          },
 
           ...(listing?.type === "venue" ? [spaceMenuItem] : []),
           {

@@ -4,14 +4,12 @@ import {
   useQueryClient,
   UseMutationOptions,
 } from "@tanstack/react-query";
-import {
-  getIdFromRelationshipField,
-  Inquiry,
-} from "@roo/common";
+import { getIdFromRelationshipField, Inquiry } from "@roo/common";
 import { GetCollectionParams, PatchData } from "@/app/functions/api/general";
 import { inquiryKeys, listingKeys } from "../query-keys";
 import {
   createInquiry,
+  fetchAcceptedInquiriesOnEvent,
   fetchInquiries,
   fetchInquiriesByListing,
   fetchInquiry,
@@ -29,11 +27,17 @@ export function useInquiriesByListing(listingId: string) {
 export function useInquiries({
   options,
   refetchInterval,
-}: { options?: GetCollectionParams; refetchInterval?: number } = {}) {
+  enabled,
+}: {
+  options?: GetCollectionParams;
+  refetchInterval?: number;
+  enabled?: boolean;
+} = {}) {
   return useQuery({
     queryKey: inquiryKeys.all(options?.query, options?.limit),
     queryFn: () => fetchInquiries(options),
     refetchInterval,
+    enabled,
   });
 }
 
@@ -64,6 +68,19 @@ export function useInquiry(
     queryKey: inquiryKeys.byId(id ?? ""),
     queryFn: () => fetchInquiry(id!),
     enabled: !!id,
+    refetchInterval: options?.refetchInterval,
+  });
+}
+
+export function useAcceptedInquiriesOnEvent(
+  eventId: string | undefined,
+  inquiryId: string | undefined,
+  options?: { refetchInterval?: number },
+) {
+  return useQuery({
+    queryKey: inquiryKeys.acceptedByEvent(eventId ?? ""),
+    queryFn: () => fetchAcceptedInquiriesOnEvent(eventId!, inquiryId!),
+    enabled: !!eventId && !!inquiryId,
     refetchInterval: options?.refetchInterval,
   });
 }

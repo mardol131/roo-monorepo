@@ -3,24 +3,16 @@
 import EntityCard from "@/app/[locale]/(user)/components/entity-card";
 import PageHeading from "@/app/[locale]/(user)/components/page-heading";
 import Text from "@/app/components/ui/atoms/text";
+import { useListing, useListingDetail } from "@/app/react-query/listings/hooks";
 import {
-  useListing,
-  useListingDetail,
-  useUpdateListing,
-  useUpdateListingDetail,
-} from "@/app/react-query/listings/hooks";
-import {
-  useDeleteSpace,
   useSpacesByListing,
   useUpdateSpace,
 } from "@/app/react-query/spaces/hooks";
-import { IntlLink, Link, useRouter } from "@/app/i18n/navigation";
-import { getIdFromRelationshipField, Listing, Space } from "@roo/common";
+import { Link } from "@/app/i18n/navigation";
+import { getIdFromRelationshipField, Space } from "@roo/common";
 import {
-  AlertTriangle,
   Building2,
   CornerDownRight,
-  Delete,
   icons,
   LayoutDashboard,
   Plus,
@@ -29,9 +21,10 @@ import {
 } from "lucide-react";
 import { useParams } from "next/navigation";
 import { useState } from "react";
-import Button from "@/app/components/ui/atoms/button";
-import Input from "@/app/components/ui/atoms/inputs/input";
 import { confirmActionModalEvents } from "@/app/components/ui/molecules/modals/confirm-action-modal";
+import SpacesTypeChangeModal from "./components/spaces-type-change-modal";
+import { EntityCompletionBadge } from "@/app/[locale]/(user)/components/entity-completion-badge";
+import { getSpaceCompletion } from "@/app/functions/utils/spaces";
 
 const TYPE_ICON: Record<Space["type"], keyof typeof icons> = {
   building: "Building2",
@@ -187,6 +180,11 @@ function SpaceTree({
                     ? { icon: "Maximize2", content: `${space.area} m²` }
                     : undefined,
                 ]}
+                rightComponent={
+                  <EntityCompletionBadge
+                    percentage={getSpaceCompletion(space)}
+                  />
+                }
                 deleteEntityHandler={(e) => {
                   e.stopPropagation();
                   e.preventDefault();
@@ -245,8 +243,6 @@ function SpaceTree({
   );
 }
 
-const CONFIRMATION_TEXT = "souhlasím";
-
 export default function SpacesPage() {
   const { listingId, companyId } = useParams<{
     companyId: string;
@@ -255,9 +251,6 @@ export default function SpacesPage() {
 
   const { data: spaces } = useSpacesByListing(listingId);
   const { data: listing } = useListing(listingId);
-  const { mutate: updateListingDetail, error } = useUpdateListingDetail(
-    "listing-venue-details",
-  );
   const { data: listingDetail } = useListingDetail(
     `listing-${listing?.type ?? "gastro"}-details`,
     getIdFromRelationshipField(listing?.detail.value ?? ""),
@@ -268,7 +261,6 @@ export default function SpacesPage() {
   const spacesType = venueDetails?.spacesType;
 
   const [pendingType, setPendingType] = useState<SpacesType | null>(null);
-  const [confirmValue, setConfirmValue] = useState("");
 
   const roots = spaces?.docs?.filter(
     (s) => !getParentId(s) && spacesType != null && s.type === spacesType,
@@ -277,29 +269,6 @@ export default function SpacesPage() {
   function handleTypeClick(type: SpacesType) {
     if (type === spacesType) return;
     setPendingType(type);
-    setConfirmValue("");
-  }
-
-  function handleConfirm() {
-    if (!venueDetails || !pendingType || confirmValue !== CONFIRMATION_TEXT)
-      return;
-    updateListingDetail(
-      {
-        id: listingId,
-        data: { ...venueDetails, spacesType: pendingType },
-      },
-      {
-        onSuccess: () => {
-          setPendingType(null);
-          setConfirmValue("");
-        },
-      },
-    );
-  }
-
-  function handleCancel() {
-    setPendingType(null);
-    setConfirmValue("");
   }
 
   return (
@@ -381,62 +350,6 @@ export default function SpacesPage() {
             },
           )}
         </div>
-
-        {pendingType && (
-          <div className="mt-4 p-4 rounded-xl border border-danger bg-danger-surface flex flex-col gap-3">
-            <div className="flex items-start gap-2.5">
-              <div>
-                <div className="flex items-center gap-3">
-                  <Text
-                    variant="label-lg"
-                    className="font-semibold text-danger"
-                  >
-                    Pozor
-                  </Text>{" "}
-                  <AlertTriangle className="w-4 h-4 text-danger mt-0.5 shrink-0" />
-                </div>
-                <Text
-                  variant="label"
-                  color="textDark"
-                  as="p"
-                  className="mt-0.5 text-danger"
-                >
-                  Změna typu změní strukturu prostorů. Bude nutné znovu nastavit
-                  prostory v jednotlivých variantách. Pokud chcete i přesto
-                  pokračovat, napište do pole{" "}
-                  <strong>{CONFIRMATION_TEXT}</strong> a klikněte na potvrdit.
-                </Text>
-              </div>
-            </div>
-            <div className="flex items-center gap-3">
-              <div>
-                <Input
-                  inputProps={{
-                    value: confirmValue,
-                    onChange: (e) => setConfirmValue(e.target.value),
-                    placeholder: CONFIRMATION_TEXT,
-                  }}
-                />
-              </div>
-
-              <Button
-                text="Potvrdit změnu"
-                onClick={handleConfirm}
-                disabled={confirmValue !== CONFIRMATION_TEXT}
-                size="sm"
-                rounding="md"
-                version="dangerFull"
-              />
-
-              <Button
-                text="Zrušit"
-                version="plain"
-                onClick={handleCancel}
-                size="sm"
-              />
-            </div>
-          </div>
-        )}
       </div>
 
       {spacesType && (
@@ -460,6 +373,19 @@ export default function SpacesPage() {
               </div>
             ))}
         </div>
+      )}
+
+      {pendingType && spacesType && (
+        <SpacesTypeChangeModal
+          isOpen
+          onClose={() => setPendingType(null)}
+          currentType={spacesType}
+          newType={pendingType}
+          allSpaces={spaces?.docs ?? []}
+          listingId={listingId}
+          venueDetailId={venueDetails?.id ?? ""}
+          onSuccess={() => setPendingType(null)}
+        />
       )}
     </main>
   );

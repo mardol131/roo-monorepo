@@ -1,0 +1,32 @@
+{
+  "noSpaces": {
+    "header": "Změnit typ prostorů",
+    "description": "Opravdu chcete změnit typ prostorů na <strong>{type}</strong>?",
+    "confirm": "Potvrdit",
+    "cancel": "Zrušit"
+  },
+  "upleveling": {
+    "header": "Přechod na {type}",
+    "createTitle": "Vytvořte nové {type}",
+    "createDescription": "Stávající {currentType} musí být přiřazeny do {newTypeGenitive}.",
+    "createDescriptionSkipLevel": "Vytvořte {newType}, do nichž pak zařadíte {intermediateType}.",
+    "namePlaceholder": "Název {type}",
+    "addButton": "Přidat {type}",
+    "intermediateCreateTitle": "Vytvořte {type} a přiřaďte je do {parentType}",
+    "intermediateCreateDescription": "Přiřaďte každou {type} do {parentType}.",
+    "assignTitle": "Přiřaďte stávající {currentType}",
+    "assignDescription": "Každou {currentType} přiřaďte do {newType}.",
+    "selectPlaceholder": "Vyberte {type}",
+    "cancel": "Zrušit",
+    "save": "Uložit a potvrdit"
+  },
+  "downleveling": {
+    "header": "Přechod na {type}",
+    "becomeRootsTitle": "Tyto {type} se stanou kořenovými prostory",
+    "archiveTitle": "Tyto prostory budou archivovány",
+    "noRootsDescription": "Typ prostorů bude změněn na <strong>{type}</strong>. Stávající prostory budou archivovány.",
+    "cancel": "Zrušit",
+    "confirm": "Potvrdit změnu"
+  },
+  "saveError": "Nepodařilo se uložit změny. Zkuste to znovu."
+}

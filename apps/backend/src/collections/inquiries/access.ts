@@ -8,6 +8,7 @@ export const inquiryAccess: CollectionAccess = {
     if (req.user.collection === 'admins') return true
 
     if (!data?.listing) return false
+
     const listingId = getIdFromRelationshipField(data.listing)
 
     const listing = await req.payload.findByID({
@@ -20,18 +21,62 @@ export const inquiryAccess: CollectionAccess = {
     return listing?.status === 'active' && listing?.subscriptionActive === true
   },
 
-  read: ({ req }) => {
+  read: async ({ req }) => {
     if (!req.user) return false
     if (req.user.collection === 'admins') return true
 
-    const query: Where = {
+    // Vlastní poptávky (jako zákazník nebo firma)
+    const ownQuery: Where = {
       or: [
         { user: { equals: req.user.id } },
         { 'listing.company.owner': { equals: req.user.id } },
+        { 'listing.company.members.user': { equals: req.user.id } },
+      ],
+    }
+
+    // Eventy s povoleným sdílením potvrzených dodavatelů, kde má user vlastní poptávku
+    const myInquiries = await req.payload.find({
+      collection: 'inquiries',
+      where: ownQuery,
+      overrideAccess: true,
+      depth: 0,
+      limit: 200,
+    })
+
+    const eventIds = [
+      ...new Set(
+        myInquiries.docs
+          .map((i) => (typeof i.event === 'string' ? i.event : i.event?.id))
+          .filter(Boolean),
+      ),
+    ]
+
+    if (eventIds.length === 0) return ownQuery
+
+    const sharedEvents = await req.payload.find({
+      collection: 'events',
+      where: {
+        and: [
+          { id: { in: eventIds } },
+          { 'sharing.confirmedInquiries': { equals: true } },
+        ],
+      },
+      overrideAccess: true,
+      depth: 0,
+      limit: 200,
+    })
+
+    const sharedEventIds = sharedEvents.docs.map((e) => e.id)
+
+    if (sharedEventIds.length === 0) return ownQuery
+
+    const query: Where = {
+      or: [
+        ...((ownQuery.or as Where[]) ?? []),
         {
           and: [
-            { 'listing.company.members.user': { equals: req.user.id } },
-            { 'listing.company.members.role': { in: ['admin', 'manager'] } },
+            { event: { in: sharedEventIds } },
+            { 'status.company': { equals: 'confirmed' } },
           ],
         },
       ],

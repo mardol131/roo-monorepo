@@ -24,6 +24,7 @@ export async function fetchEventById(id: string) {
   const res = await getCollectionItem({
     collection: "events",
     id,
+    searchParams: new URLSearchParams({ depth: "2" }),
   });
   if (!res) throw new Error("Failed to fetch event");
   return res;

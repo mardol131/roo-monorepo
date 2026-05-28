@@ -1,17 +1,13 @@
 import { adminOrApiKeyAuth } from '@/functions/ACL'
 import type { CollectionConfig } from 'payload'
 import { getFiltersFields } from '../common/filters-fields'
+import { filtersAccess } from '../common/access'
 
 export const FoodServiceStyle: CollectionConfig = {
   slug: 'food-service-styles',
   admin: {
     useAsTitle: 'name',
   },
-  access: {
-    read: () => true,
-    update: ({ req }) => adminOrApiKeyAuth(req),
-    create: ({ req }) => adminOrApiKeyAuth(req),
-    delete: ({ req }) => adminOrApiKeyAuth(req),
-  },
+  access: filtersAccess,
   fields: getFiltersFields({}),
 }

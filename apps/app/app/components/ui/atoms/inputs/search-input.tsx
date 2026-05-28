@@ -62,7 +62,7 @@ export default function SearchInput({
       onSearchQueryChange?.(searchQuery);
     },
     [searchQuery],
-    500,
+    200,
   );
 
   useClickOutside(containerRef, () => setIsOpen(false));

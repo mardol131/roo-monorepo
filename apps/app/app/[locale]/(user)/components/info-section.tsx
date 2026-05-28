@@ -47,7 +47,7 @@ export default function InfoSection({ items }: Props) {
         } else if (item.type === "text") {
           return (
             <DetailRow key={index} label={item.label}>
-              <Text variant="body-sm" color="textDark">
+              <Text variant="label" color="textDark">
                 {item.value}
               </Text>
             </DetailRow>

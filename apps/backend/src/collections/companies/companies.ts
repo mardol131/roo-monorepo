@@ -1,15 +1,11 @@
-import type { CollectionConfig, Where } from 'payload'
-import { getPhoneField } from '../common/phone'
-import { getRecordStatuses } from '@roo/common'
-import { getMediaFields } from '../common/common-fields'
-import { memberRoleField } from '../common/member-permissions'
+import type { CollectionConfig } from 'payload'
+import { companyAccess } from './access'
 import { membersInviteEndpoint } from './endpoints/members/invite'
 import { verifyMemberEndpoint } from './endpoints/members/verify'
-import { companyAccess, isCompanyMemberOrOwner } from './access'
-import { generateSlug } from './hooks/before-validate'
-import { cleanupLogo } from './hooks/before-change'
-import { stripForPublic } from './hooks/after-read'
 import { companyFields } from './fields'
+import { stripForPublic } from './hooks/after-read'
+import { cleanupLogo } from './hooks/before-change'
+import { generateSlug } from './hooks/before-validate'
 
 export const Companies: CollectionConfig = {
   slug: 'companies',

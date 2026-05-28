@@ -68,7 +68,7 @@ function hasListingRights(
   user: User | null,
   company: Company | undefined,
 ): boolean {
-  if (!user || !company) return false;
+  if (!user || !company || !company.owner) return false;
 
   const ownerId =
     typeof company.owner === "string" ? company.owner : company.owner.id;

@@ -3,7 +3,11 @@ import { CollectionAccess } from '../common/utils'
 
 export const companyAccess: CollectionAccess = {
   create: ({ req }) => !!req.user,
-  read: () => true,
+  read: () => {
+    return {
+      and: [{ status: { equals: 'active' } }],
+    }
+  },
   update: ({ req }) => {
     if (!req.user) return false
     if (req.user.collection === 'admins') return true

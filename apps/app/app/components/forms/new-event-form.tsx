@@ -16,30 +16,30 @@ import InputLabel from "@/app/components/ui/atoms/input-label";
 import { useRouter } from "@/app/i18n/navigation";
 import { useCities } from "@/app/react-query/cities/hooks";
 import { useCreateEvent, useUpdateEvent } from "@/app/react-query/events/hooks";
-import { useEventTypes } from "@/app/react-query/filters/event-types/hooks";
-import { useSpaceTypes } from "@/app/react-query/specific/space-types/hooks";
 import { Event } from "@roo/common";
 import { Building2, Info, MapPin } from "lucide-react";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { Controller, FieldErrors, Resolver, useForm } from "react-hook-form";
 import Text from "../ui/atoms/text";
 import { useFilterOptions } from "@/app/react-query/filters/aggregated-filters/hooks";
 import { AlertSection } from "../ui/molecules/alert-section";
+import PhoneInput from "../ui/atoms/inputs/phone-input";
+import { useAuth } from "@/app/context/auth/auth-context";
 
 // ── TOC ────────────────────────────────────────────────────────────────────────
 
 const S: Record<string, TocSection> = {
   basic: { id: "section-basic", title: "Základní informace", icon: "Smile" },
   dates: { id: "section-dates", title: "Termín konání", icon: "Calendar" },
-  guests: { id: "section-guests", title: "Hosté", icon: "Users" },
   budget: { id: "section-budget", title: "Rozpočet", icon: "Banknote" },
+  contact: { id: "section-contact", title: "Kontaktní osoba", icon: "Phone" },
   location: { id: "section-location", title: "Místo konání", icon: "MapPin" },
 };
 
 const EVENT_FORM_GROUPS: readonly TocGroup[] = [
   {
     label: "Základní",
-    sections: [S.basic, S.dates, S.guests, S.budget],
+    sections: [S.basic, S.dates, S.budget, S.contact],
   },
   {
     label: "Lokalita",
@@ -57,6 +57,11 @@ type FormInputs = {
   startDate: string;
   endDate: string;
   guests: { adults: number; children: number; ztp: boolean; pets: boolean };
+  contactPerson: {
+    name: string;
+    email: string;
+    phone: { countryCode: string; number: string };
+  };
   locationType: "custom" | "venue";
   locationCity?: { id: string; name: string } | null;
   locationAddress?: string;
@@ -85,6 +90,16 @@ function validate(values: Partial<FormInputs>): FieldErrors<FormInputs> {
   if (!values.guests?.adults || values.guests.adults < 1)
     e.guests = {
       adults: { type: "min", message: "Počet dospělých musí být alespoň 1" },
+    };
+  if (!values.contactPerson?.name)
+    e.contactPerson = {
+      ...e.contactPerson,
+      name: { type: "required", message: "Jméno kontaktní osoby je povinné" },
+    };
+  if (!values.contactPerson?.email)
+    e.contactPerson = {
+      ...e.contactPerson,
+      email: { type: "required", message: "Email kontaktní osoby je povinný" },
     };
   if (values.locationType === "custom" && !values.locationCity)
     e.locationCity = { type: "required", message: "Vyberte město" };
@@ -126,6 +141,14 @@ function eventToFormInputs(event: Event): Partial<FormInputs> {
       ztp: event.guests.ztp ?? false,
       pets: event.guests.pets ?? false,
     },
+    contactPerson: {
+      name: event.contactPerson?.name ?? "",
+      email: event.contactPerson?.email ?? "",
+      phone: {
+        countryCode: event.contactPerson?.phone?.countryCode ?? "420",
+        number: event.contactPerson?.phone?.number ?? "",
+      },
+    } as FormInputs["contactPerson"],
     locationType: loc?.type ?? "custom",
     locationCity:
       isCustom && loc?.city
@@ -178,6 +201,8 @@ export default function NewEventForm({
     register,
     handleSubmit,
     watch,
+    trigger,
+    setValue,
     formState: { errors },
   } = useForm<FormInputs>({
     resolver,
@@ -185,19 +210,20 @@ export default function NewEventForm({
       icon: "Calendar",
       locationType: "custom",
       guests: { adults: 0, children: 0, ztp: false, pets: false },
+      contactPerson: {
+        name: "",
+        email: "",
+        phone: { countryCode: "420", number: "" },
+      },
       ...(edditedEvent ? eventToFormInputs(edditedEvent) : {}),
     },
   });
+  const { user } = useAuth();
 
   const { data: filters } = useFilterOptions();
 
   const [eventTypeQuery, setEventTypeQuery] = useState("");
   const [cityQuery, setCityQuery] = useState("");
-
-  const { data: eventTypes } = useEventTypes({
-    limit: 20,
-    query: eventTypeQuery ? { name: { contains: eventTypeQuery } } : undefined,
-  });
   const { data: cities } = useCities({
     limit: 15,
     query: cityQuery ? { name: { contains: cityQuery } } : undefined,
@@ -206,7 +232,14 @@ export default function NewEventForm({
   const { mutate: createEvent } = useCreateEvent();
   const { mutate: updateEvent } = useUpdateEvent({});
 
+  const normalizeStr = (s: string) =>
+    s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+  const filteredEventTypes = filters?.eventTypes.filter((et) =>
+    normalizeStr(et.name).includes(normalizeStr(eventTypeQuery)),
+  );
+
   const startDate = watch("startDate");
+  const endDate = watch("endDate");
   const locationType = watch("locationType");
 
   const locked = type === "edit" && hasConfirmedInquiries;
@@ -231,6 +264,13 @@ export default function NewEventForm({
         budget: data.budget,
         date: { start: data.startDate, end: data.endDate },
         guests: data.guests,
+        contactPerson: {
+          ...data.contactPerson,
+          phone: {
+            countryCode: data.contactPerson.phone.countryCode as "420",
+            number: data.contactPerson.phone.number,
+          },
+        },
         sharing: {},
         location: buildLocation(data),
         status: "active",
@@ -259,6 +299,13 @@ export default function NewEventForm({
           budget: data.budget,
           date: { start: data.startDate, end: data.endDate },
           guests: data.guests,
+          contactPerson: {
+            ...data.contactPerson,
+            phone: {
+              countryCode: data.contactPerson.phone.countryCode as "420",
+              number: data.contactPerson.phone.number,
+            },
+          },
           location: buildLocation(data),
         },
       },
@@ -281,6 +328,20 @@ export default function NewEventForm({
 
   const onSubmit = type === "edit" ? onUpdateSubmit : onCreateSubmit;
 
+  const fillContactInfoFromUserHandler = useCallback(() => {
+    if (!user) return;
+    const name = `${user.firstName} ${user.lastName}`;
+    const email = user.email;
+    const countryCode = user.phone?.countryCode;
+    const number = user.phone?.number;
+    setValue("contactPerson.name", name);
+    setValue("contactPerson.email", email);
+    if (countryCode && number) {
+      setValue("contactPerson.phone.countryCode", countryCode);
+      setValue("contactPerson.phone.number", number);
+    }
+  }, [user]);
+
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="flex gap-6">
       <div className="flex w-full flex-col gap-4">
@@ -289,7 +350,8 @@ export default function NewEventForm({
           error={
             !!errors.name?.message ||
             !!errors.icon?.message ||
-            !!errors.eventType?.message
+            !!errors.eventType?.message ||
+            !!errors.guests
           }
           id={S.basic.id}
           icon={S.basic.icon}
@@ -355,7 +417,7 @@ export default function NewEventForm({
                   <SearchInput
                     label="Typ události"
                     isRequired
-                    options={eventTypes?.docs ?? []}
+                    options={filteredEventTypes ?? []}
                     selectedOption={field.value}
                     onSelect={field.onChange}
                     onClear={() => field.onChange(null)}
@@ -370,6 +432,25 @@ export default function NewEventForm({
               />
             </div>
           </div>
+
+          <div
+            className={locked ? "pointer-events-none opacity-50" : undefined}
+          >
+            <Controller
+              name="guests"
+              control={control}
+              render={({ field }) => (
+                <GuestsInput
+                  isRequired
+                  label="Počet hostů"
+                  value={field.value}
+                  onChange={field.onChange}
+                  error={errors.guests?.adults?.message}
+                />
+              )}
+            />
+          </div>
+
           {type === "create-compact" && (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <Controller
@@ -379,6 +460,7 @@ export default function NewEventForm({
                   <DateTimeInput
                     containerRef={field.ref}
                     isRequired
+                    max={endDate}
                     label="Začátek události"
                     value={field.value}
                     onChange={field.onChange}
@@ -404,39 +486,7 @@ export default function NewEventForm({
             </div>
           )}
         </FormSection>
-        {/* ── 4. Rozpočet ────────────────────────────────────────────────────── */}
-        {type !== "create-compact" && (
-          <FormSection
-            error={!!errors.budget?.message}
-            id={S.budget.id}
-            icon={S.budget.icon}
-            title={S.budget.title}
-            subtitle={S.budget.subTitle}
-            color={textColor}
-            surfaceColor={bgSurfaceColor}
-          >
-            <Input
-              label="Celkový rozpočet (Kč)"
-              inputProps={{
-                ...register("budget"),
-                type: "number",
-                placeholder: "0",
-              }}
-              error={errors.budget?.message}
-            />
-          </FormSection>
-        )}
-        {locked && (
-          <AlertSection
-            icon={Info}
-            iconBg="bg-amber-100"
-            iconColor="text-amber-600"
-            borderColor="border-zinc-200"
-            bgColor="bg-amber-50"
-            title="Část polí nelze upravit"
-            text="Termín, počet hostů a místo konání jsou zamčeny, protože událost má potvrzené poptávky. Změna by mohla narušit plánování dodavatelů."
-          />
-        )}
+
         {/* ── 2. Termín konání ───────────────────────────────────────────────── */}
         {type !== "create-compact" && (
           <div
@@ -459,6 +509,7 @@ export default function NewEventForm({
                     <DateTimeInput
                       containerRef={field.ref}
                       isRequired
+                      max={endDate}
                       label="Začátek události"
                       value={field.value}
                       onChange={field.onChange}
@@ -486,32 +537,89 @@ export default function NewEventForm({
           </div>
         )}
 
-        {/* ── 3. Hosté ───────────────────────────────────────────────────────── */}
-        <div className={locked ? "pointer-events-none opacity-50" : undefined}>
+        {/* ── 3. Rozpočet ────────────────────────────────────────────────────── */}
+        {type !== "create-compact" && (
           <FormSection
-            error={!!errors.guests}
-            id={S.guests.id}
-            icon={S.guests.icon}
-            title={S.guests.title}
-            subtitle={S.guests.subTitle}
+            error={!!errors.budget?.message}
+            id={S.budget.id}
+            icon={S.budget.icon}
+            title={S.budget.title}
+            subtitle={S.budget.subTitle}
             color={textColor}
             surfaceColor={bgSurfaceColor}
           >
-            <Controller
-              name="guests"
-              control={control}
-              render={({ field }) => (
-                <GuestsInput
-                  isRequired
-                  label="Počet hostů"
-                  value={field.value}
-                  onChange={field.onChange}
-                  error={errors.guests?.adults?.message}
-                />
-              )}
+            <Input
+              label="Celkový rozpočet (Kč)"
+              inputProps={{
+                ...register("budget"),
+                type: "number",
+                placeholder: "0",
+              }}
+              error={errors.budget?.message}
             />
           </FormSection>
-        </div>
+        )}
+
+        {/* ── 4. Kontaktní osoba ─────────────────────────────────────────────── */}
+        <FormSection
+          error={!!errors.contactPerson?.name || !!errors.contactPerson?.email}
+          id={S.contact.id}
+          icon={S.contact.icon}
+          title={S.contact.title}
+          subtitle={S.contact.subTitle}
+          color={textColor}
+          headerRightComponent={
+            <Button
+              text="Doplnit"
+              version="outlined"
+              size="xs"
+              onClick={fillContactInfoFromUserHandler}
+            />
+          }
+          surfaceColor={bgSurfaceColor}
+        >
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <Input
+              label="Jméno"
+              isRequired
+              inputProps={{
+                ...register("contactPerson.name"),
+                placeholder: "Jan Novák",
+              }}
+              error={errors.contactPerson?.name?.message}
+            />
+            <Input
+              label="Email"
+              isRequired
+              inputProps={{
+                ...register("contactPerson.email"),
+                type: "email",
+                placeholder: "jan@example.com",
+              }}
+              error={errors.contactPerson?.email?.message}
+            />
+          </div>
+          <PhoneInput
+            label="Telefon"
+            control={control}
+            countryCodeName="contactPerson.phone.countryCode"
+            countryCodeError={errors.contactPerson?.phone?.countryCode?.message}
+            numberError={errors.contactPerson?.phone?.number?.message}
+            phoneNumberProps={{ ...register("contactPerson.phone.number") }}
+          />
+        </FormSection>
+
+        {locked && (
+          <AlertSection
+            icon={Info}
+            iconBg="bg-amber-100"
+            iconColor="text-amber-600"
+            borderColor="border-zinc-200"
+            bgColor="bg-amber-50"
+            title="Část polí nelze upravit"
+            text="Termín, počet hostů a místo konání jsou zamčeny, protože událost má potvrzené poptávky. Změna by mohla narušit plánování dodavatelů."
+          />
+        )}
 
         {/* ── 5. Místo konání ────────────────────────────────────────────────── */}
         <div className={locked ? "pointer-events-none opacity-50" : undefined}>
@@ -559,7 +667,10 @@ export default function NewEventForm({
                       <button
                         key={option.value}
                         type="button"
-                        onClick={() => field.onChange(option.value)}
+                        onClick={() => {
+                          field.onChange(option.value);
+                          trigger(["locationCity", "locationSpaceType"]);
+                        }}
                         className={`flex-1 px-4 py-3 rounded-xl border-2 text-left transition-colors ${
                           field.value === option.value
                             ? `${borderColor} ${bgSurfaceColor}`

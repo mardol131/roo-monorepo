@@ -8,6 +8,7 @@ import { Event } from "@roo/common";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { format } from "date-fns";
 import {
+  Banknote,
   Calendar,
   Handshake,
   MapPin,
@@ -23,6 +24,9 @@ import * as yup from "yup";
 import FormVariantSummary from "./form-variant-summary";
 import StepHeading from "../step-heading";
 import { useVariantsByListing } from "@/app/react-query/variants/hooks";
+import { FaMoneyBill } from "react-icons/fa";
+import { useListing } from "@/app/react-query/listings/hooks";
+import Loader from "@/app/[locale]/(user)/components/loader";
 
 function getLocationLabel(location: Event["location"]): string | null {
   if (!location) return null;
@@ -69,6 +73,9 @@ export default function OrderStepFinalReview({
   } = useOrderStore();
   const { mutate: createInquiry } = useCreateInquiry();
   const { data: variants } = useVariantsByListing(listingId);
+  const { data: listing } = useListing(listingId);
+
+  if (!listing) return <Loader text="Finální souhrn se připravuje..." />;
 
   const {
     control,
@@ -112,7 +119,7 @@ export default function OrderStepFinalReview({
         listing: listingId,
         ...(isCustom ? {} : { variant: currentVariantId }),
         event: typeof eventData.id === "string" ? eventData.id : eventData.id,
-        listingType: "venue",
+        listingType: listing.type,
         request: isCustom
           ? {
               note: customRequest?.note,
@@ -326,8 +333,9 @@ export default function OrderStepFinalReview({
             </div>
             <div className="px-5 py-4 bg-zinc-50 border-t border-zinc-200 flex items-center justify-between gap-6">
               <Text variant="caption" color="secondary">
-                Odesláním poptávky nevzniká závazek — dodavatel vás nejprve
-                kontaktuje s nabídkou.
+                Odesláním poptávky nevzniká závazek — dodavatel vám musí nejprve
+                odpovědět a potvrdit dostupnost. Následně musí přijít finální
+                potvrzení od Vás.
               </Text>
               <Button
                 className="shrink-0"
@@ -343,7 +351,7 @@ export default function OrderStepFinalReview({
           <div className="rounded-2xl border border-zinc-200 overflow-hidden">
             <div className="px-5 py-4 border-b border-zinc-200">
               <Text variant="h4" color="textDark">
-                Co se stane po odeslání?
+                Další kroky a platba
               </Text>
             </div>
             <div className="divide-y divide-zinc-100">
@@ -354,13 +362,18 @@ export default function OrderStepFinalReview({
               />
               <NextStep
                 icon={MessageCircle}
-                title="Dodavatel vás do 48 hodin kontaktuje"
-                description="Odpovíme vám s potvrzením dostupnosti, případně doplňujícími dotazy."
+                title="Domluvení detailů"
+                description="Dodavatel vás v chatu kontaktuje, případně rovnou potvrdí či odmítne poptávku."
               />
               <NextStep
                 icon={Handshake}
-                title="Domluvíte detaily a uzavřete spolupráci"
-                description="Po odsouhlasení podmínek obdržíte smlouvu a potvrzení rezervace."
+                title="Potvrzení rezervace"
+                description="Jakmile bude vše domluveno a dodavatel vše potrvdí, bude finální rozhodnutí na vás. Poptávka není závazná, dokud ji nepotvrdíte."
+              />
+              <NextStep
+                icon={Banknote}
+                title="Platba a event"
+                description="Platbu a zbylé detaily domluvíte přímo s dodavatelem. Po skončení eventu můžete zanechat recenzi."
               />
             </div>
           </div>

@@ -1,5 +1,5 @@
 import { getRecordStatuses } from '@roo/common'
-import { Field } from 'payload'
+import { Field, Where } from 'payload'
 
 const INQUIRY_STATUS = ['pending', 'confirmed', 'cancelled']
 
@@ -69,6 +69,35 @@ export const inquiryFields: Field[] = [
         required: true,
         defaultValue: 'pending',
         options: INQUIRY_STATUS,
+        access: {
+          update: async ({ req, id }) => {
+            if (req.user?.collection === 'admins') return true
+            if (!req.user || !id) return false
+            const { totalDocs } = await req.payload.find({
+              collection: 'inquiries',
+              where: {
+                and: [
+                  { id: { equals: id } },
+                  {
+                    or: [
+                      { 'listing.company.owner': { equals: req.user.id } },
+                      {
+                        and: [
+                          { 'listing.company.members.user': { equals: req.user.id } },
+                          { 'listing.company.members.role': { in: ['admin', 'manager'] } },
+                        ],
+                      },
+                    ] as Where[],
+                  },
+                ],
+              },
+              overrideAccess: true,
+              depth: 0,
+              limit: 1,
+            })
+            return totalDocs > 0
+          },
+        },
       },
       {
         name: 'user',
@@ -76,6 +105,22 @@ export const inquiryFields: Field[] = [
         required: true,
         defaultValue: 'pending',
         options: INQUIRY_STATUS,
+        access: {
+          update: async ({ req, id }) => {
+            if (req.user?.collection === 'admins') return true
+            if (!req.user || !id) return false
+            const { totalDocs } = await req.payload.find({
+              collection: 'inquiries',
+              where: {
+                and: [{ id: { equals: id } }, { user: { equals: req.user.id } }],
+              },
+              overrideAccess: true,
+              depth: 0,
+              limit: 1,
+            })
+            return totalDocs > 0
+          },
+        },
       },
       {
         name: 'listing',

@@ -18,10 +18,12 @@ import {
 
 export function useCompanies({
   options,
-}: { options?: GetCollectionParams } = {}) {
+  enabled,
+}: { options?: GetCollectionParams; enabled?: boolean } = {}) {
   return useQuery({
     queryKey: companyKeys.all(options?.query, options?.limit),
     queryFn: () => fetchCompanies(options),
+    enabled,
   });
 }
 
@@ -68,7 +70,7 @@ export function useCreateCompany(
   return useMutation({
     mutationFn: (data: CreateCompanyPayload) => createCompany(data),
     onSuccess: (...args) => {
-      queryClient.invalidateQueries({ queryKey: companyKeys.all() });
+      queryClient.invalidateQueries({ queryKey: companyKeys.root() });
       options?.onSuccess?.(...args);
     },
     onError: options?.onError,

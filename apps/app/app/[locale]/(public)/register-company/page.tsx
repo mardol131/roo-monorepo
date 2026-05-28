@@ -42,11 +42,15 @@ export default function RegisterCompanyPage() {
     if (!user) return;
     setIsPending(true);
     try {
+      const userRoles = [...user.roles];
+      if (!userRoles.includes("company")) {
+        userRoles.push("company");
+      }
       await fetch(`${BASE_URL}/api/users/${user.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify({ type: "company" }),
+        body: JSON.stringify({ roles: userRoles }),
       });
       await refresh();
       setSwitched(true);

@@ -32,7 +32,7 @@ export function ItemListCard({
         {items.map((item, i) => (
           <li key={i} className="flex items-center gap-2">
             <Icon className={`w-3.5 h-3.5 shrink-0 ${iconColor}`} />
-            <Text variant="body-sm" color="textDark">
+            <Text variant="label" color="textDark">
               {item}
             </Text>
           </li>

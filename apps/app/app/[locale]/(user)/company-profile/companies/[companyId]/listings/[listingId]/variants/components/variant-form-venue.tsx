@@ -30,6 +30,7 @@ import { relationshipItemSchema } from "@/app/validation/schema/relationship-ite
 import { getOptionalPositiveNumber } from "@/app/validation/schema/utils";
 import SpacesCheckboxInput from "@/app/components/ui/atoms/inputs/spaces-checkbox-input";
 import TimeInput from "@/app/components/ui/atoms/inputs/time-input";
+import { getIdFromRelationshipField } from "@roo/common";
 
 // ── Color scheme ───────────────────────────────────────────────────────────────
 
@@ -52,6 +53,11 @@ const S: Record<string, TocSection> = {
     icon: "Calendar",
   },
   capacity: { id: "section-capacity", title: "Kapacita", icon: "Users" },
+  spaces: {
+    id: "section-spaces",
+    title: "Prostory",
+    icon: "LayoutDashboard",
+  },
   equipment: {
     id: "section-equipment",
     title: "Vybavení a personál",
@@ -76,7 +82,7 @@ const FORM_GROUPS: readonly TocGroup[] = [
   { label: "Konfigurace", sections: [S.availability, S.capacity, S.includes] },
   {
     label: "Prostor",
-    sections: [S.equipment, S.parking, S.accommodation, S.breakfast],
+    sections: [S.spaces, S.equipment, S.parking, S.accommodation, S.breakfast],
   },
 ];
 
@@ -684,10 +690,11 @@ export default function EditVariantFormVenue({
           />
         </FormSection>
 
+        {/* Prostory */}
         <FormSection
-          id={S.equipment.id}
-          icon={S.equipment.icon}
-          title={S.equipment.title}
+          id={S.spaces.id}
+          icon={S.spaces.icon}
+          title={S.spaces.title}
           surfaceColor={COLOR.surface}
           color={COLOR.text}
         >
@@ -711,7 +718,24 @@ export default function EditVariantFormVenue({
           id={S.equipment.id}
           icon={S.equipment.icon}
           title={S.equipment.title}
+          subtitle="Výběr možností vychází z nastavení na úrovni služby. Pokud potřebujete upravit dostupné možnosti, vraťte se do nastavení služby."
           surfaceColor={COLOR.surface}
+          headerRightComponent={
+            <Button
+              text="Upravit"
+              version="plain"
+              size="xs"
+              iconLeft="Pen"
+              link={{
+                pathname:
+                  "/company-profile/companies/[companyId]/listings/[listingId]/edit",
+                params: {
+                  listingId: listingId,
+                  companyId: getIdFromRelationshipField(listing?.company || ""),
+                },
+              }}
+            />
+          }
           color={COLOR.text}
         >
           <Controller

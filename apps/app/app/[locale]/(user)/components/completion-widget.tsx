@@ -3,7 +3,7 @@
 import Button from "@/app/components/ui/atoms/button";
 import Text from "@/app/components/ui/atoms/text";
 import { IntlLink } from "@/app/i18n/navigation";
-import { CheckCircle2, ChevronDown, CircleDashed } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 import { useState } from "react";
 import { DashboardSection } from "./dashboard-section";
 
@@ -31,6 +31,7 @@ export type CompletionGroup = {
   label: string;
   weight: number;
   fields: CompletionField[];
+  bonus?: boolean;
 };
 
 type Props = {
@@ -44,15 +45,24 @@ export function CompletionWidget({
 }: Props) {
   const [open, setOpen] = useState(false);
 
-  const totalWeight = groups.reduce((s, g) => s + g.weight, 0);
+  const mainGroups = groups
+    .filter((g) => !g.bonus)
+    .map((g) => ({
+      ...g,
+      fields: g.fields.filter((f) => f.relevant !== false),
+    }));
 
-  const relevantGroups = groups.map((g) => ({
-    ...g,
-    fields: g.fields.filter((f) => f.relevant !== false),
-  }));
+  const bonusGroups = groups
+    .filter((g) => g.bonus)
+    .map((g) => ({
+      ...g,
+      fields: g.fields.filter((f) => f.relevant !== false),
+    }));
+
+  const totalWeight = mainGroups.reduce((s, g) => s + g.weight, 0);
 
   const percent = Math.round(
-    relevantGroups.reduce((sum, g) => {
+    mainGroups.reduce((sum, g) => {
       const filled = g.fields.filter((f) => f.filled).length;
       const total = g.fields.length;
       if (total === 0) return sum;
@@ -60,9 +70,7 @@ export function CompletionWidget({
     }, 0),
   );
 
-  const allFilled = relevantGroups.every((g) =>
-    g.fields.every((f) => f.filled),
-  );
+  const allFilled = mainGroups.every((g) => g.fields.every((f) => f.filled));
   if (allFilled) return null;
 
   return (
@@ -113,75 +121,131 @@ export function CompletionWidget({
       </button>
 
       {open && (
-        <div className="flex flex-col gap-4 pt-1">
-          {relevantGroups.map((group) => {
-            const filledCount = group.fields.filter((f) => f.filled).length;
+        <div className="flex flex-col divide-y divide-zinc-100 pt-2">
+          {mainGroups.map((group) => {
+            const filledCount = group.fields.filter(
+              (f: CompletionField) => f.filled,
+            ).length;
             const groupPercent = Math.round(
               group.fields.length > 0
                 ? (filledCount / group.fields.length) * 100
                 : 0,
             );
+            const missingFields = group.fields.filter(
+              (f: CompletionField) => !f.filled,
+            );
+            if (missingFields.length === 0) return null;
+
+            const RADIUS = 9;
+            const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
+            const offset = CIRCUMFERENCE * (1 - groupPercent / 100);
+            const colorClass =
+              groupPercent < 75 ? "text-warning" : "text-success";
+            const bgClass =
+              groupPercent < 75 ? "bg-warning-surface" : "bg-success-surface";
+
             return (
-              <div
-                key={group.label}
-                className={`border p-4 rounded-lg ${groupPercent === 100 ? "border-success" : "border-zinc-200"}`}
-              >
-                <div
-                  className={`flex items-center justify-between mb-1.5 border-b pb-2 ${groupPercent === 100 ? "border-success" : "border-zinc-200"}`}
-                >
-                  {groupPercent === 100 ? (
-                    <CheckCircle2 className="w-4 h-4 text-success shrink-0" />
-                  ) : (
-                    <CircleDashed className="w-4 h-4 text-zinc-400 shrink-0" />
-                  )}
+              <div key={group.label} className="flex flex-col gap-3 py-4">
+                <div className="flex items-center gap-2.5">
+                  <div
+                    className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg shrink-0 ${bgClass} ${colorClass}`}
+                  >
+                    <div className="relative w-5 h-5 shrink-0">
+                      <svg
+                        className="w-full h-full -rotate-90"
+                        viewBox="0 0 24 24"
+                      >
+                        <circle
+                          cx="12"
+                          cy="12"
+                          r={RADIUS}
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2.5"
+                          className="opacity-20"
+                        />
+                        <circle
+                          cx="12"
+                          cy="12"
+                          r={RADIUS}
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2.5"
+                          strokeLinecap="round"
+                          strokeDasharray={CIRCUMFERENCE}
+                          strokeDashoffset={offset}
+                        />
+                      </svg>
+                    </div>
+                    <Text variant="caption" as="span" className="font-semibold">
+                      {groupPercent} %
+                    </Text>
+                  </div>
                   <Text
                     variant="label-lg"
-                    color={groupPercent === 100 ? "success" : "textDark"}
-                    className="font-medium"
+                    color="textDark"
+                    className="font-semibold"
                   >
                     {group.label}
                   </Text>
-                  <Text
-                    variant="caption"
-                    color={groupPercent === 100 ? "success" : "secondary"}
-                  >
-                    {groupPercent} %
-                  </Text>
                 </div>
-                <div className="divide-y divide-zinc-100">
-                  {group.fields.map((field) => (
-                    <div
+                <div className="flex flex-wrap gap-2 pl-1">
+                  {missingFields.map((field: CompletionField) => (
+                    <Button
                       key={field.label}
-                      className="flex items-center justify-between py-2 rounded-lg"
-                    >
-                      <div className="flex items-center gap-2">
-                        {field.filled ? (
-                          <CheckCircle2 className="w-4 h-4 text-success shrink-0" />
-                        ) : (
-                          <CircleDashed className="w-4 h-4 text-zinc-400 shrink-0" />
-                        )}
-                        <Text
-                          variant="label"
-                          color={field.filled ? "success" : "textDark"}
-                        >
-                          {field.label}
-                        </Text>
-                      </div>
-                      {!field.filled && (
-                        <Button
-                          text="Vyplnit"
-                          size="xs"
-                          version="plain"
-                          iconRight="Pencil"
-                          link={field.editHref}
-                        />
-                      )}
-                    </div>
+                      text={field.label}
+                      size="xs"
+                      version="plain"
+                      iconLeft="Pencil"
+                      link={field.editHref}
+                    />
                   ))}
                 </div>
               </div>
             );
           })}
+          {bonusGroups.some((g) =>
+            g.fields.some((f: CompletionField) => !f.filled),
+          ) && (
+            <div className="flex flex-col gap-1 py-4">
+              <Text
+                variant="label-lg"
+                color="secondary"
+                className="mb-2 font-semibold"
+              >
+                Bonusové položky
+              </Text>
+              {bonusGroups.map((group) => {
+                const missingFields = group.fields.filter(
+                  (f: CompletionField) => !f.filled,
+                );
+                if (missingFields.length === 0) return null;
+                return (
+                  <div key={group.label} className="flex flex-col gap-3 py-3">
+                    <Text
+                      variant="label"
+                      color="secondary"
+                      className="font-semibold"
+                    >
+                      {group.label}
+                    </Text>
+                    <div className="flex flex-wrap gap-2 pl-1">
+                      {missingFields.map((field: CompletionField) => (
+                        <Button
+                          key={field.label}
+                          text={field.label}
+                          size="xs"
+                          version="plain"
+                          iconLeft="Pencil"
+                          link={field.editHref}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
       )}
     </DashboardSection>

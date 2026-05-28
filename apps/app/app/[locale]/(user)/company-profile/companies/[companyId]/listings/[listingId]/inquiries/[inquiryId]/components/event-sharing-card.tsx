@@ -3,18 +3,16 @@ import { DetailRow } from "@/app/[locale]/(user)/components/detail-row";
 import EntityCard from "@/app/[locale]/(user)/components/entity-card";
 import Button from "@/app/components/ui/atoms/button";
 import Text from "@/app/components/ui/atoms/text";
-import {
-  getIdFromRelationshipField,
-  type Event,
-  type Inquiry,
-} from "@roo/common";
+import { AcceptedInquiryPublicData } from "@/app/react-query/inquiries/fetch";
+import { Inquiry, type Event } from "@roo/common";
 import { Building2, MapPin, Music, UtensilsCrossed, Users } from "lucide-react";
+import { useTranslations } from "next-intl";
 import Link from "next/link";
 
 type Props = {
   event: Event;
-  inquiries: Inquiry[];
-  contactUser: Inquiry["user"];
+  inquiries: AcceptedInquiryPublicData[];
+  contactUser: Event["contactPerson"];
 };
 
 function SectionLabel({ children }: { children: string }) {
@@ -40,8 +38,7 @@ export default function EventSharingCard({
   const hasAny =
     sharing.contactDetails || sharing.confirmedInquiries || sharing.place;
   if (!hasAny) return null;
-
-  const user = typeof contactUser !== "string" ? contactUser : null;
+  const t = useTranslations("global.listings");
 
   const showInfoSection = sharing.contactDetails || sharing.place;
 
@@ -55,24 +52,25 @@ export default function EventSharingCard({
       <div className="flex flex-col gap-6">
         {showInfoSection && (
           <div className="grid grid-cols-2 gap-6">
-            {sharing.contactDetails && user && (
+            {sharing.contactDetails && contactUser && (
               <section className="flex flex-col gap-2">
                 <SectionLabel>Kontakt zákazníka</SectionLabel>
                 <div>
                   <DetailRow label="Jméno">
-                    <Text variant="body-sm" color="textDark">
-                      {user.firstName} {user.lastName}
+                    <Text variant="label" color="textDark">
+                      {contactUser.name}
                     </Text>
                   </DetailRow>
                   <DetailRow label="Email">
-                    <Text variant="body-sm" color="textDark">
-                      {user.email}
+                    <Text variant="label" color="textDark">
+                      {contactUser.email}
                     </Text>
                   </DetailRow>
-                  {user.phone && (
+                  {contactUser.phone && (
                     <DetailRow label="Telefon">
-                      <Text variant="body-sm" color="textDark">
-                        {user.phone.countryCode} {user.phone.number}
+                      <Text variant="label" color="textDark">
+                        {contactUser.phone.countryCode}{" "}
+                        {contactUser.phone.number}
                       </Text>
                     </DetailRow>
                   )}
@@ -80,21 +78,21 @@ export default function EventSharingCard({
               </section>
             )}
 
-            {sharing.place && location && location.length > 0 && (
+            {sharing.place && location && (
               <section className="flex flex-col gap-2">
                 <SectionLabel>Místo konání</SectionLabel>
                 <div>
-                  {location.map((block, i) => {
-                    if (block.blockType === "venue") {
+                  {location.type === "venue" &&
+                    (() => {
                       const venue =
-                        typeof block.venue !== "string" && block.venue
-                          ? block.venue
+                        typeof location.venue !== "string" && location.venue
+                          ? location.venue
                           : null;
                       return (
-                        <DetailRow key={i} label="Venue">
+                        <DetailRow label="Vybrané místo">
                           <div className="flex items-center justify-between">
-                            <Text variant="body-sm" color="textDark">
-                              {venue?.name ?? "—"}
+                            <Text variant="label" color="textDark">
+                              {venue?.name ?? "Zatím nevybráno"}
                             </Text>
                             {venue && (
                               <Link
@@ -107,40 +105,35 @@ export default function EventSharingCard({
                           </div>
                         </DetailRow>
                       );
-                    }
+                    })()}
 
-                    if (block.blockType === "custom") {
-                      const cityName =
-                        typeof block.city !== "string"
-                          ? block.city.name
-                          : block.city;
-                      return (
-                        <div key={i}>
-                          <DetailRow label="Město">
-                            <Text variant="body-sm" color="textDark">
-                              {cityName}
-                            </Text>
-                          </DetailRow>
-                          {block.address && (
-                            <DetailRow label="Adresa">
-                              <Text variant="body-sm" color="textDark">
-                                {block.address}
-                              </Text>
-                            </DetailRow>
-                          )}
-                          {block.description && (
-                            <DetailRow label="Poznámka">
-                              <Text variant="body-sm" color="secondary">
-                                {block.description}
-                              </Text>
-                            </DetailRow>
-                          )}
-                        </div>
-                      );
-                    }
-
-                    return null;
-                  })}
+                  {location.type === "custom" && (
+                    <>
+                      {location.city && (
+                        <DetailRow label="Město">
+                          <Text variant="label" color="textDark">
+                            {typeof location.city !== "string"
+                              ? location.city.name
+                              : location.city}
+                          </Text>
+                        </DetailRow>
+                      )}
+                      {location.address && (
+                        <DetailRow label="Adresa">
+                          <Text variant="label" color="textDark">
+                            {location.address}
+                          </Text>
+                        </DetailRow>
+                      )}
+                      {location.description && (
+                        <DetailRow label="Poznámka">
+                          <Text variant="label" color="secondary">
+                            {location.description}
+                          </Text>
+                        </DetailRow>
+                      )}
+                    </>
+                  )}
                 </div>
               </section>
             )}
@@ -151,31 +144,34 @@ export default function EventSharingCard({
           <section className="flex flex-col gap-2">
             <SectionLabel>Potvrzení dodavatelé</SectionLabel>
             <div className="flex flex-col gap-1">
-              {inquiries.map((inq, index) => {
-                const listing =
-                  typeof inq.listing !== "string" ? inq.listing : null;
-                return (
-                  <EntityCard
-                    key={inq.id}
-                    icon={"MessageSquare"}
-                    iconColor="text-space"
-                    iconBackgroundColor="bg-space-surface"
-                    label={listing?.name ?? `Poptávka #${index + 1}`}
-                    plain
-                    link={{
-                      pathname: "/listing/[listingId]",
-                      params: {
-                        listingId: getIdFromRelationshipField(inq.listing),
-                      },
-                    }}
-                    target="_blank"
-                    items={[]}
-                    rightComponent={
-                      <Button text="Zobrazit" version="plain" size="xs" />
-                    }
-                  />
-                );
-              })}
+              {inquiries.map((inq, index) => (
+                <EntityCard
+                  key={inq.listing.id}
+                  icon={"MessageSquare"}
+                  iconColor="text-space"
+                  iconBackgroundColor="bg-space-surface"
+                  label={inq.listing.name ?? `Dodavatel #${index + 1}`}
+                  plain
+                  link={{
+                    pathname: "/listing/[listingId]",
+                    params: { listingId: inq.listing.id },
+                  }}
+                  target="_blank"
+                  items={
+                    inq.listing.type
+                      ? [
+                          {
+                            icon: "Box" as const,
+                            content: t(`type.${inq.listing.type}`),
+                          },
+                        ]
+                      : []
+                  }
+                  rightComponent={
+                    <Button text="Zobrazit" version="plain" size="xs" />
+                  }
+                />
+              ))}
             </div>
           </section>
         )}

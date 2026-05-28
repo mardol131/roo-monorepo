@@ -4,7 +4,7 @@ import CardContainer from "@/app/[locale]/(user)/components/card-container";
 import EntityCard from "@/app/[locale]/(user)/components/entity-card";
 import Loader from "@/app/[locale]/(user)/components/loader";
 import PageHeading from "@/app/[locale]/(user)/components/page-heading";
-import { canEditCompany } from "@/app/[locale]/(user)/utils/companies";
+import { canEditCompany } from "@/app/functions/utils/companies";
 import AddTeamMemberModal from "@/app/components/ui/molecules/modals/add-team-member-modal";
 import EditTeamMemberRoleModal from "@/app/components/ui/molecules/modals/edit-team-member-role-modal";
 import { useAuth } from "@/app/context/auth/auth-context";

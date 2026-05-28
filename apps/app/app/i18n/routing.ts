@@ -71,6 +71,9 @@ export const routing = defineRouting({
     "/company-profile/companies/new": {
       cs: "/firemni-ucet/firmy/nova-firma",
     },
+    "/company-profile/member-companies": {
+      cs: "/firemni-ucet/firmy/firmy-kde-jsem-clenem",
+    },
     "/company-profile/profile-settings": { cs: "/firemni-ucet/nastaveni" },
 
     // company detail

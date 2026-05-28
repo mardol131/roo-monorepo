@@ -55,16 +55,25 @@ export const spacesFields: Field[] = [
   {
     name: 'hasAccommodation',
     type: 'checkbox',
-    admin: { description: 'Indikuje, zda prostor nabízí ubytování' },
+    admin: {
+      description: 'Indikuje, zda prostor nabízí ubytování',
+      condition: (data) => data?.type !== 'room',
+    },
   },
   {
     name: 'accommodationCapacity',
     type: 'number',
-    admin: { description: 'Kapacita ubytování (počet lůžek)' },
+    admin: {
+      description: 'Kapacita ubytování (počet lůžek)',
+      condition: (data) => data?.type !== 'room' && data?.hasAccommodation === true,
+    },
   },
   {
-    name: 'rooms',
+    name: 'accommodationRooms',
     type: 'array',
+    admin: {
+      condition: (data) => data?.type !== 'room' && data?.hasAccommodation === true,
+    },
     fields: [
       {
         name: 'name',
@@ -88,6 +97,7 @@ export const spacesFields: Field[] = [
         hasMany: true,
       },
     ],
+    label: 'Typy ubytovacích pokojů',
   },
   {
     name: 'spaceRules',

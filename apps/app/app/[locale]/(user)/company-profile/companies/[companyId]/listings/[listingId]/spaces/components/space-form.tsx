@@ -66,13 +66,6 @@ const S: Record<string, TocSection> = {
   },
 };
 
-const SPACE_FORM_GROUPS: readonly TocGroup[] = [
-  {
-    label: "Prostor",
-    sections: [S.basics, S.images, S.capacity, S.accommodation, S.rules],
-  },
-];
-
 // ── Constants ─────────────────────────────────────────────────────────────────
 
 const TYPE_LABEL: Record<Space["type"], string> = {
@@ -99,7 +92,7 @@ const schema = z.object({
   accommodationCapacity: getOptionalPositiveNumber(
     "Kapacita ubytování musí být kladná",
   ),
-  rooms: z
+  accommodationRooms: z
     .array(
       z.object({
         id: z.string(),
@@ -145,6 +138,18 @@ export function SpaceForm(props: SpaceFormProps) {
   const { spaceType, listingId, companyId } = props;
   const router = useRouter();
 
+  const SPACE_FORM_GROUPS: readonly TocGroup[] = [
+    {
+      label: "Prostor",
+      sections: [
+        S.basics,
+        S.images,
+        S.capacity,
+        ...(spaceType !== "room" ? [S.accommodation] : []),
+        S.rules,
+      ],
+    },
+  ];
   const { mutate: createSpace } = useCreateSpace(listingId);
   const { mutate: updateSpace } = useUpdateSpace(
     props.mode === "edit" ? props.spaceId : "",
@@ -165,7 +170,7 @@ export function SpaceForm(props: SpaceFormProps) {
         : {
             images: [],
             hasAccommodation: false,
-            rooms: [],
+            accommodationRooms: [],
             spaceRuleIds: [],
           },
   });
@@ -177,7 +182,7 @@ export function SpaceForm(props: SpaceFormProps) {
     fields: roomFields,
     append: appendRoom,
     remove: removeRoom,
-  } = useFieldArray({ control, name: "rooms" });
+  } = useFieldArray({ control, name: "accommodationRooms" });
 
   const hasAccommodation = watch("hasAccommodation");
 
@@ -200,7 +205,7 @@ export function SpaceForm(props: SpaceFormProps) {
       images: data.images,
       hasAccommodation: data.hasAccommodation,
       accommodationCapacity: data.accommodationCapacity,
-      rooms: data.rooms.map(
+      accommodationRooms: data.accommodationRooms.map(
         ({ name, capacity, countOfRoomsOfThisType, amenityIds }) => ({
           name,
           capacity,
@@ -319,109 +324,119 @@ export function SpaceForm(props: SpaceFormProps) {
         </FormSection>
 
         {/* ── 4. Ubytování ──────────────────────────────────────────────────── */}
-        <FormSection
-          id={S.accommodation.id}
-          icon={S.accommodation.icon}
-          title={S.accommodation.title}
-          subtitle={S.accommodation.subTitle}
-          surfaceColor="bg-space-surface"
-          color="text-space"
-        >
-          <Controller
-            control={control}
-            name="hasAccommodation"
-            render={({ field }) => (
-              <Checkbox
-                checked={field.value}
-                onChange={field.onChange}
-                label="Prostor nabízí ubytování"
-                checkColor="text-space"
-              />
-            )}
-          />
+        {spaceType !== "room" && (
+          <FormSection
+            id={S.accommodation.id}
+            icon={S.accommodation.icon}
+            title={S.accommodation.title}
+            subtitle={S.accommodation.subTitle}
+            surfaceColor="bg-space-surface"
+            color="text-space"
+          >
+            <Controller
+              control={control}
+              name="hasAccommodation"
+              render={({ field }) => (
+                <Checkbox
+                  checked={field.value}
+                  onChange={field.onChange}
+                  label="Prostor nabízí ubytování"
+                  checkColor="text-space"
+                />
+              )}
+            />
 
-          {hasAccommodation && (
-            <>
-              <Input
-                label="Kapacita ubytování (počet lůžek)"
-                inputProps={{
-                  ...register("accommodationCapacity"),
-                  type: "number",
-                  min: 1,
-                  placeholder: "20",
-                }}
-                error={errors.accommodationCapacity?.message}
-              />
+            {hasAccommodation && (
+              <>
+                <Input
+                  label="Kapacita ubytování (počet lůžek)"
+                  inputProps={{
+                    ...register("accommodationCapacity"),
+                    type: "number",
+                    min: 1,
+                    placeholder: "20",
+                  }}
+                  error={errors.accommodationCapacity?.message}
+                />
 
-              <RepeaterField
-                label="Typy pokojů"
-                fields={roomFields as Record<string, unknown>[]}
-                onAppend={() =>
-                  appendRoom({
-                    id: crypto.randomUUID(),
-                    name: "",
-                    capacity: 2,
-                    countOfRoomsOfThisType: 1,
-                    amenityIds: [],
-                  })
-                }
-                onRemove={removeRoom}
-                addButtonLabel="Přidat typ pokoje"
-                renderItem={(_, index) => (
-                  <div className="flex flex-col gap-3">
-                    <Input
-                      label="Název typu pokoje"
-                      isRequired
-                      inputProps={{
-                        ...register(`rooms.${index}.name`),
-                        placeholder: "Dvoulůžkový pokoj",
-                      }}
-                      error={errors.rooms?.[index]?.name?.message}
-                    />
-                    <div className="grid grid-cols-2 gap-3">
+                <RepeaterField
+                  label="Typy pokojů"
+                  fields={roomFields as Record<string, unknown>[]}
+                  onAppend={() =>
+                    appendRoom({
+                      id: crypto.randomUUID(),
+                      name: "",
+                      capacity: 2,
+                      countOfRoomsOfThisType: 1,
+                      amenityIds: [],
+                    })
+                  }
+                  onRemove={removeRoom}
+                  addButtonLabel="Přidat typ pokoje"
+                  renderItem={(_, index) => (
+                    <div className="flex flex-col gap-3">
                       <Input
-                        label="Kapacita (lůžek)"
+                        label="Název typu pokoje"
+                        isRequired
                         inputProps={{
-                          ...register(`rooms.${index}.capacity`),
-                          type: "number",
-                          min: 1,
-                          placeholder: "2",
-                        }}
-                        error={errors.rooms?.[index]?.capacity?.message}
-                      />
-                      <Input
-                        label="Počet pokojů tohoto typu"
-                        inputProps={{
-                          ...register(`rooms.${index}.countOfRoomsOfThisType`),
-                          type: "number",
-                          min: 1,
-                          placeholder: "5",
+                          ...register(`accommodationRooms.${index}.name`),
+                          placeholder: "Dvoulůžkový pokoj",
                         }}
                         error={
-                          errors.rooms?.[index]?.countOfRoomsOfThisType?.message
+                          errors.accommodationRooms?.[index]?.name?.message
                         }
                       />
-                    </div>
-                    <Controller
-                      control={control}
-                      name={`rooms.${index}.amenityIds`}
-                      render={({ field }) => (
-                        <CheckboxGroup
-                          searchable
-                          label="Vybavení pokoje"
-                          items={amenities?.docs ?? []}
-                          value={field.value}
-                          onChange={field.onChange}
-                          checkColor={"text-space"}
+                      <div className="grid grid-cols-2 gap-3">
+                        <Input
+                          label="Kapacita (lůžek)"
+                          inputProps={{
+                            ...register(`accommodationRooms.${index}.capacity`),
+                            type: "number",
+                            min: 1,
+                            placeholder: "2",
+                          }}
+                          error={
+                            errors.accommodationRooms?.[index]?.capacity
+                              ?.message
+                          }
                         />
-                      )}
-                    />
-                  </div>
-                )}
-              />
-            </>
-          )}
-        </FormSection>
+                        <Input
+                          label="Počet pokojů tohoto typu"
+                          inputProps={{
+                            ...register(
+                              `accommodationRooms.${index}.countOfRoomsOfThisType`,
+                            ),
+                            type: "number",
+                            min: 1,
+                            placeholder: "5",
+                          }}
+                          error={
+                            errors.accommodationRooms?.[index]
+                              ?.countOfRoomsOfThisType?.message
+                          }
+                        />
+                      </div>
+                      <Controller
+                        control={control}
+                        name={`accommodationRooms.${index}.amenityIds`}
+                        render={({ field }) => (
+                          <CheckboxGroup
+                            searchable
+                            label="Vybavení pokoje"
+                            items={amenities?.docs ?? []}
+                            value={field.value}
+                            onChange={field.onChange}
+                            checkColor={"text-space"}
+                          />
+                        )}
+                      />
+                    </div>
+                  )}
+                />
+              </>
+            )}
+          </FormSection>
+        )}
 
         {/* ── 5. Pravidla ───────────────────────────────────────────────────── */}
         <FormSection

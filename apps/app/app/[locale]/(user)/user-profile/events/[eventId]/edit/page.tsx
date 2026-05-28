@@ -12,10 +12,6 @@ export default function page() {
   const { data: event, isFetching } = useEvent(eventId);
   const { data: inquiries } = useInquiriesByEvent(eventId);
 
-  const hasConfirmedInquiries = !!inquiries?.docs?.some(
-    (inquiry) => inquiry.status.company === "confirmed",
-  );
-
   if (isFetching) return <Loader text="Formulář se načítá" />;
 
   return (
@@ -29,7 +25,9 @@ export default function page() {
       <NewEventForm
         type="edit"
         edditedEvent={event}
-        hasConfirmedInquiries={true}
+        hasConfirmedInquiries={
+          inquiries && inquiries?.docs && inquiries?.docs?.length > 0
+        }
       />
     </main>
   );

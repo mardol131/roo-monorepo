@@ -55,7 +55,7 @@ export default function page() {
           images: space.images ?? [],
           hasAccommodation: space.hasAccommodation ?? false,
           accommodationCapacity: space.accommodationCapacity ?? undefined,
-          rooms: (space.rooms ?? []).map((r) => ({
+          accommodationRooms: (space.accommodationRooms ?? []).map((r) => ({
             id: r.id ?? crypto.randomUUID(),
             name: r.name,
             capacity: r.capacity,

@@ -44,8 +44,8 @@ export default function page() {
             <EntityCard
               key={inquiry.id}
               label={
-                typeof inquiry.listing !== "string"
-                  ? inquiry.listing.name
+                typeof inquiry.event !== "string"
+                  ? inquiry.event.name
                   : "Poptávka"
               }
               rightComponent={<InquiryStatusTag status={inquiry.status} />}

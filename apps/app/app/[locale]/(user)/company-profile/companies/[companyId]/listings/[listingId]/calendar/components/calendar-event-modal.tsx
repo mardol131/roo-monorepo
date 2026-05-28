@@ -187,7 +187,12 @@ export default function CalendarEventModal({
                 value={startsAt}
                 onChange={setStartsAt}
               />
-              <DateTimeInput label="Konec" value={endsAt} onChange={setEndsAt} />
+              <DateTimeInput
+                label="Konec"
+                min={startsAt || undefined}
+                value={endsAt}
+                onChange={setEndsAt}
+              />
             </div>
 
             {/* Status */}

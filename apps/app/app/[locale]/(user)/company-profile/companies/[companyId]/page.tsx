@@ -18,7 +18,7 @@ import { SummaryCard } from "../../../components/summary-card";
 import ListingStatusTag from "../../../components/tags/listing-status-tag";
 import { CompletionWidget } from "../../../components/completion-widget";
 import { useAuth } from "@/app/context/auth/auth-context";
-import { canEditCompany } from "../../../utils/companies";
+import { canEditCompany } from "../../../../../functions/utils/companies";
 
 export default function page() {
   const { companyId } = useParams<{ companyId: string }>();

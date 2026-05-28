@@ -55,7 +55,7 @@ export default function CalendarWeekView({
 }: Props) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const { listingId } = useParams<{ listingId: string }>();
-  const { data: events } = useCalendarEventsByListing(listingId);
+  const { data: calendarEvent } = useCalendarEventsByListing(listingId);
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -64,7 +64,7 @@ export default function CalendarWeekView({
   }, []);
 
   const days = Array.from({ length: DAYS }, (_, i) => addDays(weekStart, i));
-  const allDayEvents = events?.docs?.filter((e) => e.allDay) ?? [];
+  const allDayEvents = calendarEvent?.docs?.filter((e) => e.allDay) ?? [];
   const hasAllDay = allDayEvents.length > 0;
 
   return (
@@ -173,7 +173,7 @@ export default function CalendarWeekView({
               <CalendarDayColumn
                 key={day.toISOString()}
                 day={day}
-                events={events?.docs ?? []}
+                calendarEvent={calendarEvent?.docs ?? []}
                 onCreateRequest={onCreateRequest}
                 onEditRequest={onEditRequest}
                 isCreating={isCreating}

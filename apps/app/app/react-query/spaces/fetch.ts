@@ -41,7 +41,10 @@ export async function createSpace(input: CreateSpaceInput) {
   return res;
 }
 
-export async function updateSpace(id: string, data: Partial<CreateSpaceInput>) {
+export async function updateSpace(
+  id: string,
+  data: Partial<CreateSpaceInput & { status: Space["status"] }>,
+) {
   const res = await patchCollectionItem({
     collection: "spaces",
     id,

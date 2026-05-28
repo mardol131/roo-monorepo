@@ -104,6 +104,7 @@ export interface Config {
     'listing-gastro-details': ListingGastroDetail;
     'listing-venue-details': ListingVenueDetail;
     'roadmap-items': RoadmapItem;
+    'user-notifications': UserNotification;
     'payload-kv': PayloadKv;
     'payload-jobs': PayloadJob;
     'payload-locked-documents': PayloadLockedDocument;
@@ -148,6 +149,7 @@ export interface Config {
     'listing-gastro-details': ListingGastroDetailsSelect<false> | ListingGastroDetailsSelect<true>;
     'listing-venue-details': ListingVenueDetailsSelect<false> | ListingVenueDetailsSelect<true>;
     'roadmap-items': RoadmapItemsSelect<false> | RoadmapItemsSelect<true>;
+    'user-notifications': UserNotificationsSelect<false> | UserNotificationsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-jobs': PayloadJobsSelect<false> | PayloadJobsSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -877,7 +879,7 @@ export interface Space {
    * Kapacita ubytování (počet lůžek)
    */
   accommodationCapacity?: number | null;
-  rooms?:
+  accommodationRooms?:
     | {
         name: string;
         capacity: number;
@@ -1351,7 +1353,6 @@ export interface Event {
     end: string;
   };
   sharing: {
-    contactDetails?: boolean | null;
     confirmedInquiries?: boolean | null;
     place?: boolean | null;
   };
@@ -1371,6 +1372,14 @@ export interface Event {
     children: number;
     ztp?: boolean | null;
     pets?: boolean | null;
+  };
+  contactPerson: {
+    name: string;
+    email: string;
+    phone?: {
+      countryCode?: '420' | null;
+      number?: string | null;
+    };
   };
   owner: string | User;
   updatedAt: string;
@@ -1534,6 +1543,24 @@ export interface RoadmapItem {
   description?: string | null;
   votes?: number | null;
   status?: ('planned' | 'in-progress' | 'completed') | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "user-notifications".
+ */
+export interface UserNotification {
+  id: string;
+  user: string | User;
+  type: 'general' | 'inquiry' | 'event' | 'system';
+  heading: string;
+  text: string;
+  link?: string | null;
+  seen?: boolean | null;
+  seenAt?: string | null;
+  clicked?: boolean | null;
+  clickedAt?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1796,6 +1823,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'roadmap-items';
         value: string | RoadmapItem;
+      } | null)
+    | ({
+        relationTo: 'user-notifications';
+        value: string | UserNotification;
       } | null);
   globalSlug?: string | null;
   user:
@@ -2337,7 +2368,7 @@ export interface SpacesSelect<T extends boolean = true> {
       };
   hasAccommodation?: T;
   accommodationCapacity?: T;
-  rooms?:
+  accommodationRooms?:
     | T
     | {
         name?: T;
@@ -2526,7 +2557,6 @@ export interface EventsSelect<T extends boolean = true> {
   sharing?:
     | T
     | {
-        contactDetails?: T;
         confirmedInquiries?: T;
         place?: T;
       };
@@ -2547,6 +2577,18 @@ export interface EventsSelect<T extends boolean = true> {
         children?: T;
         ztp?: T;
         pets?: T;
+      };
+  contactPerson?:
+    | T
+    | {
+        name?: T;
+        email?: T;
+        phone?:
+          | T
+          | {
+              countryCode?: T;
+              number?: T;
+            };
       };
   owner?: T;
   updatedAt?: T;
@@ -3184,6 +3226,23 @@ export interface RoadmapItemsSelect<T extends boolean = true> {
   description?: T;
   votes?: T;
   status?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "user-notifications_select".
+ */
+export interface UserNotificationsSelect<T extends boolean = true> {
+  user?: T;
+  type?: T;
+  heading?: T;
+  text?: T;
+  link?: T;
+  seen?: T;
+  seenAt?: T;
+  clicked?: T;
+  clickedAt?: T;
   updatedAt?: T;
   createdAt?: T;
 }

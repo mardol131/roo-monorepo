@@ -7,6 +7,8 @@ import Button from "@/app/components/ui/atoms/button";
 import { useSpacesByListing } from "@/app/react-query/spaces/hooks";
 import { Space } from "@roo/common";
 import { CornerDownRight, icons } from "lucide-react";
+import { EntityCompletionBadge } from "@/app/[locale]/(user)/components/entity-completion-badge";
+import { getSpaceCompletion } from "@/app/functions/utils/spaces";
 
 const TYPE_ICON: Record<Space["type"], keyof typeof icons> = {
   building: "Building2",
@@ -59,6 +61,9 @@ function SpaceTreeNode({
                 "/company-profile/companies/[companyId]/listings/[listingId]/spaces/[spaceId]/edit",
               params: { companyId, listingId, spaceId: space.id },
             }}
+            rightComponent={
+              <EntityCompletionBadge percentage={getSpaceCompletion(space)} />
+            }
             items={[
               { icon: "Tag", content: TYPE_LABEL[space.type] },
               space.capacity != null

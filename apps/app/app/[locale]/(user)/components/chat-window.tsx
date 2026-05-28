@@ -23,10 +23,12 @@ export default function ChatWindow({
   senderRole,
   inquiryId,
   listingId,
+  windowOnly = false,
 }: {
   senderRole: ChatMessage["senderType"];
   inquiryId: string;
   listingId: string;
+  windowOnly?: boolean;
 }) {
   const { user } = useAuth();
   const [draft, setDraft] = useState("");
@@ -100,36 +102,38 @@ export default function ChatWindow({
       </div>
 
       {/* Input */}
-      <div className="px-4 py-3 border-t border-zinc-100 shrink-0">
-        <div className="flex items-end gap-2">
-          <textarea
-            value={draft}
-            onChange={(e) => setDraft(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" && !e.shiftKey) {
-                e.preventDefault();
-                handleSend();
-              }
-            }}
-            placeholder="Napište zprávu…"
-            rows={2}
-            className="flex-1 resize-none text-sm text-zinc-800 placeholder-zinc-400 border border-zinc-200 rounded-xl px-3.5 py-2.5 focus:outline-none focus:ring-2 focus:ring-rose-400 focus:border-transparent transition-all"
-          />
-          <button
-            type="button"
-            onClick={handleSend}
-            disabled={!draft.trim() || isPending}
-            className="w-10 h-10 flex items-center justify-center bg-rose-500 hover:bg-rose-600 disabled:opacity-40 disabled:cursor-not-allowed text-white rounded-xl transition-colors shrink-0"
-          >
-            <Send className="w-4 h-4" />
-          </button>
+      {!windowOnly && (
+        <div className="px-4 py-3 border-t border-zinc-100 shrink-0">
+          <div className="flex items-end gap-2">
+            <textarea
+              value={draft}
+              onChange={(e) => setDraft(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && !e.shiftKey) {
+                  e.preventDefault();
+                  handleSend();
+                }
+              }}
+              placeholder="Napište zprávu…"
+              rows={2}
+              className="flex-1 resize-none text-sm text-zinc-800 placeholder-zinc-400 border border-zinc-200 rounded-xl px-3.5 py-2.5 focus:outline-none focus:ring-2 focus:ring-rose-400 focus:border-transparent transition-all"
+            />
+            <button
+              type="button"
+              onClick={handleSend}
+              disabled={!draft.trim() || isPending}
+              className="w-10 h-10 flex items-center justify-center bg-rose-500 hover:bg-rose-600 disabled:opacity-40 disabled:cursor-not-allowed text-white rounded-xl transition-colors shrink-0"
+            >
+              <Send className="w-4 h-4" />
+            </button>
+          </div>
+          <div className="mt-1.5 px-1">
+            <Text variant="caption" color="secondary">
+              Enter pro odeslání · Shift+Enter pro nový řádek
+            </Text>
+          </div>
         </div>
-        <div className="mt-1.5 px-1">
-          <Text variant="caption" color="secondary">
-            Enter pro odeslání · Shift+Enter pro nový řádek
-          </Text>
-        </div>
-      </div>
+      )}
     </div>
   );
 }

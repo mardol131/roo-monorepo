@@ -9,7 +9,6 @@ import {
 } from "@/app/react-query/companies/hooks";
 import { useParams } from "next/navigation";
 import CompanyForm from "../../components/company-form";
-import EditCompanyForm from "../../components/edit-company-form";
 
 export default function page() {
   const { companyId } = useParams<{ companyId: string }>();

@@ -1,7 +1,6 @@
 "use client";
 
 import { useParams, usePathname } from "next/navigation";
-import { usePathname as useI18nPathname } from "@/app/i18n/navigation";
 import { Link as IntlLink } from "@/app/i18n/navigation";
 import { ChevronRight, Home, Signpost, SignpostBig } from "lucide-react";
 import { useListing } from "@/app/react-query/listings/hooks";
@@ -10,6 +9,7 @@ import { useVariant } from "@/app/react-query/variants/hooks";
 import { useTranslations } from "next-intl";
 import { useSpace } from "@/app/react-query/spaces/hooks";
 import { useEvent } from "@/app/react-query/events/hooks";
+import Link from "next/link";
 
 type BreadcrumbItem = {
   label: string;
@@ -22,7 +22,6 @@ type Props = {
 
 export default function Breadcrumbs({ items }: Props) {
   const pathname = usePathname();
-  const i18nPathname = useI18nPathname();
   const t = useTranslations("global");
 
   const { listingId, companyId, eventId, inquiryId, variantId, spaceId } =
@@ -54,6 +53,7 @@ export default function Breadcrumbs({ items }: Props) {
     if (variantId && segment === variantId) return variant?.name ?? segment;
     if (spaceId && segment === spaceId) return space?.name ?? segment;
 
+    // English segments
     if (segment === "company-profile") return t("breadcrumbs.company-profile");
     if (segment === "companies") return t("companies.plural");
     if (segment === "listings") return t("listings.plural");
@@ -66,6 +66,30 @@ export default function Breadcrumbs({ items }: Props) {
     if (segment === "user-profile") return t("breadcrumbs.user-profile");
     if (segment === "messages") return t("breadcrumbs.messages");
     if (segment === "favourites") return t("breadcrumbs.favourites");
+    // Czech localized segments
+    if (segment === "firemni-ucet") return t("breadcrumbs.company-profile");
+    if (segment === "firmy") return t("companies.plural");
+    if (segment === "sluzby") return t("listings.plural");
+    if (segment === "udalosti" || segment === "moje-udalosti")
+      return t("events.plural");
+    if (segment === "poptavky") return t("inquiries.plural");
+    if (segment === "varianty") return t("variants.plural");
+    if (segment === "prostory") return t("spaces.plural");
+    if (segment === "upravit") return t("breadcrumbs.edit");
+    if (
+      segment === "nova-sluzba" ||
+      segment === "nova-firma" ||
+      segment === "novy-prostor" ||
+      segment === "nova-varianta"
+    )
+      return t("breadcrumbs.new");
+    if (segment === "ucet") return t("breadcrumbs.user-profile");
+    if (segment === "zpravy") return t("breadcrumbs.messages");
+    if (segment === "oblibene") return t("breadcrumbs.favourites");
+    if (segment === "kalendar") return t("breadcrumbs.calendar");
+    if (segment === "tym") return t("breadcrumbs.team");
+    if (segment === "firmy-kde-jsem-clenem")
+      return t("breadcrumbs.member-companies");
 
     if (segment === "[companyId]")
       return company?.name ?? t("companies.singular");
@@ -84,10 +108,9 @@ export default function Breadcrumbs({ items }: Props) {
   const crumbs: BreadcrumbItem[] =
     items ??
     (() => {
-      const i18nSegments = i18nPathname.split("/").filter(Boolean);
       const segments = pathname.split("/").filter(Boolean);
-      return segments.map((_, index) => ({
-        label: formatSegment(i18nSegments[index]),
+      return segments.map((segment, index) => ({
+        label: formatSegment(segment),
         href: "/" + segments.slice(0, index + 1).join("/"),
       }));
     })();
@@ -110,12 +133,12 @@ export default function Breadcrumbs({ items }: Props) {
                 {crumb.label}
               </span>
             ) : (
-              <IntlLink
-                href={crumb.href as any}
+              <Link
+                href={crumb.href}
                 className="text-xs font-medium text-textLight hover:text-on-dark transition-colors truncate max-w-45"
               >
                 {crumb.label}
-              </IntlLink>
+              </Link>
             )}
           </span>
         );

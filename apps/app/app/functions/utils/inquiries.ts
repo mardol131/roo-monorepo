@@ -4,7 +4,7 @@ import { Company, getIdFromRelationshipField } from "@roo/common";
  * Vrací true, pokud má uživatel přístup k inquiry z firemní strany.
  * Přístup mají owner, admin a manager — editor poptávky nevidí.
  */
-export function hasInquiryCompanyRights({
+export function hasInquiryUpdateCompanyRights({
   company,
   userId,
 }: {

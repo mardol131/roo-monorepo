@@ -5,7 +5,7 @@ import EntityCard from "@/app/[locale]/(user)/components/entity-card";
 import Loader from "@/app/[locale]/(user)/components/loader";
 import PageHeading from "@/app/[locale]/(user)/components/page-heading";
 import ListingStatusTag from "@/app/[locale]/(user)/components/tags/listing-status-tag";
-import { hasListingRights } from "@/app/[locale]/(user)/utils/listings";
+import { hasListingRights } from "@/app/functions/utils/listings";
 import { confirmActionModalEvents } from "@/app/components/ui/molecules/modals/confirm-action-modal";
 import { useAuth } from "@/app/context/auth/auth-context";
 import { useCompany } from "@/app/react-query/companies/hooks";

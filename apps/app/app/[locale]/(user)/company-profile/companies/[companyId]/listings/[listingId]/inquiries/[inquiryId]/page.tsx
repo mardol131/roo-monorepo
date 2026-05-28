@@ -10,7 +10,7 @@ import VariantSection from "@/app/[locale]/(user)/components/variant-section";
 import { confirmActionModalEvents } from "@/app/components/ui/molecules/modals/confirm-action-modal";
 import { INQUIRY_STATUS } from "@/app/data/inquiry";
 import {
-  useInquiriesByEvent,
+  useAcceptedInquiriesOnEvent,
   useInquiry,
   useUpdateInquiry,
 } from "@/app/react-query/inquiries/hooks";
@@ -30,6 +30,11 @@ import { useEffect, useState } from "react";
 import InquiryDetails from "../../../../../../../components/inquiry-details";
 import AlertsSectionGroup from "./components/alerts-section-group";
 import EventSharingCard from "./components/event-sharing-card";
+import { hasInquiryUpdateCompanyRights } from "@/app/functions/utils/inquiries";
+import { useCompany } from "@/app/react-query/companies/hooks";
+import { useAuth } from "@/app/context/auth/auth-context";
+import { useEvent } from "@/app/react-query/events/hooks";
+import { useListing } from "@/app/react-query/listings/hooks";
 
 export default function page() {
   const { companyId, listingId, inquiryId } = useParams<{
@@ -41,22 +46,21 @@ export default function page() {
   const { data: inquiry, isPending } = useInquiry(inquiryId, {
     refetchInterval: 60_000,
   });
+  const { user } = useAuth();
+
+  const { data: listing } = useListing(listingId);
   const t = useTranslations("global");
   const [priceChangeModalOpen, setPriceChangeModalOpen] = useState(false);
   const { mutate: patchInquiry } = useUpdateInquiry({ listingId });
-  const { data: inquiriesByEvent } = useInquiriesByEvent(
-    getIdFromRelationshipField(inquiry?.event || ""),
-    {
-      query: {
-        and: [
-          { "status.company": { equals: "confirmed" } },
-          { "status.user": { equals: "confirmed" } },
-        ],
-      },
-      refetchInterval: 60_000,
-    },
+  const { data: inquiriesByEvent } = useAcceptedInquiriesOnEvent(
+    inquiry && user?.id ? getIdFromRelationshipField(inquiry.event) : undefined,
+    inquiryId,
+    { refetchInterval: 60_000 },
   );
-
+  const { data: event } = useEvent(
+    getIdFromRelationshipField(inquiry?.event || ""),
+  );
+  const { data: company } = useCompany(companyId);
   useEffect(() => {
     patchInquiry({
       id: inquiryId,
@@ -161,8 +165,6 @@ export default function page() {
     });
   };
 
-  const fullEvent = typeof inquiry.event !== "string" ? inquiry.event : null;
-
   return (
     <main className="w-full flex flex-col gap-6">
       <Breadcrumbs />
@@ -184,11 +186,14 @@ export default function page() {
       <div className="bg-white rounded-2xl border border-zinc-200 px-8 py-5">
         <InquiryTimeline status={inquiry.status} />
       </div>
-      <AlertsSectionGroup
-        inquiry={inquiry}
-        acceptInquiryHandler={acceptInquiryHandler}
-      />
-      <InquiryDetails inquiry={inquiry} />
+      {hasInquiryUpdateCompanyRights({ company, userId: user?.id }) && (
+        <AlertsSectionGroup
+          inquiry={inquiry}
+          acceptInquiryHandler={acceptInquiryHandler}
+          priceChangeModalHandler={priceChangeModalStateHandler}
+        />
+      )}
+      <InquiryDetails inquiry={inquiry} listing={listing} />
       <SingleInputModal
         isOpen={priceChangeModalOpen}
         onClose={priceChangeModalStateHandler}
@@ -212,73 +217,83 @@ export default function page() {
         successHeader="Cena byla změněna"
         successMessage={`Navrhli jste novou cenu pro tuto poptávku. Zákazník bude informován o navrhované změně ceny.`}
       />
-      <ControlSection
-        rows={[
-          ...(inquiry.status.user === "pending" &&
-          inquiry.status.company === "pending"
-            ? [
-                {
-                  title: "Potvrdit poptávku",
-                  text: "Potvrzením poptávky informujete zákazníka, že jeho požadavek akceptujete. Zákazník bude muset potvrdit svou stranu, aby poptávka přešla do stavu 'Závazně potvrzeno'.",
-                  icon: "Check",
-                  iconColor: "text-success",
-                  iconBgColor: "bg-success-surface",
-                  button: {
-                    version: "successFull",
-                    text: "Potvrdit",
-                    iconLeft: "Check",
-                    size: "sm",
-                    onClick: acceptInquiryHandler,
-                  },
-                } as const,
-              ]
-            : []),
-          ...(inquiry.status.company === "pending"
-            ? [
-                {
-                  disabled: inquiry.status.user === "confirmed",
-                  title: "Navrhnout novou cenu",
-                  text: "Můžete přizpůsobit cenu poptávky a odeslat návrh zákazníkovi.",
-                  icon: "Coins",
-                  iconColor: "text-yellow-600",
-                  iconBgColor: "bg-yellow-100",
-                  button: {
-                    version: "none",
-                    className: "bg-yellow-500 text-white",
-                    text: "Změnit cenu",
-                    iconLeft: "Coins",
-                    size: "sm",
-                    onClick: () => priceChangeModalStateHandler(),
-                  },
-                } as const,
-              ]
-            : []),
-          {
-            title: "Odmítnout poptávku",
-            text: "Odmítnutím poptávky informujete zákazníka, že nemůžete nabídnout své služby pro jeho požadavek.",
-            icon: "X",
-            iconColor: "text-danger",
-            iconBgColor: "bg-danger-surface",
-            button: {
-              version: "dangerFull",
-              text: "Odmítnout",
-              iconLeft: "X",
-              size: "sm",
-              onClick: () => cancelInquiryHandler(),
+      {hasInquiryUpdateCompanyRights({ company, userId: user?.id }) && (
+        <ControlSection
+          rows={[
+            ...(inquiry.status.user === "pending" &&
+            inquiry.status.company === "pending" &&
+            inquiry.pricing.quotedPrice
+              ? [
+                  {
+                    title: "Potvrdit poptávku",
+                    text: "Potvrzením poptávky informujete zákazníka, že jeho požadavek akceptujete. Zákazník bude muset potvrdit svou stranu, aby poptávka přešla do stavu 'Závazně potvrzeno'.",
+                    icon: "Check",
+                    iconColor: "text-success",
+                    iconBgColor: "bg-success-surface",
+                    button: {
+                      version: "successFull",
+                      text: "Potvrdit",
+                      iconLeft: "Check",
+                      size: "sm",
+                      onClick: acceptInquiryHandler,
+                    },
+                  } as const,
+                ]
+              : []),
+            ...(inquiry.status.company === "pending"
+              ? [
+                  {
+                    disabled: inquiry.status.user === "confirmed",
+                    title: "Navrhnout novou cenu",
+                    text: "Můžete přizpůsobit cenu poptávky a odeslat návrh zákazníkovi.",
+                    icon: "Coins",
+                    iconColor: "text-yellow-600",
+                    iconBgColor: "bg-yellow-100",
+                    button: {
+                      version: "none",
+                      className: "bg-yellow-500 text-white",
+                      text: "Změnit cenu",
+                      iconLeft: "Coins",
+                      size: "sm",
+                      onClick: () => priceChangeModalStateHandler(),
+                    },
+                  } as const,
+                ]
+              : []),
+            {
+              title: "Odmítnout poptávku",
+              text: "Odmítnutím poptávky informujete zákazníka, že nemůžete nabídnout své služby pro jeho požadavek.",
+              icon: "X",
+              iconColor: "text-danger",
+              iconBgColor: "bg-danger-surface",
+              button: {
+                version: "dangerFull",
+                text: "Odmítnout",
+                iconLeft: "X",
+                size: "sm",
+                onClick: () => cancelInquiryHandler(),
+              },
             },
-          },
-        ]}
-      />
+          ]}
+        />
+      )}
+
       <ChatWindow
         senderRole="company"
         inquiryId={inquiry.id}
         listingId={listingId}
+        windowOnly={
+          !hasInquiryUpdateCompanyRights({
+            company,
+            userId: user?.id,
+          })
+        }
       />
-      {fullEvent && (
+      {event && (
         <EventSharingCard
-          event={fullEvent}
+          event={event}
           inquiries={inquiriesByEvent?.docs ?? []}
-          contactUser={inquiry.user}
+          contactUser={event.contactPerson}
         />
       )}
       {typeof inquiry.variant !== "string" && inquiry.variant && (

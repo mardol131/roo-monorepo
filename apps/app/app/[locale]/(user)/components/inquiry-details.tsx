@@ -1,10 +1,15 @@
+"use client";
+
 import { DashboardSection } from "@/app/[locale]/(user)/components/dashboard-section";
 import Text from "@/app/components/ui/atoms/text";
+import type { Listing } from "@roo/common";
 import type { Inquiry } from "@roo/common";
-import { FileText } from "lucide-react";
+import Link from "next/link";
+import { useTranslations } from "next-intl";
 
 type Props = {
   inquiry: Inquiry;
+  listing?: Listing;
 };
 
 const PRICING_MODE_LABELS: Record<Inquiry["pricing"]["mode"], string> = {
@@ -21,7 +26,20 @@ function Row({ label, value }: { label: string; value: React.ReactNode }) {
   );
 }
 
-export default function InquiryDetails({ inquiry }: Props) {
+function formatDate(dateStr: string) {
+  return new Date(dateStr).toLocaleString("cs-CZ", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
+export default function InquiryDetails({ inquiry, listing }: Props) {
+  const t = useTranslations();
+  const event = typeof inquiry.event === "object" ? inquiry.event : null;
+
   return (
     <DashboardSection
       title="Detail poptávky"
@@ -30,6 +48,37 @@ export default function InquiryDetails({ inquiry }: Props) {
       iconColor="text-zinc-500"
     >
       <div className="flex flex-col gap-3">
+        <Row
+          label="Inzerát"
+          value={
+            listing ? (
+              <Link
+                href={`/listing/${listing.id}`}
+                className="text-sm font-medium text-zinc-900 underline underline-offset-2 hover:text-zinc-600"
+              >
+                {listing.name}
+              </Link>
+            ) : (
+              <Text variant="body-sm" color="textDark">
+                N/A
+              </Text>
+            )
+          }
+        />
+        <Row
+          label="Typ inzerátu"
+          value={t(`global.listings.type.${inquiry.listingType}`)}
+        />
+        <Row
+          label="Typ poptávky"
+          value={inquiry.variant ? "Varianta" : "Vlastní poptávka"}
+        />
+        {event && (
+          <Row
+            label="Datum události"
+            value={`${formatDate(event.date.start)} – ${formatDate(event.date.end)}`}
+          />
+        )}
         <Row
           label="Režim ceny"
           value={PRICING_MODE_LABELS[inquiry.pricing.mode]}

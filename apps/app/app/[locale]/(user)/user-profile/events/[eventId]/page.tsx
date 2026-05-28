@@ -28,6 +28,8 @@ import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import DashboardHeader from "../../../components/dashboard-header";
+import { DashboardSection } from "../../../components/dashboard-section";
+import { DetailRow } from "../../../components/detail-row";
 import EntityRow from "../../../components/entity-row";
 import RowContainer from "../../../components/row-container";
 import { SummaryCard } from "../../../components/summary-card";
@@ -36,11 +38,14 @@ import EventChecklistSection from "./components/event-checklist-section";
 import EventNotesSection from "./components/event-notes-section";
 import EventLocationSection from "./components/event-location-section";
 import Breadcrumbs from "../../../components/breadcrumbs";
+import { useAuth } from "@/app/context/auth/auth-context";
+import Text from "@/app/components/ui/atoms/text";
 
 // ── Page ───────────────────────────────────────────────────────────────────────
 
 export default function page() {
   const { eventId } = useParams<{ eventId: string }>();
+  const { user } = useAuth();
 
   const { data: event, isPending } = useEvent(eventId);
   const { mutate: updateEvent } = useUpdateEvent({});
@@ -49,7 +54,14 @@ export default function page() {
 
   const t = useTranslations("global");
 
-  const { data: inquiries } = useInquiries();
+  const { data: inquiries } = useInquiries({
+    options: {
+      query: {
+        and: [{ user: { equals: user?.id } }, { event: { equals: eventId } }],
+      },
+    },
+    enabled: !!user?.id,
+  });
 
   if (isPending) return <Loader text="Načítání události..." />;
   if (!event) return router.back();
@@ -77,16 +89,7 @@ export default function page() {
   const shareInfoHandler = (
     type: "contactDetails" | "place" | "confirmedInquiries",
   ) => {
-    if (type === "contactDetails") {
-      updateEvent({
-        id: eventId,
-        data: {
-          sharing: {
-            contactDetails: true,
-          },
-        },
-      });
-    } else if (type === "place") {
+    if (type === "place") {
       updateEvent({
         id: eventId,
         data: {
@@ -110,16 +113,7 @@ export default function page() {
   const cancelShareInfoHandler = (
     type: "contactDetails" | "place" | "confirmedInquiries",
   ) => {
-    if (type === "contactDetails") {
-      updateEvent({
-        id: eventId,
-        data: {
-          sharing: {
-            contactDetails: false,
-          },
-        },
-      });
-    } else if (type === "place") {
+    if (type === "place") {
       updateEvent({
         id: eventId,
         data: {
@@ -242,22 +236,7 @@ export default function page() {
 
       <div className="flex flex-col gap-5">
         {/* Summary cards */}
-        <EventLocationSection
-          event={event}
-          confirmedVenueInquiries={
-            inquiries?.docs?.filter(
-              (i) =>
-                i.listingType === "venue" &&
-                aggregateInquiryStatus(i.status) === "confirmed",
-            ) ?? []
-          }
-          onSetVenue={(venueId) =>
-            updateEvent({
-              id: eventId,
-              data: { location: { ...event.location, venue: venueId } },
-            })
-          }
-        />
+
         <div className="grid grid-cols-3 gap-4">
           <SummaryCard
             label="Celkem poptávek"
@@ -282,19 +261,20 @@ export default function page() {
             note="pouze potvrzené"
           />
         </div>
+
         <ControlSection
           rows={[
-            {
-              kind: "switch",
-              icon: "UserRound",
-              iconColor: "text-blue-500",
-              iconBgColor: "bg-blue-50",
-              title: "Sdílet kontaktní údaje",
-              text: "Dodavatelé uvidí vaše kontaktní údaje (jméno, email, telefon).",
-              checked: event.sharing?.contactDetails ?? false,
-              onEnable: () => shareInfoHandler("contactDetails"),
-              onDisable: () => cancelShareInfoHandler("contactDetails"),
-            },
+            // {
+            //   kind: "switch",
+            //   icon: "UserRound",
+            //   iconColor: "text-blue-500",
+            //   iconBgColor: "bg-blue-50",
+            //   title: "Sdílet kontaktní údaje",
+            //   text: "Dodavatelé uvidí vaše kontaktní údaje (jméno, email, telefon).",
+            //   checked: event.sharing?.contactDetails ?? false,
+            //   onEnable: () => shareInfoHandler("contactDetails"),
+            //   onDisable: () => cancelShareInfoHandler("contactDetails"),
+            // },
             {
               kind: "switch",
               icon: "MapPin",
@@ -419,6 +399,62 @@ export default function page() {
             },
           }}
         />
+        <EventLocationSection
+          event={event}
+          confirmedVenueInquiries={
+            inquiries?.docs?.filter(
+              (i) =>
+                i.listingType === "venue" &&
+                aggregateInquiryStatus(i.status) === "confirmed",
+            ) ?? []
+          }
+          onSetVenue={(venueId) =>
+            updateEvent({
+              id: eventId,
+              data: { location: { ...event.location, venue: venueId } },
+            })
+          }
+        />
+        <DashboardSection
+          title="Detaily události"
+          icon="Info"
+          iconBg="bg-zinc-100"
+          iconColor="text-zinc-500"
+        >
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8">
+            <div>
+              {typeof event.eventType !== "string" && (
+                <DetailRow label="Typ události">
+                  <Text variant="label"> {event.eventType.name}</Text>
+                </DetailRow>
+              )}
+              {!!event.budget && (
+                <DetailRow label="Rozpočet">
+                  <Text variant="label">
+                    {event.budget.toLocaleString("cs-CZ")} Kč
+                  </Text>
+                </DetailRow>
+              )}
+            </div>
+            <div>
+              <DetailRow label="Kontaktní osoba">
+                <Text variant="label">{event.contactPerson.name}</Text>
+              </DetailRow>
+              <DetailRow label="Email">
+                <Text variant="label">{event.contactPerson.email}</Text>
+              </DetailRow>
+              {event.contactPerson.phone?.number && (
+                <DetailRow label="Telefon">
+                  <Text variant="label">
+                    +{event.contactPerson.phone.countryCode}{" "}
+                    {event.contactPerson.phone.number}
+                  </Text>
+                </DetailRow>
+              )}
+            </div>
+          </div>
+        </DashboardSection>
+
         <EventChecklistSection
           eventId={eventId}
           checklist={event.checklist ?? []}

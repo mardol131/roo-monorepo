@@ -7,20 +7,32 @@ import OrderStepSelectVariant from "./components/order-steps/variant-selection/o
 import OrderStepFinalReview from "./components/order-steps/final-review/order-step-final-review";
 import OrderStepSuccess from "./components/order-steps/success/order-step-success";
 import OrderStepFillCustomRequest from "./components/order-steps/custom-request/order-step-fill-custom-request";
-import { useListing } from "@/app/react-query/listings/hooks";
 import { useParams } from "next/navigation";
-import { ArrowLeft, Lock } from "lucide-react";
+import { Info, Lock } from "lucide-react";
 import Button from "@/app/components/ui/atoms/button";
 import { useRouter } from "@/app/i18n/navigation";
+import { useVariantsByListing } from "@/app/react-query/variants/hooks";
+import { useEffect } from "react";
+import { AlertSection } from "@/app/components/ui/molecules/alert-section";
 
 export default function Page() {
-  const { isOrderStepActivated, setCurrentStep, inquiryMode } = useOrderStore();
+  const { isOrderStepActivated, setCurrentStep, inquiryMode, setInquiryMode } = useOrderStore();
   const router = useRouter();
+  const params = useParams<{ listingId: string }>();
+  const { data: variants } = useVariantsByListing(params.listingId);
+
+  const hasNoVariants = variants !== undefined && (variants.docs?.length ?? 0) === 0;
 
   const step2Active = isOrderStepActivated(2);
   const step3Active = isOrderStepActivated(3);
   const isSuccess = isOrderStepActivated(4);
   const showCustomForm = step2Active && inquiryMode === "custom";
+
+  useEffect(() => {
+    if (step2Active && hasNoVariants && inquiryMode === null) {
+      setInquiryMode("custom");
+    }
+  }, [step2Active, hasNoVariants, inquiryMode, setInquiryMode]);
 
   return (
     <div className="min-h-screen bg-zinc-50/60 pb-50">
@@ -50,12 +62,26 @@ export default function Page() {
                 <OrderStepSelectEvent />
               </StepCard>
 
-              {step2Active ? (
-                <StepCard>
-                  <OrderStepSelectVariant />
-                </StepCard>
-              ) : (
-                <LockedCard label="Nejprve vyberte nebo vytvořte událost" />
+              {!hasNoVariants && (
+                step2Active ? (
+                  <StepCard>
+                    <OrderStepSelectVariant />
+                  </StepCard>
+                ) : (
+                  <LockedCard label="Nejprve vyberte nebo vytvořte událost" />
+                )
+              )}
+
+              {hasNoVariants && step2Active && (
+                <AlertSection
+                  icon={Info}
+                  iconBg="bg-blue-100"
+                  iconColor="text-blue-500"
+                  borderColor="border-blue-200"
+                  bgColor="bg-blue-50"
+                  title="Inzerát nemá připravené varianty"
+                  text="Dodavatel zatím nenabízí žádné předpřipravené varianty. Vytvořte vlastní poptávku a popište své požadavky."
+                />
               )}
 
               {showCustomForm && (

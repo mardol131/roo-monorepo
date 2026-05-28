@@ -11,16 +11,15 @@ import { VariantEntertainmentDetails } from "@/app/[locale]/(user)/components/va
 import { VariantGastroDetails } from "@/app/[locale]/(user)/components/variant-gastro-details";
 import { VariantVenueDetails } from "@/app/[locale]/(user)/components/variant-venue-details";
 import Text from "@/app/components/ui/atoms/text";
+import { confirmActionModalEvents } from "@/app/components/ui/molecules/modals/confirm-action-modal";
 import { useRouter } from "@/app/i18n/navigation";
 import { useUpdateVariant, useVariant } from "@/app/react-query/variants/hooks";
-import { Variant } from "@roo/common";
-import { Package, Trash2 } from "lucide-react";
-import { useParams } from "next/navigation";
-import { useEffect } from "react";
-import { ControlSection } from "../../../../../../../components/control-section";
-import { confirmActionModalEvents } from "@/app/components/ui/molecules/modals/confirm-action-modal";
-import { useTranslations } from "next-intl";
 import { format } from "date-fns";
+import { Package, Trash2 } from "lucide-react";
+import { useTranslations } from "next-intl";
+import { useParams } from "next/navigation";
+import { ControlSection } from "../../../../../../../components/control-section";
+import { useSpacesByListing } from "@/app/react-query/spaces/hooks";
 
 export default function Page() {
   const { companyId, listingId, variantId } = useParams<{
@@ -29,6 +28,7 @@ export default function Page() {
     variantId: string;
   }>();
   const { data: variant, isPending } = useVariant(variantId);
+  const { data: spaces } = useSpacesByListing(listingId);
   const { mutate: updateVariant, isPending: isUpdating } = useUpdateVariant();
   const router = useRouter();
   const t = useTranslations("global.variants");
@@ -241,13 +241,13 @@ export default function Page() {
                   key={sp.id}
                   className="py-2.5 flex items-center justify-between border-b border-zinc-100 last:border-0"
                 >
-                  <div>
+                  <div className="flex flex-col">
                     {sp.description && (
                       <Text variant="label-lg" color="textDark">
                         {sp.description}
                       </Text>
                     )}
-                    <Text variant="body-sm" color="textDark">
+                    <Text variant="label" color="textLight">
                       {format(new Date(sp.from), "dd.MM.yyyy")} –{" "}
                       {format(new Date(sp.to), "dd.MM.yyyy")}
                     </Text>
@@ -263,7 +263,13 @@ export default function Page() {
 
         {variant.details.map((block, i) => {
           if (block.blockType === "venue")
-            return <VariantVenueDetails key={i} block={block} />;
+            return (
+              <VariantVenueDetails
+                key={i}
+                block={block}
+                spaces={spaces?.docs}
+              />
+            );
           if (block.blockType === "gastro")
             return <VariantGastroDetails key={i} block={block} />;
           if (block.blockType === "entertainment")

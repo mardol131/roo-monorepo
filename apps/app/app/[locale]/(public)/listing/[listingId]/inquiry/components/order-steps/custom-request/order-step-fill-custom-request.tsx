@@ -3,9 +3,9 @@
 import Button from "@/app/components/ui/atoms/button";
 import Input from "@/app/components/ui/atoms/inputs/input";
 import { Textarea } from "@/app/components/ui/atoms/inputs/textarea";
-import Text from "@/app/components/ui/atoms/text";
 import { useOrderStore } from "@/app/store/order-store";
-import { Plus, X } from "lucide-react";
+import { X } from "lucide-react";
+import { useEffect } from "react";
 import { Controller, useFieldArray, useForm, useWatch } from "react-hook-form";
 import StepHeading from "../step-heading";
 import InputLabel from "@/app/components/ui/atoms/input-label";
@@ -18,7 +18,7 @@ type FormData = {
 export default function OrderStepFillCustomRequest() {
   const { setCustomRequest } = useOrderStore();
 
-  const { control, register, handleSubmit } = useForm<FormData>({
+  const { control, register } = useForm<FormData>({
     defaultValues: { note: "", requirements: [] },
   });
 
@@ -27,15 +27,19 @@ export default function OrderStepFillCustomRequest() {
     name: "requirements",
   });
 
-  const note = useWatch({ control, name: "note" });
-  const canContinue = note.trim().length > 0;
+  const values = useWatch({ control });
 
-  const onSubmit = (data: FormData) => {
+  useEffect(() => {
+    const note = values.note?.trim() ?? "";
+    if (!note) {
+      setCustomRequest(undefined);
+      return;
+    }
     setCustomRequest({
-      note: data.note,
-      requirements: data.requirements.filter((r) => r.text.trim().length > 0),
+      note,
+      requirements: (values.requirements ?? []).filter((r) => r.text.trim().length > 0),
     });
-  };
+  }, [values, setCustomRequest]);
 
   return (
     <div>
@@ -43,7 +47,7 @@ export default function OrderStepFillCustomRequest() {
         title="Vlastní poptávka"
         description="Popište, co potřebujete, a dodavatel vám připraví nabídku na míru"
       />
-      <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-6">
+      <div className="flex flex-col gap-6">
         <Textarea
           label="Popis poptávky"
           inputProps={{
@@ -99,16 +103,7 @@ export default function OrderStepFillCustomRequest() {
           </div>
         </div>
 
-        <div className="flex justify-end">
-          <Button
-            text="Pokračovat na přehled"
-            version="primary"
-            iconRight="ArrowRight"
-            htmlType="submit"
-            disabled={!canContinue}
-          />
-        </div>
-      </form>
+      </div>
     </div>
   );
 }

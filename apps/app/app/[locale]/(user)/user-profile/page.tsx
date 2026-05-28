@@ -11,10 +11,26 @@ import RowContainer from "../components/row-container";
 import { SummaryCard } from "../components/summary-card";
 import EventStatusTag from "../components/tags/event-status-tag";
 import InquiryStatusTag from "../components/tags/inquiry-status-tag";
+import { useAuth } from "@/app/context/auth/auth-context";
 
 export default function UserProfilePage() {
-  const { data: inquiries } = useInquiries();
-  const { data: events } = useEvents();
+  const { user } = useAuth();
+  const { data: events, isPending } = useEvents({
+    options: {
+      query: {
+        owner: { equals: user?.id ?? "" },
+      },
+    },
+    enabled: !!user?.id,
+  });
+  const { data: inquiries } = useInquiries({
+    options: {
+      query: {
+        user: { equals: user?.id },
+      },
+    },
+    enabled: !!user?.id,
+  });
 
   return (
     <main className="w-full">
@@ -147,7 +163,10 @@ export default function UserProfilePage() {
                           : "Poptávka"
                       }
                       items={[
-                        ...(inquiry.activity?.lastCompanyMessageSentAt
+                        ...(inquiry.activity?.lastCompanyMessageSentAt &&
+                        (!inquiry.activity?.lastUserSeenAt ||
+                          inquiry.activity.lastCompanyMessageSentAt >
+                            inquiry.activity.lastUserSeenAt)
                           ? [
                               {
                                 icon: "CircleDot",
@@ -155,10 +174,6 @@ export default function UserProfilePage() {
                               } as const,
                             ]
                           : []),
-                        {
-                          icon: "Activity",
-                          content: inquiry.status?.user,
-                        },
                         ...(inquiry.pricing.quotedPrice
                           ? [
                               {

@@ -10,13 +10,7 @@ type Props = {
   bgColor?: string;
   title: string;
   text: string;
-  button?: {
-    text: string;
-    version?: ButtonProps["version"];
-    iconLeft?: ButtonProps["iconLeft"];
-    size?: ButtonProps["size"];
-    onClick?: () => void;
-  };
+  button?: ButtonProps;
 };
 
 export function AlertSection({
@@ -46,15 +40,7 @@ export function AlertSection({
           {text}
         </Text>
       </div>
-      {button && (
-        <Button
-          text={button.text}
-          version={button.version}
-          iconLeft={button.iconLeft}
-          size={button.size ?? "sm"}
-          onClick={button.onClick}
-        />
-      )}
+      {button && <Button {...button} />}
     </div>
   );
 }

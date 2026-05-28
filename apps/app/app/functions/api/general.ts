@@ -54,14 +54,20 @@ export async function getCollectionItem<T extends keyof Config["collections"]>({
   collection,
   id,
   headers,
+  searchParams,
 }: {
   collection: T;
   id: string;
   headers?: Record<string, string>;
+  searchParams?: URLSearchParams;
 }): Promise<Config["collections"][T]> {
   const url = new URL(
     `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/${collection}/${id}`,
   );
+
+  if (searchParams) {
+    url.search = searchParams.toString();
+  }
 
   const res = await fetch(url.toString(), {
     headers: {

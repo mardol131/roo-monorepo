@@ -12,10 +12,11 @@ export * from "./functions/convert-image-to-webp";
 export * from "./functions/slugify";
 export * from "./functions/wait";
 export * from "./functions/get-initials";
-export * from "./functions/company-utils";
+export * from "./functions/companies";
 export * from "./functions/data-formating";
 export * from "./functions/get-company-data-from-gov";
 export * from "./functions/undefined-to-null";
+export * from "./functions/listings";
 
 export * from "./data/country-codes";
 export * from "./data/record-status";

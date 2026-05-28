@@ -21,7 +21,9 @@ import {
 } from "@/app/react-query/listings/hooks";
 import { useSpacesByListing } from "@/app/react-query/spaces/hooks";
 import { useVariantsByListing } from "@/app/react-query/variants/hooks";
-import { getIdFromRelationshipField } from "@roo/common";
+import { useInquiriesByListing } from "@/app/react-query/inquiries/hooks";
+import { formatEventAddress, getIdFromRelationshipField } from "@roo/common";
+import { format } from "date-fns";
 import { TagIcon, Trash2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useParams } from "next/navigation";
@@ -31,9 +33,13 @@ import { GastroDetails } from "./components/gastro-details";
 import { ListingCompletion } from "./components/listing-completion";
 import { SpacesSection } from "./components/spaces-section";
 import { VenueDetails } from "./components/venue-details";
-import { hasListingRights } from "@/app/[locale]/(user)/utils/listings";
+import { hasListingRights } from "@/app/functions/utils/listings";
 import { useCompany } from "@/app/react-query/companies/hooks";
 import { useAuth } from "@/app/context/auth/auth-context";
+import InquiryStatusTag from "@/app/[locale]/(user)/components/tags/inquiry-status-tag";
+import { hasInquiryUpdateCompanyRights } from "@/app/functions/utils/inquiries";
+import { EntityCompletionBadge } from "@/app/[locale]/(user)/components/entity-completion-badge";
+import { getVariantCompletion } from "@/app/functions/utils/variants";
 
 export default function Page() {
   const { companyId, listingId } = useParams<{
@@ -44,6 +50,7 @@ export default function Page() {
   const router = useRouter();
   const { data: listing, isPending } = useListing(listingId);
   const { data: variants } = useVariantsByListing(listingId);
+  const { data: inquiries } = useInquiriesByListing(listingId);
   const { data: company } = useCompany(companyId);
   const { mutate: updateListing, isPending: isUpdating } =
     useUpdateListing(companyId);
@@ -202,6 +209,8 @@ export default function Page() {
       : []),
   ];
 
+  console.log(inquiries);
+
   return (
     <main className="w-full">
       <Breadcrumbs />
@@ -244,7 +253,8 @@ export default function Page() {
           detail={detail}
           companyId={companyId}
           listingId={listingId}
-          spacesCount={spaces?.docs?.length || 0}
+          spacesCount={spaces?.docs?.length}
+          variantsCount={variants?.docs?.length}
         />
         {hasListingRights({
           allowedRoles: ["owner", "admin", "manager"],
@@ -287,12 +297,103 @@ export default function Page() {
             ]}
           />
         )}
-
+        <RowContainer
+          icon="MessageSquare"
+          iconColor="text-sky-500"
+          iconBgColor="bg-sky-50"
+          label="Poptávky"
+          headerRightComponent={
+            <Button
+              text="Zobrazit"
+              version="plain"
+              size="xs"
+              link={{
+                pathname:
+                  "/company-profile/companies/[companyId]/listings/[listingId]/inquiries",
+                params: { companyId, listingId },
+              }}
+            />
+          }
+          subLabel={
+            inquiries?.docs?.length
+              ? `${inquiries.docs.length} poptávek`
+              : "Žádné poptávky"
+          }
+          rowComponents={(inquiries?.docs ?? []).map((inquiry) => (
+            <EntityRow
+              key={inquiry.id}
+              icon="MessageSquare"
+              iconColor="text-sky-500"
+              iconBackgroundColor="bg-sky-50"
+              rightComponent={<InquiryStatusTag status={inquiry.status} />}
+              label={
+                typeof inquiry.event !== "string"
+                  ? inquiry.event.name
+                  : inquiry.id
+              }
+              items={[
+                ...(inquiry.pricing.agreedPrice != null
+                  ? [
+                      {
+                        icon: "Banknote" as const,
+                        content: `${inquiry.pricing.agreedPrice} Kč`,
+                      },
+                    ]
+                  : inquiry.pricing.quotedPrice != null
+                    ? [
+                        {
+                          icon: "Banknote" as const,
+                          content: `${inquiry.pricing.quotedPrice} Kč`,
+                        },
+                      ]
+                    : []),
+                ...(typeof inquiry.event !== "string"
+                  ? [
+                      {
+                        icon: "Calendar" as const,
+                        content: `${format(new Date(inquiry.event.date.start), "d. M. yyyy")} – ${format(new Date(inquiry.event.date.end), "d. M. yyyy")}`,
+                      },
+                      {
+                        icon: "Users" as const,
+                        content: `${inquiry.event.guests.adults + inquiry.event.guests.children} hostů`,
+                      },
+                      {
+                        icon: "MapPin" as const,
+                        content: formatEventAddress(inquiry.event),
+                      },
+                    ]
+                  : []),
+              ]}
+              link={{
+                pathname:
+                  "/company-profile/companies/[companyId]/listings/[listingId]/inquiries/[inquiryId]",
+                params: { companyId, listingId, inquiryId: inquiry.id },
+              }}
+            />
+          ))}
+          emptyState={{
+            text: "Tato služba zatím nemá žádné poptávky",
+            subtext: "Poptávky od zákazníků se zobrazí zde.",
+            icon: "Inbox",
+          }}
+        />
         <RowContainer
           icon="Package"
           iconColor="text-violet-500"
           iconBgColor="bg-violet-50"
           label="Varianty"
+          headerRightComponent={
+            <Button
+              text="Zobrazit"
+              version="plain"
+              size="xs"
+              link={{
+                pathname:
+                  "/company-profile/companies/[companyId]/listings/[listingId]/variants",
+                params: { companyId, listingId },
+              }}
+            />
+          }
           subLabel={
             variants?.docs?.length
               ? `${variants.docs?.length} variant`
@@ -312,6 +413,11 @@ export default function Page() {
                 icon="Package"
                 iconColor="text-variant"
                 iconBackgroundColor="bg-variant-surface"
+                rightComponent={
+                  <EntityCompletionBadge
+                    percentage={getVariantCompletion(variant)}
+                  />
+                }
                 label={variant.name}
                 items={[
                   {
@@ -346,9 +452,7 @@ export default function Page() {
             },
           }}
         />
-
         <SpacesSection listingId={listingId} companyId={companyId} />
-
         {basicInfoItems.length > 0 && (
           <DashboardSection
             title="Základní informace"
@@ -370,50 +474,6 @@ export default function Page() {
         {listing.type === "venue" && detail && detail.type === "venue" && (
           <VenueDetails listing={listing} detail={detail} />
         )}
-        {listing.properties.technologies?.length && (
-          <DashboardSection
-            title="Technologie"
-            icon={"Zap"}
-            iconBg="bg-cyan-50"
-            iconColor="text-cyan-500"
-          >
-            {listing.properties.technologies?.length && (
-              <InfoSection
-                items={[
-                  {
-                    type: "tagList",
-                    label: "Vybavení",
-                    items: listing.properties.technologies.map(
-                      (tech) =>
-                        filters?.technologies?.find((t) => t.id === tech)
-                          ?.name || tech,
-                    ),
-                  },
-                ]}
-              />
-            )}
-          </DashboardSection>
-        )}
-        {/* 
-        {listing.properties.rules?.length ? (
-          <DashboardSection
-            title="Pravidla"
-            icon={"Shield"}
-            iconBg="bg-red-50"
-            iconColor="text-red-400"
-          >
-            <InfoSection
-              items={[
-                {
-                  type: "tagList",
-                  label: "Pravidla",
-                  items: listing.rules,
-                },
-              ]}
-            />
-          </DashboardSection>
-        ) : null} */}
-
         <RowContainer
           icon="User"
           iconColor="text-violet-500"
@@ -468,7 +528,6 @@ export default function Page() {
               "Zaměstnanci jsou osoby, které pracují ve vaší firmě a mohou být přiřazeni k rezervacím. Pro přidání zaměstnance klikněte na tlačítko Přidat zaměstnance.",
           }}
         />
-
         <RowContainer
           icon="Star"
           iconColor="text-yellow-500"

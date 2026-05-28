@@ -13,6 +13,7 @@ interface DateTimeInputProps {
   value?: string | null;
   onChange?: (value: string | null) => void;
   min?: string;
+  max?: string;
   containerRef?: React.Ref<HTMLDivElement>;
   placeholder?: string;
   isRequired?: boolean;
@@ -47,6 +48,7 @@ export default function DateTimeInput({
   value = null,
   onChange,
   min,
+  max,
   placeholder = "Vyberte datum a čas",
   error,
   isRequired,
@@ -138,6 +140,10 @@ export default function DateTimeInput({
     ? `${String(new Date(min).getHours()).padStart(2, "0")}:${String(new Date(min).getMinutes()).padStart(2, "0")}`
     : null;
 
+  const maxTimeString = max
+    ? `${String(new Date(max).getHours()).padStart(2, "0")}:${String(new Date(max).getMinutes()).padStart(2, "0")}`
+    : null;
+
   const isTimeBelowMin = (timeStr: string, date: Date | null): boolean => {
     if (!min || !date || !minTimeString || !isSameDay(date, new Date(min)))
       return false;
@@ -150,20 +156,43 @@ export default function DateTimeInput({
     );
   };
 
-  const isDateDisabled = (date: Date) => {
-    if (!min) return false;
-    const minDate = new Date(min);
-    const minDateOnly = new Date(
-      minDate.getFullYear(),
-      minDate.getMonth(),
-      minDate.getDate(),
+  const isTimeAboveMax = (timeStr: string, date: Date | null): boolean => {
+    if (!max || !date || !maxTimeString || !isSameDay(date, new Date(max)))
+      return false;
+    if (!isValidTime(timeStr)) return false;
+    const [h, m] = timeStr.split(":").map(Number);
+    const maxDate = new Date(max);
+    return (
+      h > maxDate.getHours() ||
+      (h === maxDate.getHours() && m > maxDate.getMinutes())
     );
+  };
+
+  const isDateDisabled = (date: Date) => {
     const checkDate = new Date(
       date.getFullYear(),
       date.getMonth(),
       date.getDate(),
     );
-    return checkDate < minDateOnly;
+    if (min) {
+      const minDate = new Date(min);
+      const minDateOnly = new Date(
+        minDate.getFullYear(),
+        minDate.getMonth(),
+        minDate.getDate(),
+      );
+      if (checkDate < minDateOnly) return true;
+    }
+    if (max) {
+      const maxDate = new Date(max);
+      const maxDateOnly = new Date(
+        maxDate.getFullYear(),
+        maxDate.getMonth(),
+        maxDate.getDate(),
+      );
+      if (checkDate > maxDateOnly) return true;
+    }
+    return false;
   };
 
   const handleDateClick = (date: Date) => {
@@ -176,18 +205,23 @@ export default function DateTimeInput({
         isTimeBelowMin(time, date)
       ) {
         setTime(minTimeString!);
+      } else if (
+        max &&
+        isSameDay(date, new Date(max)) &&
+        isValidTime(time) &&
+        isTimeAboveMax(time, date)
+      ) {
+        setTime(maxTimeString!);
       }
     }
   };
 
   const handleTimeChange = (value: string) => {
-    if (
-      isTimeBelowMin(
-        value,
-        selectedDateState ? new Date(selectedDateState) : null,
-      )
-    ) {
+    const date = selectedDateState ? new Date(selectedDateState) : null;
+    if (isTimeBelowMin(value, date)) {
       setTime(minTimeString!);
+    } else if (isTimeAboveMax(value, date)) {
+      setTime(maxTimeString!);
     } else {
       setTime(value);
     }
@@ -198,6 +232,13 @@ export default function DateTimeInput({
     min &&
     isSameDay(new Date(selectedDateState), new Date(min))
       ? (minTimeString ?? undefined)
+      : undefined;
+
+  const timeMax =
+    selectedDateState &&
+    max &&
+    isSameDay(new Date(selectedDateState), new Date(max))
+      ? (maxTimeString ?? undefined)
       : undefined;
 
   const displayText =
@@ -307,6 +348,7 @@ export default function DateTimeInput({
                   value={time}
                   onChange={handleTimeChange}
                   min={timeMin}
+                  max={timeMax}
                 />
               </div>
             </div>

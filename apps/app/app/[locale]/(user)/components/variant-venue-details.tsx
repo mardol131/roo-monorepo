@@ -1,6 +1,8 @@
+"use client";
+
 import { DashboardSection } from "./dashboard-section";
 import InfoSection from "@/app/[locale]/(user)/components/info-section";
-import { Variant } from "@roo/common";
+import { Space, Variant } from "@roo/common";
 import { Package } from "lucide-react";
 
 type VenueBlock = Extract<Variant["details"][number], { blockType: "venue" }>;
@@ -9,7 +11,18 @@ function capacityStr(c: { min?: number | null; max: number }) {
   return c.min ? `${c.min}–${c.max} osob` : `max. ${c.max} osob`;
 }
 
-export function VariantVenueDetails({ block }: { block: VenueBlock }) {
+export function VariantVenueDetails({
+  block,
+  spaces,
+}: {
+  block: VenueBlock;
+  spaces?: Space[];
+}) {
+  const formattedSpaces = block.includedSpaces?.flatMap((s) => {
+    const name = typeof s !== "string" ? s.name : spaces?.find((sp) => sp.id === s)?.name;
+    return name ? [{ name }] : [];
+  });
+
   const items = [
     {
       type: "text" as const,
@@ -21,7 +34,7 @@ export function VariantVenueDetails({ block }: { block: VenueBlock }) {
           {
             type: "tagList" as const,
             label: "Zahrnuté prostory",
-            items: block.includedSpaces,
+            items: formattedSpaces,
           },
         ]
       : []),

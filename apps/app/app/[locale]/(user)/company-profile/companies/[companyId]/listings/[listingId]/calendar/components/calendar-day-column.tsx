@@ -37,7 +37,7 @@ type DragSlots = { start: number; end: number };
 
 type Props = {
   day: Date;
-  events: CalendarEvent[];
+  calendarEvent: CalendarEvent[];
   onCreateRequest: (req: CreateRequest) => void;
   onEditRequest: (event: CalendarEvent) => void;
   isCreating?: boolean;
@@ -47,7 +47,7 @@ type Props = {
 
 export default function CalendarDayColumn({
   day,
-  events,
+  calendarEvent,
   onCreateRequest,
   onEditRequest,
   isCreating,
@@ -68,7 +68,7 @@ export default function CalendarDayColumn({
   const dayStart = startOfDay(day);
   const dayEnd = endOfDay(day);
 
-  const dayEvents = events.filter(
+  const dayEvents = calendarEvent.filter(
     (e) =>
       !e.allDay &&
       areIntervalsOverlapping(
@@ -180,11 +180,11 @@ export default function CalendarDayColumn({
         return (
           <CalendarEventBlock
             key={`${event.id}-${day.toISOString()}`}
-            event={event}
+            calendarEvent={event}
             top={top}
             height={height}
             link={
-              event.inquiry
+              event.inquiry && event.source === "inquiry"
                 ? {
                     pathname:
                       "/company-profile/companies/[companyId]/listings/[listingId]/inquiries/[inquiryId]",
@@ -199,7 +199,9 @@ export default function CalendarDayColumn({
                   }
                 : undefined
             }
-            onEdit={!event.inquiry ? () => onEditRequest(event) : undefined}
+            onEdit={
+              event.source === "manual" ? () => onEditRequest(event) : undefined
+            }
           />
         );
       })}

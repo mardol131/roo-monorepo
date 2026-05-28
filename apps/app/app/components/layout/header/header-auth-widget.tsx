@@ -16,6 +16,7 @@ import { loginModalEvents } from "@/app/components/ui/molecules/modals/login-mod
 import Button from "../../ui/atoms/button";
 import { getInitials } from "@roo/common";
 import { useTranslations } from "next-intl";
+import { useClickOutside } from "@/app/hooks/use-click-outside";
 
 export default function HeaderAuthWidget({
   onNavigate,
@@ -27,16 +28,9 @@ export default function HeaderAuthWidget({
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    const handler = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node))
-        setOpen(false);
-    };
-    document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
-  }, []);
+  useClickOutside(ref, () => setOpen(false));
 
-  if (isLoading) {
+  if (isLoading && !user) {
     return <div className="w-8 h-8 rounded-full bg-zinc-100 animate-pulse" />;
   }
 

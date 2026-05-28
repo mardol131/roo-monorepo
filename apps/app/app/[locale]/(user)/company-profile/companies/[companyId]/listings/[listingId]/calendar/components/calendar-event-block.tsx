@@ -6,7 +6,7 @@ import { format, parseISO } from "date-fns";
 import { MessageSquare, PenLine } from "lucide-react";
 
 type Props = {
-  event: CalendarEvent;
+  calendarEvent: CalendarEvent;
   top: number;
   height: number;
   /** Provided for inquiry events — clicking navigates here */
@@ -35,22 +35,22 @@ const STATUS_STYLES: Record<
 };
 
 export default function CalendarEventBlock({
-  event,
+  calendarEvent,
   top,
   height,
   link,
   onEdit,
 }: Props) {
-  const isInquiry = !!event.inquiry;
-  const colorClass = STATUS_STYLES[event.source][event.status];
+  const isInquiry = calendarEvent.source === "inquiry";
+  const colorClass = STATUS_STYLES[calendarEvent.source][calendarEvent.status];
   const isShort = height < 26;
 
   const spaceName = (() => {
-    if (!event.spaces || event.spaces.length === 0) return null;
-    if (event.spaces?.length > 1) {
-      return `Prostory: ${event.spaces.length}`;
-    } else if (typeof event.spaces[0] !== "string") {
-      return event.spaces[0].name;
+    if (!calendarEvent.spaces || calendarEvent.spaces.length === 0) return null;
+    if (calendarEvent.spaces?.length > 1) {
+      return `Prostory: ${calendarEvent.spaces.length}`;
+    } else if (typeof calendarEvent.spaces[0] !== "string") {
+      return calendarEvent.spaces[0].name;
     }
   })();
 
@@ -67,15 +67,15 @@ export default function CalendarEventBlock({
     <>
       <div className="flex items-start justify-between gap-0.5">
         <p className="text-xs font-semibold leading-tight truncate">
-          {event.name}
+          {calendarEvent.name}
         </p>
         {icon}
       </div>
       {!isShort && (
         <p className="text-[11px] opacity-70 truncate leading-tight mt-0.5">
-          {format(parseISO(event.startsAt), "HH:mm")}
+          {format(parseISO(calendarEvent.startsAt), "HH:mm")}
           {" – "}
-          {format(parseISO(event.endsAt), "HH:mm")}
+          {format(parseISO(calendarEvent.endsAt), "HH:mm")}
           {spaceName ? ` · ${spaceName}` : ""}
         </p>
       )}
@@ -88,7 +88,7 @@ export default function CalendarEventBlock({
         data-event-block="true"
         href={link}
         onClick={(e) => e.stopPropagation()}
-        title={event.name}
+        title={calendarEvent.name}
         className={sharedClassName}
         style={sharedStyle}
       >
@@ -100,7 +100,7 @@ export default function CalendarEventBlock({
   return (
     <div
       data-event-block="true"
-      title={event.name}
+      title={calendarEvent.name}
       className={sharedClassName}
       style={sharedStyle}
       onClick={(e) => {

@@ -14,6 +14,7 @@ import EntityRow from "../../components/entity-row";
 import PageHeading from "../../components/page-heading";
 import RowContainer from "../../components/row-container";
 import EntityComponentTag from "../../components/tags/entity-component-tag";
+import { useAuth } from "@/app/context/auth/auth-context";
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
 
@@ -39,7 +40,16 @@ function groupByEvent(
 // ── Page ───────────────────────────────────────────────────────────────────────
 
 export default function MessagesPage() {
-  const { data: inquiries } = useInquiries();
+  const { user } = useAuth();
+  const { data: inquiries } = useInquiries({
+    options: {
+      query: {
+        user: { equals: user?.id },
+      },
+    },
+    enabled: !!user?.id,
+    refetchInterval: 60_000,
+  });
 
   const unread = inquiries?.docs?.filter((inquiry) => {
     if (!inquiry.activity.lastCompanyMessageSentAt) return false;

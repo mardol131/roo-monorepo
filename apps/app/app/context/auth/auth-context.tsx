@@ -7,8 +7,10 @@ import {
   refreshUser,
   switchAccountTypeToCompany,
 } from "@/app/functions/api/users";
-import { usePathname } from "@/app/i18n/navigation";
+import { usePathname } from "next/navigation";
+import { useRouter } from "@/app/i18n/navigation";
 import type { User } from "@roo/common";
+import { useQueryClient } from "@tanstack/react-query";
 import {
   createContext,
   useCallback,
@@ -19,6 +21,8 @@ import {
 } from "react";
 
 const REFRESH_BEFORE_EXPIRY_MS = 2 * 60 * 1000; // 2 minuty před vypršením
+
+const PROTECTED_PREFIXES = ["/company-profile", "/user-profile"];
 
 interface AuthContextValue {
   user: User | null;
@@ -38,6 +42,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const tokenExpRef = useRef<number | null>(null);
   const refreshTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const pathname = usePathname();
+  const router = useRouter();
+  const queryClient = useQueryClient();
+
+  useEffect(() => {
+    if (isLoading) return;
+    if (!user && PROTECTED_PREFIXES.some((p) => pathname.startsWith(p))) {
+      router.replace({
+        pathname: "/login-required",
+        query: {
+          redirectAfterLogin: pathname,
+          requireLogin: "true",
+          reasonForRequiredLogin: "not_logged_in",
+        },
+      });
+    }
+  }, [user, isLoading, pathname, router]);
 
   const scheduleRefresh = useCallback((expSeconds: number) => {
     if (refreshTimerRef.current) clearTimeout(refreshTimerRef.current);
@@ -51,6 +71,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (res.ok) {
         const data = await res.json();
         setUser(data.user ?? null);
+        queryClient.invalidateQueries();
         if (data.exp) scheduleRefresh(data.exp);
       } else {
         setUser(null);
@@ -90,6 +111,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       const data = await res.json();
       setUser(data.user ?? null);
+      queryClient.invalidateQueries();
       if (data.exp) {
         tokenExpRef.current = data.exp;
         scheduleRefresh(data.exp);
