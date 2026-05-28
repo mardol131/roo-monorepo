@@ -13,6 +13,7 @@ export function canEditCompany(
   if (!userId) return false;
 
   const ownerId = getIdFromRelationshipField(company.owner);
+  console.log("ownerId", ownerId, "userId", userId);
   if (ownerId === userId) return true;
 
   return (

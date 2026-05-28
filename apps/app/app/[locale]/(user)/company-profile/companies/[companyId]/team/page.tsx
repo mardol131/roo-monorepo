@@ -62,7 +62,7 @@ export default function page() {
   return (
     <main className="w-full">
       <PageHeading
-        heading="Váš tým"
+        heading="Firemní tým"
         description="Přehled všech členů, kteří mají přístup k této firmě."
         button={
           canEditCompany(company, user?.id)
@@ -94,14 +94,13 @@ export default function page() {
         }}
         renderItem={(item) => {
           const member = item as TeamMember;
-          const user = member.user as User;
           const name =
             typeof member.user === "string"
               ? member.user
-              : `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim() ||
-                user.email;
+              : `${member.user.firstName ?? ""} ${member.user.lastName ?? ""}`.trim() ||
+                member.user.email;
           const email =
-            typeof member.user === "string" ? undefined : user.email;
+            typeof member.user === "string" ? undefined : member.user.email;
 
           const roleLabel = g(`companies.members.role.${member.role}`);
 
@@ -120,12 +119,13 @@ export default function page() {
               ]}
               onClick={
                 canEditCompany(company, user?.id)
-                  ? () =>
+                  ? () => {
                       setEditingMember({
                         id: member.id ?? "",
                         name,
                         role: member.role,
-                      })
+                      });
+                    }
                   : undefined
               }
               deleteEntityHandler={

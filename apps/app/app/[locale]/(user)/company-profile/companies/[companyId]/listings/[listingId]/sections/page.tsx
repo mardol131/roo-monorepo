@@ -19,6 +19,7 @@ import {
   useUpdateListingDetail,
 } from "@/app/react-query/listings/hooks";
 import {
+  getIdFromRelationshipField,
   Listing,
   ListingEntertainmentDetail,
   ListingGastroDetail,
@@ -336,7 +337,7 @@ export default function SectionsPage() {
   const { data: listing, isPending } = useListing(listingId);
   const { data: detail } = useListingDetail(
     `listing-${listing?.type || "gastro"}-details`,
-    listingId,
+    getIdFromRelationshipField(listing?.detail?.value ?? ""),
   );
 
   const { mutate: updateListingDetail, isPending: detailIsPending } =
@@ -351,14 +352,14 @@ export default function SectionsPage() {
 
   const cardRefs = useRef(new Map<string, CardHandle>());
 
-  if (!detail || detailIsPending || !listing || isPending) return <Loader />;
-
   useEffect(() => {
     if (!detail) return;
     const sections = initCustomSections(detail);
     setCustomSections(sections);
     setOrderItems(initOrderItems(detail, sections));
   }, [detail]);
+
+  if (!detail || detailIsPending || !listing || isPending) return <Loader />;
 
   if (isPending) return <Loader text="Načítám sekce..." />;
   if (!listing) return null;

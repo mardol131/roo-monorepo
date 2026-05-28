@@ -728,7 +728,6 @@ export interface ListingVenueDetail {
         id?: string | null;
       }[]
     | null;
-  listing: string | Listing;
   faq?:
     | {
         active?: boolean | null;
@@ -845,7 +844,7 @@ export interface EventType {
  */
 export interface Space {
   id: string;
-  status: 'active' | 'inactive' | 'disabled' | 'archived' | 'unavailable' | 'completed';
+  status: 'active' | 'disabled' | 'archived';
   name: string;
   type: 'area' | 'building' | 'room';
   parent?: (string | null) | Space;
@@ -1007,7 +1006,6 @@ export interface ListingGastroDetail {
         id?: string | null;
       }[]
     | null;
-  listing: string | Listing;
   faq?:
     | {
         active?: boolean | null;
@@ -1138,7 +1136,6 @@ export interface ListingEntertainmentDetail {
         id?: string | null;
       }[]
     | null;
-  listing: string | Listing;
   faq?:
     | {
         active?: boolean | null;
@@ -2784,7 +2781,6 @@ export interface ListingEntertainmentDetailsSelect<T extends boolean = true> {
         key?: T;
         id?: T;
       };
-  listing?: T;
   faq?:
     | T
     | {
@@ -2933,7 +2929,6 @@ export interface ListingGastroDetailsSelect<T extends boolean = true> {
         key?: T;
         id?: T;
       };
-  listing?: T;
   faq?:
     | T
     | {
@@ -3077,7 +3072,6 @@ export interface ListingVenueDetailsSelect<T extends boolean = true> {
         key?: T;
         id?: T;
       };
-  listing?: T;
   faq?:
     | T
     | {

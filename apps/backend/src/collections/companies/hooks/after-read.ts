@@ -2,10 +2,11 @@ import type { CollectionAfterReadHook } from 'payload'
 import type { Company } from '@/payload-types'
 import { getIdFromRelationshipField } from '@roo/common'
 
-export const stripForPublic: CollectionAfterReadHook = ({ doc, req }) => {
+export const stripForPublic: CollectionAfterReadHook = ({ doc, req, context }) => {
   const company = doc
 
   if (req.user?.collection === 'admins') return company
+  if (context.skipPublicStrip) return company
 
   const ownerId = getIdFromRelationshipField(company.owner)
   const isOwner = ownerId === req.user?.id

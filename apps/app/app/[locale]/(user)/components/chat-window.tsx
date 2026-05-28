@@ -33,7 +33,7 @@ export default function ChatWindow({
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   const { data: messagesData } = useChatMessagesByInquiry(inquiryId, {
-    refetchInterval: 5_000,
+    refetchInterval: 10_000,
   });
   const { mutate: sendMessage, isPending } = useCreateChatMessage();
   const { mutate: patchInquiry } = useUpdateInquiry({ listingId });

@@ -425,6 +425,7 @@ export default function SpacesPage() {
                 disabled={confirmValue !== CONFIRMATION_TEXT}
                 size="sm"
                 rounding="md"
+                version="dangerFull"
               />
 
               <Button

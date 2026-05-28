@@ -142,7 +142,7 @@ const schema = z
     ...commonEditListingFieldsSchema,
     indoor: z.boolean().default(false),
     outdoor: z.boolean().default(false),
-    spaceType: z.enum(
+    spacesType: z.enum(
       ["area", "building", "room"] as const,
       "Vyberte typ prostoru",
     ),
@@ -282,7 +282,7 @@ export default function VenueListingForm({
         access: {},
         parking: {},
         breakfast: {},
-        spacesType: data.spaceType ?? "area",
+        spacesType: data.spacesType,
         area: data.area,
       });
       await createListing({
@@ -322,7 +322,7 @@ export default function VenueListingForm({
       {
         id: venueDetail.id,
         data: {
-          spacesType: venueDetail.spacesType ?? "area",
+          spacesType: venueDetail.spacesType,
           area: data.area,
           canBeBookedAsWhole: data.canBeBookedAsWhole,
           hasAccommodation: data.hasAccommodation,
@@ -425,6 +425,7 @@ export default function VenueListingForm({
     defaultValues: {
       indoor: false,
       outdoor: false,
+      spacesType: venueDetail?.spacesType,
       eventTypes: [],
       activities: [],
       activityAddons: [],
@@ -486,6 +487,7 @@ export default function VenueListingForm({
 
     reset({
       name: listing.name,
+      spacesType: venueDetail.spacesType,
       shortDescription: listing.shortDescription ?? undefined,
       description: listing.description ?? undefined,
       indoor: listing.indoor ?? false,
@@ -623,6 +625,7 @@ export default function VenueListingForm({
   const tocGroups = type === "create" ? CREATE_VENUE_GROUPS : VENUE_FORM_GROUPS;
 
   console.log(errors);
+
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="flex gap-6">
       <div className="flex w-full flex-col gap-4">
@@ -1851,11 +1854,11 @@ export default function VenueListingForm({
             subtitle={S.spaces.subTitle}
             color="text-listing"
             surfaceColor="bg-listing-surface"
-            error={!!errors.spaceType}
+            error={!!errors.spacesType}
           >
             <Controller
               control={control}
-              name="spaceType"
+              name="spacesType"
               render={({ field }) => (
                 <div className="flex flex-col gap-2">
                   <InputLabel label="Co nabízíte?" isRequired />
@@ -1897,8 +1900,8 @@ export default function VenueListingForm({
                       />
                     ))}
                   </div>
-                  {errors.spaceType?.message && (
-                    <ErrorText error={errors.spaceType.message} />
+                  {errors.spacesType?.message && (
+                    <ErrorText error={errors.spacesType.message} />
                   )}
                 </div>
               )}

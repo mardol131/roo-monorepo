@@ -31,10 +31,9 @@ import { GastroDetails } from "./components/gastro-details";
 import { ListingCompletion } from "./components/listing-completion";
 import { SpacesSection } from "./components/spaces-section";
 import { VenueDetails } from "./components/venue-details";
-
-// ── Constants ─────────────────────────────────────────────────────────────────
-
-// ── Page ──────────────────────────────────────────────────────────────────────
+import { hasListingRights } from "@/app/[locale]/(user)/utils/listings";
+import { useCompany } from "@/app/react-query/companies/hooks";
+import { useAuth } from "@/app/context/auth/auth-context";
 
 export default function Page() {
   const { companyId, listingId } = useParams<{
@@ -45,6 +44,7 @@ export default function Page() {
   const router = useRouter();
   const { data: listing, isPending } = useListing(listingId);
   const { data: variants } = useVariantsByListing(listingId);
+  const { data: company } = useCompany(companyId);
   const { mutate: updateListing, isPending: isUpdating } =
     useUpdateListing(companyId);
   const { data: spaces } = useSpacesByListing(listingId);
@@ -54,6 +54,7 @@ export default function Page() {
       ? getIdFromRelationshipField(listing?.detail?.value)
       : "",
   );
+  const { user } = useAuth();
   const { data: filters } = useFilterOptions();
   if (isPending || isFetchingDetail) return <Loader text="Načítám službu..." />;
   if (!listing || !detail) return router.back();
@@ -245,41 +246,47 @@ export default function Page() {
           listingId={listingId}
           spacesCount={spaces?.docs?.length || 0}
         />
-        <ControlSection
-          rows={[
-            {
-              icon: isActive ? "CircleMinus" : "CircleCheck",
-              iconColor: isActive ? "text-amber-500" : "text-success",
-              iconBgColor: isActive ? "bg-amber-50" : "bg-success-surface",
-              title: isActive ? "Deaktivovat službu" : "Aktivovat službu",
-              text: isActive
-                ? "Služba přestane být zobrazována v katalogu. Kdykoli ji lze znovu aktivovat."
-                : "Po aktivaci budete přesměrováni do platební brány. Služba se zobrazí v katalogu po úspěšné platbě.",
-              button: {
-                text: isActive ? "Deaktivovat" : "Aktivovat",
-                version: isActive ? "warningFull" : "successFull",
-                iconLeft: isActive ? "CircleMinus" : "CircleCheck",
-                size: "sm",
-                disabled: isUpdating,
-                onClick: handleToggleStatus,
+        {hasListingRights({
+          allowedRoles: ["owner", "admin", "manager"],
+          company,
+          userId: user?.id,
+        }) && (
+          <ControlSection
+            rows={[
+              {
+                icon: isActive ? "CircleMinus" : "CircleCheck",
+                iconColor: isActive ? "text-amber-500" : "text-success",
+                iconBgColor: isActive ? "bg-amber-50" : "bg-success-surface",
+                title: isActive ? "Deaktivovat službu" : "Aktivovat službu",
+                text: isActive
+                  ? "Služba přestane být zobrazována v katalogu. Kdykoli ji lze znovu aktivovat."
+                  : "Po aktivaci budete přesměrováni do platební brány. Služba se zobrazí v katalogu po úspěšné platbě.",
+                button: {
+                  text: isActive ? "Deaktivovat" : "Aktivovat",
+                  version: isActive ? "warningFull" : "successFull",
+                  iconLeft: isActive ? "CircleMinus" : "CircleCheck",
+                  size: "sm",
+                  disabled: isUpdating,
+                  onClick: handleToggleStatus,
+                },
               },
-            },
-            {
-              icon: "Trash2",
-              iconColor: "text-danger",
-              iconBgColor: "bg-danger-surface",
-              title: "Smazat službu",
-              text: "Trvalé smazání nelze vrátit zpět. Všechna data budou odstraněna.",
-              button: {
-                text: "Smazat",
-                version: "dangerFull",
-                iconLeft: "Trash2",
-                size: "sm",
-                onClick: openDeleteConfirmModal,
+              {
+                icon: "Trash2",
+                iconColor: "text-danger",
+                iconBgColor: "bg-danger-surface",
+                title: "Smazat službu",
+                text: "Trvalé smazání nelze vrátit zpět. Všechna data budou odstraněna.",
+                button: {
+                  text: "Smazat",
+                  version: "dangerFull",
+                  iconLeft: "Trash2",
+                  size: "sm",
+                  onClick: openDeleteConfirmModal,
+                },
               },
-            },
-          ]}
-        />
+            ]}
+          />
+        )}
 
         <RowContainer
           icon="Package"

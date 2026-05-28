@@ -11,6 +11,7 @@ import { useParams } from "next/navigation";
 import Navbar from "../components/navbar";
 import { canEditCompany } from "../utils/companies";
 import { useAuth } from "@/app/context/auth/auth-context";
+import { hasInquiryCompanyRights } from "../utils/inquiries";
 
 export default function ContentWrapper({ children }: PropsWithChildren) {
   const pathname = usePathname();
@@ -77,14 +78,19 @@ export default function ContentWrapper({ children }: PropsWithChildren) {
         },
         icon: "Tag",
       },
-      {
-        label: "Nová služba",
-        href: {
-          pathname: "/company-profile/companies/[companyId]/listings/new",
-          params: { companyId },
-        },
-        icon: "Plus",
-      },
+
+      ...(canEditCompany(company, user?.id)
+        ? [
+            {
+              label: "Nová služba",
+              href: {
+                pathname: "/company-profile/companies/[companyId]/listings/new",
+                params: { companyId },
+              },
+              icon: "Plus",
+            } as const,
+          ]
+        : []),
     ];
 
     const spaceMenuItem: SidebarItem = {
@@ -126,34 +132,45 @@ export default function ContentWrapper({ children }: PropsWithChildren) {
             },
             icon: "Wallpaper",
           },
-          {
-            label: "Poptávky",
-            href: {
-              pathname:
-                "/company-profile/companies/[companyId]/listings/[listingId]/inquiries",
-              params: { companyId, listingId },
-            },
-            icon: "MessageSquare",
-          },
-          {
-            label: "Zprávy",
-            href: {
-              pathname:
-                "/company-profile/companies/[companyId]/listings/[listingId]/messages",
-              params: { companyId, listingId },
-            },
-            icon: "MessageCircle",
-          },
-
-          {
-            label: "Kalendář",
-            href: {
-              pathname:
-                "/company-profile/companies/[companyId]/listings/[listingId]/calendar",
-              params: { companyId, listingId },
-            },
-            icon: "Calendar",
-          },
+          ...(hasInquiryCompanyRights({ company, userId: user?.id })
+            ? [
+                {
+                  label: "Poptávky",
+                  href: {
+                    pathname:
+                      "/company-profile/companies/[companyId]/listings/[listingId]/inquiries",
+                    params: { companyId, listingId },
+                  },
+                  icon: "MessageSquare",
+                } as const,
+              ]
+            : []),
+          ...(hasInquiryCompanyRights({ company, userId: user?.id })
+            ? [
+                {
+                  label: "Zprávy",
+                  href: {
+                    pathname:
+                      "/company-profile/companies/[companyId]/listings/[listingId]/messages",
+                    params: { companyId, listingId },
+                  },
+                  icon: "MessageCircle",
+                } as const,
+              ]
+            : []),
+          ...(hasInquiryCompanyRights({ company, userId: user?.id })
+            ? [
+                {
+                  label: "Kalendář",
+                  href: {
+                    pathname:
+                      "/company-profile/companies/[companyId]/listings/[listingId]/calendar",
+                    params: { companyId, listingId },
+                  },
+                  icon: "Calendar",
+                } as const,
+              ]
+            : []),
 
           ...(listing?.type === "venue" ? [spaceMenuItem] : []),
           {
@@ -187,7 +204,7 @@ export default function ContentWrapper({ children }: PropsWithChildren) {
     };
 
     return subSidebar;
-  }, [company, listing, companyId, listingId]);
+  }, [company, listing, companyId, listingId, user]);
 
   const dontRestraintWidth =
     pathname.endsWith("/edit") ||

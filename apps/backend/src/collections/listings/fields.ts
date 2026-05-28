@@ -175,13 +175,6 @@ export const customSectionsFields: Field[] = [
 
 export const commonListingDetailFields: Field[] = [
   {
-    name: 'listing',
-    type: 'relationship',
-    relationTo: 'listings',
-    hasMany: false,
-    required: true,
-  },
-  {
     name: 'faq',
     type: 'array',
     fields: [
@@ -404,15 +397,6 @@ export const listingFields: Field[] = [
     required: true,
     defaultValue: 'inactive',
     access: { update: isCompanyManagerOrAbove },
-    validate: (
-      value: string | null | undefined,
-      { siblingData }: { siblingData: { subscriptionActive?: boolean } },
-    ) => {
-      if (value === 'active' && !siblingData.subscriptionActive) {
-        return 'Listing nelze aktivovat bez aktivního předplatného (subscriptionActive musí být true).'
-      }
-      return true
-    },
   },
   {
     name: 'subscriptionActive',

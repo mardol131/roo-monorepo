@@ -3,33 +3,32 @@ import type { FieldAccess, PayloadRequest, Where } from 'payload'
 import { CollectionAccess } from '../common/utils'
 import type { Company, Listing } from '@/payload-types'
 
-/**
- * Pomocná funkce — načte company přes listing.
- * Použití v detail kolekcích (venue, gastro, entertainment), kde je vazba detail → listing → company.
- */
-async function fetchCompanyViaListing(
+async function fetchCompanyViaDetail(
   req: PayloadRequest,
-  listingId: string,
+  detailId: string,
 ): Promise<Company | null> {
-  const listing = (await req.payload.findByID({
+  const result = await req.payload.find({
     collection: 'listings',
-    id: listingId,
-  })) as Listing | null
+    where: { 'detail.value': { equals: detailId } },
+    limit: 1,
+  })
 
+  const listing = result.docs[0]
   if (!listing) return null
 
   const companyId = getIdFromRelationshipField(listing.company)
   if (!companyId) return null
 
-  return (await req.payload.findByID({
+  return req.payload.findByID({
     collection: 'companies',
     id: companyId,
-  })) as Company | null
+    overrideAccess: true,
+    context: { skipPublicStrip: true },
+  })
 }
 
 /** Pole může měnit pouze Payload admin (tariff, type, detail, slug, subscriptionActive). */
-export const payloadAdminOnly: FieldAccess = ({ req }) =>
-  req.user?.collection === 'admins'
+export const payloadAdminOnly: FieldAccess = ({ req }) => req.user?.collection === 'admins'
 
 /**
  * Pole může měnit owner firmy nebo člen s rolí admin/manager.
@@ -39,13 +38,15 @@ export const isCompanyManagerOrAbove: FieldAccess = async ({ req, doc }) => {
   if (!req.user) return false
   if (req.user.collection === 'admins') return true
 
-  const companyId = getIdFromRelationshipField(doc?.company)
-  if (!companyId) return false
+  if (!doc?.company) return false
+  const companyId = getIdFromRelationshipField(doc.company)
 
-  const company = (await req.payload.findByID({
+  const company = await req.payload.findByID({
     collection: 'companies',
     id: companyId,
-  })) as Company | null
+    overrideAccess: true,
+    context: { skipPublicStrip: true },
+  })
 
   if (!company) return false
 
@@ -55,10 +56,7 @@ export const isCompanyManagerOrAbove: FieldAccess = async ({ req, doc }) => {
   return (
     company.members?.some((member) => {
       const memberId = getIdFromRelationshipField(member.user)
-      return (
-        memberId === req.user?.id &&
-        (member.role === 'admin' || member.role === 'manager')
-      )
+      return memberId === req.user?.id && (member.role === 'admin' || member.role === 'manager')
     }) ?? false
   )
 }
@@ -68,12 +66,14 @@ export const listingAccessControl: CollectionAccess = {
     if (!req.user) return false
     if (req.user.collection === 'admins') return true
 
-    const companyId = getIdFromRelationshipField(data?.company)
-    if (!companyId) return false
+    if (!data?.company) return false
+    const companyId = getIdFromRelationshipField(data.company)
 
     const company = await req.payload.findByID({
       collection: 'companies',
       id: companyId,
+      overrideAccess: true,
+      context: { skipPublicStrip: true },
     })
 
     if (!company) return false
@@ -91,7 +91,9 @@ export const listingAccessControl: CollectionAccess = {
   read: ({ req }) => {
     if (req.user?.collection === 'admins') return true
     if (!req.user) {
-      const query: Where = { status: { equals: 'active' } }
+      const query: Where = {
+        and: [{ status: { equals: 'active' } }, { subscriptionActive: { equals: true } }],
+      }
       return query
     }
 
@@ -109,7 +111,9 @@ export const listingAccessControl: CollectionAccess = {
             { status: { in: ['active', 'inactive'] } },
           ],
         },
-        { status: { equals: 'active' } },
+        {
+          and: [{ status: { equals: 'active' } }, { subscriptionActive: { equals: true } }],
+        },
       ],
     }
     return query
@@ -131,37 +135,14 @@ export const listingAccessControl: CollectionAccess = {
 
 export const listingDetailAccessControl: CollectionAccess = {
   read: () => true,
-  create: async ({ req, data }) => {
+  create: ({ req }) => !!req.user,
+  update: async ({ req, id }) => {
     if (!req.user) return false
     if (req.user.collection === 'admins') return true
 
-    const listingId = getIdFromRelationshipField(data?.listing)
-    if (!listingId) return false
+    if (!id) return false
 
-    const company = await fetchCompanyViaListing(req, listingId)
-    if (!company) return false
-
-    const ownerId = getIdFromRelationshipField(company.owner)
-    if (ownerId === req.user.id) return true
-
-    return (
-      company.members?.some((member) => {
-        const memberId = getIdFromRelationshipField(member.user)
-        return (
-          memberId === req.user?.id &&
-          (member.role === 'admin' || member.role === 'manager')
-        )
-      }) ?? false
-    )
-  },
-  update: async ({ req, data }) => {
-    if (!req.user) return false
-    if (req.user.collection === 'admins') return true
-
-    const listingId = getIdFromRelationshipField(data?.listing)
-    if (!listingId) return false
-
-    const company = await fetchCompanyViaListing(req, listingId)
+    const company = await fetchCompanyViaDetail(req, String(id))
     if (!company) return false
 
     const ownerId = getIdFromRelationshipField(company.owner)

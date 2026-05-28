@@ -59,10 +59,10 @@
     },
     "members": {
       "role": {
-        "owner": "Vlastník",
-        "admin": "Administrátor",
-        "manager": "Manažer",
-        "editor": "Editor"
+        "owner": "Majitel",
+        "admin": "Správce firmy",
+        "manager": "Manažer inzerátů",
+        "editor": "Redaktor"
       }
     }
   },
@@ -107,9 +107,9 @@
       "logout": "Odhlásit se",
       "myEvents": "Moje události",
       "favourites": "Oblíbené",
-      "userAdmin": "Administrace",
-      "companyAdmin": "Administrace",
-      "supplierSection": "Dodavatel"
+      "userAdmin": "Správa účtu",
+      "companyAdmin": "Správa firmy",
+      "supplierSection": "Firma"
     }
   },
   "footer": {
