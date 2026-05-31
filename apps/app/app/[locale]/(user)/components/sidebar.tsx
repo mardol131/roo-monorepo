@@ -56,7 +56,7 @@ export default function Sidebar({ mainMenuItems, subMenuItems }: SidebarProps) {
         {subMenuItems && subMenuItems.length > 0 && (
           <div className="px-2 py-2 border-zinc-100">
             <ul className="flex flex-col gap-2">
-              {auth.user?.type == "company" && (
+              {auth.user?.roles.includes("company") && (
                 <>
                   <div className="h-px bg-zinc-200"></div>
                   <div>

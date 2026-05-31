@@ -4,6 +4,7 @@ import { stringify } from "qs-esm";
 export type GetCollectionParams = {
   query?: Where;
   limit?: number;
+  page?: number;
   sort?: string;
   searchParams?: URLSearchParams;
   headers?: Record<string, string>;
@@ -17,6 +18,7 @@ export async function getCollection<T extends keyof Config["collections"]>({
   collection,
   query,
   limit,
+  page,
   sort,
   searchParams,
   headers,
@@ -28,11 +30,13 @@ export async function getCollection<T extends keyof Config["collections"]>({
     ? stringify({ where: query }, { encodeValuesOnly: true })
     : undefined;
   const limitQuery = limit ? `limit=${limit}` : undefined;
+  const pageQuery = page ? `page=${page}` : undefined;
   const sortQuery = sort ? `sort=${sort}` : undefined;
 
   const queryParams = [
     stringifiedQuery,
     limitQuery,
+    pageQuery,
     sortQuery,
     searchParams?.toString(),
   ]
@@ -114,6 +118,33 @@ export async function patchCollectionItem<
   if (!res.ok) throw new Error(`Failed to patch item in ${collection}`);
   const json = await res.json();
   return json.doc ?? json;
+}
+
+export async function patchCollection<T extends keyof Config["collections"]>({
+  collection,
+  query,
+  data,
+}: {
+  collection: T;
+  query: Where;
+  data: PatchData<Config["collections"][T]>;
+}): Promise<{ docs: Config["collections"][T][]; message: string }> {
+  const url = new URL(
+    `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/${collection}`,
+  );
+  url.search = stringify({ where: query }, { encodeValuesOnly: true });
+
+  const res = await fetch(url.toString(), {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    credentials: "include",
+    body: JSON.stringify(data),
+  });
+
+  if (!res.ok) throw new Error(`Failed to patch collection ${collection}`);
+  return res.json();
 }
 
 export async function postCollectionItem<

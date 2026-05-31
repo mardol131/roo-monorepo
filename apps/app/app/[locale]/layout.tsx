@@ -6,6 +6,7 @@ import { ConfirmActionModal } from "../components/ui/molecules/modals/confirm-ac
 import LoginModal from "../components/ui/molecules/modals/login-modal/login-modal";
 import { SimpleConfirmActionModal } from "../components/ui/molecules/modals/simple-confirm-action-modal";
 import { GlobalToast } from "../components/ui/molecules/global-toast";
+import { NotificationsModal } from "../components/ui/molecules/modals/notifications-modal";
 
 type Props = {
   params: Promise<{ locale: Locale }>;
@@ -29,6 +30,7 @@ export default function layout({ children }: PropsWithChildren) {
       <LoginModal />
       <SimpleConfirmActionModal />
       <GlobalToast />
+      <NotificationsModal />
       {children}
     </>
   );

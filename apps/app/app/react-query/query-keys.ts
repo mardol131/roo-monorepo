@@ -74,6 +74,7 @@ export const roadmapItemsKeys = {
 
 export const userNotificationKeys = {
   all: () => ["userNotifications"] as const,
+  unreadCount: () => ["userNotificationsUnreadCount"] as const,
 };
 
 // Locality

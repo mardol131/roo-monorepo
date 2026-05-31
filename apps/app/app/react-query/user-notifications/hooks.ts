@@ -1,14 +1,46 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { UserNotification } from "@roo/common";
-import { PatchData } from "@/app/functions/api/general";
+import {
+  useInfiniteQuery,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
+import { UserNotification, Where } from "@roo/common";
+import { GetCollectionParams, PatchData } from "@/app/functions/api/general";
 import { userNotificationKeys } from "../query-keys";
-import { fetchUserNotifications, updateUserNotification } from "./fetch";
+import {
+  fetchUserNotifications,
+  updateUserNotification,
+  updateUserNotifications,
+} from "./fetch";
 
-export function useUserNotifications(options?: { refetchInterval?: number }) {
-  return useQuery({
+const REFETCH_INTERVAL = 60_000;
+
+export function useUserNotifications(
+  options?: Omit<GetCollectionParams, "page"> & { refetchInterval?: number },
+) {
+  const { refetchInterval, ...fetchOptions } = options ?? {};
+  return useInfiniteQuery({
     queryKey: userNotificationKeys.all(),
-    queryFn: fetchUserNotifications,
-    refetchInterval: options?.refetchInterval,
+    queryFn: ({ pageParam }) =>
+      fetchUserNotifications({ ...fetchOptions, page: pageParam }),
+    initialPageParam: 1,
+    getNextPageParam: (lastPage) => lastPage.nextPage ?? undefined,
+    refetchInterval: refetchInterval ?? REFETCH_INTERVAL,
+  });
+}
+
+export function useUnreadUserNotificationsCount(options?: {
+  refetchInterval?: number;
+}) {
+  return useQuery({
+    queryKey: userNotificationKeys.unreadCount(),
+    queryFn: () =>
+      fetchUserNotifications({
+        query: { seen: { not_equals: true } },
+        limit: 1,
+      }),
+    select: (data) => data.totalDocs ?? 0,
+    refetchInterval: options?.refetchInterval ?? REFETCH_INTERVAL,
   });
 }
 
@@ -25,6 +57,25 @@ export function useUpdateUserNotification() {
       updateUserNotification(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: userNotificationKeys.all() });
+      queryClient.invalidateQueries({ queryKey: userNotificationKeys.unreadCount() });
+    },
+  });
+}
+
+export type UpdateUserNotificationsVars = {
+  query: Where;
+  data: PatchData<UserNotification>;
+};
+
+export function useUpdateUserNotifications() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ query, data }: UpdateUserNotificationsVars) =>
+      updateUserNotifications(query, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: userNotificationKeys.all() });
+      queryClient.invalidateQueries({ queryKey: userNotificationKeys.unreadCount() });
     },
   });
 }

@@ -44,18 +44,18 @@ export default function ContentWrapper({ children }: PropsWithChildren) {
         <Navbar
           buttons={[
             {
-              text: "Odejít",
-              size: "xs",
-              version: "plain",
-              iconLeft: "ExternalLink",
-              link: "/homepage",
-            },
-            {
               text: "Nastavení",
               size: "xs",
               version: "plain",
               iconLeft: "Settings",
               link: "/user-profile/profile-settings",
+            },
+            {
+              text: "Odejít",
+              size: "xs",
+              version: "plain",
+              iconLeft: "ExternalLink",
+              link: "/homepage",
             },
           ]}
         />

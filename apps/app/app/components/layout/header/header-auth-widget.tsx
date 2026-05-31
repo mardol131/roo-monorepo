@@ -4,6 +4,7 @@ import { useAuth } from "@/app/context/auth/auth-context";
 import { Link } from "@/app/i18n/navigation";
 import Text from "@/app/components/ui/atoms/text";
 import {
+  Bell,
   Building2,
   Calendar,
   ChevronDown,
@@ -11,12 +12,14 @@ import {
   Settings,
   Star,
 } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { loginModalEvents } from "@/app/components/ui/molecules/modals/login-modal/login-modal";
 import Button from "../../ui/atoms/button";
 import { getInitials } from "@roo/common";
 import { useTranslations } from "next-intl";
 import { useClickOutside } from "@/app/hooks/use-click-outside";
+import { useNotificationsStore } from "@/app/store/notifications-store";
+import { useUnreadUserNotificationsCount } from "@/app/react-query/user-notifications/hooks";
 
 export default function HeaderAuthWidget({
   onNavigate,
@@ -29,6 +32,9 @@ export default function HeaderAuthWidget({
   const ref = useRef<HTMLDivElement>(null);
 
   useClickOutside(ref, () => setOpen(false));
+
+  const notificationsStore = useNotificationsStore();
+  const { data: unreadCount = 0 } = useUnreadUserNotificationsCount();
 
   if (isLoading && !user) {
     return <div className="w-8 h-8 rounded-full bg-zinc-100 animate-pulse" />;
@@ -61,123 +67,141 @@ export default function HeaderAuthWidget({
   }
 
   return (
-    <div className="relative" ref={ref}>
+    <div className="flex items-center gap-2">
       <button
         type="button"
-        onClick={() => setOpen((p) => !p)}
-        className="flex items-center gap-2 p-2 rounded-full bg-zinc-100 hover:bg-zinc-200 transition-colors"
+        onClick={notificationsStore.open}
+        className="relative p-2 rounded-full bg-zinc-100 hover:bg-zinc-200 transition-colors"
       >
-        <div className="w-7 h-7 rounded-full bg-zinc-900 text-white flex items-center justify-center text-xs font-semibold shrink-0">
-          {getInitials(user.firstName, user.lastName)}
-        </div>
-        <Text
-          variant="label-lg"
-          color="textDark"
-          className="hidden lg:block max-w-35 truncate"
-        >
-          {user.email}
-        </Text>
-        <ChevronDown
-          className={`w-3.5 h-3.5 text-zinc-400 transition-transform duration-150 ${open ? "rotate-180" : ""}`}
-        />
+        <Bell className="w-4.5 h-4.5 text-zinc-600" />
+        {unreadCount > 0 && (
+          <span className="absolute -top-0.5 -right-0.5 w-4 h-4 flex items-center justify-center rounded-full bg-red-500 text-white text-[9px] font-bold">
+            {unreadCount > 99 ? "99" : unreadCount}
+          </span>
+        )}
       </button>
-
-      {open && (
-        <div className="absolute right-0 top-full mt-2 w-52 bg-white border border-zinc-200 rounded-xl shadow-lg z-50 py-1.5 overflow-hidden">
-          <div className="px-3 flex flex-col py-2 border-b border-zinc-100 mb-1">
-            <Text
-              variant="label"
-              color="textDark"
-              className="font-semibold truncate"
-            >
-              {user.firstName} {user.lastName}
-            </Text>
-            <Text variant="caption" color="secondary" className="truncate">
-              {user.email}
-            </Text>
+      <div className="relative" ref={ref}>
+        <button
+          type="button"
+          onClick={() => setOpen((p) => !p)}
+          className="flex items-center gap-2 p-2 rounded-full bg-zinc-100 hover:bg-zinc-200 transition-colors"
+        >
+          <div className="w-7 h-7 rounded-full bg-primary text-white flex items-center justify-center text-xs font-semibold shrink-0">
+            {getInitials(user.firstName, user.lastName)}
           </div>
-
-          <Link
-            href={{ pathname: "/user-profile" }}
-            onClick={() => {
-              setOpen(false);
-              onNavigate?.();
-            }}
-            className="flex items-center gap-2.5 px-3 py-2 hover:bg-zinc-50 transition-colors"
+          <Text
+            variant="label-lg"
+            color="textDark"
+            className="hidden lg:block max-w-35 truncate"
           >
-            <Settings className="w-4 h-4 text-zinc-400 shrink-0" />
-            <Text variant="label-lg" color="textDark">
-              {t("userAdmin")}
-            </Text>
-          </Link>
-          <Link
-            href={{ pathname: "/user-profile/events" }}
-            onClick={() => {
-              setOpen(false);
-              onNavigate?.();
-            }}
-            className="flex items-center gap-2.5 px-3 py-2 hover:bg-zinc-50 transition-colors"
-          >
-            <Calendar className="w-4 h-4 text-zinc-400 shrink-0" />
-            <Text variant="label-lg" color="textDark">
-              {t("myEvents")}
-            </Text>
-          </Link>
-          <Link
-            href={{ pathname: "/user-profile/favourites" }}
-            onClick={() => {
-              setOpen(false);
-              onNavigate?.();
-            }}
-            className="flex items-center gap-2.5 px-3 py-2 hover:bg-zinc-50 transition-colors"
-          >
-            <Star className="w-4 h-4 text-zinc-400 shrink-0" />
-            <Text variant="label-lg" color="textDark">
-              {t("favourites")}
-            </Text>
-          </Link>
+            {user.email}
+          </Text>
+          <ChevronDown
+            className={`w-3.5 h-3.5 text-zinc-400 transition-transform duration-150 ${open ? "rotate-180" : ""}`}
+          />
+        </button>
 
-          {user.roles.includes("company") && (
-            <>
-              <div className="border-t border-zinc-100 mt-1 pt-1 mb-1">
-                <Text variant="caption" color="secondary" className="px-3 py-1">
-                  {t("supplierSection")}
-                </Text>
-                <Link
-                  href={{ pathname: "/company-profile/companies" }}
-                  onClick={() => {
-                    setOpen(false);
-                    onNavigate?.();
-                  }}
-                  className="flex items-center gap-2.5 px-3 py-2 hover:bg-zinc-50 transition-colors"
-                >
-                  <Building2 className="w-4 h-4 text-zinc-400 shrink-0" />
-                  <Text variant="label-lg" color="textDark">
-                    {t("companyAdmin")}
-                  </Text>
-                </Link>
-              </div>
-            </>
-          )}
+        {open && (
+          <div className="absolute right-0 top-full mt-2 w-52 bg-white border border-zinc-200 rounded-xl shadow-lg z-50 py-1.5 overflow-hidden">
+            <div className="px-3 flex flex-col py-2 border-b border-zinc-100 mb-1">
+              <Text
+                variant="label"
+                color="textDark"
+                className="font-semibold truncate"
+              >
+                {user.firstName} {user.lastName}
+              </Text>
+              <Text variant="caption" color="secondary" className="truncate">
+                {user.email}
+              </Text>
+            </div>
 
-          <div className="border-t border-zinc-100 mt-1 pt-1">
-            <button
-              type="button"
-              onClick={async () => {
+            <Link
+              href={{ pathname: "/user-profile" }}
+              onClick={() => {
                 setOpen(false);
                 onNavigate?.();
-                await logout();
               }}
-              className="w-full cursor-pointer flex items-center gap-2.5 px-3 py-2 hover:bg-rose-50 transition-colors"
+              className="flex items-center gap-2.5 px-3 py-2 hover:bg-zinc-50 transition-colors"
             >
-              <LogOut className="w-4 h-4 shrink-0 text-danger" />
-              <Text variant="label-lg" color="danger">
-                {t("logout")}
+              <Settings className="w-4 h-4 text-zinc-400 shrink-0" />
+              <Text variant="label-lg" color="textDark">
+                {t("userAdmin")}
               </Text>
-            </button>
+            </Link>
+            <Link
+              href={{ pathname: "/user-profile/events" }}
+              onClick={() => {
+                setOpen(false);
+                onNavigate?.();
+              }}
+              className="flex items-center gap-2.5 px-3 py-2 hover:bg-zinc-50 transition-colors"
+            >
+              <Calendar className="w-4 h-4 text-zinc-400 shrink-0" />
+              <Text variant="label-lg" color="textDark">
+                {t("myEvents")}
+              </Text>
+            </Link>
+            <Link
+              href={{ pathname: "/user-profile/favourites" }}
+              onClick={() => {
+                setOpen(false);
+                onNavigate?.();
+              }}
+              className="flex items-center gap-2.5 px-3 py-2 hover:bg-zinc-50 transition-colors"
+            >
+              <Star className="w-4 h-4 text-zinc-400 shrink-0" />
+              <Text variant="label-lg" color="textDark">
+                {t("favourites")}
+              </Text>
+            </Link>
+
+            {user.roles.includes("company") && (
+              <>
+                <div className="border-t border-zinc-100 mt-1 pt-1 mb-1">
+                  <Text
+                    variant="caption"
+                    color="secondary"
+                    className="px-3 py-1"
+                  >
+                    {t("supplierSection")}
+                  </Text>
+                  <Link
+                    href={{ pathname: "/company-profile/companies" }}
+                    onClick={() => {
+                      setOpen(false);
+                      onNavigate?.();
+                    }}
+                    className="flex items-center gap-2.5 px-3 py-2 hover:bg-zinc-50 transition-colors"
+                  >
+                    <Building2 className="w-4 h-4 text-zinc-400 shrink-0" />
+                    <Text variant="label-lg" color="textDark">
+                      {t("companyAdmin")}
+                    </Text>
+                  </Link>
+                </div>
+              </>
+            )}
+
+            <div className="border-t border-zinc-100 mt-1 pt-1">
+              <button
+                type="button"
+                onClick={async () => {
+                  setOpen(false);
+                  onNavigate?.();
+                  await logout();
+                }}
+                className="w-full cursor-pointer flex items-center gap-2.5 px-3 py-2 hover:bg-rose-50 transition-colors"
+              >
+                <LogOut className="w-4 h-4 shrink-0 text-danger" />
+                <Text variant="label-lg" color="danger">
+                  {t("logout")}
+                </Text>
+              </button>
+            </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }
