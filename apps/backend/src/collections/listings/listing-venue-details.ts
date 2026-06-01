@@ -1,5 +1,5 @@
 import type { CollectionConfig } from 'payload'
-import { commonListingDetailFields, customSectionsFields } from './fields'
+import { commonListingDetailFields, customSectionsFields, priceableOptionFields } from './fields'
 import { listingDetailAccessControl } from './access'
 
 export const ListingVenueDetails: CollectionConfig = {
@@ -31,15 +31,23 @@ export const ListingVenueDetails: CollectionConfig = {
       type: 'checkbox',
     },
     {
-      name: 'hasAccommodation',
-      type: 'checkbox',
+      name: 'accomodation',
+      type: 'group',
+      required: true,
+      fields: [
+        {
+          name: 'hasAccommodation',
+          type: 'checkbox',
+        },
+        {
+          name: 'accommodationCapacity',
+          type: 'number',
+        },
+      ],
     },
+
     {
-      name: 'accommodationCapacity',
-      type: 'number',
-    },
-    {
-      name: 'access',
+      name: 'propertyAccess',
       type: 'group',
       required: true,
       fields: [
@@ -48,10 +56,6 @@ export const ListingVenueDetails: CollectionConfig = {
           type: 'select',
           options: ['car', 'truck', 'van', 'bus'],
           hasMany: true,
-        },
-        {
-          name: 'helpWithLoadingAndUnloading',
-          type: 'checkbox',
         },
         {
           name: 'loadingRamp',
@@ -109,42 +113,123 @@ export const ListingVenueDetails: CollectionConfig = {
         {
           name: 'parkingCapacity',
           type: 'number',
+          validate: (value: unknown, { siblingData }: { siblingData: Record<string, unknown> }) => {
+            if (siblingData?.hasParking && (value === undefined || value === null)) {
+              return 'Zadejte kapacitu parkování'
+            }
+            return true
+          },
         },
         {
           name: 'parkingIsIncludedInPrice',
           type: 'checkbox',
+          defaultValue: false,
         },
         {
           name: 'parkingPrice',
           type: 'number',
+          validate: (value: unknown, { siblingData }: { siblingData: Record<string, unknown> }) => {
+            if (siblingData?.parkingIsIncludedInPrice && (value === undefined || value === null)) {
+              return 'Zadejte cenu parkování'
+            }
+            return true
+          },
         },
       ],
     },
     {
-      name: 'activityAddons',
-      type: 'array',
+      name: 'filters',
+      type: 'group',
+      required: true,
       fields: [
         {
-          name: 'activity',
+          name: 'allEventTypes',
+          type: 'checkbox',
+          required: true,
+          defaultValue: false,
+        },
+        {
+          name: 'eventTypes',
           type: 'relationship',
-          relationTo: 'activities',
-          required: true,
+          relationTo: 'event-types',
+          hasMany: true,
+          validate: (value: unknown, { siblingData }: { siblingData: Record<string, unknown> }) => {
+            if (!siblingData?.allEventTypes && !(value as unknown[])?.length) {
+              return 'Vyberte alespoň jeden typ akce'
+            }
+            return true
+          },
         },
+
         {
-          name: 'price',
-          type: 'number',
-          required: true,
-        },
-        {
-          name: 'space',
+          name: 'placeTypes',
           type: 'relationship',
-          relationTo: 'spaces',
+          relationTo: 'place-types',
+          hasMany: true,
         },
         {
-          name: 'type',
-          type: 'select',
-          options: ['indoor', 'outdoor'],
-          required: true,
+          name: 'venueRules',
+          type: 'relationship',
+          relationTo: 'venue-rules',
+          hasMany: true,
+        },
+        {
+          name: 'necessities',
+          type: 'relationship',
+          relationTo: 'necessities',
+          hasMany: true,
+        },
+      ],
+    },
+    {
+      name: 'options',
+      type: 'group',
+      required: true,
+      fields: [
+        {
+          name: 'activities',
+          type: 'array',
+          fields: [
+            { name: 'activity', type: 'relationship', relationTo: 'activities', required: true },
+            ...priceableOptionFields,
+          ],
+        },
+        {
+          name: 'technologies',
+          type: 'array',
+          fields: [
+            {
+              name: 'technology',
+              type: 'relationship',
+              relationTo: 'technologies',
+              required: true,
+            },
+            ...priceableOptionFields,
+          ],
+        },
+        {
+          name: 'personnel',
+          type: 'array',
+          fields: [
+            { name: 'personnel', type: 'relationship', relationTo: 'personnel', required: true },
+            ...priceableOptionFields,
+          ],
+        },
+        {
+          name: 'amenities',
+          type: 'array',
+          fields: [
+            { name: 'amenity', type: 'relationship', relationTo: 'amenities', required: true },
+            ...priceableOptionFields,
+          ],
+        },
+        {
+          name: 'services',
+          type: 'array',
+          fields: [
+            { name: 'service', type: 'relationship', relationTo: 'services', required: true },
+            ...priceableOptionFields,
+          ],
         },
       ],
     },
@@ -154,8 +239,10 @@ export const ListingVenueDetails: CollectionConfig = {
       required: true,
       fields: [
         {
-          name: 'included',
+          name: 'breakfastIncluded',
           type: 'checkbox',
+          required: true,
+          defaultValue: false,
         },
         {
           name: 'allowAccommodationWithoutBreakfast',
@@ -168,16 +255,35 @@ export const ListingVenueDetails: CollectionConfig = {
         {
           name: 'breakfastIsIncludedInPrice',
           type: 'checkbox',
+          defaultValue: false,
         },
         {
           name: 'price',
           type: 'number',
+          validate: (value: unknown, { siblingData }: { siblingData: Record<string, unknown> }) => {
+            if (
+              siblingData?.breakfastIsIncludedInPrice &&
+              (value === undefined || value === null)
+            ) {
+              return 'Zadejte cenu snídaně'
+            }
+            return true
+          },
         },
         {
-          name: 'pricePer',
+          name: 'priceUnit',
           type: 'select',
           options: ['person', 'booking'],
           defaultValue: 'person',
+          validate: (value: unknown, { siblingData }: { siblingData: Record<string, unknown> }) => {
+            if (
+              siblingData?.breakfastIsIncludedInPrice &&
+              (value === undefined || value === null)
+            ) {
+              return 'Zadejte jednotku ceny snídaně'
+            }
+            return true
+          },
         },
         {
           name: 'timeFrom',

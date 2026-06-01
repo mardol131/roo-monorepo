@@ -15,6 +15,13 @@ export const getOptionalPositiveNumber = (errorMessage: string) =>
     z.coerce.number(errorMessage).positive(errorMessage).optional(),
   );
 
+export const getNonNegativeNumber = (errorMessage: string) =>
+  z.preprocess(
+    (val) =>
+      val === "" || val === undefined || val === null ? undefined : val,
+    z.coerce.number(errorMessage).min(0, errorMessage).optional(),
+  );
+
 export const toItem = <T extends { id: string; name: string }>(
   v: string | T,
 ): { id: string; name: string } =>

@@ -27,6 +27,8 @@ export default function FormToc({
   dotColor = "bg-listing",
   buttonVersion = "primary",
   buttonText = "Přejít na uložení",
+  showControlButtons = true,
+  onCancelButtonClick,
 }: {
   groups: readonly TocGroup[];
   sticky?: boolean;
@@ -35,6 +37,8 @@ export default function FormToc({
   dotColor?: string;
   buttonVersion?: ButtonProps["version"];
   buttonText?: string;
+  showControlButtons?: boolean;
+  onCancelButtonClick?: () => void;
 }) {
   const [visibleIds, setVisibleIds] = useState<Set<string>>(
     () => new Set([groups[0]?.sections[0]?.id ?? ""]),
@@ -103,7 +107,7 @@ export default function FormToc({
   return (
     <div>
       <nav
-        className={`${sticky ? "sticky top-6" : ""} flex flex-col gap-0.5 w-52 shrink-0  max-lg:block`}
+        className={`${sticky ? "sticky top-15" : ""} flex flex-col gap-0.5 w-52 shrink-0  max-lg:block`}
       >
         <span
           className={`px-3 py-1.5 text-xs border-b border-zinc-500/20 font-medium uppercase tracking-wide ${textColor}`}
@@ -193,19 +197,24 @@ export default function FormToc({
             </div>
           );
         })}
-        <div className="flex flex-col gap-2 mt-4">
-          <Button
-            htmlType="submit"
-            text={buttonText}
-            version={buttonVersion}
-            className="w-full"
-          />
-          <Button
-            text="Zrušit"
-            version="plain"
-            className="w-full"
-            onClick={() => router.back()}
-          />
+        <div className="flex flex-col items-stretch gap-2 mt-4">
+          {showControlButtons && (
+            <>
+              <Button
+                htmlType="submit"
+                text={buttonText}
+                version={buttonVersion}
+              />
+              {onCancelButtonClick && (
+                <Button
+                  text="Zrušit"
+                  version="plainFull"
+                  size="sm"
+                  onClick={onCancelButtonClick}
+                />
+              )}
+            </>
+          )}
         </div>
       </nav>
     </div>

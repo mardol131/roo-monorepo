@@ -6,7 +6,7 @@ import { usePathname, useRouter } from "@/app/i18n/navigation";
 import Button, { ButtonProps } from "@/app/components/ui/atoms/button";
 import NotificationButton from "./notification-button";
 
-export default function Navbar({ buttons }: { buttons?: ButtonProps[] }) {
+export default function Navbar() {
   const { user, logout } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
@@ -21,6 +21,14 @@ export default function Navbar({ buttons }: { buttons?: ButtonProps[] }) {
   const handleLogout = async () => {
     await logout();
     router.push("/homepage");
+  };
+
+  const handleProfileSettingsClick = () => {
+    if (pathname.startsWith("/company-profile")) {
+      router.push("/company-profile/profile-settings");
+    } else {
+      router.push("/user-profile/profile-settings");
+    }
   };
 
   return (
@@ -54,10 +62,20 @@ export default function Navbar({ buttons }: { buttons?: ButtonProps[] }) {
         </div>
       )}
       <NotificationButton />
-
-      {buttons &&
-        buttons.map((button, index) => <Button key={index} {...button} />)}
-
+      <Button
+        text="Nastavení a média"
+        size="xs"
+        version="plain"
+        iconLeft="Settings"
+        onClick={handleProfileSettingsClick}
+      />
+      <Button
+        text="Odejít"
+        size="xs"
+        version="plain"
+        iconLeft="ExternalLink"
+        link="/homepage"
+      />
       <Button
         text="Odhlásit"
         size="xs"
@@ -65,7 +83,6 @@ export default function Navbar({ buttons }: { buttons?: ButtonProps[] }) {
         iconLeft="LogOut"
         onClick={handleLogout}
       />
-
       <div className="w-7 h-7 rounded-full bg-primary text-white flex items-center justify-center text-xs font-semibold shrink-0">
         {initials}
       </div>

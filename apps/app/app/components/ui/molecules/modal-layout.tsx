@@ -1,8 +1,9 @@
 "use client";
 
 import React, { PropsWithChildren } from "react";
-import { X } from "lucide-react";
+import { AlertTriangle, X } from "lucide-react";
 import Text from "../atoms/text";
+import { AlertSection } from "./alert-section";
 
 interface ModalLayoutProps extends PropsWithChildren {
   header: string | React.ReactNode;
@@ -65,15 +66,20 @@ export default function ModalLayout({
               <X className="w-5 h-5 text-zinc-600 hover:text-zinc-900" />
             </button>
           </div>
-          {errorMessage && (
-            <div className="px-6 py-2">
-              <Text variant="body-sm" color="danger">
-                {errorMessage}
-              </Text>
-            </div>
-          )}
         </div>
-
+        {errorMessage && (
+          <div className="px-6 py-3">
+            <AlertSection
+              icon={AlertTriangle}
+              iconBg="bg-warning-surface"
+              iconColor="text-warning"
+              borderColor="border-warning"
+              title={errorMessage}
+              text=""
+              bgColor="bg-warning-surface"
+            />{" "}
+          </div>
+        )}
         {/* Content */}
         <div className="p-6 max-h-[calc(100vh-200px)] overflow-y-auto">
           {children}

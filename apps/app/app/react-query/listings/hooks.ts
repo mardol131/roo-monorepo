@@ -26,7 +26,7 @@ import {
   updateListingDetail,
   CreateListingDetailPayload,
 } from "./fetch";
-import { GetCollectionParams } from "@/app/functions/api/general";
+import { GetCollectionParams, PatchData } from "@/app/functions/api/general";
 
 export type ListingDetailCollectionMap = {
   "listing-venue-details": ListingVenueDetail;
@@ -62,7 +62,13 @@ export function useListing(id: string | undefined) {
   });
 }
 
-export type UpdateListingData = Partial<Listing>;
+export type UpdateListingData = Omit<
+  Partial<Listing>,
+  "filters" | "options"
+> & {
+  filters?: Partial<Listing["filters"]>;
+  options?: Partial<Listing["options"]>;
+};
 export type UpdateListingVars = { id: string; data: UpdateListingData };
 
 export function useUpdateListing(
@@ -145,7 +151,7 @@ export function useUpdateListingDetail<
   options?: UseMutationOptions<
     ListingDetailCollectionMap[C],
     Error,
-    { id: string; data: Partial<ListingDetailCollectionMap[C]> }
+    { id: string; data: PatchData<ListingDetailCollectionMap[C]> }
   >,
 ) {
   const queryClient = useQueryClient();
@@ -156,7 +162,7 @@ export function useUpdateListingDetail<
       data,
     }: {
       id: string;
-      data: Partial<ListingDetailCollectionMap[C]>;
+      data: PatchData<ListingDetailCollectionMap[C]>;
     }) => updateListingDetail(collection, id, data),
     onSuccess: (...args) => {
       queryClient.invalidateQueries({

@@ -106,42 +106,34 @@ export function GastroDetails({
     : [];
 
   const offerItems = [
-    ...(listing.properties.cuisines?.length
+    ...(listing.options.cuisines?.length
       ? [
           {
             type: "tagList" as const,
             label: "Kuchyně",
-            items: listing.properties.cuisines,
+            items: listing.options.cuisines,
           },
         ]
       : []),
-    ...(listing.properties.dishTypes?.length
+    ...(listing.options.dishTypes?.length
       ? [
           {
             type: "tagList" as const,
             label: "Typy pokrmů",
-            items: listing.properties.dishTypes,
+            items: listing.options.dishTypes,
           },
         ]
       : []),
-    ...(listing.properties.dietaryOptions?.length
+    ...(listing.filters.dietaryOptions?.length
       ? [
           {
             type: "tagList" as const,
             label: "Dietní možnosti",
-            items: listing.properties.dietaryOptions,
+            items: listing.filters.dietaryOptions,
           },
         ]
       : []),
-    ...(listing.properties.foodServiceStyles?.length
-      ? [
-          {
-            type: "tagList" as const,
-            label: "Styl servisu",
-            items: listing.properties.foodServiceStyles,
-          },
-        ]
-      : []),
+
     {
       type: "boolean" as const,
       label: "Alkoholová licence",
@@ -151,21 +143,21 @@ export function GastroDetails({
   ];
 
   const personnelItems = [
-    ...(listing.properties.personnel?.length
+    ...(listing.options.personnel?.length
       ? [
           {
             type: "tagList" as const,
             label: "Personál",
-            items: listing.properties.personnel,
+            items: listing.options.personnel,
           },
         ]
       : []),
-    ...(listing.properties.necessities?.length
+    ...(listing.filters.necessities?.length
       ? [
           {
             type: "tagList" as const,
             label: "Technické požadavky",
-            items: listing.properties.necessities,
+            items: listing.filters.necessities,
           },
         ]
       : []),

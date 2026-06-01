@@ -130,12 +130,6 @@ export const gastroVariantDetails: Field[] = [
     hasMany: true,
   },
   {
-    name: 'foodServiceStyle',
-    type: 'relationship',
-    relationTo: 'food-service-styles',
-    hasMany: true,
-  },
-  {
     name: 'personnel',
     type: 'relationship',
     relationTo: 'personnel',

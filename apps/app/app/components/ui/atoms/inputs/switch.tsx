@@ -5,10 +5,16 @@ type Props = {
   onDisable: () => void;
 };
 
-export default function Switch({ checked, disabled, onEnable, onDisable }: Props) {
+export default function Switch({
+  checked,
+  disabled,
+  onEnable,
+  onDisable,
+}: Props) {
   return (
     <button
       role="switch"
+      type="button"
       aria-checked={checked}
       disabled={disabled}
       onClick={() => (checked ? onDisable() : onEnable())}

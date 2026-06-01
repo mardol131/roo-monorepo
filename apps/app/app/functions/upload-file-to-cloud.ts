@@ -12,9 +12,6 @@ export async function uploadFileToCloud(file: File): Promise<MediaSchema> {
 
   const response = await fetch(apiUrl, {
     method: "POST",
-    headers: {
-      // "Content-Type": "application/json",
-    },
     body: formData,
     credentials: "include",
   });

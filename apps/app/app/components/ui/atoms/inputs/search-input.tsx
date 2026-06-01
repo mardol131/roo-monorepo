@@ -16,6 +16,7 @@ export interface SearchOption {
 
 interface SearchInputProps {
   label: string;
+  sublabel?: string;
   placeholder?: string;
   options: SearchOption[];
   selectedOption?: SearchOption | null;
@@ -30,6 +31,7 @@ interface SearchInputProps {
 
 export default function SearchInput({
   label,
+  sublabel,
   placeholder = "Vyhledávání...",
   options,
   selectedOption,
@@ -144,7 +146,9 @@ export default function SearchInput({
         {...rest}
         value={selected?.id ?? ""}
       />
-      {label && <InputLabel label={label} isRequired={isRequired} />}
+      {label && (
+        <InputLabel sublabel={sublabel} label={label} isRequired={isRequired} />
+      )}
 
       {type === "fixed" ? (
         <div className="flex flex-col gap-2">
@@ -230,7 +234,7 @@ export default function SearchInput({
 
           {isOpen && (
             <div
-              className={`absolute left-0 w-full bg-white border border-zinc-200 rounded-lg shadow-lg z-10 ${openUpward ? "bottom-full mb-2" : "top-full mt-2"}`}
+              className={`absolute z-50 left-0 w-full bg-white border border-zinc-200 rounded-lg shadow-lg ${openUpward ? "bottom-full mb-2" : "top-full mt-2"}`}
             >
               {onSearchQueryChange && (
                 <div className="p-3 border-b border-zinc-100">

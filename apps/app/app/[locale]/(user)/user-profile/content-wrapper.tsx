@@ -41,24 +41,7 @@ export default function ContentWrapper({ children }: PropsWithChildren) {
     <>
       <Sidebar {...sidebar} />
       <div className="flex-1 flex flex-col justify-start items-center">
-        <Navbar
-          buttons={[
-            {
-              text: "Nastavení",
-              size: "xs",
-              version: "plain",
-              iconLeft: "Settings",
-              link: "/user-profile/profile-settings",
-            },
-            {
-              text: "Odejít",
-              size: "xs",
-              version: "plain",
-              iconLeft: "ExternalLink",
-              link: "/homepage",
-            },
-          ]}
-        />
+        <Navbar />
         <div
           className={`w-full flex flex-col px-8 py-20 ${dontRestraintWidth ? "max-w-user-profile-content-form" : "max-w-user-profile-content"}`}
         >

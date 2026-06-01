@@ -1,6 +1,6 @@
 import { Field } from 'payload'
-import { getMediaFields } from '../common/common-fields'
-import { getRecordStatuses } from '@roo/common'
+import { getMediaFields, getSeasonalPricesArrayField } from '../common/common-fields'
+import { getRecordStatuses, PRICING_UNITS_ARRAY } from '@roo/common'
 
 export const spacesFields: Field[] = [
   {
@@ -11,10 +11,30 @@ export const spacesFields: Field[] = [
     required: true,
   },
   {
+    name: 'price',
+    type: 'group',
+    required: true,
+    fields: [
+      {
+        name: 'startsAt',
+        type: 'number',
+        required: true,
+      },
+      {
+        name: 'pricingUnit',
+        type: 'select',
+        options: PRICING_UNITS_ARRAY,
+        required: true,
+      },
+      getSeasonalPricesArrayField({ required: true }),
+    ],
+  },
+  {
     name: 'name',
     type: 'text',
     required: true,
   },
+
   {
     name: 'type',
     type: 'select',
@@ -102,7 +122,7 @@ export const spacesFields: Field[] = [
   {
     name: 'spaceRules',
     type: 'relationship',
-    relationTo: 'rules',
+    relationTo: 'space-rules',
     hasMany: true,
   },
 ]

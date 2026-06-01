@@ -102,7 +102,7 @@ export default function page() {
                 },
                 {
                   icon: "Banknote",
-                  content: `${listing.price.startsAt} Kč`,
+                  content: `${listing.minimumPricePerEvent} Kč`,
                 },
                 ...(listing.location?.address
                   ? [

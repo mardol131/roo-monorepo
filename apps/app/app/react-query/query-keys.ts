@@ -1,4 +1,5 @@
 import { Where } from "@roo/common";
+import { GetCollectionParams } from "../functions/api/general";
 
 // Entities
 
@@ -89,6 +90,7 @@ export const districtsKeys = {
 
 export const citiesKeys = {
   all: (query?: Where, limit?: number) => ["cities", query, limit] as const,
+  byId: (id: string) => ["cities", id] as const,
 };
 
 // Filters
@@ -170,4 +172,9 @@ export const rulesKeys = {
 
 export const filterOptionsKeys = {
   all: () => ["filter-options"] as const,
+};
+
+export const userMediasKeys = {
+  all: (params?: GetCollectionParams) => ["user-medias", params] as const,
+  infinite: (limit: number) => ["user-medias", "infinite", limit] as const,
 };

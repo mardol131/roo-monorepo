@@ -5,6 +5,7 @@ import type { Locale } from "next-intl";
 import { ConfirmActionModal } from "../components/ui/molecules/modals/confirm-action-modal";
 import LoginModal from "../components/ui/molecules/modals/login-modal/login-modal";
 import { SimpleConfirmActionModal } from "../components/ui/molecules/modals/simple-confirm-action-modal";
+import { UserImagesGalleryModal } from "../components/ui/molecules/modals/user-images-gallery-modal";
 import { GlobalToast } from "../components/ui/molecules/global-toast";
 import { NotificationsModal } from "../components/ui/molecules/modals/notifications-modal";
 
@@ -29,6 +30,7 @@ export default function layout({ children }: PropsWithChildren) {
       <ConfirmActionModal />
       <LoginModal />
       <SimpleConfirmActionModal />
+      <UserImagesGalleryModal />
       <GlobalToast />
       <NotificationsModal />
       {children}

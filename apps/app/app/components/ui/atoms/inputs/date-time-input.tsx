@@ -18,6 +18,7 @@ interface DateTimeInputProps {
   placeholder?: string;
   isRequired?: boolean;
   error?: string;
+  dateOnly?: boolean;
 }
 
 const DAYS_OF_WEEK = ["Po", "Út", "St", "Čt", "Pá", "So", "Ne"];
@@ -49,11 +50,14 @@ export default function DateTimeInput({
   onChange,
   min,
   max,
-  placeholder = "Vyberte datum a čas",
+  placeholder,
   error,
   isRequired,
   containerRef,
+  dateOnly = false,
 }: DateTimeInputProps) {
+  const defaultPlaceholder =
+    placeholder ?? (dateOnly ? "Vyberte datum" : "Vyberte datum a čas");
   const [isOpen, setIsOpen] = useState(false);
   const [openUpward, setOpenUpward] = useState(false);
   const [currentMonth, setCurrentMonth] = useState<Date>(
@@ -72,7 +76,7 @@ export default function DateTimeInput({
   );
 
   const ref = useRef<HTMLDivElement>(null);
-  const isMounted = useRef(false);
+  const userChangedRef = useRef(false);
 
   useClickOutside(ref, () => {
     setIsOpen(false);
@@ -91,10 +95,33 @@ export default function DateTimeInput({
     return newDate;
   };
 
-  // Emit změny ven — přeskočí mount, aby onChange nevolal null při inicializaci
+  // Sync internal state when value prop changes externally (e.g. form.reset())
   useEffect(() => {
-    if (!isMounted.current) {
-      isMounted.current = true;
+    userChangedRef.current = false;
+    setSelectedDateState(value ?? null);
+    if (!dateOnly && value) {
+      setTime(
+        new Date(value).toLocaleTimeString("cs-CZ", {
+          hour: "2-digit",
+          minute: "2-digit",
+        }),
+      );
+    }
+  }, [value]);
+
+  // Emit changes — only fires when triggered by user interaction
+  useEffect(() => {
+    if (!userChangedRef.current) return;
+    if (dateOnly) {
+      if (!selectedDateState) {
+        onChange?.(null);
+        return;
+      }
+      const d = new Date(selectedDateState);
+      const yyyy = d.getFullYear();
+      const mm = String(d.getMonth() + 1).padStart(2, "0");
+      const dd = String(d.getDate()).padStart(2, "0");
+      onChange?.(`${yyyy}-${mm}-${dd}`);
       return;
     }
     const dateObj = createDateTimeValue(
@@ -197,6 +224,7 @@ export default function DateTimeInput({
 
   const handleDateClick = (date: Date) => {
     if (!isDateDisabled(date)) {
+      userChangedRef.current = true;
       setSelectedDateState(date.toISOString());
       if (
         min &&
@@ -217,6 +245,7 @@ export default function DateTimeInput({
   };
 
   const handleTimeChange = (value: string) => {
+    userChangedRef.current = true;
     const date = selectedDateState ? new Date(selectedDateState) : null;
     if (isTimeBelowMin(value, date)) {
       setTime(minTimeString!);
@@ -241,10 +270,11 @@ export default function DateTimeInput({
       ? (maxTimeString ?? undefined)
       : undefined;
 
-  const displayText =
-    selectedDateState && time
-      ? `${new Date(selectedDateState).toLocaleDateString("cs-CZ")} ${time}`
-      : placeholder;
+  const displayText = selectedDateState
+    ? dateOnly
+      ? new Date(selectedDateState).toLocaleDateString("cs-CZ")
+      : `${new Date(selectedDateState).toLocaleDateString("cs-CZ")} ${time}`
+    : defaultPlaceholder;
 
   return (
     <div ref={containerRef} className="flex flex-col w-full">
@@ -342,15 +372,17 @@ export default function DateTimeInput({
                 ))}
               </div>
 
-              <div className="border-t border-zinc-100 pt-4">
-                <TimeInput
-                  label="Čas"
-                  value={time}
-                  onChange={handleTimeChange}
-                  min={timeMin}
-                  max={timeMax}
-                />
-              </div>
+              {!dateOnly && (
+                <div className="border-t border-zinc-100 pt-4">
+                  <TimeInput
+                    label="Čas"
+                    value={time}
+                    onChange={handleTimeChange}
+                    min={timeMin}
+                    max={timeMax}
+                  />
+                </div>
+              )}
             </div>
           </div>
         )}

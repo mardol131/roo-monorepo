@@ -18,7 +18,6 @@ import { Companies } from './collections/companies/companies'
 import { Cities } from './collections/locality/cities'
 
 import { PlaceTypes } from './collections/filters/place-types'
-import { Rules } from './collections/specific/rules'
 import { Technologies } from './collections/filters/technologies'
 import { Amenities } from './collections/filters/amenities'
 import { RoomAmenities } from './collections/specific/room-amenities'
@@ -33,7 +32,7 @@ import { DishTypes } from './collections/filters/dish-types'
 import { Necessities } from './collections/specific/necessities'
 import { EntertainmentTypes } from './collections/filters/entertainment-types'
 import { DietaryOptions } from './collections/filters/dietary-options'
-import { FoodServiceStyle } from './collections/filters/food-service-style'
+import { FoodServiceTypes } from './collections/filters/food-service-types'
 import { CalendarEvents } from './collections/calendar-events/calendar-events'
 import { FavouriteListings } from './collections/favourite-listings'
 import { Invitations } from './collections/invitations/invitations'
@@ -41,7 +40,7 @@ import { Invitations } from './collections/invitations/invitations'
 import { SpaceTypes } from './collections/specific/space-types'
 import { uploadFileToCloud } from './endpoints/upload-file-to-cloud/upload-file-to-cloud'
 import { Users } from './collections/users/users'
-import { Media } from './collections/media'
+import { UserMedia } from './collections/user-media'
 import { ListingEntertainmentDetails } from './collections/listings/listing-entertainment-details'
 import { ListingGastroDetails } from './collections/listings/listing-gastro-details'
 import { ListingVenueDetails } from './collections/listings/listing-venue-details'
@@ -49,6 +48,12 @@ import { getFiltersAndSpecifics } from './endpoints/get-filters-and-specific/get
 import { RoadmapItems } from './collections/roadmap-items'
 import { UserNotifications } from './collections/user-notifications/user-notifications'
 import { Spaces } from './collections/spaces/spaces'
+import { VenueRules } from './collections/filters/venue-rules'
+import { GastroRules } from './collections/filters/gastro-rules'
+import { EntertainmentRules } from './collections/filters/entertainment-rules'
+import { SpaceRules } from './collections/specific/space-rules'
+import { MusicGenres } from './collections/filters/music-genres'
+import { FoodPreparationStyle } from './collections/filters/food-preparation-style'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -82,12 +87,12 @@ export default buildConfig({
     Necessities,
     EntertainmentTypes,
     DietaryOptions,
-    FoodServiceStyle,
+    FoodServiceTypes,
     Regions,
     DishTypes,
     Users,
     Admins,
-    Media,
+    UserMedia,
     Variants,
     Activities,
     Services,
@@ -98,7 +103,12 @@ export default buildConfig({
     Companies,
     Cities,
     PlaceTypes,
-    Rules,
+    VenueRules,
+    GastroRules,
+    EntertainmentRules,
+    FoodPreparationStyle,
+    SpaceRules,
+    MusicGenres,
     Technologies,
     Amenities,
     RoomAmenities,

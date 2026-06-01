@@ -101,15 +101,6 @@ export function EntertainmentDetails({
     : [];
 
   const programItems = [
-    ...(listing.properties.entertainmentTypes?.length
-      ? [
-          {
-            type: "tagList" as const,
-            label: "Typy programu",
-            items: listing.properties.entertainmentTypes,
-          },
-        ]
-      : []),
     ...(detail.audience?.length
       ? [
           {
@@ -145,21 +136,21 @@ export function EntertainmentDetails({
     : [];
 
   const personnelItems = [
-    ...(listing.properties.personnel?.length
+    ...(listing.options.personnel?.length
       ? [
           {
             type: "tagList" as const,
             label: "Personál",
-            items: listing.properties.personnel,
+            items: listing.options.personnel,
           },
         ]
       : []),
-    ...(listing.properties.necessities?.length
+    ...(listing.filters.necessities?.length
       ? [
           {
             type: "tagList" as const,
             label: "Technické požadavky",
-            items: listing.properties.necessities,
+            items: listing.filters.necessities,
           },
         ]
       : []),

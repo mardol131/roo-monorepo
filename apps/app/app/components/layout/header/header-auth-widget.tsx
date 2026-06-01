@@ -67,13 +67,13 @@ export default function HeaderAuthWidget({
   }
 
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex h-full items-center gap-2">
       <button
         type="button"
         onClick={notificationsStore.open}
-        className="relative p-2 rounded-full bg-zinc-100 hover:bg-zinc-200 transition-colors"
+        className="relative h-10 w-10 flex items-center justify-center aspect-square rounded-full bg-zinc-100 hover:bg-zinc-200 transition-colors"
       >
-        <Bell className="w-4.5 h-4.5 text-zinc-600" />
+        <Bell strokeWidth={2.5} className="w-4.5 h-4.5 text-zinc-600" />
         {unreadCount > 0 && (
           <span className="absolute -top-0.5 -right-0.5 w-4 h-4 flex items-center justify-center rounded-full bg-red-500 text-white text-[9px] font-bold">
             {unreadCount > 99 ? "99" : unreadCount}

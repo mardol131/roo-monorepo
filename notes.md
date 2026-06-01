@@ -1,5 +1,7 @@
 # MVP todo
 
+- Káťa mi to zhejtila, přidat ceny na všechny položky, co se dají zaklikat.
+
 - Zkontrolovat texty
 
 # Landing pages
@@ -73,6 +75,8 @@
 - Odesílání hromadného mailu hostům
 - Vytvoření landing page pro event
 - Public eventy, na které se budou moci lidé hlásit
+- Search bar do administrace na entity
+- Umožnit event pořadateli zveřejnění eventu, kam se budou moci pořadatelé přihlásit - něco jako NFCtron marketplace
 
 # Platby
 

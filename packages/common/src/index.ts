@@ -4,6 +4,7 @@ export * from "./types/section-keys";
 export * from "./types/payload-custom";
 export * from "./types/media";
 export * from "./types/custom";
+export * from "./types/pricing";
 
 export * from "./functions/event-utils";
 export * from "./functions/inquiry-utils";
@@ -16,9 +17,9 @@ export * from "./functions/companies";
 export * from "./functions/data-formating";
 export * from "./functions/get-company-data-from-gov";
 export * from "./functions/undefined-to-null";
-export * from "./functions/listings";
 
 export * from "./data/country-codes";
 export * from "./data/record-status";
 export * from "./data/companies";
 export * from "./data/pricing";
+export * from "./data/images";

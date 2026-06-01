@@ -58,7 +58,7 @@ export default function Input({
         onInput={handleInput}
         placeholder={placeholder}
         maxLength={maxLength}
-        className={`w-full px-3 text-sm py-2.5 border bg-white ${error ? "border-red-500" : "border-zinc-300"} rounded-lg focus:outline-none focus:ring-2 focus:ring-zinc-900 focus:border-transparent`}
+        className={`w-full px-3 text-sm py-2.5 border bg-white ${error ? "border-danger" : "border-zinc-300"} rounded-lg focus:outline-none focus:ring-2 focus:ring-zinc-900 focus:border-transparent`}
       />
       {error && (
         <div>

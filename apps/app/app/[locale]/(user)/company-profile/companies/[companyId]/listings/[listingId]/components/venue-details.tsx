@@ -59,7 +59,7 @@ export function VenueDetails({
   const regionIds = extractIds(location?.regions);
   const districtIds = extractIds(location?.districts);
   const cityIds = extractIds(location?.cities);
-  const placeTypeIds = listing.properties.placeTypes;
+  const placeTypeIds = listing.filters.placeTypes;
 
   const { data: regionsData } = useRegions(
     regionIds.length ? { id: { in: regionIds } } : undefined,
@@ -128,48 +128,48 @@ export function VenueDetails({
   ];
 
   const equipmentItems = [
-    ...(listing.properties.amenities?.length
+    ...(listing.options.amenities?.length
       ? [
           {
             type: "tagList" as const,
             label: "Vybavení",
-            items: listing.properties.amenities,
+            items: listing.options.amenities,
           },
         ]
       : []),
-    ...(listing.properties.technologies?.length
+    ...(listing.options.technologies?.length
       ? [
           {
             type: "tagList" as const,
             label: "Technika",
-            items: listing.properties.technologies,
+            items: listing.options.technologies,
           },
         ]
       : []),
-    ...(listing.properties.services?.length
+    ...(listing.options.services?.length
       ? [
           {
             type: "tagList" as const,
             label: "Služby",
-            items: listing.properties.services,
+            items: listing.options.services,
           },
         ]
       : []),
-    ...(listing.properties.activities?.length
+    ...(listing.options.activities?.length
       ? [
           {
             type: "tagList" as const,
             label: "Aktivity",
-            items: listing.properties.activities,
+            items: listing.options.activities,
           },
         ]
       : []),
-    ...(listing.properties.personnel?.length
+    ...(listing.options.personnel?.length
       ? [
           {
             type: "tagList" as const,
             label: "Personál",
-            items: listing.properties.personnel,
+            items: listing.options.personnel,
           },
         ]
       : []),
@@ -328,21 +328,21 @@ export function VenueDetails({
   ];
 
   const rulesItems = [
-    ...(listing.properties.venueRules?.length
+    ...(listing.filters.venueRules?.length
       ? [
           {
             type: "tagList" as const,
             label: "Pravidla prostoru",
-            items: listing.properties.venueRules,
+            items: listing.filters.venueRules,
           },
         ]
       : []),
-    ...(listing.properties.gastroRules?.length
+    ...(listing.filters.gastroRules?.length
       ? [
           {
             type: "tagList" as const,
             label: "Pravidla pro jídlo a pití",
-            items: listing.properties.gastroRules,
+            items: listing.filters.gastroRules,
           },
         ]
       : []),

@@ -4,6 +4,7 @@ import {
   getCollectionItem,
   GetCollectionParams,
   patchCollectionItem,
+  PatchData,
   postCollectionItem,
 } from "@/app/functions/api/general";
 import {
@@ -61,7 +62,7 @@ export async function fetchListing(id: string): Promise<Listing> {
   return res;
 }
 
-export async function updateListing(id: string, data: Partial<Listing>) {
+export async function updateListing(id: string, data: PatchData<Listing>) {
   const res = await patchCollectionItem({
     collection: "listings",
     id,
@@ -115,7 +116,7 @@ export async function updateListingDetail<
 >(
   collection: C,
   id: string,
-  data: Partial<ListingDetailCollectionMap[C]>,
+  data: PatchData<ListingDetailCollectionMap[C]>,
 ): Promise<ListingDetailCollectionMap[C]> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const res = await patchCollectionItem({ collection, id, data: data as any });

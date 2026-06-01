@@ -166,7 +166,11 @@ function SectionLabel({
           {label}
         </Text>
         {sublabel && (
-          <Text variant="caption" color={subLabelColor || "textDark"}>
+          <Text
+            variant="label-sm"
+            color={subLabelColor || "textDark"}
+            className="font-semibold"
+          >
             {sublabel}
           </Text>
         )}
@@ -184,6 +188,7 @@ function SubSidebarNavItem({
   variant,
 }: SidebarItem & { active: boolean; variant: ColorVariant }) {
   const v = variants[variant];
+  console.log(v);
 
   const IconComponent = lucideIcons[icon] as unknown as React.FC<
     React.SVGProps<SVGSVGElement>
@@ -203,9 +208,13 @@ function SubSidebarNavItem({
           <IconComponent
             className={`w-4 h-4 ${active ? v.activeIcon : "text-zinc-400"}`}
           />
-          <span className="text-[11px] font-semibold leading-tight">
+          <Text
+            variant="label-sm"
+            color="none"
+            className={`font-semibold ${active ? v.activeText : "text-secondary"}`}
+          >
             {label}
-          </span>
+          </Text>
         </Link>
       ) : (
         <button
@@ -219,9 +228,13 @@ function SubSidebarNavItem({
           <IconComponent
             className={`w-4 h-4 ${active ? v.activeIcon : "text-zinc-400"}`}
           />
-          <span className="text-[11px] font-semibold leading-tight">
+          <Text
+            variant="label-sm"
+            color="none"
+            className={`font-semibold ${active ? v.activeText : "text-secondary"}`}
+          >
             {label}
-          </span>
+          </Text>
         </button>
       )}
     </li>

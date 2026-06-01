@@ -117,6 +117,20 @@
       "420": "+420"
     }
   },
+  "pricing": {
+    "travelFee": {
+      "types": {
+        "one_way": "Jednosměrný",
+        "round_trip": "Obousměrný"
+      }
+    },
+    "units": {
+      "lump_sum": "Za událost",
+      "per_person": "Za osobu",
+      "per_hour": "Za hodinu",
+      "per_day": "Za den"
+    }
+  },
   "header": {
     "nav": {
       "venue": "Místa",

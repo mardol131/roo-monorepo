@@ -9,6 +9,7 @@ type Props = {
   icon: LucideIcons;
   onClick: () => void;
   selected?: boolean;
+  error?: boolean;
 };
 
 export default function IconCard({
@@ -17,6 +18,7 @@ export default function IconCard({
   icon,
   onClick,
   selected,
+  error,
 }: Props) {
   const Icon = lucideIcons[icon] as unknown as React.FC<
     React.SVGProps<SVGSVGElement>
@@ -28,7 +30,7 @@ export default function IconCard({
       className={`flex cursor-pointer flex-col items-start gap-3 p-6 rounded-2xl border transition-all text-left group ${
         selected
           ? "border-listing bg-listing-surface"
-          : "border-zinc-200 bg-white hover:border-listing hover:bg-listing-surface"
+          : `${error ? "border-danger" : "border-zinc-200"} bg-white hover:border-listing hover:bg-listing-surface`
       }`}
     >
       <div

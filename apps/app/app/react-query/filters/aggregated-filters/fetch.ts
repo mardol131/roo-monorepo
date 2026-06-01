@@ -4,17 +4,22 @@ import {
   Cuisine,
   DietaryOption,
   DishType,
+  EntertainmentRule,
   EntertainmentType,
   EventType,
-  FoodServiceStyle,
+  FoodPreparationStyle,
+  FoodServiceType,
+  GastroRule,
+  MusicGenre,
   Necessity,
   Personnel,
   PlaceType,
   RoomAmenity,
-  Rule,
   Service,
+  SpaceRule,
   SpaceType,
   Technology,
+  VenueRule,
 } from "@roo/common";
 
 export type FilterOptions = {
@@ -25,15 +30,20 @@ export type FilterOptions = {
   dishTypes: DishType[];
   entertainmentTypes: EntertainmentType[];
   eventTypes: EventType[];
-  foodServiceStyles: FoodServiceStyle[];
+  foodServiceTypes: FoodServiceType[];
   personnel: Personnel[];
   placeTypes: PlaceType[];
   services: Service[];
   technologies: Technology[];
   necessities: Necessity[];
   roomAmenities: RoomAmenity[];
-  rules: Rule[];
+  spaceRules: SpaceRule[];
+  venueRules: VenueRule[];
+  gastroRules: GastroRule[];
+  entertainmentRules: EntertainmentRule[];
+  musicGenres: MusicGenre[];
   spaceTypes: SpaceType[];
+  foodPreparationStyles: FoodPreparationStyle[];
 };
 
 export async function fetchFilterOptions(): Promise<FilterOptions> {

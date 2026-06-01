@@ -15,7 +15,10 @@ import VariantFormGastro, {
 import VariantFormVenue, {
   VenueFormInputs,
 } from "../../components/variant-form-venue";
-import { toIds, toItem } from "../../../../components/utils";
+import {
+  toIds,
+  toItem,
+} from "../../../../../../../../../../components/forms/listings/utils";
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
