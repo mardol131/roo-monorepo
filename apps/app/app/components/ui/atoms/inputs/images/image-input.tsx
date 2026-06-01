@@ -9,6 +9,8 @@ import { convertAndUploadImage, useFileDragDrop, useFileInput } from "./utils";
 import InputLabel from "../../input-label";
 import { generateMediaUrl } from "@/app/functions/generate-media-url";
 import { MediaSchema } from "@roo/common";
+import Button from "../../button";
+import { userImagesGalleryModalEvents } from "../../../molecules/modals/user-images-gallery-modal";
 
 type ImageInputProps = {
   label: string;
@@ -16,22 +18,14 @@ type ImageInputProps = {
   value?: MediaSchema | null;
   onChange: (media: MediaSchema | null) => void;
   onUpload: (file: File) => Promise<MediaSchema>;
+  onGalleryButtonClick?: () => void;
   error?: string;
   isRequired?: boolean;
   accept?: string;
   containerRef?: React.Ref<HTMLDivElement>;
 };
 
-const nullMedia: MediaSchema = {
-  filename: null,
-  alt: null,
-  width: null,
-  height: null,
-  size: null,
-  mimeType: null,
-};
-
-function isDisplayableUrl(url: string) {
+export function isDisplayableUrl(url: string) {
   if (url.startsWith("blob:") || url.startsWith("data:")) return true;
   try {
     new URL(url);
@@ -51,6 +45,7 @@ export default function ImageInput({
   isRequired,
   accept = "image/*",
   containerRef,
+  onGalleryButtonClick,
 }: ImageInputProps) {
   const [isUploading, setIsUploading] = useState(false);
   const [uploadPreview, setUploadPreview] = useState<string | null>(null);
@@ -97,7 +92,7 @@ export default function ImageInput({
   const handleRemove = useCallback(() => {
     setUploadError(null);
     setUploadPreview(null);
-    onChange(nullMedia);
+    onChange(null);
   }, [onChange]);
 
   const displayUrl =
@@ -107,6 +102,20 @@ export default function ImageInput({
       : null);
   const hasValue = isUploading || !!value?.filename;
 
+  const galleryButtonHandler = useCallback(() => {
+    if (onGalleryButtonClick) onGalleryButtonClick();
+    userImagesGalleryModalEvents.emit("open", {
+      onMediaClick: (media) => {
+        const mediaUrl = generateMediaUrl(media.filename || "");
+        if (!isDisplayableUrl(mediaUrl)) {
+          setUploadError("Vybraný obrázek nelze zobrazit.");
+          return;
+        }
+        onChange(media);
+      },
+    });
+  }, [onGalleryButtonClick]);
+
   return (
     <div ref={containerRef} tabIndex={-1}>
       <InputLabel label={label} sublabel={sublabel} isRequired={isRequired} />
@@ -115,7 +124,7 @@ export default function ImageInput({
 
       {hasValue ? (
         <div
-          className={`relative w-full overflow-hidden rounded-lg border ${error ? "border-red-500" : "border-zinc-300"}`}
+          className={`relative w-full overflow-hidden rounded-lg border ${error ? "border-danger" : "border-zinc-300"}`}
         >
           {displayUrl ? (
             <Image
@@ -149,37 +158,80 @@ export default function ImageInput({
           )}
         </div>
       ) : (
-        <div
-          role="button"
-          tabIndex={0}
+        <UploadImageItem
           onClick={handleClick}
-          onKeyDown={(event) => {
-            if (event.key === "Enter" || event.key === " ") {
-              event.preventDefault();
-              handleClick();
-            }
-          }}
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
           onDrop={handleDrop}
-          className={`flex w-full cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed px-3 py-8 transition-colors ${
-            isDragging
-              ? "border-zinc-900 bg-zinc-50"
-              : error
-                ? "border-red-500 bg-white"
-                : "border-zinc-300 bg-white hover:border-zinc-400 hover:bg-zinc-50"
-          } focus:border-transparent focus:outline-none focus:ring-2 focus:ring-zinc-900`}
-        >
-          <ImagePlus size={28} className="text-zinc-400" />
-          <Text variant="label" color="textLight" className="text-center">
-            Přetáhněte obrázek nebo klikněte pro nahrání
-          </Text>
-        </div>
+          isDragging={isDragging}
+          error={error}
+          onGalleryButtonClick={galleryButtonHandler}
+        />
       )}
 
       {(error || uploadError) && (
         <ErrorText error={error ?? uploadError ?? undefined} />
       )}
+    </div>
+  );
+}
+
+export function UploadImageItem({
+  onClick,
+  onDragOver,
+  onDragLeave,
+  onDrop,
+  onGalleryButtonClick,
+  isDragging,
+  error,
+}: {
+  onClick: () => void;
+  onDragOver: (e: React.DragEvent<HTMLDivElement>) => void;
+  onDragLeave: (e: React.DragEvent<HTMLDivElement>) => void;
+  onDrop: (e: React.DragEvent<HTMLDivElement>) => void;
+  isDragging: boolean;
+  onGalleryButtonClick?: () => void;
+  error?: string;
+}) {
+  return (
+    <div
+      role="button"
+      tabIndex={0}
+      onClick={onClick}
+      onKeyDown={(event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          onClick();
+        }
+      }}
+      onDragOver={onDragOver}
+      onDragLeave={onDragLeave}
+      onDrop={onDrop}
+      className={`flex relative w-full cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed px-3 py-10 transition-colors ${
+        isDragging
+          ? "border-zinc-900 bg-zinc-50"
+          : error
+            ? "border-danger bg-white"
+            : "border-zinc-300 bg-white hover:border-zinc-400 hover:bg-zinc-50"
+      } focus:border-transparent focus:outline-none focus:ring-2 focus:ring-zinc-900`}
+    >
+      {onGalleryButtonClick && (
+        <div
+          className="absolute top-2 right-2"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <Button
+            text="Otevřít galerii"
+            size="xs"
+            version="outlined"
+            onClick={onGalleryButtonClick}
+          />
+        </div>
+      )}
+      <ImagePlus size={28} className="text-zinc-400" />
+      <Text variant="label" color="textLight" className="text-center">
+        Přetáhněte obrázek nebo klikněte pro nahrání
+      </Text>
     </div>
   );
 }

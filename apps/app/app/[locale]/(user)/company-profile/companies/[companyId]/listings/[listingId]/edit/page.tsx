@@ -4,9 +4,9 @@ import PageHeading from "@/app/[locale]/(user)/components/page-heading";
 import { useRouter } from "@/app/i18n/navigation";
 import { useListing, useUpdateListing } from "@/app/react-query/listings/hooks";
 import { useParams, useSearchParams } from "next/navigation";
-import EntertainmentListingForm from "../../components/entertainment-listing-form";
-import GastroListingForm from "../../components/gastro-listing-form";
-import VenueListingForm from "../../components/venue-listing-form";
+import EntertainmentListingForm from "../../../../../../../../components/forms/listings/edit-forms/entertainment/entertainment-listing-form";
+import GastroListingForm from "../../../../../../../../components/forms/listings/edit-forms/gastro/gastro-listing-form";
+import VenueListingForm from "../../../../../../../../components/forms/listings/edit-forms/venue/venue-listing-form";
 import { Listing } from "@roo/common";
 import { useEffect } from "react";
 import Loader from "@/app/[locale]/(user)/components/loader";
@@ -14,7 +14,7 @@ import Loader from "@/app/[locale]/(user)/components/loader";
 type Props = {};
 
 export default function page({}: Props) {
-  const { listingId, companyId } = useParams<{
+  const { listingId } = useParams<{
     listingId: string;
     companyId: string;
   }>();
@@ -44,17 +44,18 @@ export default function page({}: Props) {
       <PageHeading
         heading="Detailní nastavení"
         description="Zde můžeš upravit všechny detaily vaší služby. Nezapomeň změny uložit!"
+        button={{
+          text: "Opustit formulář",
+          version: "plainFull",
+          size: "sm",
+          iconLeft: "ArrowLeft",
+          onClick: router.back,
+        }}
       />
 
-      {isVenue && (
-        <VenueListingForm type="edit" onCancel={() => router.back()} />
-      )}
-      {listing?.type === "gastro" && (
-        <GastroListingForm type="edit" onCancel={() => router.back()} />
-      )}
-      {listing?.type === "entertainment" && (
-        <EntertainmentListingForm type="edit" onCancel={() => router.back()} />
-      )}
+      {isVenue && <VenueListingForm />}
+      {listing?.type === "gastro" && <GastroListingForm />}
+      {listing?.type === "entertainment" && <EntertainmentListingForm />}
     </main>
   );
 }

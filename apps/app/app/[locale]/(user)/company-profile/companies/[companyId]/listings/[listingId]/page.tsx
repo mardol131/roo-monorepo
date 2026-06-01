@@ -30,16 +30,19 @@ import { useParams } from "next/navigation";
 import { ControlSection } from "../../../../../components/control-section";
 import { EntertainmentDetails } from "./components/entertainment-details";
 import { GastroDetails } from "./components/gastro-details";
-import { ListingCompletion } from "./components/listing-completion";
 import { SpacesSection } from "./components/spaces-section";
 import { VenueDetails } from "./components/venue-details";
-import { hasListingRights } from "@/app/functions/utils/listings";
+import {
+  getFullListingCompletion,
+  hasListingRights,
+} from "@/app/functions/utils/listings";
 import { useCompany } from "@/app/react-query/companies/hooks";
 import { useAuth } from "@/app/context/auth/auth-context";
 import InquiryStatusTag from "@/app/[locale]/(user)/components/tags/inquiry-status-tag";
 import { hasInquiryUpdateCompanyRights } from "@/app/functions/utils/inquiries";
 import { EntityCompletionBadge } from "@/app/[locale]/(user)/components/entity-completion-badge";
 import { getVariantCompletion } from "@/app/functions/utils/variants";
+import { CompletionWidget } from "@/app/[locale]/(user)/components/completion-widget";
 
 export default function Page() {
   const { companyId, listingId } = useParams<{
@@ -116,7 +119,7 @@ export default function Page() {
   const listingType = listing.type;
 
   const headerInfoItems = [
-    { icon: "Banknote", text: `od ${listing.price.startsAt} Kč` },
+    { icon: "Banknote", text: `od ${listing.minimumPricePerEvent} Kč` },
     ...(listingType
       ? [{ icon: "Tag", text: t(`listings.type.${listingType}`) }]
       : []),
@@ -129,7 +132,33 @@ export default function Page() {
           : []),
   ];
 
+  const getSubType = () => {
+    if (listing.type === "entertainment") {
+      return filters?.entertainmentTypes?.find(
+        (et) => et.id === listing.subType,
+      );
+    } else if (listing.type === "gastro") {
+      return filters?.foodServiceTypes?.find((gt) => gt.id === listing.subType);
+    }
+  };
+  const subType = getSubType();
+
+  console.log(listing);
+  console.log(filters);
+
   const basicInfoItems = [
+    ...(subType
+      ? [
+          {
+            type: "text" as const,
+            label:
+              listing.type === "entertainment"
+                ? "Typ programu"
+                : "Typ gastro služby",
+            value: subType.name,
+          },
+        ]
+      : []),
     ...(listing.shortDescription
       ? [
           {
@@ -148,14 +177,17 @@ export default function Page() {
           },
         ]
       : []),
-    ...(listing.properties.eventTypes?.length
+    ...(listing.filters.eventTypes?.length
       ? [
           {
             type: "tagList" as const,
             label: "Typy akcí",
-            items: listing.properties.eventTypes.map(
-              (et) => filters?.eventTypes?.find((e) => e.id === et)?.name || et,
-            ),
+            items: listing.filters.eventTypes
+              .map((et) => {
+                const eventType = filters?.eventTypes?.find((e) => e.id === et);
+                return eventType?.name;
+              })
+              .filter((item) => item !== undefined),
           },
         ]
       : []),
@@ -209,8 +241,6 @@ export default function Page() {
       : []),
   ];
 
-  console.log(inquiries);
-
   return (
     <main className="w-full">
       <Breadcrumbs />
@@ -248,13 +278,14 @@ export default function Page() {
       />
 
       <div className="flex flex-col gap-4">
-        <ListingCompletion
-          listing={listing}
-          detail={detail}
-          companyId={companyId}
-          listingId={listingId}
-          spacesCount={spaces?.docs?.length}
-          variantsCount={variants?.docs?.length}
+        <CompletionWidget
+          title="Co doporučujeme vyplnit"
+          data={getFullListingCompletion(
+            listing,
+            detail,
+            spaces?.docs?.length,
+            variants?.docs?.length,
+          )}
         />
         {hasListingRights({
           allowedRoles: ["owner", "admin", "manager"],
@@ -379,8 +410,8 @@ export default function Page() {
         />
         <RowContainer
           icon="Package"
-          iconColor="text-violet-500"
-          iconBgColor="bg-violet-50"
+          iconColor="text-variant"
+          iconBgColor="bg-variant-surface"
           label="Varianty"
           headerRightComponent={
             <Button
@@ -404,7 +435,7 @@ export default function Page() {
             const capacityItem = firstBlock
               ? {
                   icon: "Users" as const,
-                  content: `max. ${firstBlock.capacity.max} osob`,
+                  content: `max. ${variant.capacity.max} osob`,
                 }
               : null;
             return (
@@ -422,7 +453,7 @@ export default function Page() {
                 items={[
                   {
                     icon: "Banknote",
-                    content: `${variant.price.generalPrice} Kč`,
+                    content: `${variant.price.base} Kč`,
                   },
                   ...(capacityItem ? [capacityItem] : []),
                 ]}

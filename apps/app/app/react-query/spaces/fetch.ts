@@ -2,10 +2,17 @@ import {
   deleteCollectionItem,
   getCollection,
   getCollectionItem,
+  GetCollectionParams,
   patchCollectionItem,
   postCollectionItem,
 } from "@/app/functions/api/general";
 import { Space } from "@roo/common";
+
+export async function fetchSpaces(options?: GetCollectionParams) {
+  const res = await getCollection({ collection: "spaces", ...options });
+  if (!res) throw new Error("Failed to fetch spaces");
+  return res;
+}
 
 export async function fetchSpacesByListing(listingId: string) {
   const res = await getCollection({

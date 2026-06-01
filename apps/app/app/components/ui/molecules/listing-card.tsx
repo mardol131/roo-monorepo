@@ -12,63 +12,32 @@ import {
 } from "@/app/react-query/favourite-listings/hooks";
 import { useAuth } from "@/app/context/auth/auth-context";
 import { storage } from "@/app/local-storage/storage";
-import { Listing } from "@roo/common";
-import {
-  Users,
-  Maximize2,
-  MapPin,
-  BedDouble,
-  Car,
-  Wine,
-  Baby,
-  Clock,
-} from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { generateMediaUrl } from "@/app/functions/generate-media-url";
+import { truncateText } from "@roo/common";
 
 type Props = {
-  imageUrl: string;
+  images: string[];
   id: string;
   title: string;
+  shortDescription?: string;
   price: number;
   imageAlt?: string;
+  linkTarget?: React.HTMLAttributeAnchorTarget;
 };
-
-const AUDIENCE_LABEL: Record<string, string> = {
-  adults: "Dospělí",
-  kids: "Děti",
-  seniors: "Senioři",
-};
-
-function getCityName(city: unknown): string | null {
-  if (!city) return null;
-  if (typeof city === "string") return city;
-  if (Array.isArray(city)) {
-    const first = city[0];
-    if (!first) return null;
-    return typeof first === "string" ? first : (first as { name: string }).name;
-  }
-  return (city as { name: string }).name ?? null;
-}
-
-function Chip({ icon, label }: { icon: React.ReactNode; label: string }) {
-  return (
-    <div className="flex items-center gap-1 bg-zinc-100 rounded-md px-1.5 py-0.5">
-      <span className="text-zinc-400">{icon}</span>
-      <Text variant="caption" color="textLight">
-        {label}
-      </Text>
-    </div>
-  );
-}
 
 export default function ListingCard({
-  imageUrl,
+  images,
   title,
+  shortDescription,
   price,
   imageAlt,
   id,
+  linkTarget = "_blank",
 }: Props) {
   const { isAuthenticated } = useAuth();
   const [isLiked, setIsLiked] = useState(false);
+  const [currentIndex, setCurrentIndex] = useState(0);
 
   const { data: favouriteListings } = useFavouriteListings();
   const { mutate: createFavouriteListing } = useCreateFavouriteListing();
@@ -127,22 +96,68 @@ export default function ListingCard({
     ],
   );
 
+  const goTo = useCallback(
+    (e: React.MouseEvent, index: number) => {
+      e.preventDefault();
+      e.stopPropagation();
+      setCurrentIndex((index + images.length) % images.length);
+    },
+    [images.length],
+  );
+
+  const currentImage = images[currentIndex];
+  const hasMultiple = images.length > 1;
+
   return (
     <Link
       href={{ pathname: "/listing/[listingId]", params: { listingId: id } }}
-      target="_blank"
+      target={linkTarget}
       className="group rounded-xl transition ease-in-out"
     >
       <div className="relative min-w-60 w-full rounded-xl aspect-square bg-zinc-100 overflow-hidden">
-        {imageUrl && imageUrl.startsWith("http") && (
-          <Image
-            src={imageUrl}
-            alt={imageAlt || title}
-            className="object-cover w-full h-full object-center transition-transform duration-300 group-hover:scale-105"
-            width={1000}
-            height={1000}
-          />
+        <Image
+          src={
+            generateMediaUrl(currentImage).startsWith("http")
+              ? generateMediaUrl(currentImage)
+              : ""
+          }
+          alt={imageAlt || title}
+          className="object-cover w-full h-full object-center transition-transform duration-300 group-hover:scale-105"
+          width={1000}
+          height={1000}
+        />
+
+        {hasMultiple && (
+          <>
+            <button
+              onClick={(e) => goTo(e, currentIndex - 1)}
+              className="absolute left-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-white/80 backdrop-blur-sm flex items-center justify-center shadow opacity-0 group-hover:opacity-100 transition-opacity hover:bg-white"
+            >
+              <ChevronLeft className="w-4 h-4 text-zinc-700" />
+            </button>
+            <button
+              onClick={(e) => goTo(e, currentIndex + 1)}
+              className="absolute right-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-white/80 backdrop-blur-sm flex items-center justify-center shadow opacity-0 group-hover:opacity-100 transition-opacity hover:bg-white"
+            >
+              <ChevronRight className="w-4 h-4 text-zinc-700" />
+            </button>
+
+            <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1">
+              {images.map((_, i) => (
+                <button
+                  key={i}
+                  onClick={(e) => goTo(e, i)}
+                  className={`rounded-full transition-all ${
+                    i === currentIndex
+                      ? "w-2 h-2 bg-white"
+                      : "w-1.5 h-1.5 bg-white/60"
+                  }`}
+                />
+              ))}
+            </div>
+          </>
         )}
+
         <FaHeart
           onClick={clickOnLikedHandler}
           size={24}
@@ -152,11 +167,15 @@ export default function ListingCard({
       <div className="p-3 flex flex-col gap-0.5">
         <div className="flex items-start justify-between gap-2">
           <Text variant="label-lg">{title}</Text>
+
           <div className="flex items-center gap-1 shrink-0 pt-0.5">
             <span className="font-semibold text-sm">5</span>
             <FaStar size={13} className="text-rose-500" />
           </div>
         </div>
+        {shortDescription && (
+          <Text variant="label-sm">{truncateText(shortDescription, 80)}</Text>
+        )}
         <Text variant="label" color="textLight" className="font-semibold mt-1">
           Cena od <span className="text-primary">{price} Kč</span>
         </Text>

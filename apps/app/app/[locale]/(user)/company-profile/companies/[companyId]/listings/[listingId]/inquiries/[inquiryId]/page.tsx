@@ -6,7 +6,7 @@ import { ControlSection } from "@/app/[locale]/(user)/components/control-section
 import DashboardHeader from "@/app/[locale]/(user)/components/dashboard-header";
 import InquiryTimeline from "@/app/[locale]/(user)/components/inquiry-timeline";
 import Loader from "@/app/[locale]/(user)/components/loader";
-import VariantSection from "@/app/[locale]/(user)/components/variant-section";
+import VariantSection from "@/app/[locale]/(user)/company-profile/companies/[companyId]/listings/[listingId]/variants/[variantId]/components/variant-section";
 import { confirmActionModalEvents } from "@/app/components/ui/molecules/modals/confirm-action-modal";
 import { INQUIRY_STATUS } from "@/app/data/inquiry";
 import {
@@ -23,8 +23,8 @@ import { useTranslations } from "next-intl";
 import { useParams } from "next/navigation";
 
 import { VariantEntertainmentDetails } from "@/app/[locale]/(user)/components/variant-entertainment-details";
-import { VariantGastroDetails } from "@/app/[locale]/(user)/components/variant-gastro-details";
-import { VariantVenueDetails } from "@/app/[locale]/(user)/components/variant-venue-details";
+import { VariantGastroDetails } from "@/app/[locale]/(user)/company-profile/companies/[companyId]/listings/[listingId]/variants/[variantId]/components/variant-gastro-details";
+import { VariantVenueDetails } from "@/app/[locale]/(user)/company-profile/companies/[companyId]/listings/[listingId]/variants/[variantId]/components/variant-venue-details";
 import { SingleInputModal } from "@/app/components/ui/molecules/modals/single-input-modal";
 import { useEffect, useState } from "react";
 import InquiryDetails from "../../../../../../../components/inquiry-details";

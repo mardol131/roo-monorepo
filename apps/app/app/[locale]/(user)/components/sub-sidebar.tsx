@@ -39,11 +39,13 @@ export type SubSidebarProps = {
   mainMenuLabel?: {
     label: string;
     sublabel?: string;
+    icon?: LucideIcons;
   };
   mainMenuItems: SidebarItem[];
   subMenuLabel?: {
     label: string;
     sublabel?: string;
+    icon?: LucideIcons;
   };
   subMenuItems?: SidebarItem[];
 };
@@ -78,7 +80,7 @@ export function SubSidebar({
             label={mainMenuLabel.label}
             sublabel={mainMenuLabel.sublabel}
             variant="company"
-            icon="Building2"
+            icon={mainMenuLabel.icon || "Building2"}
             iconBgColor="bg-company-surface"
             iconColor="text-company"
             labelColor="company"
@@ -105,7 +107,7 @@ export function SubSidebar({
                 label={subMenuLabel.label}
                 sublabel={subMenuLabel.sublabel}
                 variant="listing"
-                icon="Tag"
+                icon={subMenuLabel.icon || "Tag"}
                 iconBgColor="bg-listing-surface"
                 iconColor="text-listing"
                 labelColor="listing"
@@ -166,7 +168,11 @@ function SectionLabel({
           {label}
         </Text>
         {sublabel && (
-          <Text variant="caption" color={subLabelColor || "textDark"}>
+          <Text
+            variant="label-sm"
+            color={subLabelColor || "textDark"}
+            className="font-semibold"
+          >
             {sublabel}
           </Text>
         )}
@@ -184,6 +190,7 @@ function SubSidebarNavItem({
   variant,
 }: SidebarItem & { active: boolean; variant: ColorVariant }) {
   const v = variants[variant];
+  console.log(v);
 
   const IconComponent = lucideIcons[icon] as unknown as React.FC<
     React.SVGProps<SVGSVGElement>
@@ -203,9 +210,13 @@ function SubSidebarNavItem({
           <IconComponent
             className={`w-4 h-4 ${active ? v.activeIcon : "text-zinc-400"}`}
           />
-          <span className="text-[11px] font-semibold leading-tight">
+          <Text
+            variant="label-sm"
+            color="none"
+            className={`font-semibold ${active ? v.activeText : "text-secondary"}`}
+          >
             {label}
-          </span>
+          </Text>
         </Link>
       ) : (
         <button
@@ -219,9 +230,13 @@ function SubSidebarNavItem({
           <IconComponent
             className={`w-4 h-4 ${active ? v.activeIcon : "text-zinc-400"}`}
           />
-          <span className="text-[11px] font-semibold leading-tight">
+          <Text
+            variant="label-sm"
+            color="none"
+            className={`font-semibold ${active ? v.activeText : "text-secondary"}`}
+          >
             {label}
-          </span>
+          </Text>
         </button>
       )}
     </li>

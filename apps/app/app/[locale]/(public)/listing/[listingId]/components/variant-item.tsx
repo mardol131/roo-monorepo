@@ -3,21 +3,9 @@
 import Button from "@/app/components/ui/atoms/button";
 import Text from "@/app/components/ui/atoms/text";
 import { generateMediaUrl } from "@/app/functions/generate-media-url";
-import {
-  Amenity,
-  Cuisine,
-  DietaryOption,
-  DishType,
-  EventType,
-  FoodServiceStyle,
-  Necessity,
-  Service,
-  Technology,
-  Variant,
-} from "@roo/common";
+import { Variant } from "@roo/common";
 import {
   BedDouble,
-  Car,
   ChevronLeft,
   ChevronRight,
   Clock,
@@ -85,75 +73,29 @@ function VenueDetails({
 }: {
   detail: Extract<VariantDetail, { blockType: "venue" }>;
 }) {
-  const amenities = (detail.amenities ?? [])
-    .filter((a): a is Amenity => typeof a !== "string")
-    .map((a) => a.name);
-  const services = (detail.services ?? [])
-    .filter((s): s is Service => typeof s !== "string")
-    .map((s) => s.name);
-  const technology = (detail.technology ?? [])
-    .filter((t): t is Technology => typeof t !== "string")
-    .map((t) => t.name);
-
   return (
-    <div className="flex flex-col gap-5">
-      <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-3">
+      {detail.accommodation.included && (
         <InfoRow
-          icon={<Users size={16} />}
-          label="Kapacita"
+          icon={<BedDouble size={16} />}
+          label="Ubytování"
           value={
-            detail.capacity.min
-              ? `${detail.capacity.min}–${detail.capacity.max} osob`
-              : `až ${detail.capacity.max} osob`
+            detail.accommodation.capacity
+              ? `${detail.accommodation.capacity} míst`
+              : "v ceně"
           }
         />
-        {detail.accommodation.included && (
-          <InfoRow
-            icon={<BedDouble size={16} />}
-            label="Ubytování"
-            value={
-              detail.accommodation.capacity
-                ? `${detail.accommodation.capacity} míst`
-                : "v ceně"
-            }
-          />
-        )}
-        {detail.parking.included && (
-          <InfoRow
-            icon={<Car size={16} />}
-            label="Parkování"
-            value={
-              detail.parking.spots ? `${detail.parking.spots} míst` : "v ceně"
-            }
-          />
-        )}
-        {detail.breakfast.included && (
-          <InfoRow icon={<Coffee size={16} />} label="Snídaně" value="v ceně" />
-        )}
-      </div>
-      {amenities.length > 0 && (
-        <div className="flex flex-col gap-2">
-          <Text variant="label" color="secondary">
-            Vybavení
-          </Text>
-          <ChipList items={amenities} />
-        </div>
       )}
-      {services.length > 0 && (
-        <div className="flex flex-col gap-2">
-          <Text variant="label" color="secondary">
-            Služby
-          </Text>
-          <ChipList items={services} />
-        </div>
-      )}
-      {technology.length > 0 && (
-        <div className="flex flex-col gap-2">
-          <Text variant="label" color="secondary">
-            Technika
-          </Text>
-          <ChipList items={technology} />
-        </div>
+      {detail.breakfast.included && (
+        <InfoRow
+          icon={<Coffee size={16} />}
+          label="Snídaně"
+          value={
+            detail.breakfast.price
+              ? `${detail.breakfast.price.toLocaleString("cs-CZ")} Kč/os.`
+              : "v ceně"
+          }
+        />
       )}
     </div>
   );
@@ -164,75 +106,17 @@ function GastroDetails({
 }: {
   detail: Extract<VariantDetail, { blockType: "gastro" }>;
 }) {
-  const cuisines = (detail.cuisines ?? [])
-    .filter((c): c is Cuisine => typeof c !== "string")
-    .map((c) => c.name);
-  const dishTypes = (detail.dishTypes ?? [])
-    .filter((d): d is DishType => typeof d !== "string")
-    .map((d) => d.name);
-  const dietary = (detail.dietaryOptions ?? [])
-    .filter((d): d is DietaryOption => typeof d !== "string")
-    .map((d) => d.name);
-  const styles = (detail.foodServiceStyle ?? [])
-    .filter((s): s is FoodServiceStyle => typeof s !== "string")
-    .map((s) => s.name);
-
   return (
     <div className="flex flex-col gap-5">
-      <div className="flex flex-col gap-3">
-        <InfoRow
-          icon={<Users size={16} />}
-          label="Kapacita"
-          value={
-            detail.capacity.min
-              ? `${detail.capacity.min}–${detail.capacity.max} osob`
-              : `až ${detail.capacity.max} osob`
-          }
-        />
-        {detail.pricePerPerson != null && (
-          <InfoRow
-            icon={<Users size={16} />}
-            label="Cena na osobu"
-            value={`${detail.pricePerPerson.toLocaleString("cs-CZ")} Kč`}
-          />
-        )}
-      </div>
       <div className="flex flex-wrap gap-2">
         {detail.alcoholIncluded && <Chip label="Alkohol v ceně" />}
         {detail.kidsMenu && <Chip label="Dětské menu" />}
+        {detail.minimumOrderAmount != null && (
+          <Chip
+            label={`Min. objednávka ${detail.minimumOrderAmount.toLocaleString("cs-CZ")} Kč`}
+          />
+        )}
       </div>
-      {cuisines.length > 0 && (
-        <div className="flex flex-col gap-2">
-          <Text variant="label" color="secondary">
-            Kuchyně
-          </Text>
-          <ChipList items={cuisines} />
-        </div>
-      )}
-      {dishTypes.length > 0 && (
-        <div className="flex flex-col gap-2">
-          <Text variant="label" color="secondary">
-            Typy jídel
-          </Text>
-          <ChipList items={dishTypes} />
-        </div>
-      )}
-      {dietary.length > 0 && (
-        <div className="flex flex-col gap-2">
-          <Text variant="label" color="secondary">
-            Dietní možnosti
-          </Text>
-          <ChipList items={dietary} />
-        </div>
-      )}
-      {styles.length > 0 && (
-        <div className="flex flex-col gap-2">
-          <Text variant="label" color="secondary">
-            Forma servisu
-          </Text>
-          <ChipList items={styles} />
-        </div>
-      )}
     </div>
   );
 }
@@ -242,10 +126,6 @@ function EntertainmentDetails({
 }: {
   detail: Extract<VariantDetail, { blockType: "entertainment" }>;
 }) {
-  const necessities = (detail.necessities ?? [])
-    .filter((n): n is Necessity => typeof n !== "string")
-    .map((n) => n.name);
-
   const audienceLabels: Record<string, string> = {
     adults: "Dospělí",
     kids: "Děti",
@@ -254,42 +134,17 @@ function EntertainmentDetails({
 
   return (
     <div className="flex flex-col gap-5">
-      <div className="flex flex-col gap-3">
+      {detail.performance.numberOfSets != null && (
         <InfoRow
-          icon={<Users size={16} />}
-          label="Kapacita"
+          icon={<Clock size={16} />}
+          label="Počet setů"
           value={
-            detail.capacity.min
-              ? `${detail.capacity.min}–${detail.capacity.max} osob`
-              : `až ${detail.capacity.max} osob`
+            detail.performance.pauseBetweenSetsInMinutes != null
+              ? `${detail.performance.numberOfSets} × přestávka ${detail.performance.pauseBetweenSetsInMinutes} min`
+              : String(detail.performance.numberOfSets)
           }
         />
-        {detail.performanceDuration != null && (
-          <InfoRow
-            icon={<Clock size={16} />}
-            label="Délka vystoupení"
-            value={`${detail.performanceDuration} min`}
-          />
-        )}
-        {detail.numberOfSets != null && (
-          <InfoRow
-            icon={<Clock size={16} />}
-            label="Počet setů"
-            value={
-              detail.breakDuration != null
-                ? `${detail.numberOfSets} × přestávka ${detail.breakDuration} min`
-                : String(detail.numberOfSets)
-            }
-          />
-        )}
-        {detail.setupAndTeardown.setupTime != null && (
-          <InfoRow
-            icon={<Clock size={16} />}
-            label="Příprava / úklid"
-            value={`${detail.setupAndTeardown.setupTime} / ${detail.setupAndTeardown.teardownTime ?? 0} min`}
-          />
-        )}
-      </div>
+      )}
       {(detail.audience ?? []).length > 0 && (
         <div className="flex flex-col gap-2">
           <Text variant="label" color="secondary">
@@ -298,14 +153,6 @@ function EntertainmentDetails({
           <ChipList
             items={(detail.audience ?? []).map((a) => audienceLabels[a] ?? a)}
           />
-        </div>
-      )}
-      {necessities.length > 0 && (
-        <div className="flex flex-col gap-2">
-          <Text variant="label" color="secondary">
-            Požadavky
-          </Text>
-          <ChipList items={necessities} />
         </div>
       )}
     </div>
@@ -329,7 +176,7 @@ export default function VariantItem({
   const allImages = [
     variant.images.coverImage,
     ...(variant.images.gallery ?? []),
-  ].filter((img) => !!img.filename);
+  ].filter((img) => !!img?.filename);
 
   const currentImage = allImages[currentImageIndex];
 
@@ -347,30 +194,16 @@ export default function VariantItem({
     .map((i) => i.item)
     .filter((i): i is string => !!i);
 
-  const eventTypes = (variant.eventTypes ?? [])
-    .filter((e): e is EventType => typeof e !== "string")
-    .map((e) => e.name);
-
   const detail = variant.details[0];
 
-  const availabilityLabel =
-    variant.availability === "allDay"
-      ? "Celý den"
-      : (variant.selectedHours ?? [])
-          .map((h) => `${h.from}–${h.to}`)
-          .join(", ");
-
-  const seasonLabel =
-    variant.type === "allYear"
-      ? "Celý rok"
-      : (variant.selectedSeasons ?? [])
-          .map((s) => `${s.from}–${s.to}`)
-          .join(", ");
+  const capacityValue = variant.capacity.min
+    ? `${variant.capacity.min}–${variant.capacity.max} osob`
+    : `až ${variant.capacity.max} osob`;
 
   return (
     <div className="border border-zinc-200 rounded-3xl overflow-hidden shadow-sm transition-shadow">
       <div className="grid grid-cols-[380px_1fr]">
-        {/* Left column — image + availability */}
+        {/* Left column — image */}
         <div className="bg-zinc-50 p-6 flex flex-col gap-6 border-r border-zinc-200">
           {/* Carousel */}
           <div className="relative w-full aspect-square rounded-2xl overflow-hidden bg-zinc-200">
@@ -411,30 +244,6 @@ export default function VariantItem({
               </>
             )}
           </div>
-
-          {/* Availability */}
-          <div className="flex flex-col gap-3">
-            <InfoRow
-              icon={<Clock size={16} />}
-              label="Sezóna"
-              value={seasonLabel}
-            />
-            <InfoRow
-              icon={<Clock size={16} />}
-              label="Dostupnost"
-              value={availabilityLabel}
-            />
-          </div>
-
-          {/* Event types */}
-          {eventTypes.length > 0 && (
-            <div className="flex flex-col gap-2">
-              <Text variant="label" color="secondary">
-                Typy akcí
-              </Text>
-              <ChipList items={eventTypes} />
-            </div>
-          )}
         </div>
 
         {/* Right column — content */}
@@ -450,8 +259,15 @@ export default function VariantItem({
               </Text>
             </div>
 
-            {/* Detail-specific info */}
-            {detail && <DetailSection detail={detail} />}
+            {/* Capacity + detail-specific info */}
+            <div className="flex flex-col gap-5">
+              <InfoRow
+                icon={<Users size={16} />}
+                label="Kapacita"
+                value={capacityValue}
+              />
+              {detail && <DetailSection detail={detail} />}
+            </div>
 
             {/* Includes / Excludes */}
             {(includeItems.length > 0 || excludeItems.length > 0) && (
@@ -480,7 +296,7 @@ export default function VariantItem({
           <div className="bg-zinc-50 rounded-2xl p-5 flex items-center justify-between gap-4">
             <div className="flex flex-col gap-0.5">
               <Text variant="h3" color="primary">
-                {variant.price.generalPrice.toLocaleString("cs-CZ")} Kč
+                {variant.price.base.toLocaleString("cs-CZ")} Kč
               </Text>
               {(variant.price.seasonalPrices ?? []).length > 0 && (
                 <Text variant="caption" color="secondary">

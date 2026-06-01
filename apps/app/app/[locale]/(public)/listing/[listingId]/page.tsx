@@ -214,7 +214,7 @@ export default function Page() {
             })}
           </div>
           <div>
-            <OrderBox startingPrice={listing.price.startsAt} />
+            <OrderBox startingPrice={listing.minimumPricePerEvent} />
           </div>
         </div>
         {variants?.docs && variants.docs.length > 0 && (

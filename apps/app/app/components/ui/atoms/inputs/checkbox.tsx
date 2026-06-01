@@ -2,11 +2,14 @@ import React from "react";
 import Text from "../text";
 import { MdCheckBox, MdCheckBoxOutlineBlank } from "react-icons/md";
 import ErrorText from "./error-text";
+import InputLabel from "../input-label";
 
 export interface CheckboxProps {
   checked: boolean;
   onChange: (checked: boolean) => void;
   label: React.ReactNode;
+  title?: string;
+  subtitle?: string;
   id?: string;
   name?: string;
   value?: string;
@@ -19,6 +22,8 @@ export interface CheckboxProps {
 function Checkbox({
   checked,
   onChange,
+  title,
+  subtitle,
   label,
   id,
   name,
@@ -36,6 +41,7 @@ function Checkbox({
 
   return (
     <div>
+      {title && <InputLabel label={title} sublabel={subtitle} />}
       <label className="flex items-start gap-3 w-full rounded-md hover:bg-white transition-all duration-200 cursor-pointer">
         <input
           id={id}

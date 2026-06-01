@@ -14,6 +14,7 @@ export const collectionColors = {
 };
 
 export const colors = {
+  none: "",
   primary: "primary",
   primarySurface: "primarySurface",
   onPrimary: "onPrimary",

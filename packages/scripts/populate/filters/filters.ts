@@ -10,13 +10,22 @@ const COLLECTIONS = [
   "cuisines",
   "dietary-options",
   "dish-types",
+  "entertainment-rules",
   "entertainment-types",
   "event-types",
-  "food-service-styles",
+  "food-service-types",
+  "food-preparation-styles",
+  "gastro-rules",
+  "music-genres",
+  "necessities",
   "personnel",
   "place-types",
+  "room-amenities",
   "services",
+  "space-rules",
+  "space-types",
   "technologies",
+  "venue-rules",
 ] as const;
 
 type Collection = (typeof COLLECTIONS)[number];
@@ -41,7 +50,8 @@ async function login(): Promise<string> {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ email: config.email, password: config.password }),
   });
-  if (!res.ok) throw new Error(`Login failed: ${res.status} ${await res.text()}`);
+  if (!res.ok)
+    throw new Error(`Login failed: ${res.status} ${await res.text()}`);
   return ((await res.json()) as { token: string }).token;
 }
 
@@ -50,7 +60,10 @@ async function upsert(
   collection: Collection,
   item: { name: string; slug: string },
 ): Promise<"created" | "updated"> {
-  const headers = { "Content-Type": "application/json", Authorization: `JWT ${token}` };
+  const headers = {
+    "Content-Type": "application/json",
+    Authorization: `JWT ${token}`,
+  };
 
   const existing = (await fetch(
     `${config.backendUrl}/api/${collection}?where[slug][equals]=${item.slug}&limit=1`,
@@ -58,11 +71,14 @@ async function upsert(
   ).then((r) => r.json())) as { docs: { id: string }[] };
 
   if (existing.docs.length > 0) {
-    const res = await fetch(`${config.backendUrl}/api/${collection}/${existing.docs[0].id}`, {
-      method: "PATCH",
-      headers,
-      body: JSON.stringify(item),
-    });
+    const res = await fetch(
+      `${config.backendUrl}/api/${collection}/${existing.docs[0].id}`,
+      {
+        method: "PATCH",
+        headers,
+        body: JSON.stringify(item),
+      },
+    );
     if (!res.ok) throw new Error(`${res.status} ${await res.text()}`);
     return "updated";
   }
@@ -96,13 +112,19 @@ async function main() {
     if (items.length === 0) continue;
 
     console.log(`\n[${collection}] — ${items.length} položek`);
-    let created = 0, updated = 0;
+    let created = 0,
+      updated = 0;
 
     for (const row of items) {
       try {
-        const action = await upsert(token, collection, { name: row.name, slug: row.slug });
+        const action = await upsert(token, collection, {
+          name: row.name,
+          slug: row.slug,
+        });
         action === "created" ? created++ : updated++;
-        console.log(`  ${action === "created" ? "✓" : "↺"} ${row.name} [${action}]`);
+        console.log(
+          `  ${action === "created" ? "✓" : "↺"} ${row.name} [${action}]`,
+        );
       } catch (err) {
         failures.push({ collection, name: row.name, error: String(err) });
         console.log(`  ✗ ${row.name} [failed]`);
@@ -119,11 +141,16 @@ async function main() {
   console.log(`  ✗ failed  : ${failures.length}`);
   if (failures.length > 0) {
     console.log(`\nFailed records:`);
-    failures.forEach((f) => console.log(`  • [${f.collection}] ${f.name}: ${f.error}`));
+    failures.forEach((f) =>
+      console.log(`  • [${f.collection}] ${f.name}: ${f.error}`),
+    );
   }
   console.log(`─────────────────────────────────────`);
 
   if (failures.length > 0) process.exit(1);
 }
 
-main().catch((err) => { console.error(err); process.exit(1); });
+main().catch((err) => {
+  console.error(err);
+  process.exit(1);
+});

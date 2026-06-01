@@ -27,7 +27,7 @@ export function FormSection({
   return (
     <div
       id={id}
-      className={`bg-white rounded-2xl border ${error ? "border-red-500" : "border-zinc-200"} scroll-mt-6`}
+      className={`bg-white rounded-2xl border ${error ? "border-danger" : "border-zinc-200"} scroll-mt-6`}
     >
       <DashboardSectionHeader
         icon={icon}

@@ -8,35 +8,20 @@ import Text from "@/app/components/ui/atoms/text";
 type Filter = { label: string; value: string };
 
 type Props = {
-  filters?: Filter[];
-  defaultFilter?: string;
-  items: unknown[];
-  filterFn?: (item: unknown, activeFilter: string) => boolean;
-  renderItem: (item: unknown) => React.ReactNode;
+  items: React.ReactNode[] | undefined;
   emptyState: EmptyStateProps;
   title?: string;
   subtitle?: string;
+  filterComponent?: React.ReactNode;
 };
 
 export default function CardContainer({
-  filters,
-  defaultFilter,
   items,
-  filterFn,
-  renderItem,
   emptyState,
   title,
   subtitle,
+  filterComponent,
 }: Props) {
-  const [activeFilter, setActiveFilter] = useState(
-    defaultFilter ?? filters?.[0]?.value ?? "all",
-  );
-
-  const filtered =
-    filterFn && activeFilter !== "all"
-      ? items.filter((item) => filterFn(item, activeFilter))
-      : items;
-
   return (
     <>
       {title && subtitle && (
@@ -49,21 +34,14 @@ export default function CardContainer({
           </Text>
         </div>
       )}
-      {filters && filters.length > 0 && (
-        <TabFilter
-          tabs={filters}
-          activeTab={activeFilter}
-          onChange={setActiveFilter}
-          className="mb-6"
-        />
-      )}
+      {filterComponent && <div className="mb-6">{filterComponent}</div>}
 
-      {filtered.length === 0 ? (
+      {!items || items?.length === 0 ? (
         <EmptyState {...emptyState} />
       ) : (
         <div className="flex flex-col gap-3">
-          {filtered.map((item, i) => (
-            <React.Fragment key={i}>{renderItem(item)}</React.Fragment>
+          {items.map((item, i) => (
+            <React.Fragment key={i}>{item}</React.Fragment>
           ))}
         </div>
       )}

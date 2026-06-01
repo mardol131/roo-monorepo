@@ -3,15 +3,21 @@ import type { FieldAccess, PayloadRequest, Where } from 'payload'
 import { CollectionAccess } from '../common/utils'
 import type { Company, Listing } from '@/payload-types'
 
-async function fetchCompanyViaDetail(
-  req: PayloadRequest,
-  detailId: string,
-): Promise<Company | null> {
+async function fetchCompanyViaDetail({
+  req,
+  detailId,
+}: {
+  req: PayloadRequest
+  detailId: string
+}): Promise<Company | null> {
+  console.log('fetchCompanyViaDetail - detailId', detailId)
   const result = await req.payload.find({
     collection: 'listings',
     where: { 'detail.value': { equals: detailId } },
     limit: 1,
   })
+
+  console.log('listing result', result)
 
   const listing = result.docs[0]
   if (!listing) return null
@@ -19,6 +25,7 @@ async function fetchCompanyViaDetail(
   const companyId = getIdFromRelationshipField(listing.company)
   if (!companyId) return null
 
+  console.log('companyId', companyId)
   return req.payload.findByID({
     collection: 'companies',
     id: companyId,
@@ -142,10 +149,12 @@ export const listingDetailAccessControl: CollectionAccess = {
 
     if (!id) return false
 
-    const company = await fetchCompanyViaDetail(req, String(id))
+    const company = await fetchCompanyViaDetail({ req, detailId: String(id) })
+    console.log('company', company)
     if (!company) return false
 
     const ownerId = getIdFromRelationshipField(company.owner)
+    console.log('ownerId', ownerId, 'userId', req.user.id)
     if (ownerId === req.user.id) return true
 
     return (

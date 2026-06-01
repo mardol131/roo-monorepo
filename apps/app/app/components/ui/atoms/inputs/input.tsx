@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 import ErrorText from "./error-text";
 import InputLabel from "../input-label";
 import Text from "../text";
@@ -15,6 +15,7 @@ export default function Input({
   filterRegex,
   placeholder,
   maxLength,
+  size = "base",
 }: {
   label?: string;
   sublabel?: string;
@@ -25,11 +26,19 @@ export default function Input({
   filterRegex?: RegExp;
   placeholder?: string;
   maxLength?: number;
+  size?: "base" | "sm";
 }) {
   const [charCount, setCharCount] = React.useState(() => {
     const v = inputProps?.value ?? inputProps?.defaultValue;
     return typeof v === "string" ? v.length : 0;
   });
+
+  useEffect(() => {
+    const v = inputProps?.value;
+    if (typeof v === "string") {
+      setCharCount(v.length);
+    }
+  }, [inputProps?.value]);
 
   function handleInput(e: React.FormEvent<HTMLInputElement>) {
     if (filterRegex) {
@@ -58,7 +67,7 @@ export default function Input({
         onInput={handleInput}
         placeholder={placeholder}
         maxLength={maxLength}
-        className={`w-full px-3 text-sm py-2.5 border bg-white ${error ? "border-red-500" : "border-zinc-300"} rounded-lg focus:outline-none focus:ring-2 focus:ring-zinc-900 focus:border-transparent`}
+        className={`w-full px-3 text-sm border bg-white ${error ? "border-danger" : "border-zinc-300"} rounded-lg focus:outline-none focus:ring-2 focus:ring-zinc-900 focus:border-transparent ${size === "sm" ? "text-sm py-1.5" : "text-base py-2.5"}`}
       />
       {error && (
         <div>

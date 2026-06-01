@@ -7,9 +7,8 @@ import {
 import EntityCard from "../../components/entity-card";
 import PageHeading from "../../components/page-heading";
 import EntityComponentTag from "../../components/tags/entity-component-tag";
-import { EmptyState } from "../../components/empty-state";
 import CardContainer from "../../components/card-container";
-import { Company, getIdFromRelationshipField } from "@roo/common";
+import { getIdFromRelationshipField } from "@roo/common";
 import { confirmActionModalEvents } from "@/app/components/ui/molecules/modals/confirm-action-modal";
 import { Trash2 } from "lucide-react";
 import { useRouter } from "@/app/i18n/navigation";
@@ -72,7 +71,6 @@ export default function page() {
         }}
       />
       <CardContainer
-        items={myCompanies || []}
         emptyState={{
           text: "Zatím nemáte žádné firmy",
           subtext:
@@ -88,52 +86,49 @@ export default function page() {
           },
           icon: "Building2",
         }}
-        renderItem={(item) => {
-          const company = item as Company;
-          return (
-            <EntityCard
-              key={company.id}
-              icon="Building2"
-              label={company.name}
-              iconColor="text-company"
-              iconBackgroundColor="bg-company-surface"
-              items={[{ icon: "Mail", content: company.email }]}
-              link={{
-                pathname: "/company-profile/companies/[companyId]",
-                params: { companyId: company.id },
-              }}
-              rightComponent={
-                <EntityComponentTag
-                  text={`IČO: ${company.ico}`}
-                  bgColor="bg-zinc-100"
-                  textColor="text-on-dark"
-                />
-              }
-              deleteEntityHandler={(e) => {
-                e.stopPropagation();
-                e.preventDefault();
-                confirmActionModalEvents.emit("open", {
-                  title: "Smazat společnost",
-                  description:
-                    "Tato akce je nevratná a trvale odstraní tuto společnost z platformy.",
-                  Icon: Trash2,
-                  buttonText: "Smazat společnost",
-                  buttonVersion: "dangerFull",
-                  confirmPhrase: company.name,
-                  whatIsGoingToHappenText:
-                    "Opravdu chcete smazat tuto společnost?",
-                  whatIsGoingToHappenTextColor: "danger",
-                  whatIsGoingToHappenList: [
-                    "Všechny záznamy spojené s touto společností budou nenávratně smazány",
-                    "Všechny poptávky budou zrušeny",
-                  ],
-                  bgColor: "bg-danger-surface",
-                  onConfirmClick: async () => deleteCompanyHandler(company.id),
-                });
-              }}
-            />
-          );
-        }}
+        items={(myCompanies ?? []).map((company) => (
+          <EntityCard
+            key={company.id}
+            icon="Building2"
+            label={company.name}
+            iconColor="text-company"
+            iconBackgroundColor="bg-company-surface"
+            items={[{ icon: "Mail", content: company.email }]}
+            link={{
+              pathname: "/company-profile/companies/[companyId]",
+              params: { companyId: company.id },
+            }}
+            rightComponent={
+              <EntityComponentTag
+                text={`IČO: ${company.ico}`}
+                bgColor="bg-zinc-100"
+                textColor="text-on-dark"
+              />
+            }
+            deleteEntityHandler={(e) => {
+              e.stopPropagation();
+              e.preventDefault();
+              confirmActionModalEvents.emit("open", {
+                title: "Smazat společnost",
+                description:
+                  "Tato akce je nevratná a trvale odstraní tuto společnost z platformy.",
+                Icon: Trash2,
+                buttonText: "Smazat společnost",
+                buttonVersion: "dangerFull",
+                confirmPhrase: company.name,
+                whatIsGoingToHappenText:
+                  "Opravdu chcete smazat tuto společnost?",
+                whatIsGoingToHappenTextColor: "danger",
+                whatIsGoingToHappenList: [
+                  "Všechny záznamy spojené s touto společností budou nenávratně smazány",
+                  "Všechny poptávky budou zrušeny",
+                ],
+                bgColor: "bg-danger-surface",
+                onConfirmClick: async () => deleteCompanyHandler(company.id),
+              });
+            }}
+          />
+        ))}
       />
 
       {memberCompanies && memberCompanies && memberCompanies.length > 0 && (
@@ -141,7 +136,50 @@ export default function page() {
           <CardContainer
             title="Firmy, ve kterých působíte jako člen"
             subtitle="Zde najdete přehled všech firem, ke kterým máte přístup jako člen. Kliknutím na firmu zobrazíte její profil a služby."
-            items={memberCompanies || []}
+            items={memberCompanies.map((company) => (
+              <EntityCard
+                key={company.id}
+                icon="Building2"
+                label={company.name}
+                iconColor="text-company"
+                iconBackgroundColor="bg-company-surface"
+                items={[{ icon: "Mail", content: company.email }]}
+                link={{
+                  pathname: "/company-profile/companies/[companyId]",
+                  params: { companyId: company.id },
+                }}
+                rightComponent={
+                  <EntityComponentTag
+                    text={`IČO: ${company.ico}`}
+                    bgColor="bg-zinc-100"
+                    textColor="text-on-dark"
+                  />
+                }
+                deleteEntityHandler={(e) => {
+                  e.stopPropagation();
+                  e.preventDefault();
+                  confirmActionModalEvents.emit("open", {
+                    title: "Smazat společnost",
+                    description:
+                      "Tato akce je nevratná a trvale odstraní tuto společnost z platformy.",
+                    Icon: Trash2,
+                    buttonText: "Smazat společnost",
+                    buttonVersion: "dangerFull",
+                    confirmPhrase: company.name,
+                    whatIsGoingToHappenText:
+                      "Opravdu chcete smazat tuto společnost?",
+                    whatIsGoingToHappenTextColor: "danger",
+                    whatIsGoingToHappenList: [
+                      "Všechny záznamy spojené s touto společností budou nenávratně smazány",
+                      "Všechny poptávky budou zrušeny",
+                    ],
+                    bgColor: "bg-danger-surface",
+                    onConfirmClick: async () =>
+                      deleteCompanyHandler(company.id),
+                  });
+                }}
+              />
+            ))}
             emptyState={{
               text: "Zatím nemáte žádné firmy",
               subtext:
@@ -156,53 +194,6 @@ export default function page() {
                 },
               },
               icon: "Building2",
-            }}
-            renderItem={(item) => {
-              const company = item as Company;
-              return (
-                <EntityCard
-                  key={company.id}
-                  icon="Building2"
-                  label={company.name}
-                  iconColor="text-company"
-                  iconBackgroundColor="bg-company-surface"
-                  items={[{ icon: "Mail", content: company.email }]}
-                  link={{
-                    pathname: "/company-profile/companies/[companyId]",
-                    params: { companyId: company.id },
-                  }}
-                  rightComponent={
-                    <EntityComponentTag
-                      text={`IČO: ${company.ico}`}
-                      bgColor="bg-zinc-100"
-                      textColor="text-on-dark"
-                    />
-                  }
-                  deleteEntityHandler={(e) => {
-                    e.stopPropagation();
-                    e.preventDefault();
-                    confirmActionModalEvents.emit("open", {
-                      title: "Smazat společnost",
-                      description:
-                        "Tato akce je nevratná a trvale odstraní tuto společnost z platformy.",
-                      Icon: Trash2,
-                      buttonText: "Smazat společnost",
-                      buttonVersion: "dangerFull",
-                      confirmPhrase: company.name,
-                      whatIsGoingToHappenText:
-                        "Opravdu chcete smazat tuto společnost?",
-                      whatIsGoingToHappenTextColor: "danger",
-                      whatIsGoingToHappenList: [
-                        "Všechny záznamy spojené s touto společností budou nenávratně smazány",
-                        "Všechny poptávky budou zrušeny",
-                      ],
-                      bgColor: "bg-danger-surface",
-                      onConfirmClick: async () =>
-                        deleteCompanyHandler(company.id),
-                    });
-                  }}
-                />
-              );
             }}
           />
         </div>

@@ -57,8 +57,17 @@ export const routing = defineRouting({
     "/user-profile/events/[eventId]/edit": {
       cs: "/ucet/moje-udalosti/[eventId]/upravit-udalost",
     },
-    "/user-profile/events/[eventId]/[inquiryId]": {
-      cs: "/ucet/moje-udalosti/[eventId]/[inquiryId]",
+    "/user-profile/events/[eventId]/inquiries": {
+      cs: "/ucet/moje-udalosti/[eventId]/poptavky",
+    },
+    "/user-profile/events/[eventId]/tasks": {
+      cs: "/ucet/moje-udalosti/[eventId]/ukoly",
+    },
+    "/user-profile/events/[eventId]/notes": {
+      cs: "/ucet/moje-udalosti/[eventId]/poznamky",
+    },
+    "/user-profile/events/[eventId]/inquiries/[inquiryId]": {
+      cs: "/ucet/moje-udalosti/[eventId]/poptavky/[inquiryId]",
     },
     "/user-profile/inquiries": { cs: "/ucet/poptavky" },
     "/user-profile/messages": { cs: "/ucet/zpravy" },

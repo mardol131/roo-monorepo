@@ -117,6 +117,20 @@
       "420": "+420"
     }
   },
+  "pricing": {
+    "travelFee": {
+      "types": {
+        "one_way": "Jednosměrný",
+        "round_trip": "Obousměrný"
+      }
+    },
+    "units": {
+      "lump_sum": "Za událost",
+      "per_person": "Za osobu",
+      "per_hour": "Za hodinu",
+      "per_day": "Za den"
+    }
+  },
   "header": {
     "nav": {
       "venue": "Místa",
@@ -137,7 +151,7 @@
   },
   "footer": {
     "brand": {
-      "description": "Naplánujte celý firemní event na jednom místě."
+      "description": "Naplánujte celý event na jednom místě."
     },
     "sections": {
       "roo": {

@@ -30,7 +30,8 @@ type ButtonVersion =
   | "warning"
   | "warningFull"
   | "calendar"
-  | "calendarFull";
+  | "calendarFull"
+  | "plainFull";
 
 type ButtonSize = "2xl" | "xl" | "lg" | "md" | "sm" | "xs";
 type ButtonRounding = "none" | "sm" | "md" | "lg" | "xl" | "2xl" | "full";
@@ -76,8 +77,10 @@ const getVersionClass = (
     primary: "bg-primary text-white shadow hover:shadow-md",
     primarySoft:
       "bg-primary-surface text-primary hover:bg-primary-surface hover:bg-opacity-90",
-    secondary: "bg-zinc-900 text-white shadow hover:shadow-md",
+    secondary: "bg-secondary text-white shadow hover:shadow-md",
     plain: "bg-transparent text-zinc-900",
+    plainFull:
+      "text-secondary bg-zinc-200/50 border border-zinc-200 hover:bg-zinc-300",
     company:
       "bg-company-surface text-company hover:bg-company-surface hover:bg-opacity-90",
     companyFull: "bg-company text-white shadow hover:shadow-md",
@@ -93,7 +96,7 @@ const getVersionClass = (
     space: "bg-space-surface text-space hover:bg-space-surface",
     spaceFull: "bg-space text-white",
     outlined:
-      "bg-transparent text-zinc-900 border border-zinc-900 hover:bg-black/5",
+      "bg-transparent text-secondary border border-secondary hover:bg-black/5",
     link: "bg-transparent text-rose-500 underline hover:opacity-80 active:opacity-60 transition-opacity p-0",
     white: "bg-white text-dark shadow hover:shadow-md",
     none: ownColor || "",
@@ -149,7 +152,7 @@ export default function Button({
   ownColor,
   loading = false,
 }: ButtonProps) {
-  const baseClasses = `${!disabled ? "cursor-pointer" : ""} inline-flex items-center ${getRoundingClass(rounding)} justify-center font-medium transition-all ease-in-out ${disabled ? "opacity-50" : "hover:scale-105"} gap-2`;
+  const baseClasses = `${!disabled ? "cursor-pointer" : ""} inline-flex items-center ${getRoundingClass(rounding)} justify-center font-semibold transition-all ease-in-out ${disabled ? "opacity-50" : "hover:scale-105"} gap-2`;
   const versionClass = getVersionClass(version, disabled, ownColor);
   const sizeClass = getSizeClass(size);
   const iconSize = getIconSize(size);

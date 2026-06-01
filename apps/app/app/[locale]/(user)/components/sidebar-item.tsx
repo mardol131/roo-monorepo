@@ -1,3 +1,4 @@
+import Text from "@/app/components/ui/atoms/text";
 import { IntlPathname, Link } from "@/app/i18n/navigation";
 import { LucideIcons } from "@roo/common";
 import * as lucideIcons from "lucide-react";
@@ -32,9 +33,13 @@ export function SidebarNavItem({
       <Icon
         className={`w-5 h-5 shrink-0 ${active ? "text-primary" : "text-zinc-400"}`}
       />
-      <span className="text-[11px] font-semibold leading-tight text-center">
+      <Text
+        variant="label-sm"
+        color={active ? "primary" : "textDark"}
+        className="font-semibold text-center"
+      >
         {label}
-      </span>
+      </Text>
     </Link>
   ) : (
     <button
@@ -48,9 +53,13 @@ export function SidebarNavItem({
       <Icon
         className={`w-5 h-5 shrink-0 ${active ? "text-primary" : "text-zinc-400"}`}
       />
-      <span className="text-[11px] font-semibold leading-tight text-center">
+      <Text
+        variant="label-sm"
+        color={"textDark"}
+        className="font-semibold text-center"
+      >
         {label}
-      </span>
+      </Text>
     </button>
   );
 

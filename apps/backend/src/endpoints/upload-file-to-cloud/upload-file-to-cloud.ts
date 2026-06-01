@@ -1,6 +1,6 @@
 import { Endpoint, PayloadRequest } from 'payload'
 import { createClient } from '@supabase/supabase-js'
-import { MediaSchema } from '@roo/common'
+import { Bucket, bucketsArray, MediaSchema } from '@roo/common'
 
 export const uploadFileToCloud: Endpoint = {
   path: '/upload-file-to-cloud',
@@ -28,7 +28,7 @@ export const uploadFileToCloud: Endpoint = {
     const formData = await req.formData()
 
     const file = formData.get('file') as File | null
-    const bucket = formData.get('bucket') as string | null
+    const bucket = formData.get('bucket') as Bucket | null
 
     if (!file) {
       return Response.json(
@@ -74,7 +74,7 @@ export const uploadFileToCloud: Endpoint = {
     // Generuj filename
     const ext = isVideo ? file.type.split('/')[1] : 'webp'
     const filename = `${Date.now()}-${crypto.randomUUID()}.${ext}`
-    const uploadBucket = bucket || 'listings-images'
+    const uploadBucket: Bucket = bucket || 'listings-images'
 
     // Konvertuj File → Buffer
     const arrayBuffer = await file.arrayBuffer()
@@ -100,6 +100,24 @@ export const uploadFileToCloud: Endpoint = {
     const responseData: MediaSchema = {
       filename,
       mimeType: isVideo ? `video/${file.type.split('/')[1]}` : 'image/webp',
+    }
+
+    if (responseData.filename) {
+      try {
+        await req.payload.create({
+          collection: 'user-media',
+          draft: false,
+          data: {
+            filename: responseData.filename,
+            mimeType: responseData.mimeType,
+            bucket: bucketsArray.includes(uploadBucket) ? uploadBucket : 'listings-images',
+            user: req.user.id,
+            status: 'active',
+          },
+        })
+      } catch {
+        console.log('Failed to create media record in database')
+      }
     }
 
     return Response.json({

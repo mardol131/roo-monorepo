@@ -5,12 +5,19 @@ import InfoSection from "@/app/[locale]/(user)/components/info-section";
 import { useCities } from "@/app/react-query/cities/hooks";
 import { useDistricts } from "@/app/react-query/districts/hooks";
 import { useRegions } from "@/app/react-query/regions/hooks";
+import Text from "@/app/components/ui/atoms/text";
 import {
   City,
   District,
+  EntertainmentRule,
+  EventType,
   Listing,
   ListingEntertainmentDetail,
+  MusicGenre,
+  Necessity,
   Region,
+  Service,
+  Technology,
 } from "@roo/common";
 
 const AUDIENCE_LABELS: Record<string, string> = {
@@ -19,11 +26,45 @@ const AUDIENCE_LABELS: Record<string, string> = {
   seniors: "Senioři",
 };
 
-function extractIds(
-  items: (string | { id: string })[] | null | undefined,
-): string[] {
-  return (items ?? []).filter(
-    (item): item is string => typeof item === "string",
+const PRICING_UNIT_LABELS: Record<string, string> = {
+  per_day: "za den",
+  per_person: "za osobu",
+  per_hour: "za hodinu",
+  lump_sum: "paušál",
+};
+
+type PriceableItem = {
+  name: string;
+  unitPrice: number;
+  pricingUnit: string;
+  quantity: number;
+};
+
+function PriceableList({ items }: { items: PriceableItem[] }) {
+  return (
+    <div className="flex flex-col gap-2">
+      {items.map((item, i) => (
+        <div
+          key={i}
+          className="flex items-center justify-between rounded-lg border border-zinc-100 bg-zinc-50 px-4 py-3"
+        >
+          <Text variant="label-sm" color="textDark" className="font-medium">
+            {item.name}
+          </Text>
+          <div className="flex items-center gap-3 text-sm text-zinc-500">
+            <Text variant="label-sm" color="secondary">
+              {item.quantity} ks
+            </Text>
+            <Text variant="label-sm" color="secondary">
+              ·
+            </Text>
+            <Text variant="label-sm" color="secondary">
+              {item.unitPrice} Kč {PRICING_UNIT_LABELS[item.pricingUnit] ?? item.pricingUnit}
+            </Text>
+          </div>
+        </div>
+      ))}
+    </div>
   );
 }
 
@@ -45,11 +86,17 @@ export function EntertainmentDetails({
   listing: Listing;
   detail: ListingEntertainmentDetail;
 }) {
-  const location = listing.location;
+  const servicableArea = listing.servicableArea;
 
-  const regionIds = extractIds(location?.regions);
-  const districtIds = extractIds(location?.districts);
-  const cityIds = extractIds(location?.cities);
+  const regionIds = (servicableArea?.regions ?? []).filter(
+    (r): r is string => typeof r === "string",
+  );
+  const districtIds = (servicableArea?.districts ?? []).filter(
+    (d): d is string => typeof d === "string",
+  );
+  const cityIds = (servicableArea?.cities ?? []).filter(
+    (c): c is string => typeof c === "string",
+  );
 
   const { data: regionsData } = useRegions(
     regionIds.length ? { id: { in: regionIds } } : undefined,
@@ -68,48 +115,43 @@ export function EntertainmentDetails({
   });
 
   const regionNames = resolveNames<Region>(
-    location?.regions,
+    servicableArea?.regions as (string | Region)[] | undefined,
     regionsData?.docs,
   );
   const districtNames = resolveNames<District>(
-    location?.districts,
+    servicableArea?.districts as (string | District)[] | undefined,
     districtsData?.docs,
   );
-  const cityNames = resolveNames<City>(location?.cities, citiesData?.docs);
+  const cityNames = resolveNames<City>(
+    servicableArea?.cities as (string | City)[] | undefined,
+    citiesData?.docs,
+  );
 
-  const locationItems = location
-    ? [
-        ...(regionNames.length
-          ? [{ type: "tagList" as const, label: "Kraj", items: regionNames }]
-          : []),
-        ...(districtNames.length
-          ? [{ type: "tagList" as const, label: "Okres", items: districtNames }]
-          : []),
-        ...(cityNames.length
-          ? [{ type: "tagList" as const, label: "Město", items: cityNames }]
-          : []),
-        ...(location.address
-          ? [
-              {
-                type: "text" as const,
-                label: "Adresa",
-                value: location.address,
-              },
-            ]
-          : []),
-      ]
-    : [];
-
-  const programItems = [
-    ...(listing.properties.entertainmentTypes?.length
+  const locationItems = [
+    ...(servicableArea?.wholeCountry
+      ? [{ type: "text" as const, label: "Působiště", value: "Celá ČR" }]
+      : []),
+    ...(regionNames.length
+      ? [{ type: "tagList" as const, label: "Kraj", items: regionNames }]
+      : []),
+    ...(districtNames.length
+      ? [{ type: "tagList" as const, label: "Okres", items: districtNames }]
+      : []),
+    ...(cityNames.length
+      ? [{ type: "tagList" as const, label: "Město", items: cityNames }]
+      : []),
+    ...(listing.location?.address
       ? [
           {
-            type: "tagList" as const,
-            label: "Typy programu",
-            items: listing.properties.entertainmentTypes,
+            type: "text" as const,
+            label: "Adresa",
+            value: listing.location.address,
           },
         ]
       : []),
+  ];
+
+  const programItems = [
     ...(detail.audience?.length
       ? [
           {
@@ -119,47 +161,105 @@ export function EntertainmentDetails({
           },
         ]
       : []),
-  ];
-
-  const logisticsItems = detail.setupAndTearDownRules
-    ? [
-        ...(detail.setupAndTearDownRules.setupTime != null
-          ? [
-              {
-                type: "text" as const,
-                label: "Čas přípravy",
-                value: `${detail.setupAndTearDownRules.setupTime} min`,
-              },
-            ]
-          : []),
-        ...(detail.setupAndTearDownRules.tearDownTime != null
-          ? [
-              {
-                type: "text" as const,
-                label: "Čas úklidu",
-                value: `${detail.setupAndTearDownRules.tearDownTime} min`,
-              },
-            ]
-          : []),
-      ]
-    : [];
-
-  const personnelItems = [
-    ...(listing.properties.personnel?.length
+    ...(detail.filters.eventTypes?.length
       ? [
           {
             type: "tagList" as const,
-            label: "Personál",
-            items: listing.properties.personnel,
+            label: "Typy akcí",
+            items: resolveNames<EventType>(detail.filters.eventTypes, []),
           },
         ]
       : []),
-    ...(listing.properties.necessities?.length
+    ...(detail.filters.musicGenres?.length
+      ? [
+          {
+            type: "tagList" as const,
+            label: "Hudební žánry",
+            items: resolveNames<MusicGenre>(detail.filters.musicGenres, []),
+          },
+        ]
+      : []),
+    ...(detail.filters.entertainmentRules?.length
+      ? [
+          {
+            type: "tagList" as const,
+            label: "Pravidla",
+            items: resolveNames<EntertainmentRule>(
+              detail.filters.entertainmentRules,
+              [],
+            ),
+          },
+        ]
+      : []),
+    ...(detail.filters.necessities?.length
       ? [
           {
             type: "tagList" as const,
             label: "Technické požadavky",
-            items: listing.properties.necessities,
+            items: resolveNames<Necessity>(detail.filters.necessities, []),
+          },
+        ]
+      : []),
+  ];
+
+  const logisticsItems = [
+    ...(detail.setupAndTearDown.setupTime != null
+      ? [
+          {
+            type: "text" as const,
+            label: "Čas přípravy",
+            value: `${detail.setupAndTearDown.setupTime} min`,
+          },
+        ]
+      : []),
+    ...(detail.setupAndTearDown.tearDownTime != null
+      ? [
+          {
+            type: "text" as const,
+            label: "Čas úklidu",
+            value: `${detail.setupAndTearDown.tearDownTime} min`,
+          },
+        ]
+      : []),
+  ];
+
+  const priceableItems: PriceableItem[] = [
+    ...(detail.options.technologies ?? []).map((t) => ({
+      name:
+        typeof t.technology === "string"
+          ? t.technology
+          : (t.technology as Technology).name,
+      unitPrice: t.unitPrice,
+      pricingUnit: t.pricingUnit,
+      quantity: t.quantity,
+    })),
+    ...(detail.options.services ?? []).map((s) => ({
+      name:
+        typeof s.service === "string"
+          ? s.service
+          : (s.service as Service).name,
+      unitPrice: s.unitPrice,
+      pricingUnit: s.pricingUnit,
+      quantity: s.quantity,
+    })),
+  ];
+
+  const personnelItems = [
+    ...(listing.options.personnel?.length
+      ? [
+          {
+            type: "tagList" as const,
+            label: "Personál",
+            items: listing.options.personnel,
+          },
+        ]
+      : []),
+    ...(listing.options.technologies?.length
+      ? [
+          {
+            type: "tagList" as const,
+            label: "Technologie",
+            items: listing.options.technologies,
           },
         ]
       : []),
@@ -170,7 +270,7 @@ export function EntertainmentDetails({
       {locationItems.length > 0 && (
         <DashboardSection
           title="Místo působení"
-          icon={"MapPin"}
+          icon="MapPin"
           iconBg="bg-blue-50"
           iconColor="text-blue-500"
         >
@@ -181,7 +281,7 @@ export function EntertainmentDetails({
       {programItems.length > 0 && (
         <DashboardSection
           title="Typ programu"
-          icon={"Music"}
+          icon="Music"
           iconBg="bg-purple-50"
           iconColor="text-purple-500"
         >
@@ -192,7 +292,7 @@ export function EntertainmentDetails({
       {logisticsItems.length > 0 && (
         <DashboardSection
           title="Logistika"
-          icon={"Clock"}
+          icon="Clock"
           iconBg="bg-amber-50"
           iconColor="text-amber-500"
         >
@@ -200,10 +300,21 @@ export function EntertainmentDetails({
         </DashboardSection>
       )}
 
+      {priceableItems.length > 0 && (
+        <DashboardSection
+          title="Technologie a služby"
+          icon="Banknote"
+          iconBg="bg-green-50"
+          iconColor="text-green-500"
+        >
+          <PriceableList items={priceableItems} />
+        </DashboardSection>
+      )}
+
       {personnelItems.length > 0 && (
         <DashboardSection
-          title="Personál a požadavky"
-          icon={"Users"}
+          title="Personál a vybavení"
+          icon="Users"
           iconBg="bg-zinc-50"
           iconColor="text-zinc-500"
         >

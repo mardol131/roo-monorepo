@@ -1,69 +1,107 @@
-import Image from "next/image";
 import Button from "../../../../components/ui/atoms/button";
 import Text from "@/app/components/ui/atoms/text";
-import EventFilters from "./event-filters";
+import { generateMediaUrl } from "@/app/functions/generate-media-url";
 
-type HeroItem = {
-  id: string;
-  title: string;
-  linkText: string;
-  linkHref: string;
-};
-
-interface HeroSectionProps {
-  items?: HeroItem[];
-  backgroundImage?: string;
-  className?: string;
-}
-
-const defaultItems: HeroItem[] = [
-  {
-    id: "produkty",
-    title: "Naše produkty",
-    linkText: "Zjistit více",
-    linkHref: "/produkty",
-  },
-  {
-    id: "reseni",
-    title: "Inovativní řešení",
-    linkText: "Prozkoumat",
-    linkHref: "/reseni",
-  },
-  {
-    id: "sluzby",
-    title: "Profesionální služby",
-    linkText: "Kontaktovat",
-    linkHref: "/kontakt",
-  },
-];
-
-export default function HeroSection({}: HeroSectionProps) {
+export default function HeroSection() {
   return (
-    <div className="w-full h-full flex items-center justify-center bg-linear-0 from-white to-white/75 py-50 px-4 -mt-20">
-      <div className="max-w-content w-full text-center">
-        <Text variant="display-2xl" as="h1" className="mb-6">
-          Naplánujte celý event
-        </Text>
-        <Text variant="display-2xl" color="primary" className="mb-8">
-          Vše z jednoho místa
+    <div className="rounded-[4rem] overflow-hidden relative">
+      {/* Three-panel video background */}
+      <div className="absolute inset-0 grid grid-cols-3">
+        <video
+          autoPlay
+          muted
+          loop
+          playsInline
+          className="h-full w-full object-cover"
+        >
+          <source
+            src={generateMediaUrl("6760602-uhd_2560_1440_25fps.mp4", "videos")}
+            type="video/mp4"
+          />
+        </video>
+        <video
+          autoPlay
+          muted
+          loop
+          playsInline
+          className="h-full w-full scale-x-101 object-cover"
+        >
+          <source
+            src={generateMediaUrl("wedding.mp4", "videos")}
+            type="video/mp4"
+          />
+        </video>
+        <video
+          autoPlay
+          muted
+          loop
+          playsInline
+          className="h-full w-full object-cover"
+        >
+          <source
+            src={generateMediaUrl("852304-hd_1920_1080_24fps.mp4", "videos")}
+            type="video/mp4"
+          />
+        </video>
+      </div>
+
+      {/* Gradient overlay — dark for readability, fades to white at bottom for search section */}
+      <div className="absolute inset-0 bg-gradient-to-b from-black/65 to-black/55" />
+
+      {/* Content */}
+      <div className="relative z-10 flex flex-col items-center justify-center py-48 px-4 text-center">
+        {/* Eyebrow badge */}
+        {/* <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/25 rounded-full px-5 py-2 mb-10">
+          <Text variant="label-lg" color="white">
+            Plánování eventů bez stresu
+          </Text>
+        </div> */}
+
+        {/* Headline */}
+        <Text
+          variant="display-2xl"
+          color="white"
+          as="h1"
+          className="mb-4 max-w-4xl leading-tight"
+        >
+          Místo, catering &amp; zábava —{" "}
+          <span className="text-primary">z jednoho místa</span>
         </Text>
 
-        <div className="max-w-200 mx-auto">
-          <Text variant="h2" color="textDark">
-            S námi dokážete naplánovat celý event během pár minut. Od výběru
-            místa, přes catering až po zábavu. Zajišťujeme komunikaci s
-            dodavateli a koordinaci jejich služeb, abyste nemuseli řešit detaily
-            sami.
-          </Text>
+        {/* Subtext */}
+        <Text
+          variant="body-lg"
+          color="white"
+          className="max-w-lg mb-12 opacity-75"
+        >
+          Naplánujte celý event během pár minut. Bez emailů, bez stresu, bez
+          zdlouhavé koordinace.
+        </Text>
+
+        {/* CTAs */}
+        <div>
+          <div className="flex items-center gap-4 flex-wrap justify-center">
+            <Button
+              text="Prozkoumat katalog"
+              size="xl"
+              version="primary"
+              link={{ pathname: "/catalog" }}
+            />
+            <Button
+              text="Jak to funguje"
+              size="xl"
+              version="white"
+              link={{ pathname: "/pages/how-it-works-for-user" }}
+            />
+          </div>{" "}
+          <Button
+            text="Chcete se stát dodavatelem?"
+            size="sm"
+            className="text-white mt-5"
+            version="none"
+            link={{ pathname: "/pages/how-it-works-for-company" }}
+          />
         </div>
-        <Button
-          text="Přejít do katalogu"
-          size="2xl"
-          className="mt-10"
-          link={{
-            pathname: "/catalog/gastro",
-          }}
-        />
       </div>
     </div>
   );

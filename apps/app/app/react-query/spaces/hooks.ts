@@ -4,16 +4,26 @@ import {
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
+import { GetCollectionParams } from "@/app/functions/api/general";
 import { spaceKeys } from "../query-keys";
 import {
   createSpace,
   CreateSpaceInput,
   deleteSpace,
   fetchSpace,
+  fetchSpaces,
   fetchSpacesByListing,
   updateSpace,
 } from "./fetch";
 import { Space } from "@roo/common";
+
+export function useSpaces(options?: GetCollectionParams, enabled = true) {
+  return useQuery({
+    queryKey: spaceKeys.all(options?.query, options?.limit),
+    queryFn: () => fetchSpaces(options),
+    enabled,
+  });
+}
 
 export function useSpacesByListing(listingId: string) {
   return useQuery({

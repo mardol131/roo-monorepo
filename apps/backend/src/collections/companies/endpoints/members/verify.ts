@@ -34,24 +34,24 @@ export const verifyMemberEndpoint: Endpoint = {
     }
 
     if (invitation.status !== 'pending') {
-      return Response.json({ error: 'Pozvánka již byla použita nebo byla zrušena' }, { status: 409 })
+      return Response.json(
+        { error: 'Pozvánka již byla použita nebo byla zrušena' },
+        { status: 409 },
+      )
     }
 
     const user = req.user as User
     if (user.email !== invitation.email) {
-      return Response.json(
-        { error: 'Pozvánka je určena pro jiný e-mail' },
-        { status: 403 },
-      )
+      return Response.json({ error: 'Pozvánka je určena pro jiný e-mail' }, { status: 403 })
     }
 
     const companyId =
       typeof invitation.company === 'string' ? invitation.company : invitation.company.id
 
-    const company = (await req.payload.findByID({
+    const company = await req.payload.findByID({
       collection: 'companies',
       id: companyId,
-    })) as Company
+    })
 
     const alreadyMember = (company.members ?? []).some((m) => {
       const memberId = typeof m.user === 'string' ? m.user : m.user.id
@@ -70,6 +70,7 @@ export const verifyMemberEndpoint: Endpoint = {
           ...(company.members ?? []).map((m) => ({
             ...m,
             user: typeof m.user === 'string' ? m.user : m.user.id,
+            invitationEmail: m.invitationEmail,
           })),
           {
             user: user.id,

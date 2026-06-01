@@ -35,6 +35,7 @@ import {
   useRef,
   useState,
 } from "react";
+import { RefreshCw } from "lucide-react";
 import { useForm } from "react-hook-form";
 import PageHeading from "@/app/[locale]/(user)/components/page-heading";
 import { globalToastEvents } from "@/app/components/ui/molecules/global-toast";
@@ -193,7 +194,7 @@ const CustomSectionCard = forwardRef<
     onDelete: (blockName: string) => void;
   }
 >(function CustomSectionCard({ section, onChange, onDelete }, ref) {
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(!section.title);
   const required = blockTypeMaxImages[section.blockType];
 
   const {
@@ -349,6 +350,7 @@ export default function SectionsPage() {
   );
   const [saved, setSaved] = useState(false);
   const [isPickingType, setIsPickingType] = useState(false);
+  const [iframeKey, setIframeKey] = useState(0);
 
   const cardRefs = useRef(new Map<string, CardHandle>());
 
@@ -508,6 +510,37 @@ export default function SectionsPage() {
             onClick={handleSave}
             disabled={detailIsPending}
           />
+        </div>
+
+        <div className="flex flex-col gap-3 pt-4">
+          <div className="flex items-center justify-between">
+            <Text variant="h4" color="textDark">
+              Náhled inzerátu
+            </Text>
+            <button
+              type="button"
+              onClick={() => setIframeKey((k) => k + 1)}
+              className="flex items-center gap-1.5 text-zinc-400 hover:text-zinc-600 transition-colors"
+            >
+              <RefreshCw size={14} />
+              <Text variant="caption" color="secondary">
+                Obnovit
+              </Text>
+            </button>
+          </div>
+          <div
+            className="rounded-xl overflow-hidden border border-zinc-200 w-full"
+            style={{ height: 700 }}
+          >
+            <iframe
+              key={iframeKey}
+              src={`${process.env.NEXT_PUBLIC_WEBSITE_URL}/cs/inzerat/${listingId}`}
+              className="w-full h-full"
+              title="Náhled inzerátu"
+              style={{ zoom: 0.5 }}
+              sandbox="allow-scripts allow-same-origin allow-popups"
+            />
+          </div>
         </div>
       </div>
     </main>

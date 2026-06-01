@@ -9,6 +9,7 @@ interface DateFilterProps {
   onEndChange?: (value: string) => void;
   startDateInput?: React.InputHTMLAttributes<HTMLInputElement>;
   endDateInput?: React.InputHTMLAttributes<HTMLInputElement>;
+  type?: "dropdown" | "inline";
 }
 
 const DAYS_OF_WEEK = ["Po", "Út", "St", "Čt", "Pá", "So", "Ne"];
@@ -26,7 +27,6 @@ const MONTHS = [
   "Listopad",
   "Prosinec",
 ];
-
 
 function parseDate(iso?: string): Date | null {
   if (!iso) return null;
@@ -48,12 +48,15 @@ export default function DateFilter({
   onEndChange,
   startDateInput,
   endDateInput,
+  type = "dropdown",
 }: DateFilterProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [currentMonth, setCurrentMonth] = useState(
     parseDate(startValue) ?? new Date(),
   );
-  const [startDate, setStartDate] = useState<Date | null>(parseDate(startValue));
+  const [startDate, setStartDate] = useState<Date | null>(
+    parseDate(startValue),
+  );
   const [endDate, setEndDate] = useState<Date | null>(parseDate(endValue));
   const [startTime, setStartTime] = useState(parseTime(startValue) || "09:00");
   const [endTime, setEndTime] = useState(parseTime(endValue) || "17:00");
@@ -179,6 +182,145 @@ export default function DateFilter({
     currentMonth.getMonth() + 1,
   );
 
+  const calendarPanel = (
+    <div className="grid grid-cols-2 gap-6 p-4">
+      {/* Start month */}
+      <div>
+        <div className="flex items-center justify-between mb-4">
+          <button
+            type="button"
+            onClick={() =>
+              setCurrentMonth(
+                new Date(
+                  currentMonth.getFullYear(),
+                  currentMonth.getMonth() - 1,
+                ),
+              )
+            }
+            className="p-1 hover:bg-zinc-50 rounded"
+          >
+            <ChevronLeft className="w-4 h-4" />
+          </button>
+          <h3 className="text-sm font-medium text-zinc-900">
+            {MONTHS[currentMonth.getMonth()]} {currentMonth.getFullYear()}
+          </h3>
+        </div>
+
+        <div className="grid grid-cols-7 gap-1 mb-2">
+          {DAYS_OF_WEEK.map((day) => (
+            <div
+              key={day}
+              className="w-8 h-8 flex items-center justify-center text-xs font-medium text-zinc-600"
+            >
+              {day}
+            </div>
+          ))}
+        </div>
+
+        <div className="grid grid-cols-7 gap-1">
+          {renderCalendar(currentMonth).map((date, index) => (
+            <div key={index} className="w-8 h-8">
+              {date ? (
+                <button
+                  type="button"
+                  onClick={() => handleDateClick(date)}
+                  className={`w-full h-full rounded text-xs font-medium transition-colors ${
+                    isDateSelected(date)
+                      ? "bg-rose-500 text-white"
+                      : isDateInRange(date)
+                        ? "bg-rose-100 text-rose-900"
+                        : "hover:bg-zinc-100 text-zinc-900"
+                  }`}
+                >
+                  {date.getDate()}
+                </button>
+              ) : null}
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Next month */}
+      <div>
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-sm font-medium text-zinc-900">
+            {MONTHS[nextMonth.getMonth()]} {nextMonth.getFullYear()}
+          </h3>
+          <button
+            type="button"
+            onClick={() =>
+              setCurrentMonth(
+                new Date(
+                  currentMonth.getFullYear(),
+                  currentMonth.getMonth() + 1,
+                ),
+              )
+            }
+            className="p-1 hover:bg-zinc-50 rounded"
+          >
+            <ChevronRight className="w-4 h-4" />
+          </button>
+        </div>
+
+        <div className="grid grid-cols-7 gap-1 mb-2">
+          {DAYS_OF_WEEK.map((day) => (
+            <div
+              key={day}
+              className="w-8 h-8 flex items-center justify-center text-xs font-medium text-zinc-600"
+            >
+              {day}
+            </div>
+          ))}
+        </div>
+
+        <div className="grid grid-cols-7 gap-1">
+          {renderCalendar(nextMonth).map((date, index) => (
+            <div key={index} className="w-8 h-8">
+              {date ? (
+                <button
+                  type="button"
+                  onClick={() => handleDateClick(date)}
+                  className={`w-full h-full rounded text-xs font-medium transition-colors ${
+                    isDateSelected(date)
+                      ? "bg-rose-500 text-white"
+                      : isDateInRange(date)
+                        ? "bg-rose-100 text-rose-900"
+                        : "hover:bg-zinc-100 text-zinc-900"
+                  }`}
+                >
+                  {date.getDate()}
+                </button>
+              ) : null}
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Times */}
+      <div className="col-span-2 border-t border-zinc-100 pt-4 grid grid-cols-2 gap-3">
+        <TimeInput label="Začátek" value={startTime} onChange={setStartTime} />
+        <TimeInput
+          label="Konec"
+          value={endTime}
+          onChange={setEndTime}
+          min={startTime}
+        />
+      </div>
+    </div>
+  );
+
+  if (type === "inline") {
+    return (
+      <div className="flex flex-col gap-2">
+        <div className="bg-white border border-zinc-200 rounded-lg w-fit">
+          {calendarPanel}
+        </div>
+        <input type="hidden" value={startDateTimeString} {...startDateInput} />
+        <input type="hidden" value={endDateTimeString} {...endDateInput} />
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col gap-2">
       <div className="relative" ref={ref}>
@@ -193,144 +335,11 @@ export default function DateFilter({
 
         {isOpen && (
           <div className="absolute top-full left-0 mt-2 bg-white border border-zinc-200 rounded-lg shadow-lg z-10 w-fit">
-            <div className="grid grid-cols-2 gap-6 p-4">
-              {/* Start month */}
-              <div>
-                <div className="flex items-center justify-between mb-4">
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setCurrentMonth(
-                        new Date(
-                          currentMonth.getFullYear(),
-                          currentMonth.getMonth() - 1,
-                        ),
-                      )
-                    }
-                    className="p-1 hover:bg-zinc-50 rounded"
-                  >
-                    <ChevronLeft className="w-4 h-4" />
-                  </button>
-                  <h3 className="text-sm font-medium text-zinc-900">
-                    {MONTHS[currentMonth.getMonth()]}{" "}
-                    {currentMonth.getFullYear()}
-                  </h3>
-                </div>
-
-                {/* Days header */}
-                <div className="grid grid-cols-7 gap-1 mb-2">
-                  {DAYS_OF_WEEK.map((day) => (
-                    <div
-                      key={day}
-                      className="w-8 h-8 flex items-center justify-center text-xs font-medium text-zinc-600"
-                    >
-                      {day}
-                    </div>
-                  ))}
-                </div>
-
-                {/* Days */}
-                <div className="grid grid-cols-7 gap-1">
-                  {renderCalendar(currentMonth).map((date, index) => (
-                    <div key={index} className="w-8 h-8">
-                      {date ? (
-                        <button
-                          type="button"
-                          onClick={() => handleDateClick(date)}
-                          className={`w-full h-full rounded text-xs font-medium transition-colors ${
-                            isDateSelected(date)
-                              ? "bg-rose-500 text-white"
-                              : isDateInRange(date)
-                                ? "bg-rose-100 text-rose-900"
-                                : "hover:bg-zinc-100 text-zinc-900"
-                          }`}
-                        >
-                          {date.getDate()}
-                        </button>
-                      ) : null}
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Next month */}
-              <div>
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-sm font-medium text-zinc-900">
-                    {MONTHS[nextMonth.getMonth()]} {nextMonth.getFullYear()}
-                  </h3>
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setCurrentMonth(
-                        new Date(
-                          currentMonth.getFullYear(),
-                          currentMonth.getMonth() + 1,
-                        ),
-                      )
-                    }
-                    className="p-1 hover:bg-zinc-50 rounded"
-                  >
-                    <ChevronRight className="w-4 h-4" />
-                  </button>
-                </div>
-
-                {/* Days header */}
-                <div className="grid grid-cols-7 gap-1 mb-2">
-                  {DAYS_OF_WEEK.map((day) => (
-                    <div
-                      key={day}
-                      className="w-8 h-8 flex items-center justify-center text-xs font-medium text-zinc-600"
-                    >
-                      {day}
-                    </div>
-                  ))}
-                </div>
-
-                {/* Days */}
-                <div className="grid grid-cols-7 gap-1">
-                  {renderCalendar(nextMonth).map((date, index) => (
-                    <div key={index} className="w-8 h-8">
-                      {date ? (
-                        <button
-                          type="button"
-                          onClick={() => handleDateClick(date)}
-                          className={`w-full h-full rounded text-xs font-medium transition-colors ${
-                            isDateSelected(date)
-                              ? "bg-rose-500 text-white"
-                              : isDateInRange(date)
-                                ? "bg-rose-100 text-rose-900"
-                                : "hover:bg-zinc-100 text-zinc-900"
-                          }`}
-                        >
-                          {date.getDate()}
-                        </button>
-                      ) : null}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            {/* Times */}
-            <div className="border-t border-zinc-100 p-4 grid grid-cols-2 gap-3">
-              <TimeInput
-                label="Začátek"
-                value={startTime}
-                onChange={setStartTime}
-              />
-              <TimeInput
-                label="Konec"
-                value={endTime}
-                onChange={setEndTime}
-                min={startTime}
-              />
-            </div>
+            {calendarPanel}
           </div>
         )}
       </div>
 
-      {/* Hidden inputs for form integration */}
       <input type="hidden" value={startDateTimeString} {...startDateInput} />
       <input type="hidden" value={endDateTimeString} {...endDateInput} />
     </div>

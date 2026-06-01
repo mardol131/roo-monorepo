@@ -1,15 +1,13 @@
+"use client";
+
 import { Listing } from "@roo/common";
 import { MapPin } from "lucide-react";
-import { InfoRow, resolveNames } from "../listing-ui";
+import { InfoRow } from "../listing-ui";
 import SectionWrapper from "../section-wrapper";
 
 function ExactLocation({ listing }: { listing: Listing }) {
-  const cityName =
-    typeof listing.location.city === "string"
-      ? listing.location.city
-      : (listing.location.city?.name ?? "");
-
-  const mapUrl = `https://maps.google.com/?q=${listing.location.latitude},${listing.location.longitude}`;
+  const { address, city, latitude, longitude } = listing.location;
+  const mapUrl = `https://maps.google.com/?q=${latitude},${longitude}`;
 
   return (
     <SectionWrapper title="Kde nás najdete">
@@ -17,7 +15,7 @@ function ExactLocation({ listing }: { listing: Listing }) {
         <InfoRow
           icon={<MapPin size={16} />}
           label="Adresa"
-          value={`${listing.location.address}${cityName ? `, ${cityName}` : ""}`}
+          value={`${address}${city ? `, ${city}` : ""}`}
         />
         <a
           href={mapUrl}
@@ -32,27 +30,31 @@ function ExactLocation({ listing }: { listing: Listing }) {
   );
 }
 
-function RegionsLocation({ listing }: { listing: Listing }) {
-  const cities = resolveNames(
-    (listing.location.cities ?? []) as (string | { name: string })[],
-  );
-  const regions = resolveNames(
-    (listing.location.regions ?? []) as (string | { name: string })[],
-  );
-  const locationParts = [
-    listing.location.address,
-    ...cities,
-    ...regions,
-  ].filter(Boolean) as string[];
+function ServiceableArea({ listing }: { listing: Listing }) {
+  const { wholeCountry, regions, districts, cities } = listing.servicableArea;
 
-  if (locationParts.length === 0) return null;
+  if (wholeCountry) {
+    return (
+      <SectionWrapper title="Kde působíme">
+        <InfoRow icon={<MapPin size={16} />} label="Oblast" value="Celá ČR" />
+      </SectionWrapper>
+    );
+  }
+
+  const parts = [
+    ...(regions ?? []),
+    ...(districts ?? []),
+    ...(cities ?? []),
+  ].filter(Boolean);
+
+  if (parts.length === 0) return null;
 
   return (
     <SectionWrapper title="Kde působíme">
       <InfoRow
         icon={<MapPin size={16} />}
-        label="Lokalita"
-        value={locationParts.join(", ")}
+        label="Oblast"
+        value={parts.join(", ")}
       />
     </SectionWrapper>
   );
@@ -63,6 +65,10 @@ export default function ListingLocationSection({
 }: {
   listing: Listing;
 }) {
-  if (listing.location.type === "exact") return <ExactLocation listing={listing} />;
-  return <RegionsLocation listing={listing} />;
+  return (
+    <>
+      <ExactLocation listing={listing} />
+      <ServiceableArea listing={listing} />
+    </>
+  );
 }

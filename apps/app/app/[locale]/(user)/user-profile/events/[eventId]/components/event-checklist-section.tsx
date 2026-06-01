@@ -55,6 +55,7 @@ export default function EventChecklistSection({ eventId, checklist }: Props) {
           dueDate: dueDate ?? undefined,
           completed: false,
           priority,
+          status: "active",
         },
       ],
       {
@@ -71,8 +72,12 @@ export default function EventChecklistSection({ eventId, checklist }: Props) {
 
   const [completedOpen, setCompletedOpen] = useState(false);
   const priorityOrder = { high: 0, medium: 1, low: 2 };
-  const sortByPriority = (a: NonNullable<Event["checklist"]>[number], b: NonNullable<Event["checklist"]>[number]) =>
-    (priorityOrder[a.priority ?? "medium"] ?? 1) - (priorityOrder[b.priority ?? "medium"] ?? 1);
+  const sortByPriority = (
+    a: NonNullable<Event["checklist"]>[number],
+    b: NonNullable<Event["checklist"]>[number],
+  ) =>
+    (priorityOrder[a.priority ?? "medium"] ?? 1) -
+    (priorityOrder[b.priority ?? "medium"] ?? 1);
   const pending = checklist.filter((i) => !i.completed).sort(sortByPriority);
   const completed = checklist.filter((i) => i.completed).sort(sortByPriority);
   const done = completed.length;
@@ -98,7 +103,7 @@ export default function EventChecklistSection({ eventId, checklist }: Props) {
 
       {/* Pending items */}
       {pending.length > 0 && (
-        <div className="divide-y divide-zinc-50">
+        <div className="divide-y divide-zinc-50 flex flex-col">
           {pending.map((item, i) => (
             <ChecklistItemRow
               key={item.id ?? i}
@@ -122,7 +127,9 @@ export default function EventChecklistSection({ eventId, checklist }: Props) {
             <Text variant="caption" color="secondary">
               Splněno ({completed.length})
             </Text>
-            <ChevronDown className={`w-4 h-4 text-zinc-400 transition-transform ${completedOpen ? "rotate-180" : ""}`} />
+            <ChevronDown
+              className={`w-4 h-4 text-zinc-400 transition-transform ${completedOpen ? "rotate-180" : ""}`}
+            />
           </button>
           {completedOpen && (
             <div className="divide-y divide-zinc-50">

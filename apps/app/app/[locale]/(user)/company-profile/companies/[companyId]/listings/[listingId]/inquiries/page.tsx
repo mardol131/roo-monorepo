@@ -9,6 +9,8 @@ import { useTranslations } from "next-intl";
 import { useParams } from "next/navigation";
 import { useInquiriesByListing } from "@/app/react-query/inquiries/hooks";
 import { icons } from "lucide-react";
+import TabFilter from "@/app/[locale]/(user)/components/tab-filter";
+import { useState } from "react";
 
 export default function page() {
   const t = useTranslations("global");
@@ -17,6 +19,9 @@ export default function page() {
     listingId: string;
     companyId: string;
   }>();
+  const [activeFilter, setActiveFilter] = useState<
+    Inquiry["status"]["company"] | "all"
+  >("all");
 
   const { data: inquiries } = useInquiriesByListing(listingId);
 
@@ -29,18 +34,26 @@ export default function page() {
 
       {/* Tabs */}
       <CardContainer
-        filters={[
-          { label: t("common.words.all"), value: "all" },
-          { label: t("inquiries.status.pending"), value: "pending" },
-          { label: t("inquiries.status.confirmed"), value: "confirmed" },
-          { label: t("inquiries.status.cancelled"), value: "cancelled" },
-        ]}
-        defaultFilter="all"
-        items={inquiries?.docs ?? []}
-        filterFn={(item, filter) => (item as Inquiry).status.user === filter}
-        renderItem={(item) => {
-          const inquiry = item as Inquiry;
-          return (
+        filterComponent={
+          <TabFilter
+            tabs={[
+              { label: t("common.words.all"), value: "all" },
+              { label: t("inquiries.status.pending"), value: "pending" },
+              { label: t("inquiries.status.confirmed"), value: "confirmed" },
+              { label: t("inquiries.status.cancelled"), value: "cancelled" },
+            ]}
+            activeTab={activeFilter}
+            onChange={(value) => {
+              setActiveFilter(value);
+            }}
+          />
+        }
+        items={inquiries?.docs
+          ?.filter((inquiry) => {
+            if (activeFilter === "all") return true;
+            return inquiry.status.company === activeFilter;
+          })
+          .map((inquiry) => (
             <EntityCard
               key={inquiry.id}
               label={
@@ -85,8 +98,7 @@ export default function page() {
                 },
               }}
             />
-          );
-        }}
+          ))}
         emptyState={{
           text: "Zatím žádné poptávky",
           subtext:

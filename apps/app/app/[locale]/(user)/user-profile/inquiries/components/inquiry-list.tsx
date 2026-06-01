@@ -125,7 +125,8 @@ export default function InquiryList({ inquiries }: { inquiries: Inquiry[] }) {
                           : []),
                       ]}
                       link={{
-                        pathname: "/user-profile/events/[eventId]/[inquiryId]",
+                        pathname:
+                          "/user-profile/events/[eventId]/inquiries/[inquiryId]",
                         params: {
                           eventId: getIdFromRelationshipField(inquiry.event),
                           inquiryId: inquiry.id,

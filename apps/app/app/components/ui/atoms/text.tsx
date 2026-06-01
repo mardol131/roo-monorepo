@@ -14,6 +14,7 @@ type TextVariant =
   | "body-sm"
   | "label-lg"
   | "label"
+  | "label-sm"
   | "caption"
   | "quote";
 
@@ -37,6 +38,7 @@ const variantClasses: Record<TextVariant, string> = {
   body: "text-base leading-relaxed",
   "body-sm": "text-sm leading-relaxed",
   "label-lg": "text-sm font-medium",
+  "label-sm": "text-[11px] font-medium",
   label: "text-xs font-medium",
   caption: "text-xs font-normal",
   quote: "text-lg italic leading-relaxed",
@@ -55,6 +57,7 @@ const defaultElements: Record<TextVariant, keyof JSX.IntrinsicElements> = {
   "body-sm": "p",
   "label-lg": "span",
   label: "span",
+  "label-sm": "span",
   caption: "span",
   quote: "blockquote",
 };
@@ -66,6 +69,7 @@ const getColorStyles = (color: Color): string => {
     primary: "text-primary",
     onPrimary: "text-on-primary",
     secondary: "text-secondary",
+    none: "",
     primarySurface: "text-primary-surface",
     onSecondary: "text-on-secondary",
     calendarSurface: "text-calendar-surface",

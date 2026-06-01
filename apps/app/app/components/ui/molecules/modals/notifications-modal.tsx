@@ -16,12 +16,12 @@ import {
   Settings,
 } from "lucide-react";
 import Link from "next/link";
-import { useCallback } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { userNotificationKeys } from "@/app/react-query/query-keys";
-import Button from "../../atoms/button";
 import Text from "../../atoms/text";
 import ModalLayout from "../modal-layout";
+import { format } from "date-fns";
 
 const notificationTypeConfig: Record<
   UserNotification["type"],
@@ -63,10 +63,26 @@ export function NotificationsModal({ onClose }: Props) {
   const { mutateAsync: updateUserNotifications } = useUpdateUserNotifications();
   const { mutate: markOneSeen } = useUpdateUserNotification();
 
-  const allDocs = data?.pages.flatMap((p) => p.docs ?? []) ?? [];
-  const unreadCount = allDocs.filter((n) => !n.seen).length;
+  const notifications = data?.pages.flatMap((p) => p.docs ?? []) ?? [];
+  const unreadCount = notifications.filter((n) => !n.seen).length;
 
   const queryClient = useQueryClient();
+  const sentinelRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const el = sentinelRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && hasNextPage && !isFetchingNextPage) {
+          fetchNextPage();
+        }
+      },
+      { threshold: 0.1 },
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   const closeHandler = useCallback(() => {
     onClose?.();
@@ -117,7 +133,7 @@ export function NotificationsModal({ onClose }: Props) {
             </div>
           ))}
         </div>
-      ) : allDocs.length === 0 ? (
+      ) : notifications.length === 0 ? (
         <div className="py-10 flex flex-col items-center gap-3">
           <div className="w-12 h-12 rounded-full bg-zinc-100 flex items-center justify-center">
             <Bell className="w-5 h-5 text-zinc-400" />
@@ -129,7 +145,7 @@ export function NotificationsModal({ onClose }: Props) {
       ) : (
         <div className="flex flex-col gap-0">
           <ul className="divide-y divide-zinc-100">
-            {allDocs.map((n) => {
+            {notifications.map((n) => {
               const typeConfig = notificationTypeConfig[n.type];
 
               return (
@@ -148,21 +164,21 @@ export function NotificationsModal({ onClose }: Props) {
                         {!n.seen && (
                           <span className="w-1.5 h-1.5 rounded-full bg-primary shrink-0" />
                         )}
-                        <Text variant="label-lg" color="textDark" as="span">
+                        <Text
+                          variant="label-lg"
+                          color="textDark"
+                          as="span"
+                          className="font-semibold"
+                        >
                           {n.heading}
                         </Text>
                       </div>
-                      <Text variant="body-sm" color="textLight">
+                      <Text variant="body-sm" color="textDark">
                         {n.text}
                       </Text>
                       <div className="flex items-center gap-3">
                         <Text variant="caption" color="textLight">
-                          {new Date(n.createdAt).toLocaleDateString("cs-CZ", {
-                            day: "numeric",
-                            month: "short",
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          })}
+                          {format(new Date(n.createdAt), "d. M. yyyy H:mm")}
                         </Text>
                         {n.link && (
                           <Link
@@ -177,7 +193,9 @@ export function NotificationsModal({ onClose }: Props) {
                     </div>
                     {!n.seen && (
                       <button
-                        onClick={() => markOneSeen({ id: n.id, data: { seen: true } })}
+                        onClick={() =>
+                          markOneSeen({ id: n.id, data: { seen: true } })
+                        }
                         title="Označit jako přečtené"
                         className="shrink-0 w-7 h-7 flex items-center justify-center rounded-lg text-zinc-400 hover:text-zinc-600 hover:bg-zinc-100 transition-colors"
                       >
@@ -190,16 +208,11 @@ export function NotificationsModal({ onClose }: Props) {
             })}
           </ul>
 
-          {hasNextPage && (
-            <div className="pt-4 flex justify-start">
-              <Button
-                text="Načíst další"
-                version="primary"
-                onClick={() => fetchNextPage()}
-                loading={isFetchingNextPage}
-              />
-            </div>
-          )}
+          <div ref={sentinelRef} className="py-2 flex justify-center">
+            {isFetchingNextPage && (
+              <div className="w-5 h-5 rounded-full border-2 border-zinc-200 border-t-zinc-500 animate-spin" />
+            )}
+          </div>
         </div>
       )}
     </ModalLayout>

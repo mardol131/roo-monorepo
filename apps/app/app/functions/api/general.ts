@@ -4,6 +4,7 @@ import { stringify } from "qs-esm";
 export type GetCollectionParams = {
   query?: Where;
   limit?: number;
+  depth?: number;
   page?: number;
   sort?: string;
   searchParams?: URLSearchParams;
@@ -17,6 +18,7 @@ export type GetCollectionOptions<T extends keyof Config["collections"]> = {
 export async function getCollection<T extends keyof Config["collections"]>({
   collection,
   query,
+  depth,
   limit,
   page,
   sort,
@@ -32,12 +34,15 @@ export async function getCollection<T extends keyof Config["collections"]>({
   const limitQuery = limit ? `limit=${limit}` : undefined;
   const pageQuery = page ? `page=${page}` : undefined;
   const sortQuery = sort ? `sort=${sort}` : undefined;
+  const depthQuery =
+    depth !== null && depth !== undefined ? `depth=${depth}` : undefined;
 
   const queryParams = [
     stringifiedQuery,
     limitQuery,
     pageQuery,
     sortQuery,
+    depthQuery,
     searchParams?.toString(),
   ]
     .filter(Boolean)
@@ -58,19 +63,28 @@ export async function getCollectionItem<T extends keyof Config["collections"]>({
   collection,
   id,
   headers,
+  depth,
   searchParams,
 }: {
   collection: T;
   id: string;
   headers?: Record<string, string>;
   searchParams?: URLSearchParams;
-}): Promise<Config["collections"][T]> {
+} & Omit<GetCollectionParams, "query" | "limit" | "page">): Promise<
+  Config["collections"][T]
+> {
   const url = new URL(
     `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/${collection}/${id}`,
   );
 
+  const depthQuery =
+    depth !== null && depth !== undefined ? `depth=${depth}` : undefined;
+
   if (searchParams) {
     url.search = searchParams.toString();
+  }
+  if (depthQuery) {
+    url.searchParams.set("depth", depthQuery);
   }
 
   const res = await fetch(url.toString(), {

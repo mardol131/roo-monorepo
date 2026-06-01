@@ -72,12 +72,12 @@ export interface Config {
     necessities: Necessity;
     'entertainment-types': EntertainmentType;
     'dietary-options': DietaryOption;
-    'food-service-styles': FoodServiceStyle;
+    'food-service-types': FoodServiceType;
     regions: Region;
     'dish-types': DishType;
     users: User;
     admins: Admin;
-    media: Media;
+    'user-media': UserMedia;
     variants: Variant;
     activities: Activity;
     services: Service;
@@ -86,9 +86,15 @@ export interface Config {
     spaces: Space;
     personnel: Personnel;
     companies: Company;
+    countries: Country;
     cities: City;
     'place-types': PlaceType;
-    rules: Rule;
+    'venue-rules': VenueRule;
+    'gastro-rules': GastroRule;
+    'entertainment-rules': EntertainmentRule;
+    'food-preparation-styles': FoodPreparationStyle;
+    'space-rules': SpaceRule;
+    'music-genres': MusicGenre;
     technologies: Technology;
     amenities: Amenity;
     'room-amenities': RoomAmenity;
@@ -117,12 +123,12 @@ export interface Config {
     necessities: NecessitiesSelect<false> | NecessitiesSelect<true>;
     'entertainment-types': EntertainmentTypesSelect<false> | EntertainmentTypesSelect<true>;
     'dietary-options': DietaryOptionsSelect<false> | DietaryOptionsSelect<true>;
-    'food-service-styles': FoodServiceStylesSelect<false> | FoodServiceStylesSelect<true>;
+    'food-service-types': FoodServiceTypesSelect<false> | FoodServiceTypesSelect<true>;
     regions: RegionsSelect<false> | RegionsSelect<true>;
     'dish-types': DishTypesSelect<false> | DishTypesSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     admins: AdminsSelect<false> | AdminsSelect<true>;
-    media: MediaSelect<false> | MediaSelect<true>;
+    'user-media': UserMediaSelect<false> | UserMediaSelect<true>;
     variants: VariantsSelect<false> | VariantsSelect<true>;
     activities: ActivitiesSelect<false> | ActivitiesSelect<true>;
     services: ServicesSelect<false> | ServicesSelect<true>;
@@ -131,9 +137,15 @@ export interface Config {
     spaces: SpacesSelect<false> | SpacesSelect<true>;
     personnel: PersonnelSelect<false> | PersonnelSelect<true>;
     companies: CompaniesSelect<false> | CompaniesSelect<true>;
+    countries: CountriesSelect<false> | CountriesSelect<true>;
     cities: CitiesSelect<false> | CitiesSelect<true>;
     'place-types': PlaceTypesSelect<false> | PlaceTypesSelect<true>;
-    rules: RulesSelect<false> | RulesSelect<true>;
+    'venue-rules': VenueRulesSelect<false> | VenueRulesSelect<true>;
+    'gastro-rules': GastroRulesSelect<false> | GastroRulesSelect<true>;
+    'entertainment-rules': EntertainmentRulesSelect<false> | EntertainmentRulesSelect<true>;
+    'food-preparation-styles': FoodPreparationStylesSelect<false> | FoodPreparationStylesSelect<true>;
+    'space-rules': SpaceRulesSelect<false> | SpaceRulesSelect<true>;
+    'music-genres': MusicGenresSelect<false> | MusicGenresSelect<true>;
     technologies: TechnologiesSelect<false> | TechnologiesSelect<true>;
     amenities: AmenitiesSelect<false> | AmenitiesSelect<true>;
     'room-amenities': RoomAmenitiesSelect<false> | RoomAmenitiesSelect<true>;
@@ -271,9 +283,9 @@ export interface DietaryOption {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "food-service-styles".
+ * via the `definition` "food-service-types".
  */
-export interface FoodServiceStyle {
+export interface FoodServiceType {
   id: string;
   name: string;
   slug: string;
@@ -374,22 +386,21 @@ export interface Admin {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "media".
+ * via the `definition` "user-media".
  */
-export interface Media {
+export interface UserMedia {
   id: string;
-  alt: string;
-  updatedAt: string;
-  createdAt: string;
-  url?: string | null;
-  thumbnailURL?: string | null;
-  filename?: string | null;
-  mimeType?: string | null;
-  filesize?: number | null;
+  filename: string;
+  alt?: string | null;
   width?: number | null;
   height?: number | null;
-  focalX?: number | null;
-  focalY?: number | null;
+  size?: number | null;
+  mimeType?: string | null;
+  bucket?: ('listings-images' | 'listings-videos') | null;
+  user: string | User;
+  status: 'active' | 'disabled' | 'archived';
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -399,31 +410,22 @@ export interface Variant {
   id: string;
   listing: string | Listing;
   status: 'active' | 'inactive' | 'disabled' | 'archived';
+  capacity: {
+    min?: number | null;
+    max?: number | null;
+  };
   name: string;
   shortDescription: string;
   description?: string | null;
-  type: 'allYear' | 'seasonal';
-  selectedSeasons?:
-    | {
-        from: string;
-        to: string;
-        id?: string | null;
-      }[]
-    | null;
-  availability: 'allDay' | 'selectedHours';
-  selectedHours?:
-    | {
-        from: string;
-        to: string;
-        id?: string | null;
-      }[]
-    | null;
   price: {
-    generalPrice: number;
+    base: number;
+    pricingUnit: 'per_day' | 'per_person' | 'per_hour' | 'lump_sum';
     seasonalPrices?:
       | {
-          price: number;
-          description?: string | null;
+          amount: number;
+          adjustmentType: 'surcharge' | 'discount';
+          valueType: 'absolute' | 'percentage';
+          title: string;
           from: string;
           to: string;
           id?: string | null;
@@ -442,7 +444,6 @@ export interface Variant {
         id?: string | null;
       }[]
     | null;
-  eventTypes?: (string | EventType)[] | null;
   images: {
     coverImage: {
       filename?: string | null;
@@ -451,6 +452,7 @@ export interface Variant {
       height?: number | null;
       size?: number | null;
       mimeType?: string | null;
+      bucket?: ('listings-images' | 'listings-videos') | null;
     };
     gallery?:
       | {
@@ -460,6 +462,7 @@ export interface Variant {
           height?: number | null;
           size?: number | null;
           mimeType?: string | null;
+          bucket?: ('listings-images' | 'listings-videos') | null;
           id?: string | null;
         }[]
       | null;
@@ -467,23 +470,9 @@ export interface Variant {
   details: (
     | {
         includedSpaces?: (string | Space)[] | null;
-        activities?: (string | Activity)[] | null;
-        personnel?: (string | Personnel)[] | null;
-        services?: (string | Service)[] | null;
-        capacity: {
-          min?: number | null;
-          max: number;
-        };
-        amenities?: (string | Amenity)[] | null;
-        technology?: (string | Technology)[] | null;
-        canBeBookedAsWhole?: boolean | null;
         accommodation: {
           included?: boolean | null;
           capacity?: number | null;
-        };
-        parking: {
-          included?: boolean | null;
-          spots?: number | null;
         };
         breakfast: {
           included?: boolean | null;
@@ -495,53 +484,19 @@ export interface Variant {
         blockType: 'venue';
       }
     | {
-        cuisines?: (string | Cuisine)[] | null;
-        dishTypes?: (string | DishType)[] | null;
-        dietaryOptions?: (string | DietaryOption)[] | null;
-        foodServiceStyle?: (string | FoodServiceStyle)[] | null;
-        personnel?: (string | Personnel)[] | null;
-        capacity: {
-          min?: number | null;
-          max: number;
-        };
-        pricePerPerson?: number | null;
-        necessities?: (string | Necessity)[] | null;
         kidsMenu?: boolean | null;
         alcoholIncluded?: boolean | null;
-        minimumOrderCount?: number | null;
+        minimumOrderAmount?: number | null;
         id?: string | null;
         blockName?: string | null;
         blockType: 'gastro';
       }
     | {
-        personnel?: (string | Personnel)[] | null;
-        necessities?: (string | Necessity)[] | null;
         audience?: ('adults' | 'kids' | 'seniors')[] | null;
-        capacity: {
-          min?: number | null;
-          max: number;
-        };
-        /**
-         * Délka vystoupení v minutách
-         */
-        performanceDuration?: number | null;
-        /**
-         * Počet setů/bloků vystoupení
-         */
-        numberOfSets?: number | null;
-        /**
-         * Délka přestávky mezi sety v minutách
-         */
-        breakDuration?: number | null;
-        setupAndTeardown: {
-          /**
-           * Čas potřebný na přípravu v minutách
-           */
-          setupTime?: number | null;
-          /**
-           * Čas potřebný na úklid v minutách
-           */
-          teardownTime?: number | null;
+        performance: {
+          entertainmentIsPerformance?: boolean | null;
+          numberOfSets?: number | null;
+          pauseBetweenSetsInMinutes?: number | null;
         };
         id?: string | null;
         blockName?: string | null;
@@ -559,23 +514,27 @@ export interface Listing {
   id: string;
   tariff: 'basic' | 'premium';
   type: 'venue' | 'gastro' | 'entertainment';
-  properties: {
-    eventTypes: string[];
-    placeTypes?: string[] | null;
-    gastroRules?: string[] | null;
-    venueRules?: string[] | null;
-    entertainmentRules?: string[] | null;
-    services?: string[] | null;
-    technologies?: string[] | null;
-    amenities?: string[] | null;
-    activities?: string[] | null;
-    cuisines?: string[] | null;
-    dishTypes?: string[] | null;
-    dietaryOptions?: string[] | null;
-    foodServiceStyles?: string[] | null;
-    necessities?: string[] | null;
-    entertainmentTypes?: string[] | null;
-    personnel?: string[] | null;
+  subType?: string | null;
+  filters: {
+    eventTypes?: (string | EventType)[] | null;
+    allEventTypes?: boolean | null;
+    necessities?: (string | Necessity)[] | null;
+    placeTypes?: (string | PlaceType)[] | null;
+    venueRules?: (string | VenueRule)[] | null;
+    musicGenres?: (string | MusicGenre)[] | null;
+    entertainmentRules?: (string | EntertainmentRule)[] | null;
+    gastroRules?: (string | GastroRule)[] | null;
+    dietaryOptions?: (string | DietaryOption)[] | null;
+    dishTypes?: (string | DishType)[] | null;
+  };
+  options: {
+    cuisines?: (string | Cuisine)[] | null;
+    foodPreparationStyles?: (string | FoodPreparationStyle)[] | null;
+    services?: (string | Service)[] | null;
+    technologies?: (string | Technology)[] | null;
+    personnel?: (string | Personnel)[] | null;
+    amenities?: (string | Amenity)[] | null;
+    activities?: (string | Activity)[] | null;
   };
   detail:
     | {
@@ -591,13 +550,16 @@ export interface Listing {
         value: string | ListingEntertainmentDetail;
       };
   location: {
-    type: 'regions' | 'exact';
-    latitude?: number | null;
-    longitude?: number | null;
-    address?: string | null;
-    city?: (string | null) | City;
-    districts?: (string | District)[] | null;
+    latitude: number;
+    longitude: number;
+    address: string;
+    city: string | City;
+    country: 'cz';
+  };
+  servicableArea: {
+    wholeCountry: boolean;
     regions?: (string | Region)[] | null;
+    districts?: (string | District)[] | null;
     cities?: (string | City)[] | null;
   };
   name: string;
@@ -606,7 +568,7 @@ export interface Listing {
   subscriptionActive?: boolean | null;
   company: string | Company;
   description?: string | null;
-  shortDescription?: string | null;
+  shortDescription: string;
   indoor?: boolean | null;
   outdoor?: boolean | null;
   guests: {
@@ -623,6 +585,7 @@ export interface Listing {
       height?: number | null;
       size?: number | null;
       mimeType?: string | null;
+      bucket?: ('listings-images' | 'listings-videos') | null;
     };
     logo?: {
       filename?: string | null;
@@ -631,6 +594,7 @@ export interface Listing {
       height?: number | null;
       size?: number | null;
       mimeType?: string | null;
+      bucket?: ('listings-images' | 'listings-videos') | null;
     };
     gallery: {
       filename: string;
@@ -639,12 +603,154 @@ export interface Listing {
       height?: number | null;
       size?: number | null;
       mimeType?: string | null;
+      bucket?: ('listings-images' | 'listings-videos') | null;
       id?: string | null;
     }[];
   };
-  price: {
-    startsAt: number;
-  };
+  minimumPricePerEvent: number;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "event-types".
+ */
+export interface EventType {
+  id: string;
+  name: string;
+  slug: string;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "place-types".
+ */
+export interface PlaceType {
+  id: string;
+  name: string;
+  slug: string;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "venue-rules".
+ */
+export interface VenueRule {
+  id: string;
+  name: string;
+  slug: string;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "music-genres".
+ */
+export interface MusicGenre {
+  id: string;
+  name: string;
+  slug: string;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "entertainment-rules".
+ */
+export interface EntertainmentRule {
+  id: string;
+  name: string;
+  slug: string;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "gastro-rules".
+ */
+export interface GastroRule {
+  id: string;
+  name: string;
+  slug: string;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "cuisines".
+ */
+export interface Cuisine {
+  id: string;
+  name: string;
+  slug: string;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "food-preparation-styles".
+ */
+export interface FoodPreparationStyle {
+  id: string;
+  name: string;
+  slug: string;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "services".
+ */
+export interface Service {
+  id: string;
+  name: string;
+  slug: string;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "technologies".
+ */
+export interface Technology {
+  id: string;
+  name: string;
+  slug: string;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "personnel".
+ */
+export interface Personnel {
+  id: string;
+  name: string;
+  slug: string;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "amenities".
+ */
+export interface Amenity {
+  id: string;
+  name: string;
+  slug: string;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "activities".
+ */
+export interface Activity {
+  id: string;
+  name: string;
+  slug: string;
   updatedAt: string;
   createdAt: string;
 }
@@ -666,6 +772,7 @@ export interface ListingVenueDetail {
               height?: number | null;
               size?: number | null;
               mimeType?: string | null;
+              bucket?: ('listings-images' | 'listings-videos') | null;
               id?: string | null;
             }[];
             id?: string | null;
@@ -682,6 +789,7 @@ export interface ListingVenueDetail {
               height?: number | null;
               size?: number | null;
               mimeType?: string | null;
+              bucket?: ('listings-images' | 'listings-videos') | null;
               id?: string | null;
             }[];
             id?: string | null;
@@ -699,6 +807,7 @@ export interface ListingVenueDetail {
                   height?: number | null;
                   size?: number | null;
                   mimeType?: string | null;
+                  bucket?: ('listings-images' | 'listings-videos') | null;
                   id?: string | null;
                 }[]
               | null;
@@ -716,6 +825,7 @@ export interface ListingVenueDetail {
               height?: number | null;
               size?: number | null;
               mimeType?: string | null;
+              bucket?: ('listings-images' | 'listings-videos') | null;
               id?: string | null;
             }[];
             id?: string | null;
@@ -730,6 +840,25 @@ export interface ListingVenueDetail {
         id?: string | null;
       }[]
     | null;
+  price: {
+    base: number;
+    pricingUnit: 'per_day' | 'per_person' | 'per_hour' | 'lump_sum';
+    seasonalPrices?:
+      | {
+          amount: number;
+          adjustmentType: 'surcharge' | 'discount';
+          valueType: 'absolute' | 'percentage';
+          title: string;
+          from: string;
+          to: string;
+          id?: string | null;
+        }[]
+      | null;
+    travelFeeEnabled?: boolean | null;
+    travelFeePerKm?: number | null;
+    travelFeeType?: ('one_way' | 'round_trip') | null;
+    travelFeeStartsAtKm?: number | null;
+  };
   faq?:
     | {
         active?: boolean | null;
@@ -748,6 +877,7 @@ export interface ListingVenueDetail {
           height?: number | null;
           size?: number | null;
           mimeType?: string | null;
+          bucket?: ('listings-images' | 'listings-videos') | null;
         };
         eventName: string;
         description?: string | null;
@@ -768,6 +898,7 @@ export interface ListingVenueDetail {
           height?: number | null;
           size?: number | null;
           mimeType?: string | null;
+          bucket?: ('listings-images' | 'listings-videos') | null;
         };
         id?: string | null;
       }[]
@@ -776,11 +907,12 @@ export interface ListingVenueDetail {
   spacesType: 'area' | 'building' | 'room';
   area: number;
   canBeBookedAsWhole?: boolean | null;
-  hasAccommodation?: boolean | null;
-  accommodationCapacity?: number | null;
-  access: {
+  accomodation: {
+    hasAccommodation?: boolean | null;
+    accommodationCapacity?: number | null;
+  };
+  propertyAccess: {
     vehicleTypes?: ('car' | 'truck' | 'van' | 'bus')[] | null;
-    helpWithLoadingAndUnloading?: boolean | null;
     loadingRamp?: boolean | null;
     loadingElevator?: boolean | null;
     serviceAccess?: boolean | null;
@@ -801,22 +933,67 @@ export interface ListingVenueDetail {
     parkingIsIncludedInPrice?: boolean | null;
     parkingPrice?: number | null;
   };
-  activityAddons?:
-    | {
-        activity: string | Activity;
-        price: number;
-        space?: (string | null) | Space;
-        type: 'indoor' | 'outdoor';
-        id?: string | null;
-      }[]
-    | null;
+  filters: {
+    allEventTypes: boolean;
+    eventTypes?: (string | EventType)[] | null;
+    placeTypes?: (string | PlaceType)[] | null;
+    venueRules?: (string | VenueRule)[] | null;
+    necessities?: (string | Necessity)[] | null;
+  };
+  options: {
+    activities?:
+      | {
+          activity: string | Activity;
+          pricingUnit: 'per_day' | 'per_person' | 'per_hour' | 'lump_sum';
+          unitPrice: number;
+          quantity: number;
+          id?: string | null;
+        }[]
+      | null;
+    technologies?:
+      | {
+          technology: string | Technology;
+          pricingUnit: 'per_day' | 'per_person' | 'per_hour' | 'lump_sum';
+          unitPrice: number;
+          quantity: number;
+          id?: string | null;
+        }[]
+      | null;
+    personnel?:
+      | {
+          personnel: string | Personnel;
+          pricingUnit: 'per_day' | 'per_person' | 'per_hour' | 'lump_sum';
+          unitPrice: number;
+          quantity: number;
+          id?: string | null;
+        }[]
+      | null;
+    amenities?:
+      | {
+          amenity: string | Amenity;
+          pricingUnit: 'per_day' | 'per_person' | 'per_hour' | 'lump_sum';
+          unitPrice: number;
+          quantity: number;
+          id?: string | null;
+        }[]
+      | null;
+    services?:
+      | {
+          service: string | Service;
+          pricingUnit: 'per_day' | 'per_person' | 'per_hour' | 'lump_sum';
+          unitPrice: number;
+          quantity: number;
+          id?: string | null;
+        }[]
+      | null;
+  };
   breakfast: {
-    included?: boolean | null;
+    breakfastIncluded: boolean;
     allowAccommodationWithoutBreakfast?: boolean | null;
     allowMoreBreakfastsThanAccommodation?: boolean | null;
     breakfastIsIncludedInPrice?: boolean | null;
     price?: number | null;
-    pricePer?: ('person' | 'booking') | null;
+    priceUnit?: ('person' | 'booking') | null;
     /**
      * Čas, od kterého je snídaně k dispozici (např. 07:00)
      */
@@ -831,22 +1008,26 @@ export interface ListingVenueDetail {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "event-types".
- */
-export interface EventType {
-  id: string;
-  name: string;
-  slug: string;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "spaces".
  */
 export interface Space {
   id: string;
   status: 'active' | 'disabled' | 'archived';
+  price: {
+    base: number;
+    pricingUnit: 'per_day' | 'per_person' | 'per_hour' | 'lump_sum';
+    seasonalPrices?:
+      | {
+          amount: number;
+          adjustmentType: 'surcharge' | 'discount';
+          valueType: 'absolute' | 'percentage';
+          title: string;
+          from: string;
+          to: string;
+          id?: string | null;
+        }[]
+      | null;
+  };
   name: string;
   type: 'area' | 'building' | 'room';
   parent?: (string | null) | Space;
@@ -868,6 +1049,7 @@ export interface Space {
         height?: number | null;
         size?: number | null;
         mimeType?: string | null;
+        bucket?: ('listings-images' | 'listings-videos') | null;
         id?: string | null;
       }[]
     | null;
@@ -888,7 +1070,7 @@ export interface Space {
         id?: string | null;
       }[]
     | null;
-  spaceRules?: (string | Rule)[] | null;
+  spaceRules?: (string | SpaceRule)[] | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -905,21 +1087,9 @@ export interface RoomAmenity {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "rules".
+ * via the `definition` "space-rules".
  */
-export interface Rule {
-  id: string;
-  name: string;
-  slug: string;
-  type: 'gastro' | 'venue' | 'entertainment';
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "activities".
- */
-export interface Activity {
+export interface SpaceRule {
   id: string;
   name: string;
   slug: string;
@@ -944,6 +1114,7 @@ export interface ListingGastroDetail {
               height?: number | null;
               size?: number | null;
               mimeType?: string | null;
+              bucket?: ('listings-images' | 'listings-videos') | null;
               id?: string | null;
             }[];
             id?: string | null;
@@ -960,6 +1131,7 @@ export interface ListingGastroDetail {
               height?: number | null;
               size?: number | null;
               mimeType?: string | null;
+              bucket?: ('listings-images' | 'listings-videos') | null;
               id?: string | null;
             }[];
             id?: string | null;
@@ -977,6 +1149,7 @@ export interface ListingGastroDetail {
                   height?: number | null;
                   size?: number | null;
                   mimeType?: string | null;
+                  bucket?: ('listings-images' | 'listings-videos') | null;
                   id?: string | null;
                 }[]
               | null;
@@ -994,6 +1167,7 @@ export interface ListingGastroDetail {
               height?: number | null;
               size?: number | null;
               mimeType?: string | null;
+              bucket?: ('listings-images' | 'listings-videos') | null;
               id?: string | null;
             }[];
             id?: string | null;
@@ -1008,6 +1182,25 @@ export interface ListingGastroDetail {
         id?: string | null;
       }[]
     | null;
+  price: {
+    base: number;
+    pricingUnit: 'per_day' | 'per_person' | 'per_hour' | 'lump_sum';
+    seasonalPrices?:
+      | {
+          amount: number;
+          adjustmentType: 'surcharge' | 'discount';
+          valueType: 'absolute' | 'percentage';
+          title: string;
+          from: string;
+          to: string;
+          id?: string | null;
+        }[]
+      | null;
+    travelFeeEnabled?: boolean | null;
+    travelFeePerKm?: number | null;
+    travelFeeType?: ('one_way' | 'round_trip') | null;
+    travelFeeStartsAtKm?: number | null;
+  };
   faq?:
     | {
         active?: boolean | null;
@@ -1026,6 +1219,7 @@ export interface ListingGastroDetail {
           height?: number | null;
           size?: number | null;
           mimeType?: string | null;
+          bucket?: ('listings-images' | 'listings-videos') | null;
         };
         eventName: string;
         description?: string | null;
@@ -1046,13 +1240,67 @@ export interface ListingGastroDetail {
           height?: number | null;
           size?: number | null;
           mimeType?: string | null;
+          bucket?: ('listings-images' | 'listings-videos') | null;
         };
         id?: string | null;
       }[]
     | null;
   type: 'gastro';
-  hasAlcoholLicense?: boolean | null;
+  alcohol: {
+    servesAlcohol: boolean;
+    pricingUnit: 'per_person' | 'per_event';
+  };
   kidsMenu?: boolean | null;
+  filters: {
+    allEventTypes: boolean;
+    eventTypes?: (string | EventType)[] | null;
+    dishTypes?: (string | DishType)[] | null;
+    necessities?: (string | Necessity)[] | null;
+    dietaryOptions?: (string | DietaryOption)[] | null;
+    gastroRules?: (string | GastroRule)[] | null;
+  };
+  options: {
+    cuisines?:
+      | {
+          cuisine: string | Cuisine;
+          pricingUnit: 'per_day' | 'per_person' | 'per_hour' | 'lump_sum';
+          unitPrice: number;
+          quantity: number;
+          id?: string | null;
+        }[]
+      | null;
+    foodPreparationStyles?:
+      | {
+          foodPreparationStyle: string | FoodPreparationStyle;
+          pricingUnit: 'per_day' | 'per_person' | 'per_hour' | 'lump_sum';
+          unitPrice: number;
+          quantity: number;
+          id?: string | null;
+        }[]
+      | null;
+    services?:
+      | {
+          service: string | Service;
+          pricingUnit: 'per_day' | 'per_person' | 'per_hour' | 'lump_sum';
+          unitPrice: number;
+          quantity: number;
+          id?: string | null;
+        }[]
+      | null;
+    personnel?:
+      | {
+          personnel: string | Personnel;
+          pricingUnit: 'per_day' | 'per_person' | 'per_hour' | 'lump_sum';
+          unitPrice: number;
+          quantity: number;
+          id?: string | null;
+        }[]
+      | null;
+  };
+  setupAndTearDown: {
+    setupTime?: number | null;
+    tearDownTime?: number | null;
+  };
   updatedAt: string;
   createdAt: string;
 }
@@ -1074,6 +1322,7 @@ export interface ListingEntertainmentDetail {
               height?: number | null;
               size?: number | null;
               mimeType?: string | null;
+              bucket?: ('listings-images' | 'listings-videos') | null;
               id?: string | null;
             }[];
             id?: string | null;
@@ -1090,6 +1339,7 @@ export interface ListingEntertainmentDetail {
               height?: number | null;
               size?: number | null;
               mimeType?: string | null;
+              bucket?: ('listings-images' | 'listings-videos') | null;
               id?: string | null;
             }[];
             id?: string | null;
@@ -1107,6 +1357,7 @@ export interface ListingEntertainmentDetail {
                   height?: number | null;
                   size?: number | null;
                   mimeType?: string | null;
+                  bucket?: ('listings-images' | 'listings-videos') | null;
                   id?: string | null;
                 }[]
               | null;
@@ -1124,6 +1375,7 @@ export interface ListingEntertainmentDetail {
               height?: number | null;
               size?: number | null;
               mimeType?: string | null;
+              bucket?: ('listings-images' | 'listings-videos') | null;
               id?: string | null;
             }[];
             id?: string | null;
@@ -1138,6 +1390,25 @@ export interface ListingEntertainmentDetail {
         id?: string | null;
       }[]
     | null;
+  price: {
+    base: number;
+    pricingUnit: 'per_day' | 'per_person' | 'per_hour' | 'lump_sum';
+    seasonalPrices?:
+      | {
+          amount: number;
+          adjustmentType: 'surcharge' | 'discount';
+          valueType: 'absolute' | 'percentage';
+          title: string;
+          from: string;
+          to: string;
+          id?: string | null;
+        }[]
+      | null;
+    travelFeeEnabled?: boolean | null;
+    travelFeePerKm?: number | null;
+    travelFeeType?: ('one_way' | 'round_trip') | null;
+    travelFeeStartsAtKm?: number | null;
+  };
   faq?:
     | {
         active?: boolean | null;
@@ -1156,6 +1427,7 @@ export interface ListingEntertainmentDetail {
           height?: number | null;
           size?: number | null;
           mimeType?: string | null;
+          bucket?: ('listings-images' | 'listings-videos') | null;
         };
         eventName: string;
         description?: string | null;
@@ -1176,13 +1448,41 @@ export interface ListingEntertainmentDetail {
           height?: number | null;
           size?: number | null;
           mimeType?: string | null;
+          bucket?: ('listings-images' | 'listings-videos') | null;
         };
         id?: string | null;
       }[]
     | null;
   type: 'entertainment';
   audience?: ('adults' | 'kids' | 'seniors')[] | null;
-  setupAndTearDownRules: {
+  filters: {
+    allEventTypes: boolean;
+    eventTypes?: (string | EventType)[] | null;
+    necessities?: (string | Necessity)[] | null;
+    musicGenres?: (string | MusicGenre)[] | null;
+    entertainmentRules?: (string | EntertainmentRule)[] | null;
+  };
+  options: {
+    technologies?:
+      | {
+          technology: string | Technology;
+          pricingUnit: 'per_day' | 'per_person' | 'per_hour' | 'lump_sum';
+          unitPrice: number;
+          quantity: number;
+          id?: string | null;
+        }[]
+      | null;
+    services?:
+      | {
+          service: string | Service;
+          pricingUnit: 'per_day' | 'per_person' | 'per_hour' | 'lump_sum';
+          unitPrice: number;
+          quantity: number;
+          id?: string | null;
+        }[]
+      | null;
+  };
+  setupAndTearDown: {
     setupTime?: number | null;
     tearDownTime?: number | null;
   };
@@ -1228,6 +1528,7 @@ export interface Company {
     height?: number | null;
     size?: number | null;
     mimeType?: string | null;
+    bucket?: ('listings-images' | 'listings-videos') | null;
   };
   email: string;
   phone: {
@@ -1246,6 +1547,7 @@ export interface Company {
   members?:
     | {
         user: string | User;
+        invitationEmail: string;
         role: 'admin' | 'manager' | 'editor';
         id?: string | null;
       }[]
@@ -1255,67 +1557,19 @@ export interface Company {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "personnel".
+ * via the `definition` "countries".
  */
-export interface Personnel {
+export interface Country {
   id: string;
   name: string;
   slug: string;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "services".
- */
-export interface Service {
-  id: string;
-  name: string;
-  slug: string;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "amenities".
- */
-export interface Amenity {
-  id: string;
-  name: string;
-  slug: string;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "technologies".
- */
-export interface Technology {
-  id: string;
-  name: string;
-  slug: string;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "cuisines".
- */
-export interface Cuisine {
-  id: string;
-  name: string;
-  slug: string;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "place-types".
- */
-export interface PlaceType {
-  id: string;
-  name: string;
-  slug: string;
+  code: string;
+  latitude: number;
+  longitude: number;
+  bboxMinLon: number;
+  bboxMinLat: number;
+  bboxMaxLon: number;
+  bboxMaxLat: number;
   updatedAt: string;
   createdAt: string;
 }
@@ -1331,9 +1585,10 @@ export interface Event {
   budget?: number | null;
   notes?:
     | {
-        note?: string | null;
+        title: string;
         createdAt: string;
         description?: string | null;
+        status: 'active' | 'archived';
         id?: string | null;
       }[]
     | null;
@@ -1344,6 +1599,7 @@ export interface Event {
         dueDate?: string | null;
         completed?: boolean | null;
         priority?: ('low' | 'medium' | 'high') | null;
+        status: 'active' | 'archived';
         id?: string | null;
       }[]
     | null;
@@ -1697,8 +1953,8 @@ export interface PayloadLockedDocument {
         value: string | DietaryOption;
       } | null)
     | ({
-        relationTo: 'food-service-styles';
-        value: string | FoodServiceStyle;
+        relationTo: 'food-service-types';
+        value: string | FoodServiceType;
       } | null)
     | ({
         relationTo: 'regions';
@@ -1717,8 +1973,8 @@ export interface PayloadLockedDocument {
         value: string | Admin;
       } | null)
     | ({
-        relationTo: 'media';
-        value: string | Media;
+        relationTo: 'user-media';
+        value: string | UserMedia;
       } | null)
     | ({
         relationTo: 'variants';
@@ -1753,6 +2009,10 @@ export interface PayloadLockedDocument {
         value: string | Company;
       } | null)
     | ({
+        relationTo: 'countries';
+        value: string | Country;
+      } | null)
+    | ({
         relationTo: 'cities';
         value: string | City;
       } | null)
@@ -1761,8 +2021,28 @@ export interface PayloadLockedDocument {
         value: string | PlaceType;
       } | null)
     | ({
-        relationTo: 'rules';
-        value: string | Rule;
+        relationTo: 'venue-rules';
+        value: string | VenueRule;
+      } | null)
+    | ({
+        relationTo: 'gastro-rules';
+        value: string | GastroRule;
+      } | null)
+    | ({
+        relationTo: 'entertainment-rules';
+        value: string | EntertainmentRule;
+      } | null)
+    | ({
+        relationTo: 'food-preparation-styles';
+        value: string | FoodPreparationStyle;
+      } | null)
+    | ({
+        relationTo: 'space-rules';
+        value: string | SpaceRule;
+      } | null)
+    | ({
+        relationTo: 'music-genres';
+        value: string | MusicGenre;
       } | null)
     | ({
         relationTo: 'technologies';
@@ -1929,9 +2209,9 @@ export interface DietaryOptionsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "food-service-styles_select".
+ * via the `definition` "food-service-types_select".
  */
-export interface FoodServiceStylesSelect<T extends boolean = true> {
+export interface FoodServiceTypesSelect<T extends boolean = true> {
   name?: T;
   slug?: T;
   updatedAt?: T;
@@ -2027,21 +2307,20 @@ export interface AdminsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "media_select".
+ * via the `definition` "user-media_select".
  */
-export interface MediaSelect<T extends boolean = true> {
-  alt?: T;
-  updatedAt?: T;
-  createdAt?: T;
-  url?: T;
-  thumbnailURL?: T;
+export interface UserMediaSelect<T extends boolean = true> {
   filename?: T;
-  mimeType?: T;
-  filesize?: T;
+  alt?: T;
   width?: T;
   height?: T;
-  focalX?: T;
-  focalY?: T;
+  size?: T;
+  mimeType?: T;
+  bucket?: T;
+  user?: T;
+  status?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -2050,34 +2329,27 @@ export interface MediaSelect<T extends boolean = true> {
 export interface VariantsSelect<T extends boolean = true> {
   listing?: T;
   status?: T;
+  capacity?:
+    | T
+    | {
+        min?: T;
+        max?: T;
+      };
   name?: T;
   shortDescription?: T;
   description?: T;
-  type?: T;
-  selectedSeasons?:
-    | T
-    | {
-        from?: T;
-        to?: T;
-        id?: T;
-      };
-  availability?: T;
-  selectedHours?:
-    | T
-    | {
-        from?: T;
-        to?: T;
-        id?: T;
-      };
   price?:
     | T
     | {
-        generalPrice?: T;
+        base?: T;
+        pricingUnit?: T;
         seasonalPrices?:
           | T
           | {
-              price?: T;
-              description?: T;
+              amount?: T;
+              adjustmentType?: T;
+              valueType?: T;
+              title?: T;
               from?: T;
               to?: T;
               id?: T;
@@ -2095,7 +2367,6 @@ export interface VariantsSelect<T extends boolean = true> {
         item?: T;
         id?: T;
       };
-  eventTypes?: T;
   images?:
     | T
     | {
@@ -2108,6 +2379,7 @@ export interface VariantsSelect<T extends boolean = true> {
               height?: T;
               size?: T;
               mimeType?: T;
+              bucket?: T;
             };
         gallery?:
           | T
@@ -2118,6 +2390,7 @@ export interface VariantsSelect<T extends boolean = true> {
               height?: T;
               size?: T;
               mimeType?: T;
+              bucket?: T;
               id?: T;
             };
       };
@@ -2128,29 +2401,11 @@ export interface VariantsSelect<T extends boolean = true> {
           | T
           | {
               includedSpaces?: T;
-              activities?: T;
-              personnel?: T;
-              services?: T;
-              capacity?:
-                | T
-                | {
-                    min?: T;
-                    max?: T;
-                  };
-              amenities?: T;
-              technology?: T;
-              canBeBookedAsWhole?: T;
               accommodation?:
                 | T
                 | {
                     included?: T;
                     capacity?: T;
-                  };
-              parking?:
-                | T
-                | {
-                    included?: T;
-                    spots?: T;
                   };
               breakfast?:
                 | T
@@ -2165,45 +2420,22 @@ export interface VariantsSelect<T extends boolean = true> {
         gastro?:
           | T
           | {
-              cuisines?: T;
-              dishTypes?: T;
-              dietaryOptions?: T;
-              foodServiceStyle?: T;
-              personnel?: T;
-              capacity?:
-                | T
-                | {
-                    min?: T;
-                    max?: T;
-                  };
-              pricePerPerson?: T;
-              necessities?: T;
               kidsMenu?: T;
               alcoholIncluded?: T;
-              minimumOrderCount?: T;
+              minimumOrderAmount?: T;
               id?: T;
               blockName?: T;
             };
         entertainment?:
           | T
           | {
-              personnel?: T;
-              necessities?: T;
               audience?: T;
-              capacity?:
+              performance?:
                 | T
                 | {
-                    min?: T;
-                    max?: T;
-                  };
-              performanceDuration?: T;
-              numberOfSets?: T;
-              breakDuration?: T;
-              setupAndTeardown?:
-                | T
-                | {
-                    setupTime?: T;
-                    teardownTime?: T;
+                    entertainmentIsPerformance?: T;
+                    numberOfSets?: T;
+                    pauseBetweenSetsInMinutes?: T;
                   };
               id?: T;
               blockName?: T;
@@ -2249,37 +2481,48 @@ export interface EventTypesSelect<T extends boolean = true> {
 export interface ListingsSelect<T extends boolean = true> {
   tariff?: T;
   type?: T;
-  properties?:
+  subType?: T;
+  filters?:
     | T
     | {
         eventTypes?: T;
+        allEventTypes?: T;
+        necessities?: T;
         placeTypes?: T;
-        gastroRules?: T;
         venueRules?: T;
+        musicGenres?: T;
         entertainmentRules?: T;
+        gastroRules?: T;
+        dietaryOptions?: T;
+        dishTypes?: T;
+      };
+  options?:
+    | T
+    | {
+        cuisines?: T;
+        foodPreparationStyles?: T;
         services?: T;
         technologies?: T;
+        personnel?: T;
         amenities?: T;
         activities?: T;
-        cuisines?: T;
-        dishTypes?: T;
-        dietaryOptions?: T;
-        foodServiceStyles?: T;
-        necessities?: T;
-        entertainmentTypes?: T;
-        personnel?: T;
       };
   detail?: T;
   location?:
     | T
     | {
-        type?: T;
         latitude?: T;
         longitude?: T;
         address?: T;
         city?: T;
-        districts?: T;
+        country?: T;
+      };
+  servicableArea?:
+    | T
+    | {
+        wholeCountry?: T;
         regions?: T;
+        districts?: T;
         cities?: T;
       };
   name?: T;
@@ -2311,6 +2554,7 @@ export interface ListingsSelect<T extends boolean = true> {
               height?: T;
               size?: T;
               mimeType?: T;
+              bucket?: T;
             };
         logo?:
           | T
@@ -2321,6 +2565,7 @@ export interface ListingsSelect<T extends boolean = true> {
               height?: T;
               size?: T;
               mimeType?: T;
+              bucket?: T;
             };
         gallery?:
           | T
@@ -2331,14 +2576,11 @@ export interface ListingsSelect<T extends boolean = true> {
               height?: T;
               size?: T;
               mimeType?: T;
+              bucket?: T;
               id?: T;
             };
       };
-  price?:
-    | T
-    | {
-        startsAt?: T;
-      };
+  minimumPricePerEvent?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -2348,6 +2590,23 @@ export interface ListingsSelect<T extends boolean = true> {
  */
 export interface SpacesSelect<T extends boolean = true> {
   status?: T;
+  price?:
+    | T
+    | {
+        base?: T;
+        pricingUnit?: T;
+        seasonalPrices?:
+          | T
+          | {
+              amount?: T;
+              adjustmentType?: T;
+              valueType?: T;
+              title?: T;
+              from?: T;
+              to?: T;
+              id?: T;
+            };
+      };
   name?: T;
   type?: T;
   parent?: T;
@@ -2364,6 +2623,7 @@ export interface SpacesSelect<T extends boolean = true> {
         height?: T;
         size?: T;
         mimeType?: T;
+        bucket?: T;
         id?: T;
       };
   hasAccommodation?: T;
@@ -2410,6 +2670,7 @@ export interface CompaniesSelect<T extends boolean = true> {
         height?: T;
         size?: T;
         mimeType?: T;
+        bucket?: T;
       };
   email?: T;
   phone?:
@@ -2433,9 +2694,27 @@ export interface CompaniesSelect<T extends boolean = true> {
     | T
     | {
         user?: T;
+        invitationEmail?: T;
         role?: T;
         id?: T;
       };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "countries_select".
+ */
+export interface CountriesSelect<T extends boolean = true> {
+  name?: T;
+  slug?: T;
+  code?: T;
+  latitude?: T;
+  longitude?: T;
+  bboxMinLon?: T;
+  bboxMinLat?: T;
+  bboxMaxLon?: T;
+  bboxMaxLat?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -2471,12 +2750,61 @@ export interface PlaceTypesSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "rules_select".
+ * via the `definition` "venue-rules_select".
  */
-export interface RulesSelect<T extends boolean = true> {
+export interface VenueRulesSelect<T extends boolean = true> {
   name?: T;
   slug?: T;
-  type?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "gastro-rules_select".
+ */
+export interface GastroRulesSelect<T extends boolean = true> {
+  name?: T;
+  slug?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "entertainment-rules_select".
+ */
+export interface EntertainmentRulesSelect<T extends boolean = true> {
+  name?: T;
+  slug?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "food-preparation-styles_select".
+ */
+export interface FoodPreparationStylesSelect<T extends boolean = true> {
+  name?: T;
+  slug?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "space-rules_select".
+ */
+export interface SpaceRulesSelect<T extends boolean = true> {
+  name?: T;
+  slug?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "music-genres_select".
+ */
+export interface MusicGenresSelect<T extends boolean = true> {
+  name?: T;
+  slug?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -2532,9 +2860,10 @@ export interface EventsSelect<T extends boolean = true> {
   notes?:
     | T
     | {
-        note?: T;
+        title?: T;
         createdAt?: T;
         description?: T;
+        status?: T;
         id?: T;
       };
   checklist?:
@@ -2545,6 +2874,7 @@ export interface EventsSelect<T extends boolean = true> {
         dueDate?: T;
         completed?: T;
         priority?: T;
+        status?: T;
         id?: T;
       };
   icon?: T;
@@ -2754,6 +3084,7 @@ export interface ListingEntertainmentDetailsSelect<T extends boolean = true> {
                     height?: T;
                     size?: T;
                     mimeType?: T;
+                    bucket?: T;
                     id?: T;
                   };
               id?: T;
@@ -2773,6 +3104,7 @@ export interface ListingEntertainmentDetailsSelect<T extends boolean = true> {
                     height?: T;
                     size?: T;
                     mimeType?: T;
+                    bucket?: T;
                     id?: T;
                   };
               id?: T;
@@ -2792,6 +3124,7 @@ export interface ListingEntertainmentDetailsSelect<T extends boolean = true> {
                     height?: T;
                     size?: T;
                     mimeType?: T;
+                    bucket?: T;
                     id?: T;
                   };
               id?: T;
@@ -2811,6 +3144,7 @@ export interface ListingEntertainmentDetailsSelect<T extends boolean = true> {
                     height?: T;
                     size?: T;
                     mimeType?: T;
+                    bucket?: T;
                     id?: T;
                   };
               id?: T;
@@ -2822,6 +3156,27 @@ export interface ListingEntertainmentDetailsSelect<T extends boolean = true> {
     | {
         key?: T;
         id?: T;
+      };
+  price?:
+    | T
+    | {
+        base?: T;
+        pricingUnit?: T;
+        seasonalPrices?:
+          | T
+          | {
+              amount?: T;
+              adjustmentType?: T;
+              valueType?: T;
+              title?: T;
+              from?: T;
+              to?: T;
+              id?: T;
+            };
+        travelFeeEnabled?: T;
+        travelFeePerKm?: T;
+        travelFeeType?: T;
+        travelFeeStartsAtKm?: T;
       };
   faq?:
     | T
@@ -2844,6 +3199,7 @@ export interface ListingEntertainmentDetailsSelect<T extends boolean = true> {
               height?: T;
               size?: T;
               mimeType?: T;
+              bucket?: T;
             };
         eventName?: T;
         description?: T;
@@ -2866,12 +3222,44 @@ export interface ListingEntertainmentDetailsSelect<T extends boolean = true> {
               height?: T;
               size?: T;
               mimeType?: T;
+              bucket?: T;
             };
         id?: T;
       };
   type?: T;
   audience?: T;
-  setupAndTearDownRules?:
+  filters?:
+    | T
+    | {
+        allEventTypes?: T;
+        eventTypes?: T;
+        necessities?: T;
+        musicGenres?: T;
+        entertainmentRules?: T;
+      };
+  options?:
+    | T
+    | {
+        technologies?:
+          | T
+          | {
+              technology?: T;
+              pricingUnit?: T;
+              unitPrice?: T;
+              quantity?: T;
+              id?: T;
+            };
+        services?:
+          | T
+          | {
+              service?: T;
+              pricingUnit?: T;
+              unitPrice?: T;
+              quantity?: T;
+              id?: T;
+            };
+      };
+  setupAndTearDown?:
     | T
     | {
         setupTime?: T;
@@ -2902,6 +3290,7 @@ export interface ListingGastroDetailsSelect<T extends boolean = true> {
                     height?: T;
                     size?: T;
                     mimeType?: T;
+                    bucket?: T;
                     id?: T;
                   };
               id?: T;
@@ -2921,6 +3310,7 @@ export interface ListingGastroDetailsSelect<T extends boolean = true> {
                     height?: T;
                     size?: T;
                     mimeType?: T;
+                    bucket?: T;
                     id?: T;
                   };
               id?: T;
@@ -2940,6 +3330,7 @@ export interface ListingGastroDetailsSelect<T extends boolean = true> {
                     height?: T;
                     size?: T;
                     mimeType?: T;
+                    bucket?: T;
                     id?: T;
                   };
               id?: T;
@@ -2959,6 +3350,7 @@ export interface ListingGastroDetailsSelect<T extends boolean = true> {
                     height?: T;
                     size?: T;
                     mimeType?: T;
+                    bucket?: T;
                     id?: T;
                   };
               id?: T;
@@ -2970,6 +3362,27 @@ export interface ListingGastroDetailsSelect<T extends boolean = true> {
     | {
         key?: T;
         id?: T;
+      };
+  price?:
+    | T
+    | {
+        base?: T;
+        pricingUnit?: T;
+        seasonalPrices?:
+          | T
+          | {
+              amount?: T;
+              adjustmentType?: T;
+              valueType?: T;
+              title?: T;
+              from?: T;
+              to?: T;
+              id?: T;
+            };
+        travelFeeEnabled?: T;
+        travelFeePerKm?: T;
+        travelFeeType?: T;
+        travelFeeStartsAtKm?: T;
       };
   faq?:
     | T
@@ -2992,6 +3405,7 @@ export interface ListingGastroDetailsSelect<T extends boolean = true> {
               height?: T;
               size?: T;
               mimeType?: T;
+              bucket?: T;
             };
         eventName?: T;
         description?: T;
@@ -3014,12 +3428,74 @@ export interface ListingGastroDetailsSelect<T extends boolean = true> {
               height?: T;
               size?: T;
               mimeType?: T;
+              bucket?: T;
             };
         id?: T;
       };
   type?: T;
-  hasAlcoholLicense?: T;
+  alcohol?:
+    | T
+    | {
+        servesAlcohol?: T;
+        pricingUnit?: T;
+      };
   kidsMenu?: T;
+  filters?:
+    | T
+    | {
+        allEventTypes?: T;
+        eventTypes?: T;
+        dishTypes?: T;
+        necessities?: T;
+        dietaryOptions?: T;
+        gastroRules?: T;
+      };
+  options?:
+    | T
+    | {
+        cuisines?:
+          | T
+          | {
+              cuisine?: T;
+              pricingUnit?: T;
+              unitPrice?: T;
+              quantity?: T;
+              id?: T;
+            };
+        foodPreparationStyles?:
+          | T
+          | {
+              foodPreparationStyle?: T;
+              pricingUnit?: T;
+              unitPrice?: T;
+              quantity?: T;
+              id?: T;
+            };
+        services?:
+          | T
+          | {
+              service?: T;
+              pricingUnit?: T;
+              unitPrice?: T;
+              quantity?: T;
+              id?: T;
+            };
+        personnel?:
+          | T
+          | {
+              personnel?: T;
+              pricingUnit?: T;
+              unitPrice?: T;
+              quantity?: T;
+              id?: T;
+            };
+      };
+  setupAndTearDown?:
+    | T
+    | {
+        setupTime?: T;
+        tearDownTime?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
 }
@@ -3045,6 +3521,7 @@ export interface ListingVenueDetailsSelect<T extends boolean = true> {
                     height?: T;
                     size?: T;
                     mimeType?: T;
+                    bucket?: T;
                     id?: T;
                   };
               id?: T;
@@ -3064,6 +3541,7 @@ export interface ListingVenueDetailsSelect<T extends boolean = true> {
                     height?: T;
                     size?: T;
                     mimeType?: T;
+                    bucket?: T;
                     id?: T;
                   };
               id?: T;
@@ -3083,6 +3561,7 @@ export interface ListingVenueDetailsSelect<T extends boolean = true> {
                     height?: T;
                     size?: T;
                     mimeType?: T;
+                    bucket?: T;
                     id?: T;
                   };
               id?: T;
@@ -3102,6 +3581,7 @@ export interface ListingVenueDetailsSelect<T extends boolean = true> {
                     height?: T;
                     size?: T;
                     mimeType?: T;
+                    bucket?: T;
                     id?: T;
                   };
               id?: T;
@@ -3113,6 +3593,27 @@ export interface ListingVenueDetailsSelect<T extends boolean = true> {
     | {
         key?: T;
         id?: T;
+      };
+  price?:
+    | T
+    | {
+        base?: T;
+        pricingUnit?: T;
+        seasonalPrices?:
+          | T
+          | {
+              amount?: T;
+              adjustmentType?: T;
+              valueType?: T;
+              title?: T;
+              from?: T;
+              to?: T;
+              id?: T;
+            };
+        travelFeeEnabled?: T;
+        travelFeePerKm?: T;
+        travelFeeType?: T;
+        travelFeeStartsAtKm?: T;
       };
   faq?:
     | T
@@ -3135,6 +3636,7 @@ export interface ListingVenueDetailsSelect<T extends boolean = true> {
               height?: T;
               size?: T;
               mimeType?: T;
+              bucket?: T;
             };
         eventName?: T;
         description?: T;
@@ -3157,6 +3659,7 @@ export interface ListingVenueDetailsSelect<T extends boolean = true> {
               height?: T;
               size?: T;
               mimeType?: T;
+              bucket?: T;
             };
         id?: T;
       };
@@ -3164,13 +3667,16 @@ export interface ListingVenueDetailsSelect<T extends boolean = true> {
   spacesType?: T;
   area?: T;
   canBeBookedAsWhole?: T;
-  hasAccommodation?: T;
-  accommodationCapacity?: T;
-  access?:
+  accomodation?:
+    | T
+    | {
+        hasAccommodation?: T;
+        accommodationCapacity?: T;
+      };
+  propertyAccess?:
     | T
     | {
         vehicleTypes?: T;
-        helpWithLoadingAndUnloading?: T;
         loadingRamp?: T;
         loadingElevator?: T;
         serviceAccess?: T;
@@ -3193,24 +3699,73 @@ export interface ListingVenueDetailsSelect<T extends boolean = true> {
         parkingIsIncludedInPrice?: T;
         parkingPrice?: T;
       };
-  activityAddons?:
+  filters?:
     | T
     | {
-        activity?: T;
-        price?: T;
-        space?: T;
-        type?: T;
-        id?: T;
+        allEventTypes?: T;
+        eventTypes?: T;
+        placeTypes?: T;
+        venueRules?: T;
+        necessities?: T;
+      };
+  options?:
+    | T
+    | {
+        activities?:
+          | T
+          | {
+              activity?: T;
+              pricingUnit?: T;
+              unitPrice?: T;
+              quantity?: T;
+              id?: T;
+            };
+        technologies?:
+          | T
+          | {
+              technology?: T;
+              pricingUnit?: T;
+              unitPrice?: T;
+              quantity?: T;
+              id?: T;
+            };
+        personnel?:
+          | T
+          | {
+              personnel?: T;
+              pricingUnit?: T;
+              unitPrice?: T;
+              quantity?: T;
+              id?: T;
+            };
+        amenities?:
+          | T
+          | {
+              amenity?: T;
+              pricingUnit?: T;
+              unitPrice?: T;
+              quantity?: T;
+              id?: T;
+            };
+        services?:
+          | T
+          | {
+              service?: T;
+              pricingUnit?: T;
+              unitPrice?: T;
+              quantity?: T;
+              id?: T;
+            };
       };
   breakfast?:
     | T
     | {
-        included?: T;
+        breakfastIncluded?: T;
         allowAccommodationWithoutBreakfast?: T;
         allowMoreBreakfastsThanAccommodation?: T;
         breakfastIsIncludedInPrice?: T;
         price?: T;
-        pricePer?: T;
+        priceUnit?: T;
         timeFrom?: T;
         timeTo?: T;
       };

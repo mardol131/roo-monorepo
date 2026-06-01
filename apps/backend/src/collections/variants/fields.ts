@@ -1,6 +1,6 @@
-import { getRecordStatuses } from '@roo/common'
+import { getRecordStatuses, PRICING_UNITS_ARRAY } from '@roo/common'
 import { Field } from 'payload'
-import { getMediaFields, priceField } from '../common/common-fields'
+import { getMediaFields, getSeasonalPricesArrayField } from '../common/common-fields'
 
 export const venueVariantDetails: Field[] = [
   {
@@ -8,56 +8,6 @@ export const venueVariantDetails: Field[] = [
     type: 'relationship',
     relationTo: 'spaces',
     hasMany: true,
-  },
-  {
-    name: 'activities',
-    type: 'relationship',
-    relationTo: 'activities',
-    hasMany: true,
-  },
-  {
-    name: 'personnel',
-    type: 'relationship',
-    relationTo: 'personnel',
-    hasMany: true,
-  },
-  {
-    name: 'services',
-    type: 'relationship',
-    relationTo: 'services',
-    hasMany: true,
-  },
-  {
-    name: 'capacity',
-    type: 'group',
-    required: true,
-    fields: [
-      {
-        name: 'min',
-        type: 'number',
-      },
-      {
-        name: 'max',
-        type: 'number',
-        required: true,
-      },
-    ],
-  },
-  {
-    name: 'amenities',
-    type: 'relationship',
-    relationTo: 'amenities',
-    hasMany: true,
-  },
-  {
-    name: 'technology',
-    type: 'relationship',
-    relationTo: 'technologies',
-    hasMany: true,
-  },
-  {
-    name: 'canBeBookedAsWhole',
-    type: 'checkbox',
   },
   {
     name: 'accommodation',
@@ -71,21 +21,12 @@ export const venueVariantDetails: Field[] = [
       {
         name: 'capacity',
         type: 'number',
-      },
-    ],
-  },
-  {
-    name: 'parking',
-    type: 'group',
-    required: true,
-    fields: [
-      {
-        name: 'included',
-        type: 'checkbox',
-      },
-      {
-        name: 'spots',
-        type: 'number',
+        validate: (value: unknown, { siblingData }: { siblingData: Record<string, unknown> }) => {
+          if (siblingData?.included && (value === undefined || value === null)) {
+            return 'Zadejte kapacitu ubytování'
+          }
+          return true
+        },
       },
     ],
   },
@@ -101,6 +42,12 @@ export const venueVariantDetails: Field[] = [
       {
         name: 'price',
         type: 'number',
+        validate: (value: unknown, { siblingData }: { siblingData: Record<string, unknown> }) => {
+          if (siblingData?.included && (value === undefined || value === null)) {
+            return 'Zadejte cenu snídaně'
+          }
+          return true
+        },
       },
       {
         name: 'loweredPrice',
@@ -112,62 +59,6 @@ export const venueVariantDetails: Field[] = [
 
 export const gastroVariantDetails: Field[] = [
   {
-    name: 'cuisines',
-    type: 'relationship',
-    relationTo: 'cuisines',
-    hasMany: true,
-  },
-  {
-    name: 'dishTypes',
-    type: 'relationship',
-    relationTo: 'dish-types',
-    hasMany: true,
-  },
-  {
-    name: 'dietaryOptions',
-    type: 'relationship',
-    relationTo: 'dietary-options',
-    hasMany: true,
-  },
-  {
-    name: 'foodServiceStyle',
-    type: 'relationship',
-    relationTo: 'food-service-styles',
-    hasMany: true,
-  },
-  {
-    name: 'personnel',
-    type: 'relationship',
-    relationTo: 'personnel',
-    hasMany: true,
-  },
-  {
-    name: 'capacity',
-    type: 'group',
-    required: true,
-    fields: [
-      {
-        name: 'min',
-        type: 'number',
-      },
-      {
-        name: 'max',
-        type: 'number',
-        required: true,
-      },
-    ],
-  },
-  {
-    name: 'pricePerPerson',
-    type: 'number',
-  },
-  {
-    name: 'necessities',
-    type: 'relationship',
-    relationTo: 'necessities',
-    hasMany: true,
-  },
-  {
     name: 'kidsMenu',
     type: 'checkbox',
   },
@@ -176,24 +67,12 @@ export const gastroVariantDetails: Field[] = [
     type: 'checkbox',
   },
   {
-    name: 'minimumOrderCount',
+    name: 'minimumOrderAmount',
     type: 'number',
   },
 ]
 
 export const entertainmentVariantDetails: Field[] = [
-  {
-    name: 'personnel',
-    type: 'relationship',
-    relationTo: 'personnel',
-    hasMany: true,
-  },
-  {
-    name: 'necessities',
-    type: 'relationship',
-    relationTo: 'necessities',
-    hasMany: true,
-  },
   {
     name: 'audience',
     type: 'select',
@@ -201,59 +80,33 @@ export const entertainmentVariantDetails: Field[] = [
     options: ['adults', 'kids', 'seniors'],
   },
   {
-    name: 'capacity',
+    name: 'performance',
     type: 'group',
     required: true,
     fields: [
       {
-        name: 'min',
-        type: 'number',
+        name: 'entertainmentIsPerformance',
+        type: 'checkbox',
+        defaultValue: false,
       },
       {
-        name: 'max',
+        name: 'numberOfSets',
         type: 'number',
-        required: true,
-      },
-    ],
-  },
-  {
-    name: 'performanceDuration',
-    type: 'number',
-    admin: {
-      description: 'Délka vystoupení v minutách',
-    },
-  },
-  {
-    name: 'numberOfSets',
-    type: 'number',
-    admin: {
-      description: 'Počet setů/bloků vystoupení',
-    },
-  },
-  {
-    name: 'breakDuration',
-    type: 'number',
-    admin: {
-      description: 'Délka přestávky mezi sety v minutách',
-    },
-  },
-  {
-    name: 'setupAndTeardown',
-    type: 'group',
-    required: true,
-    fields: [
-      {
-        name: 'setupTime',
-        type: 'number',
-        admin: {
-          description: 'Čas potřebný na přípravu v minutách',
+        validate: (value: unknown, { siblingData }: { siblingData: Record<string, unknown> }) => {
+          if (siblingData?.entertainmentIsPerformance && (value === undefined || value === null)) {
+            return 'Zadejte počet setů'
+          }
+          return true
         },
       },
       {
-        name: 'teardownTime',
+        name: 'pauseBetweenSetsInMinutes',
         type: 'number',
-        admin: {
-          description: 'Čas potřebný na úklid v minutách',
+        validate: (value: unknown, { siblingData }: { siblingData: Record<string, unknown> }) => {
+          if (siblingData?.entertainmentIsPerformance && (value === undefined || value === null)) {
+            return 'Zadejte délku pauzy mezi sety v minutách'
+          }
+          return true
         },
       },
     ],
@@ -276,6 +129,21 @@ export const variantsCommonFields: Field[] = [
     required: true,
   },
   {
+    name: 'capacity',
+    type: 'group',
+    required: true,
+    fields: [
+      {
+        name: 'min',
+        type: 'number',
+      },
+      {
+        name: 'max',
+        type: 'number',
+      },
+    ],
+  },
+  {
     name: 'name',
     type: 'text',
     required: true,
@@ -291,51 +159,27 @@ export const variantsCommonFields: Field[] = [
     type: 'textarea',
     maxLength: 1000,
   },
+
   {
-    name: 'type',
-    type: 'select',
-    options: ['allYear', 'seasonal'],
+    name: 'price',
+    type: 'group',
     required: true,
-  },
-  {
-    name: 'selectedSeasons',
-    type: 'array',
     fields: [
       {
-        name: 'from',
-        type: 'text',
+        name: 'base',
+        type: 'number',
+        min: 0,
         required: true,
       },
       {
-        name: 'to',
-        type: 'text',
+        name: 'pricingUnit',
+        type: 'select',
+        options: PRICING_UNITS_ARRAY,
         required: true,
       },
+      getSeasonalPricesArrayField({ required: false }),
     ],
   },
-  {
-    name: 'availability',
-    type: 'select',
-    options: ['allDay', 'selectedHours'],
-    required: true,
-  },
-  {
-    name: 'selectedHours',
-    type: 'array',
-    fields: [
-      {
-        name: 'from',
-        type: 'text',
-        required: true,
-      },
-      {
-        name: 'to',
-        type: 'text',
-        required: true,
-      },
-    ],
-  },
-  priceField,
   {
     name: 'includes',
     type: 'array',
@@ -355,12 +199,6 @@ export const variantsCommonFields: Field[] = [
         type: 'text',
       },
     ],
-  },
-  {
-    name: 'eventTypes',
-    type: 'relationship',
-    relationTo: 'event-types',
-    hasMany: true,
   },
   {
     name: 'images',
@@ -384,6 +222,7 @@ export const variantsCommonFields: Field[] = [
 
 export const variantFields: Field[] = [
   ...variantsCommonFields,
+
   {
     name: 'details',
     type: 'blocks',

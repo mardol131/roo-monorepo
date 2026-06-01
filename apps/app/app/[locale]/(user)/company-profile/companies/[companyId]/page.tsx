@@ -19,10 +19,12 @@ import ListingStatusTag from "../../../components/tags/listing-status-tag";
 import { CompletionWidget } from "../../../components/completion-widget";
 import { useAuth } from "@/app/context/auth/auth-context";
 import { canEditCompany } from "../../../../../functions/utils/companies";
+import { useTranslations } from "next-intl";
 
 export default function page() {
   const { companyId } = useParams<{ companyId: string }>();
   const { user } = useAuth();
+  const g = useTranslations("global");
 
   const { data: company, isLoading: isCompanyLoading } = useCompany(companyId);
   const { data: listings, isLoading: isListingsLoading } =
@@ -72,7 +74,7 @@ export default function page() {
                   pathname: `/company-profile/companies/[companyId]/edit`,
                   params: { companyId },
                 },
-                iconLeft: "Plus",
+                iconLeft: "Pen",
                 text: "Upravit firmu",
                 size: "sm",
               }
@@ -81,26 +83,6 @@ export default function page() {
       />
 
       <div className="flex flex-col gap-5">
-        <CompletionWidget
-          groups={[
-            {
-              label: "Průvodce firmou",
-              weight: 1,
-              fields: [
-                {
-                  label: "Vytvořte svou první službu",
-                  filled: listings?.docs?.length ? true : false,
-                  editHref: {
-                    pathname:
-                      "/company-profile/companies/[companyId]/listings/new",
-                    params: { companyId },
-                  },
-                },
-              ],
-            },
-          ]}
-          title="Dokončení firmy"
-        />
         {/* Summary cards */}
         <div className="grid grid-cols-3 gap-4">
           <SummaryCard
@@ -159,9 +141,21 @@ export default function page() {
                     label={listing.name}
                     items={[
                       {
-                        icon: "Banknote",
-                        content: `${listing.price.startsAt} Kč`,
+                        icon: "MapPin",
+                        content: g(`listings.type.${listing.type}`),
                       },
+                      {
+                        icon: "Banknote",
+                        content: `${listing.minimumPricePerEvent} Kč`,
+                      },
+                      ...(listing.location?.address
+                        ? [
+                            {
+                              icon: "MapPin",
+                              content: listing.location.address,
+                            } as const,
+                          ]
+                        : []),
                     ]}
                     link={{
                       pathname: `/company-profile/companies/[companyId]/listings/[listingId]`,

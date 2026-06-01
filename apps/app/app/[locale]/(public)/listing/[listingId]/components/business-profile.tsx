@@ -4,6 +4,7 @@ import { useCompany } from "@/app/react-query/companies/hooks";
 import { useListingsByCompany } from "@/app/react-query/listings/hooks";
 import Image from "next/image";
 import React from "react";
+import SectionWrapper from "./section-wrapper";
 
 interface BusinessProfileProps {
   companyId?: string;
@@ -24,10 +25,8 @@ export default function BusinessProfile({ companyId }: BusinessProfileProps) {
     .slice(0, 2);
 
   return (
-    <div className="flex flex-col gap-6 rounded-lg">
-      <Text variant="h4" color="textDark">
-        O pronajímateli
-      </Text>
+    <SectionWrapper title="Profil firmy">
+      {" "}
       <div className="flex items-center gap-4">
         <div className="shrink-0">
           {company?.logo?.filename ? (
@@ -55,6 +54,6 @@ export default function BusinessProfile({ companyId }: BusinessProfileProps) {
           </Text>
         </div>
       </div>
-    </div>
+    </SectionWrapper>
   );
 }

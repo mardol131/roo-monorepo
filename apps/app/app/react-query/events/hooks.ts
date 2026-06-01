@@ -96,6 +96,18 @@ export function useRemoveEventNote(eventId: string) {
   });
 }
 
+export function useUpdateEventNotes(eventId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (notes: NonNullable<Event["notes"]>) =>
+      addNoteToEvent(eventId, notes),
+    onSuccess: (updated) => {
+      queryClient.setQueryData(eventKeys.byId(eventId), updated);
+    },
+  });
+}
+
 export function useUpdateChecklist(eventId: string) {
   const queryClient = useQueryClient();
 

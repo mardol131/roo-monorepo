@@ -44,16 +44,10 @@ import { useRegions } from "@/app/react-query/regions/hooks";
 import { useFilterOptions } from "@/app/react-query/filters/aggregated-filters/hooks";
 
 interface CatalogFiltersProps {
-  switchMapViewHandler?: () => void;
-  mapViewIsActive?: boolean;
   type: CatalogType;
 }
 
-export default function CatalogSidebarFilters({
-  switchMapViewHandler,
-  mapViewIsActive,
-  type,
-}: CatalogFiltersProps) {
+export default function CatalogSidebarFilters({ type }: CatalogFiltersProps) {
   const searchParams = useSearchParams();
   const router = useRouter();
   const [isFiltersModalOpen, setIsFiltersModalOpen] = useState(false);
@@ -188,7 +182,11 @@ export default function CatalogSidebarFilters({
     return filtersArray;
   };
 
-  const { city: cityFilter, district: districtFilter, region: regionFilter } = generalFiltersFromParams(searchParams);
+  const {
+    city: cityFilter,
+    district: districtFilter,
+    region: regionFilter,
+  } = generalFiltersFromParams(searchParams);
 
   const { data: cities } = useCities({
     limit: 1,
@@ -213,9 +211,19 @@ export default function CatalogSidebarFilters({
   const externalBbox = city
     ? [city.bboxMinLon, city.bboxMinLat, city.bboxMaxLon, city.bboxMaxLat]
     : district
-      ? [district.bboxMinLon, district.bboxMinLat, district.bboxMaxLon, district.bboxMaxLat]
+      ? [
+          district.bboxMinLon,
+          district.bboxMinLat,
+          district.bboxMaxLon,
+          district.bboxMaxLat,
+        ]
       : region
-        ? [region.bboxMinLon, region.bboxMinLat, region.bboxMaxLon, region.bboxMaxLat]
+        ? [
+            region.bboxMinLon,
+            region.bboxMinLat,
+            region.bboxMaxLon,
+            region.bboxMaxLat,
+          ]
         : undefined;
 
   const mapPins = useMemo((): PinProps[] => {
@@ -229,7 +237,7 @@ export default function CatalogSidebarFilters({
         value: { latitude, longitude },
         data: {
           label: listing.name,
-          tags: (listing.properties.eventTypes ?? []).flatMap((id) => {
+          tags: (listing.filters.eventTypes ?? []).flatMap((id) => {
             const found = filters?.eventTypes.find((e) => e.id === id);
             return found ? [found.name] : [];
           }),
@@ -375,7 +383,7 @@ export default function CatalogSidebarFilters({
       {renderVenueModal()}
       {renderEntertainmentModal()}
       <div className="relative h-full flex flex-col">
-        {type === "venue" && (
+        {/* {type === "venue" && (
           <div
             className={`mb-6 rounded-xl overflow-hidden ${mapViewIsActive ? "h-130" : "h-100 bg-linear-to-br from-zinc-50 to-zinc-100 flex items-center justify-center border border-zinc-200"} transition-all ease-in-out`}
           >
@@ -388,13 +396,15 @@ export default function CatalogSidebarFilters({
                 size: "sm",
               }}
               height={"h-full"}
-              externalBbox={externalBbox as [number, number, number, number] | undefined}
+              externalBbox={
+                externalBbox as [number, number, number, number] | undefined
+              }
             />
           </div>
-        )}
+        )} */}
 
         {/* Filtry */}
-        <div className="bg-white relative pb-10 rounded-xl border border-zinc-200 p-5 overflow-y-auto flex-1">
+        <div className="bg-secondary/2 relative pb-10 rounded-3xl border border-zinc-200 p-5 overflow-y-auto flex-1">
           <div className="flex items-center gap-2 mb-6 pb-4 border-b border-zinc-100">
             <Sliders className="h-5 w-5 text-rose-500" />
             <Text variant="h4" className="text-zinc-900">

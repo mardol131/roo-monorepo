@@ -10,6 +10,7 @@ import {
   ListingEntertainmentDetail,
   ListingGastroDetail,
   ListingVenueDetail,
+  LocalityType,
 } from "@roo/common";
 import { listingDetailKeys, listingKeys, spaceKeys } from "../query-keys";
 import {
@@ -25,8 +26,10 @@ import {
   updateListing,
   updateListingDetail,
   CreateListingDetailPayload,
+  fetchListingPinsByLocationId,
 } from "./fetch";
-import { GetCollectionParams } from "@/app/functions/api/general";
+import { GetCollectionParams, PatchData } from "@/app/functions/api/general";
+import { LocationType } from "@/app/components/ui/atoms/inputs/location-input";
 
 export type ListingDetailCollectionMap = {
   "listing-venue-details": ListingVenueDetail;
@@ -36,10 +39,12 @@ export type ListingDetailCollectionMap = {
 
 export function useListings({
   options,
-}: { options?: GetCollectionParams } = {}) {
+  enabled,
+}: { options?: GetCollectionParams; enabled?: boolean } = {}) {
   return useQuery({
-    queryKey: listingKeys.all(options?.query, options?.limit),
+    queryKey: listingKeys.all(options),
     queryFn: () => fetchAllListings(options),
+    enabled,
   });
 }
 
@@ -62,7 +67,13 @@ export function useListing(id: string | undefined) {
   });
 }
 
-export type UpdateListingData = Partial<Listing>;
+export type UpdateListingData = Omit<
+  Partial<Listing>,
+  "filters" | "options"
+> & {
+  filters?: Partial<Listing["filters"]>;
+  options?: Partial<Listing["options"]>;
+};
 export type UpdateListingVars = { id: string; data: UpdateListingData };
 
 export function useUpdateListing(
@@ -145,7 +156,7 @@ export function useUpdateListingDetail<
   options?: UseMutationOptions<
     ListingDetailCollectionMap[C],
     Error,
-    { id: string; data: Partial<ListingDetailCollectionMap[C]> }
+    { id: string; data: PatchData<ListingDetailCollectionMap[C]> }
   >,
 ) {
   const queryClient = useQueryClient();
@@ -156,7 +167,7 @@ export function useUpdateListingDetail<
       data,
     }: {
       id: string;
-      data: Partial<ListingDetailCollectionMap[C]>;
+      data: PatchData<ListingDetailCollectionMap[C]>;
     }) => updateListingDetail(collection, id, data),
     onSuccess: (...args) => {
       queryClient.invalidateQueries({
@@ -209,5 +220,15 @@ export function useDeleteListingDetail<
         queryKey: listingDetailKeys.byId(collection, id),
       });
     },
+  });
+}
+
+export function useListingPinsByLocationId(
+  locationId: string,
+  type: LocalityType,
+) {
+  return useQuery({
+    queryKey: listingKeys.pinsByLocation(locationId, type),
+    queryFn: () => fetchListingPinsByLocationId(locationId, type),
   });
 }

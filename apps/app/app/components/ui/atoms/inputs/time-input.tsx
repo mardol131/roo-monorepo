@@ -100,7 +100,7 @@ export default function TimeInput({
             }
             setIsOpen(!isOpen);
           }}
-          className={`w-full px-3 py-2.5 border ${error ? "border-rose-500" : "border-zinc-200"} rounded-lg text-sm bg-white text-left flex items-center justify-between cursor-pointer hover:border-zinc-300 transition-colors`}
+          className={`w-full px-3 h-10 border ${error ? "border-rose-500" : "border-zinc-200"} rounded-lg text-sm bg-white text-left flex items-center justify-between cursor-pointer hover:border-zinc-300 transition-colors`}
         >
           <div className="flex items-center gap-2">
             <Clock className="w-4 h-4 text-zinc-400 shrink-0" />

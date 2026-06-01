@@ -4,6 +4,7 @@ import {
   getCollectionItem,
   GetCollectionParams,
   patchCollectionItem,
+  PatchData,
   postCollectionItem,
 } from "@/app/functions/api/general";
 import {
@@ -11,6 +12,7 @@ import {
   ListingEntertainmentDetail,
   ListingGastroDetail,
   ListingVenueDetail,
+  LocalityType,
   Where,
 } from "@roo/common";
 
@@ -21,13 +23,9 @@ type ListingDetailCollectionMap = {
 };
 
 export async function fetchAllListings(options?: GetCollectionParams) {
-  const { query, limit, sort = "-createdAt", searchParams } = options || {};
   const res = await getCollection({
     collection: "listings",
-    query,
-    limit,
-    sort,
-    searchParams,
+    ...options,
   });
   if (!res) throw new Error("Failed to fetch listings");
   return res;
@@ -43,10 +41,8 @@ export async function fetchListingsByCompany(
     : companyFilter;
   const res = await getCollection({
     collection: "listings",
+    ...options,
     query: mergedQuery,
-    limit: options?.limit,
-    sort: options?.sort ?? "-createdAt",
-    headers: options?.headers,
   });
   if (!res) throw new Error("Failed to fetch listings");
   return res;
@@ -61,7 +57,7 @@ export async function fetchListing(id: string): Promise<Listing> {
   return res;
 }
 
-export async function updateListing(id: string, data: Partial<Listing>) {
+export async function updateListing(id: string, data: PatchData<Listing>) {
   const res = await patchCollectionItem({
     collection: "listings",
     id,
@@ -115,7 +111,7 @@ export async function updateListingDetail<
 >(
   collection: C,
   id: string,
-  data: Partial<ListingDetailCollectionMap[C]>,
+  data: PatchData<ListingDetailCollectionMap[C]>,
 ): Promise<ListingDetailCollectionMap[C]> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const res = await patchCollectionItem({ collection, id, data: data as any });
@@ -151,4 +147,34 @@ export async function deleteListingDetail(
   const res = await deleteCollectionItem({ collection, id });
   if (!res) throw new Error("Failed to delete listing detail");
   return res;
+}
+
+export type MapPinItem = {
+  id: string;
+  name: string;
+  latitude: number;
+  longitude: number;
+  coverImage: string;
+};
+
+export type MapPinsResponse = {
+  data: MapPinItem[];
+};
+
+export async function fetchListingPinsByLocationId(
+  locationId: string,
+  type: LocalityType,
+): Promise<MapPinsResponse> {
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/listings/map-pins?id=${locationId}&type=${type}`,
+    {
+      method: "GET",
+      credentials: "include",
+    },
+  );
+
+  console.log(res);
+
+  if (!res.ok) throw new Error("Failed to fetch listing pins");
+  return res.json() as Promise<MapPinsResponse>;
 }

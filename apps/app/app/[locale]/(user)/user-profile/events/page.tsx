@@ -11,13 +11,8 @@ import EventStatusTag from "../../components/tags/event-status-tag";
 import { format } from "date-fns";
 import Loader from "../../components/loader";
 import { useAuth } from "@/app/context/auth/auth-context";
-
-const TABS: { label: string; value: Event["status"] | "all" }[] = [
-  { label: "Všechny", value: "all" },
-  { label: "Zrušené", value: "disabled" },
-  { label: "Plánované", value: "active" },
-  { label: "Dokončené", value: "completed" },
-];
+import TabFilter from "../../components/tab-filter";
+import { useState } from "react";
 
 export default function page() {
   const { user } = useAuth();
@@ -30,6 +25,9 @@ export default function page() {
     enabled: !!user?.id,
   });
   const t = useTranslations("global.events");
+  const [activeFilter, setActiveFilter] = useState<Event["status"] | "all">(
+    "all",
+  );
 
   if (isPending) return <Loader text="Vaše události se načítají..." />;
 
@@ -49,13 +47,26 @@ export default function page() {
       />
 
       <CardContainer
-        filters={TABS}
-        defaultFilter="all"
-        items={events?.docs ?? []}
-        filterFn={(item, filter) => (item as Event).status === filter}
-        renderItem={(item) => {
-          const event = item as Event;
-          return (
+        filterComponent={
+          <TabFilter
+            tabs={[
+              { label: "Všechny", value: "all" },
+              { label: "Zrušené", value: "disabled" },
+              { label: "Plánované", value: "active" },
+              { label: "Dokončené", value: "completed" },
+            ]}
+            activeTab={activeFilter}
+            onChange={(value) => {
+              setActiveFilter(value);
+            }}
+          />
+        }
+        items={events?.docs
+          ?.filter((event) => {
+            if (activeFilter === "all") return true;
+            return event.status === activeFilter;
+          })
+          .map((event) => (
             <EntityCard
               key={event.id}
               icon="Calendar"
@@ -78,8 +89,7 @@ export default function page() {
               }}
               rightComponent={<EventStatusTag eventStatus={event.status} />}
             />
-          );
-        }}
+          ))}
         emptyState={{
           text: "Zatím žádné události",
           subtext: "Vytvořte první událost a začněte plánovat.",

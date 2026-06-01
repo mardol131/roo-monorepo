@@ -2,6 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 import Text from "@/app/components/ui/atoms/text";
+import HomepageSectionHeading from "./homepage-section-heading";
+import { HomepageSectionWrapper } from "@/app/components/ui/sections/landing-section-wrapper";
 
 const STEPS = [
   {
@@ -43,43 +45,39 @@ export default function HowItWorksSection() {
   }, []);
 
   return (
-    <div ref={ref} className="w-full">
-      <div
-        className="text-center mb-8 transition-all duration-500"
-        style={{
-          opacity: visible ? 1 : 0,
-          transform: visible ? "translateY(0)" : "translateY(12px)",
-        }}
-      >
-        <Text variant="display-lg" color="textDark" className="mb-2">
-          Jak to funguje
-        </Text>
-        <Text variant="body-lg" color="textLight">
-          Od nápadu k hotovému eventu za pár minut.
-        </Text>
-      </div>
-
-      <div className="rounded-3xl border border-zinc-100 overflow-hidden grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-zinc-100">
+    <div ref={ref} className="w-full py-10">
+      <HomepageSectionHeading
+        heading="Jak to funguje"
+        subheading="Od nápadu k hotovému eventu za pár minut."
+        wrapperClassname="text-center"
+        headingColor="white"
+        subheadingColor="textLight"
+      />
+      <div className="rounded-3xl overflow-hidden grid grid-cols-1 md:grid-cols-3 gap-15">
         {STEPS.map((step, i) => (
           <div
             key={step.number}
-            className="relative overflow-hidden px-8 py-8 bg-zinc-50 transition-all duration-600"
+            className="relative overflow-hidden py-8 transition-all duration-600"
             style={{
               opacity: visible ? 1 : 0,
               transform: visible ? "translateY(0)" : "translateY(20px)",
               transitionDelay: `${i * 120 + 150}ms`,
             }}
           >
-            <span className="absolute top-2 right-4 text-8xl font-black text-zinc-100 select-none leading-none pointer-events-none tabular-nums">
+            <span className="absolute top-2 right-4 text-8xl font-black text-text-light/10 select-none leading-none pointer-events-none tabular-nums">
               {step.number}
             </span>
             <div className="relative z-10 flex flex-col gap-4">
               <div className={`w-8 h-1.5 rounded-full ${step.accent}`} />
               <div className="flex flex-col gap-1">
-                <Text variant="display-2xl" color="textDark" className="tabular-nums">
+                <Text
+                  variant="display-2xl"
+                  color="white"
+                  className="tabular-nums"
+                >
                   {step.number}
                 </Text>
-                <Text variant="h3" color="textDark">
+                <Text variant="h3" color="white">
                   {step.title}
                 </Text>
                 <Text variant="body-sm" color="textLight">

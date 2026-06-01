@@ -105,6 +105,11 @@ export const companyFields: Field[] = [
         relationTo: 'users',
         required: true,
       },
+      {
+        name: 'invitationEmail',
+        type: 'email',
+        required: true,
+      },
       memberRoleField,
     ],
   },

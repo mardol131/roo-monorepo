@@ -31,8 +31,9 @@ export const eventsFields: Field[] = [
     type: 'array',
     fields: [
       {
-        name: 'note',
+        name: 'title',
         type: 'text',
+        required: true,
       },
       {
         name: 'createdAt',
@@ -43,6 +44,13 @@ export const eventsFields: Field[] = [
       {
         name: 'description',
         type: 'text',
+      },
+      {
+        name: 'status',
+        type: 'select',
+        options: ['active', 'archived'],
+        defaultValue: 'active',
+        required: true,
       },
     ],
   },
@@ -73,6 +81,13 @@ export const eventsFields: Field[] = [
         type: 'select',
         options: ['low', 'medium', 'high'],
         defaultValue: 'medium',
+      },
+      {
+        name: 'status',
+        type: 'select',
+        options: ['active', 'archived'],
+        defaultValue: 'active',
+        required: true,
       },
     ],
   },

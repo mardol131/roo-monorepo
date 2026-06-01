@@ -16,6 +16,8 @@ import {
 import InputLabel from "../../input-label";
 import { MediaSchema } from "@roo/common";
 import { generateMediaUrl } from "@/app/functions/generate-media-url";
+import { isDisplayableUrl, UploadImageItem } from "./image-input";
+import { userImagesGalleryModalEvents } from "../../../molecules/modals/user-images-gallery-modal";
 
 type UploadingImage = {
   id: string;
@@ -48,7 +50,7 @@ function SortableGalleryItem({
     <div
       ref={ref}
       className={`relative aspect-square overflow-hidden rounded-lg border ${
-        hasError ? "border-red-500" : "border-zinc-300"
+        hasError ? "border-danger" : "border-zinc-300"
       } ${isDragging ? "z-10 opacity-50" : ""}`}
     >
       <Image
@@ -85,6 +87,7 @@ type GalleryInputProps = {
   accept?: string;
   maxImages?: number;
   containerRef?: React.Ref<HTMLDivElement>;
+  onGalleryButtonClick?: () => void;
 };
 
 export default function GalleryInput({
@@ -97,6 +100,7 @@ export default function GalleryInput({
   accept = "image/*",
   maxImages = 20,
   containerRef,
+  onGalleryButtonClick,
 }: GalleryInputProps) {
   const [uploadingImages, setUploadingImages] = useState<UploadingImage[]>([]);
   const [uploadError, setUploadError] = useState<string | null>(null);
@@ -218,6 +222,22 @@ export default function GalleryInput({
     [onChange, value],
   );
 
+  const galleryButtonHandler = useCallback(() => {
+    if (onGalleryButtonClick) onGalleryButtonClick();
+    userImagesGalleryModalEvents.emit("open", {
+      onMediaClick: (media) => {
+        const mediaUrl = generateMediaUrl(media.filename || "");
+        if (!isDisplayableUrl(mediaUrl)) {
+          setUploadError("Vybraný obrázek nelze zobrazit.");
+          return;
+        }
+        if (value.length < maxImages) {
+          onChange([...value, media]);
+        }
+      },
+    });
+  }, [value, onChange, maxImages, onGalleryButtonClick]);
+
   return (
     <div ref={containerRef} tabIndex={-1}>
       <InputLabel label={label} isRequired={isRequired} />
@@ -228,7 +248,7 @@ export default function GalleryInput({
         <div className="grid grid-cols-4 gap-2">
           {value.map((media, idx) => (
             <SortableGalleryItem
-              key={media.filename}
+              key={`${media.filename}-${idx}`}
               sortableId={idx.toString()}
               imageUrl={generateMediaUrl(media.filename || "")}
               label={label}
@@ -256,36 +276,15 @@ export default function GalleryInput({
           ))}
 
           {canAddMore && (
-            <div
-              role="button"
-              tabIndex={0}
+            <UploadImageItem
               onClick={handleClick}
-              onKeyDown={(event) => {
-                if (event.key === "Enter" || event.key === " ") {
-                  event.preventDefault();
-                  handleClick();
-                }
-              }}
               onDragOver={handleDragOver}
               onDragLeave={handleDragLeave}
               onDrop={handleDrop}
-              className={`flex aspect-square cursor-pointer flex-col items-center justify-center gap-1.5 rounded-lg border-2 border-dashed transition-colors ${
-                isDragging
-                  ? "border-zinc-900 bg-zinc-50"
-                  : error
-                    ? "border-red-500 bg-white"
-                    : "border-zinc-300 bg-white hover:border-zinc-400 hover:bg-zinc-50"
-              } focus:border-transparent focus:outline-none focus:ring-2 focus:ring-zinc-900`}
-            >
-              <ImagePlus size={24} className="text-zinc-400" />
-              <Text
-                variant="caption"
-                color="textLight"
-                className="text-center px-1"
-              >
-                Nahrát
-              </Text>
-            </div>
+              isDragging={isDragging}
+              error={error}
+              onGalleryButtonClick={galleryButtonHandler}
+            />
           )}
         </div>
       </DragDropProvider>

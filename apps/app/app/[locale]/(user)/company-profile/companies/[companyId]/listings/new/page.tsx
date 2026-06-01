@@ -6,9 +6,10 @@ import { Listing, LucideIcons } from "@roo/common";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import IconCard from "./components/icon-card";
-import VenueListingForm from "../components/venue-listing-form";
-import GastroListingForm from "../components/gastro-listing-form";
-import EntertainmentListingForm from "../components/entertainment-listing-form";
+import VenueWizard from "../../../../../../../components/forms/listings/create-wizards/venue-wizard";
+import GastroWizard from "../../../../../../../components/forms/listings/create-wizards/gastro-wizard";
+import EntertainmentWizard from "../../../../../../../components/forms/listings/create-wizards/entertainment-wizard";
+import { useTranslations } from "next-intl";
 
 const LISTING_TYPES: {
   type: Listing["type"];
@@ -41,6 +42,7 @@ export default function NewListingPage() {
   const [selectedType, setSelectedType] = useState<Listing["type"] | null>(
     null,
   );
+  const t = useTranslations("global");
 
   if (!selectedType) {
     return (
@@ -67,41 +69,26 @@ export default function NewListingPage() {
   return (
     <main className="w-full pb-100">
       <PageHeading
-        heading="Založení nové služby"
+        button={{
+          version: "listingFull",
+          onClick: () => setSelectedType(null),
+          iconLeft: "ArrowLeft",
+          className: "mb-4",
+          text: "Zpět na výběr typu služby",
+          size: "sm",
+        }}
+        heading={`Založení nové služby ${selectedType ? `- ${t(`listings.type.${selectedType}`)}` : ""}`}
         description="Zde můžete vytvořit novou službu, kterou budete nabízet zákazníkům. Jde pouze o základní nastavení, zbytek lze pak upravit v editaci služby."
       />
 
-      <Button
-        version="listingFull"
-        onClick={() => setSelectedType(null)}
-        iconLeft="ArrowLeft"
-        className="mb-4"
-        text="Zpět na výběr typu služby"
-        size="sm"
-      />
       {selectedType === "venue" && (
-        <VenueListingForm
-          type="create"
-          onCancel={() => {
-            setSelectedType(null);
-          }}
-        />
+        <VenueWizard onCancel={() => setSelectedType(null)} />
       )}
       {selectedType === "gastro" && (
-        <GastroListingForm
-          type="create"
-          onCancel={() => {
-            setSelectedType(null);
-          }}
-        />
+        <GastroWizard onCancel={() => setSelectedType(null)} />
       )}
       {selectedType === "entertainment" && (
-        <EntertainmentListingForm
-          type="create"
-          onCancel={() => {
-            setSelectedType(null);
-          }}
-        />
+        <EntertainmentWizard onCancel={() => setSelectedType(null)} />
       )}
     </main>
   );

@@ -3,6 +3,7 @@
 import { ControlSection } from "@/app/[locale]/(user)/components/control-section";
 import { simpleConfirmActionModalEvents } from "@/app/components/ui/molecules/modals/simple-confirm-action-modal";
 import { SingleInputModal } from "@/app/components/ui/molecules/modals/single-input-modal";
+import { userImagesGalleryModalEvents } from "@/app/components/ui/molecules/modals/user-images-gallery-modal";
 import { useAuth } from "@/app/context/auth/auth-context";
 import { switchAccountTypeToCompany } from "@/app/functions/api/users";
 import { useState } from "react";
@@ -92,6 +93,24 @@ export function AccountSettingsSection() {
                 }),
             },
             disabled: isCompany,
+          },
+          {
+            icon: "Image",
+            iconColor: "text-success",
+            iconBgColor: "bg-success-surface",
+            title: "Obrázky a videa",
+            text: "Spravujte své nahrané obrázky a videa, které používáte ve svých inzerátech.",
+            button: {
+              text: "Zobrazit",
+              version: "outlined",
+              size: "sm",
+              onClick: () =>
+                userImagesGalleryModalEvents.emit("open", {
+                  onMediaClick: (media) => {},
+                  allowDelete: true,
+                  allowCloseOnMediaClick: false,
+                }),
+            },
           },
         ]}
       />

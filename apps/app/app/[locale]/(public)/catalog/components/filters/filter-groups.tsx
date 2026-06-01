@@ -1,5 +1,8 @@
 import React from "react";
 import PriceFilter from "./special/price-filter";
+import LocationFilter from "./location-filter";
+import DateFilter from "./special/date-filter";
+import GuestsFilter from "./special/guests-filter";
 import { useCities } from "@/app/react-query/cities/hooks";
 import { useFilterOptions } from "@/app/react-query/filters/aggregated-filters/hooks";
 import FilterSection from "./filter-section";
@@ -414,4 +417,138 @@ export function createActivitiesGroup<
     },
   };
 }
+
+// ─── General filter group factories ────────────────────────────────────────────
+
+export function createLocationGroup<
+  TFilters extends GeneralFilterState,
+>(): FilterGroup<TFilters> {
+  return {
+    key: "location",
+    label: "Místo konání",
+    count: (f) => (f.city || f.district || f.region ? 1 : 0),
+    Content: ({ filters, onChange }) => (
+      <LocationFilter
+        value={{
+          city: filters.city,
+          district: filters.district,
+          region: filters.region,
+        }}
+        onChange={({ city, district, region }) =>
+          onChange({ ...filters, city, district, region, bbox: [] })
+        }
+      />
+    ),
+  };
+}
+
+export function createDateGroup<
+  TFilters extends GeneralFilterState,
+>(): FilterGroup<TFilters> {
+  return {
+    key: "date",
+    label: "Termín",
+    count: (f) => (f.dateFrom ? 1 : 0) + (f.dateTo ? 1 : 0),
+    Content: ({ filters, onChange }) => (
+      <DateFilter
+        type="inline"
+        startValue={filters.dateFrom || undefined}
+        endValue={filters.dateTo || undefined}
+        onStartChange={(dateFrom) => onChange({ ...filters, dateFrom })}
+        onEndChange={(dateTo) => onChange({ ...filters, dateTo })}
+      />
+    ),
+  };
+}
+
+export function createGuestsGroup<
+  TFilters extends GeneralFilterState,
+>(): FilterGroup<TFilters> {
+  return {
+    key: "guests",
+    label: "Hosté",
+    count: (f) =>
+      (f.adults !== 1 ? 1 : 0) +
+      (f.children > 0 ? 1 : 0) +
+      (f.accessibility ? 1 : 0) +
+      (f.pets ? 1 : 0),
+    Content: ({ filters, onChange }) => (
+      <GuestsFilter
+        type="inline"
+        value={{
+          adults: filters.adults,
+          children: filters.children,
+          accessibility: filters.accessibility,
+          pets: filters.pets,
+        }}
+        onChange={(g) => onChange({ ...filters, ...g })}
+      />
+    ),
+  };
+}
+
+// ─── Combined full filter types ─────────────────────────────────────────────────
+
+export type GastroFullFilterState = GeneralFilterState &
+  CommonFilterState &
+  GastroFilterState;
+export type VenueFullFilterState = GeneralFilterState &
+  CommonFilterState &
+  VenueFilterState;
+export type EntertainmentFullFilterState = GeneralFilterState &
+  CommonFilterState &
+  EntertainmentFilterState;
+
+export const EMPTY_GASTRO_FULL_FILTERS: GastroFullFilterState = {
+  ...EMPTY_GENERAL_FILTERS,
+  ...EMPTY_COMMON_FILTERS,
+  ...EMPTY_GASTRO_FILTERS,
+};
+
+export const EMPTY_VENUE_FULL_FILTERS: VenueFullFilterState = {
+  ...EMPTY_GENERAL_FILTERS,
+  ...EMPTY_COMMON_FILTERS,
+  ...EMPTY_VENUE_FILTERS,
+};
+
+export const EMPTY_ENTERTAINMENT_FULL_FILTERS: EntertainmentFullFilterState = {
+  ...EMPTY_GENERAL_FILTERS,
+  ...EMPTY_COMMON_FILTERS,
+  ...EMPTY_ENTERTAINMENT_FILTERS,
+};
+
+// ─── Full modal groups (general + common + type-specific) ───────────────────────
+
+export const GASTRO_FULL_MODAL_GROUPS: FilterGroup<GastroFullFilterState>[] = [
+  createLocationGroup(),
+  createDateGroup(),
+  createGuestsGroup(),
+  createPriceGroup(),
+  createEventTypesGroup(),
+  createCuisinesGroup(),
+  createDishTypesGroup(),
+  createFoodServiceStylesGroup(),
+];
+
+export const VENUE_FULL_MODAL_GROUPS: FilterGroup<VenueFullFilterState>[] = [
+  createLocationGroup(),
+  createDateGroup(),
+  createGuestsGroup(),
+  createPriceGroup(),
+  createEventTypesGroup(),
+  createPlaceTypesGroup(),
+  createAmenitiesGroup(),
+  createActivitiesGroup(),
+];
+
+export const ENTERTAINMENT_FULL_MODAL_GROUPS: FilterGroup<EntertainmentFullFilterState>[] =
+  [
+    createLocationGroup(),
+    createDateGroup(),
+    createGuestsGroup(),
+    createPriceGroup(),
+    createEventTypesGroup(),
+    createActivitiesGroup(),
+  ];
+
 // ─── Gastro groups ──────────────────────────────────────────────────────────────

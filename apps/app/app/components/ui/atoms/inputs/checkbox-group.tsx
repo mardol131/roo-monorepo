@@ -25,6 +25,7 @@ type Props = {
   isRequired?: boolean;
   sublabel?: string;
   error?: string | null;
+  hideTags?: boolean;
 };
 
 export default function CheckboxGroup({
@@ -44,6 +45,7 @@ export default function CheckboxGroup({
   isRequired,
   sublabel,
   error,
+  hideTags = false,
 }: Props) {
   value = value ?? [];
   const [query, setQuery] = useState(defaultSearchValue);
@@ -89,7 +91,7 @@ export default function CheckboxGroup({
             </div>
           )}
 
-          {value.length > 0 && (
+          {!hideTags && value.length > 0 && (
             <div className="flex flex-wrap gap-1.5 py-2">
               {value.map((item) => (
                 <button

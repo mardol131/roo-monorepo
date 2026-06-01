@@ -33,6 +33,7 @@ type EditingMember = {
 export default function page() {
   const { companyId } = useParams<{ companyId: string }>();
   const { data: company, isLoading } = useCompany(companyId);
+  console.log("Company data:", company);
   const { mutate: updateCompany } = useUpdateCompany();
   const { data: invitations } = usePendingInvitationsByCompany(companyId);
   const { mutate: updateInvitation } = useUpdateInvitation();
@@ -77,7 +78,6 @@ export default function page() {
         }
       />
       <CardContainer
-        items={company.members ?? []}
         emptyState={{
           text: "Zatím žádní členové",
           subtext: "Pozvěte kolegy, aby mohli spravovat firmu společně s vámi.",
@@ -92,87 +92,72 @@ export default function page() {
             : undefined,
           icon: "Users",
         }}
-        renderItem={(item) => {
-          const member = item as TeamMember;
-          const name =
-            typeof member.user === "string"
-              ? member.user
-              : `${member.user.firstName ?? ""} ${member.user.lastName ?? ""}`.trim() ||
-                member.user.email;
-          const email =
-            typeof member.user === "string" ? undefined : member.user.email;
-
-          const roleLabel = g(`companies.members.role.${member.role}`);
-
-          return (
-            <EntityCard
-              key={member.id}
-              icon="UserRound"
-              label={name}
-              iconColor="text-company"
-              rightIcon="Pen"
-              hideRightIcon={!canEditCompany(company, user?.id)}
-              iconBackgroundColor="bg-company-surface"
-              items={[
-                ...(email ? [{ icon: "Mail" as const, content: email }] : []),
-                { icon: "Shield" as const, content: roleLabel },
-              ]}
-              onClick={
-                canEditCompany(company, user?.id)
-                  ? () => {
-                      setEditingMember({
-                        id: member.id ?? "",
-                        name,
-                        role: member.role,
-                      });
-                    }
-                  : undefined
-              }
-              deleteEntityHandler={
-                canEditCompany(company, user?.id)
-                  ? () => handleDeleteMember(member.id ?? "")
-                  : undefined
-              }
-            />
-          );
-        }}
+        items={company?.members?.map((member) => (
+          <EntityCard
+            key={member.id}
+            icon="UserRound"
+            label={member.invitationEmail}
+            iconColor="text-company"
+            rightIcon="Pen"
+            hideRightIcon={!canEditCompany(company, user?.id)}
+            iconBackgroundColor="bg-company-surface"
+            items={[
+              {
+                icon: "Shield",
+                content: g(`companies.members.role.${member.role}`),
+              },
+            ]}
+            onClick={
+              canEditCompany(company, user?.id)
+                ? () => {
+                    setEditingMember({
+                      id: member.id ?? "",
+                      name: member.invitationEmail,
+                      role: member.role,
+                    });
+                  }
+                : undefined
+            }
+            deleteEntityHandler={
+              canEditCompany(company, user?.id)
+                ? () => handleDeleteMember(member.id ?? "")
+                : undefined
+            }
+          />
+        ))}
       />
       {invitations && invitations.docs && invitations?.docs?.length > 0 && (
         <div className="mt-6">
           <CardContainer
             title="Čekající pozvánky"
             subtitle="Seznam pozvánek, které jste odeslali, ale ještě nebyly přijaty."
-            items={invitations.docs ?? []}
             emptyState={{
               text: "Zatím žádní členové",
               subtext:
                 "Pozvěte kolegy, aby mohli spravovat firmu společně s vámi.",
               icon: "Users",
             }}
-            renderItem={(item) => {
-              const invitation = item as Invitation;
-
-              const roleLabel = g(`companies.members.role.${invitation.role}`);
-
-              return (
-                <EntityCard
-                  key={invitation.id}
-                  icon="UserRound"
-                  label={invitation.email}
-                  iconColor="text-company"
-                  iconBackgroundColor="bg-company-surface"
-                  deleteEntityHandler={() =>
-                    updateInvitationStatus(invitation.id, "cancelled")
-                  }
-                  items={[
-                    ...(invitation.email
-                      ? [{ icon: "Mail" as const, content: invitation.email }]
-                      : []),
-                    { icon: "Shield" as const, content: roleLabel },
-                  ]}
-                />
-              );
-            }}
+            items={invitations.docs?.map((invitation) => (
+              <EntityCard
+                key={invitation.id}
+                icon="UserRound"
+                label={invitation.email}
+                iconColor="text-company"
+                iconBackgroundColor="bg-company-surface"
+                deleteEntityHandler={() =>
+                  updateInvitationStatus(invitation.id, "cancelled")
+                }
+                items={[
+                  ...(invitation.email
+                    ? [{ icon: "Mail" as const, content: invitation.email }]
+                    : []),
+                  {
+                    icon: "Shield" as const,
+                    content: g(`companies.members.role.${invitation.role}`),
+                  },
+                ]}
+              />
+            ))}
           />
         </div>
       )}

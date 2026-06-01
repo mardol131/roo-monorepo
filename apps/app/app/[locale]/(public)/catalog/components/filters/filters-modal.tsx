@@ -5,17 +5,17 @@ import Text from "@/app/components/ui/atoms/text";
 import Button from "@/app/components/ui/atoms/button";
 import ModalLayout from "@/app/components/ui/molecules/modal-layout";
 import { FilterGroup } from "./filter-groups";
+import { createEvents } from "@/app/functions/create-events";
+import { useCatalogStore } from "@/app/store/catalog-store";
 
 interface FiltersModalProps<TFilters> {
-  isOpen: boolean;
-  onClose: () => void;
+  onClose?: () => void;
   onApply?: (filters: TFilters) => void;
   groups: FilterGroup<TFilters>[];
   initialFilters: TFilters;
 }
 
 export default function FiltersModal<TFilters>({
-  isOpen,
   onClose,
   onApply,
   groups,
@@ -23,17 +23,21 @@ export default function FiltersModal<TFilters>({
 }: FiltersModalProps<TFilters>) {
   const [filters, setFilters] = useState<TFilters>(initialFilters);
   const [activeGroupKey, setActiveGroupKey] = useState(groups[0].key);
+  const { filtersModalOpen, setFiltersModalOpen } = useCatalogStore();
 
   useEffect(() => {
-    if (isOpen) setFilters(initialFilters);
-  }, [isOpen]);
+    if (filtersModalOpen) setFilters(initialFilters);
+  }, [filtersModalOpen, initialFilters]);
 
   const totalActive = groups.reduce((sum, g) => sum + g.count(filters), 0);
   const activeGroup = groups.find((g) => g.key === activeGroupKey) ?? groups[0];
-
+  const closeHandler = () => {
+    onClose?.();
+    setFiltersModalOpen(false);
+  };
   const handleApply = () => {
     onApply?.(filters);
-    onClose();
+    closeHandler();
   };
 
   const header = (
@@ -52,8 +56,8 @@ export default function FiltersModal<TFilters>({
   return (
     <ModalLayout
       header={header}
-      onClose={onClose}
-      isOpen={isOpen}
+      onClose={closeHandler}
+      isOpen={filtersModalOpen}
       maxWidth="max-w-3xl"
     >
       <div className="-mx-6 -my-6 flex flex-col">

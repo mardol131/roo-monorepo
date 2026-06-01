@@ -376,7 +376,8 @@ export default function page() {
                       <InquiryStatusTag status={inquiry.status} />
                     }
                     link={{
-                      pathname: "/user-profile/events/[eventId]/[inquiryId]",
+                      pathname:
+                        "/user-profile/events/[eventId]/inquiries/[inquiryId]",
                       params: {
                         eventId: getIdFromRelationshipField(inquiry.event),
                         inquiryId: inquiry.id,
@@ -455,11 +456,11 @@ export default function page() {
           </div>
         </DashboardSection>
 
-        <EventChecklistSection
+        {/* <EventChecklistSection
           eventId={eventId}
           checklist={event.checklist ?? []}
         />
-        <EventNotesSection eventId={eventId} notes={event.notes ?? []} />
+        <EventNotesSection eventId={eventId} notes={event.notes ?? []} /> */}
       </div>
     </main>
   );

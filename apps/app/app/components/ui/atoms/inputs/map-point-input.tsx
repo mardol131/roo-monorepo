@@ -239,12 +239,12 @@ export default function MapPointInput({
       )}
       <div className="relative">
         {mapDisabled && (
-          <div className="absolute top-[50%] left-[50%] transform -translate-x-1/2 -translate-y-1/2 z-50">
+          <div className="absolute top-[50%] left-[50%] transform -translate-x-1/2 -translate-y-1/2 z-10">
             <Text variant="h4">Nejprve vyberte město</Text>
           </div>
         )}
         <div
-          className={`relative rounded-md h-100 overflow-hidden border ${mapDisabled ? "opacity-50 pointer-events-none" : ""} ${error ? "border-red-500" : "border-zinc-200"}`}
+          className={`relative rounded-md h-100 overflow-hidden border ${mapDisabled ? "opacity-50 pointer-events-none" : ""} ${error ? "border-danger" : "border-zinc-200"}`}
           onBlur={onBlur}
         >
           <Map

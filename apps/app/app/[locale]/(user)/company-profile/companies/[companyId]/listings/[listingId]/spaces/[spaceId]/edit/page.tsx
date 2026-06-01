@@ -53,6 +53,11 @@ export default function page() {
           capacity: space.capacity ?? undefined,
           area: space.area ?? undefined,
           images: space.images ?? [],
+          price: {
+            base: space.price?.base,
+            pricingUnit: space.price?.pricingUnit,
+            seasonalPrices: space.price?.seasonalPrices ?? [],
+          },
           hasAccommodation: space.hasAccommodation ?? false,
           accommodationCapacity: space.accommodationCapacity ?? undefined,
           accommodationRooms: (space.accommodationRooms ?? []).map((r) => ({
@@ -61,11 +66,15 @@ export default function page() {
             capacity: r.capacity,
             countOfRoomsOfThisType: r.countOfRoomsOfThisType,
             amenityIds: (r.amenities ?? []).map((a) =>
-              typeof a === "string" ? { id: a, name: "" } : { id: a.id, name: a.name },
+              typeof a === "string"
+                ? { id: a, name: "" }
+                : { id: a.id, name: a.name },
             ),
           })),
           spaceRuleIds: (space.spaceRules ?? []).map((rule) =>
-            typeof rule === "string" ? { id: rule, name: "" } : { id: rule.id, name: rule.name },
+            typeof rule === "string"
+              ? { id: rule, name: "" }
+              : { id: rule.id, name: rule.name },
           ),
         }}
       />

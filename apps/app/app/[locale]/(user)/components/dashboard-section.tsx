@@ -13,9 +13,11 @@ export function DashboardSection({
   children,
   emptyText,
   headerRightComponent,
+  subtitle,
 }: {
   id?: string;
   title: string;
+  subtitle?: string;
   icon: LucideIcons;
   iconBg: string;
   iconColor: string;
@@ -26,6 +28,7 @@ export function DashboardSection({
   return (
     <div id={id} className="bg-white rounded-2xl border border-zinc-200">
       <DashboardSectionHeader
+        subheading={subtitle}
         heading={title}
         icon={icon}
         iconBgColor={iconBg}

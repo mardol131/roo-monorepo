@@ -1,46 +1,53 @@
 "use client";
 
 import { useAuth } from "@/app/context/auth/auth-context";
-import { IntlLink, Link } from "@/app/i18n/navigation";
+import { IntlLink, Link, usePathname } from "@/app/i18n/navigation";
 import logo from "@/public/logo.png";
-import { Balloon, MapPin, Menu, UtensilsCrossed, X } from "lucide-react";
+import { Balloon, icons, MapPin, Menu, UtensilsCrossed, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Image from "next/image";
 import { useState } from "react";
 import Text from "../../ui/atoms/text";
 import HeaderAuthWidget from "./header-auth-widget";
+import Button from "../../ui/atoms/button";
+import { LucideIcons } from "../../ui/atoms/inputs/icon-select";
+import GeneralFilters from "@/app/[locale]/(public)/catalog/components/filters/general-filters";
 
 export default function Header() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const auth = useAuth();
   const t = useTranslations("global.header");
+  const pathname = usePathname();
+  const isInCatalog = pathname?.startsWith("/catalog");
 
   const NAV_ITEMS: {
     label: string;
     href: IntlLink;
-    icon: React.ElementType;
-  }[] = [
-    {
-      label: t("nav.venue"),
-      icon: MapPin,
-      href: { pathname: "/catalog/venue" },
-    },
-    {
-      label: t("nav.gastro"),
-      icon: UtensilsCrossed,
-      href: { pathname: "/catalog/gastro" },
-    },
-    {
-      label: t("nav.entertainment"),
-      icon: Balloon,
-      href: { pathname: "/catalog/entertainment" },
-    },
-  ];
+    icon: LucideIcons;
+  }[] = !isInCatalog
+    ? [
+        {
+          label: t("nav.venue"),
+          icon: "MapPin",
+          href: { pathname: "/catalog/venue" },
+        },
+        {
+          label: t("nav.gastro"),
+          icon: "UtensilsCrossed",
+          href: { pathname: "/catalog/gastro" },
+        },
+        {
+          label: t("nav.entertainment"),
+          icon: "Balloon",
+          href: { pathname: "/catalog/entertainment" },
+        },
+      ]
+    : [];
 
   const userIsNotLoggedInOrDoesNotHaveCompany =
     !auth.user || !auth.user.roles.includes("company");
   return (
-    <header className="sticky top-0 z-50 px-6 w-full bg-white/95 backdrop-blur-sm border-b border-zinc-100">
+    <header className="sticky top-0 z-50 px-6 w-full bg-linear-to-t from-zinc-50/95 to-white/95 backdrop-blur-sm border-b border-zinc-100">
       <div className="max-w-content mx-auto flex items-center justify-between h-16">
         {/* Logo + nav */}
         <div className="flex items-center gap-8">
@@ -52,15 +59,16 @@ export default function Header() {
           </Link>
 
           <nav className="hidden md:flex items-center gap-0.5">
-            {NAV_ITEMS.map(({ label, href, icon: Icon }) => (
-              <Link
+            {NAV_ITEMS.map(({ label, href, icon }) => (
+              <Button
                 key={label}
-                href={href}
-                className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-semibold text-zinc-900 hover:bg-zinc-100 transition-colors"
-              >
-                <Icon className="w-4 h-4 shrink-0 text-zinc-400" />
-                {label}
-              </Link>
+                link={href}
+                onClick={() => setMobileOpen(false)}
+                text={label}
+                version="plain"
+                size="sm"
+                iconLeft={icon}
+              />
             ))}
           </nav>
         </div>
@@ -70,12 +78,13 @@ export default function Header() {
           {/* Supplier CTA */}
           {userIsNotLoggedInOrDoesNotHaveCompany && (
             <>
-              <Link
-                href="/register-company"
-                className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium text-zinc-500 hover:text-zinc-900 hover:bg-zinc-50 transition-colors"
-              >
-                <Text variant="label-lg">{t("supplierCta")}</Text>
-              </Link>
+              <Button
+                link="/register-company"
+                onClick={() => setMobileOpen(false)}
+                text={t("supplierCta")}
+                version="plain"
+                size="sm"
+              />
               <div className="hidden md:block w-px h-4 bg-zinc-200 mx-1" />
             </>
           )}
@@ -109,29 +118,32 @@ export default function Header() {
       >
         <nav className="flex flex-col px-4 py-3 gap-0.5">
           {NAV_ITEMS.map(({ label, href, icon: Icon }) => (
-            <Link
+            <Button
               key={label}
-              href={href}
+              link="/register-company"
               onClick={() => setMobileOpen(false)}
-              className="flex items-center gap-2 px-3 py-2.5 text-sm font-semibold text-zinc-900 hover:bg-zinc-100 rounded-lg transition-colors"
-            >
-              <Icon className="w-4 h-4 shrink-0 text-zinc-400" />
-              {label}
-            </Link>
+              text={t("supplierCta")}
+              version="plain"
+              size="sm"
+            />
           ))}
-          <Link
-            href="/register-company"
+          <Button
+            link="/register-company"
             onClick={() => setMobileOpen(false)}
+            text={t("supplierCta")}
             className="flex items-center gap-2 px-3 py-2.5 text-sm font-medium text-zinc-700 hover:bg-zinc-50 rounded-lg transition-colors"
-          >
-            {t("supplierCta")}
-          </Link>
+          />
 
           <div className="border-t border-zinc-100 mt-1.5 pt-1.5 flex flex-col gap-0.5">
             <HeaderAuthWidget onNavigate={() => setMobileOpen(false)} />
           </div>
         </nav>
       </div>
+      {isInCatalog && (
+        <div className="max-w-content mx-auto pb-4">
+          <GeneralFilters />
+        </div>
+      )}
     </header>
   );
 }

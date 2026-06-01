@@ -31,7 +31,7 @@ export default function HeroImageSection({ coverImage, gallery }: Props) {
       <div className="relative grid grid-cols-4 gap-4">
         {images.map((filename, i) => (
           <button
-            key={filename}
+            key={filename + i}
             onClick={() => openAt(i)}
             className={`cursor-pointer overflow-hidden rounded-lg ${
               i === 0 ? "row-span-2 col-span-2" : ""

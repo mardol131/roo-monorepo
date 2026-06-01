@@ -13,7 +13,11 @@ import RepeaterField from "@/app/components/ui/atoms/inputs/repeater-field";
 import { Textarea } from "@/app/components/ui/atoms/inputs/textarea";
 import { useRouter } from "@/app/i18n/navigation";
 import { useAmenities } from "@/app/react-query/filters/amenities/hooks";
-import { useCreateSpace, useUpdateSpace } from "@/app/react-query/spaces/hooks";
+import {
+  useCreateSpace,
+  useSpace,
+  useUpdateSpace,
+} from "@/app/react-query/spaces/hooks";
 import { useRules } from "@/app/react-query/specific/rules/hooks";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Space, undefinedToNull } from "@roo/common";
@@ -30,6 +34,12 @@ import {
   getOptionalPositiveNumber,
   getPositiveNumber,
 } from "@/app/validation/schema/utils";
+import { CreateSpaceInput } from "@/app/react-query/spaces/fetch";
+import { priceWithoutTravelFeeSchema } from "@/app/components/forms/listings/edit-forms/common-schema";
+import PriceInput from "@/app/components/ui/atoms/inputs/price-input";
+import SeasonalPricesInput from "@/app/components/ui/atoms/inputs/seasonal-prices-input";
+import { CompletionWidget } from "@/app/[locale]/(user)/components/completion-widget";
+import { getFullSpaceCompletion } from "@/app/functions/utils/spaces";
 
 // ── TOC ────────────────────────────────────────────────────────────────────────
 
@@ -56,6 +66,16 @@ const S: Record<string, TocSection> = {
     icon: "BedDouble",
     subTitle:
       "Nabízí prostor možnost ubytování? Pokud ano, jaká je kapacita ubytování a jaké typy pokojů jsou k dispozici?",
+  },
+  price: {
+    id: "section-price",
+    title: "Základní cena",
+    icon: "Banknote",
+  },
+  seasonalPrices: {
+    id: "section-seasonal-prices",
+    title: "Sezónní ceny",
+    icon: "CalendarRange",
   },
   rules: {
     id: "section-rules",
@@ -92,6 +112,7 @@ const schema = z.object({
   accommodationCapacity: getOptionalPositiveNumber(
     "Kapacita ubytování musí být kladná",
   ),
+  price: priceWithoutTravelFeeSchema,
   accommodationRooms: z
     .array(
       z.object({
@@ -144,6 +165,8 @@ export function SpaceForm(props: SpaceFormProps) {
       sections: [
         S.basics,
         S.images,
+        S.price,
+        S.seasonalPrices,
         S.capacity,
         ...(spaceType !== "room" ? [S.accommodation] : []),
         S.rules,
@@ -177,6 +200,7 @@ export function SpaceForm(props: SpaceFormProps) {
 
   const { data: amenities } = useAmenities({ limit: 15 });
   const { data: rules } = useRules({ limit: 15 });
+  const { data: space } = useSpace(props.mode === "edit" ? props.spaceId : "");
 
   const {
     fields: roomFields,
@@ -195,7 +219,7 @@ export function SpaceForm(props: SpaceFormProps) {
   }
 
   function onSubmit(data: FormInputs) {
-    const payload = {
+    const payload: CreateSpaceInput = {
       name: data.name,
       type: spaceType,
       listing: listingId,
@@ -203,6 +227,7 @@ export function SpaceForm(props: SpaceFormProps) {
       capacity: data.capacity,
       area: data.area,
       images: data.images,
+      price: data.price,
       hasAccommodation: data.hasAccommodation,
       accommodationCapacity: data.accommodationCapacity,
       accommodationRooms: data.accommodationRooms.map(
@@ -236,6 +261,13 @@ export function SpaceForm(props: SpaceFormProps) {
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="flex gap-6 mt-8">
       <div className="flex w-full flex-col gap-4">
+        {space && (
+          <CompletionWidget
+            data={getFullSpaceCompletion(space)}
+            title="Dokončení prostoru"
+          />
+        )}
+
         {/* ── 1. Základní informace ─────────────────────────────────────────── */}
         <FormSection
           id={S.basics.id}
@@ -244,6 +276,7 @@ export function SpaceForm(props: SpaceFormProps) {
           subtitle={S.basics.subTitle}
           surfaceColor="bg-space-surface"
           color="text-space"
+          error={!!errors.name}
         >
           <Input
             label="Název"
@@ -290,7 +323,51 @@ export function SpaceForm(props: SpaceFormProps) {
           />
         </FormSection>
 
-        {/* ── 3. Kapacita a plocha ──────────────────────────────────────────── */}
+        {/* ── 3. Základní cena ──────────────────────────────────────────────── */}
+        <FormSection
+          id={S.price.id}
+          icon={S.price.icon}
+          title={S.price.title}
+          subtitle={S.price.subTitle}
+          surfaceColor="bg-space-surface"
+          color="text-space"
+          error={!!errors.price?.base}
+        >
+          <Controller
+            control={control}
+            name="price.pricingUnit"
+            render={({ field }) => (
+              <PriceInput
+                label="Základní cena"
+                sublabel="Jednotková cena, podle které naceňujete akce."
+                isRequired
+                amountProps={register("price.base")}
+                unitValue={field.value}
+                onUnitChange={field.onChange}
+                amountError={errors.price?.base?.message}
+                unitError={errors.price?.pricingUnit?.message}
+              />
+            )}
+          />
+        </FormSection>
+
+        {/* ── 4. Sezónní ceny ───────────────────────────────────────────────── */}
+        <FormSection
+          id={S.seasonalPrices.id}
+          icon={S.seasonalPrices.icon}
+          title={S.seasonalPrices.title}
+          subtitle={S.seasonalPrices.subTitle}
+          surfaceColor="bg-space-surface"
+          color="text-space"
+        >
+          <SeasonalPricesInput
+            control={control}
+            register={register}
+            errors={(errors?.price?.seasonalPrices as any) ?? []}
+          />
+        </FormSection>
+
+        {/* ── 5. Kapacita a plocha ──────────────────────────────────────────── */}
         <FormSection
           id={S.capacity.id}
           icon={S.capacity.icon}
@@ -438,7 +515,7 @@ export function SpaceForm(props: SpaceFormProps) {
           </FormSection>
         )}
 
-        {/* ── 5. Pravidla ───────────────────────────────────────────────────── */}
+        {/* ── 8. Pravidla ───────────────────────────────────────────────────── */}
         <FormSection
           id={S.rules.id}
           icon={S.rules.icon}

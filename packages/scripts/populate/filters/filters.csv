@@ -99,6 +99,14 @@ dish-types;Canapé;canape
 dish-types;Cheese board;cheese-board
 dish-types;Degustační menu;degustacni-menu
 dish-types;Brunch;brunch
+entertainment-rules;Vlastní ozvučení nutné;vlastni-ozvuceni-nutne
+entertainment-rules;Generátor nutný;generator-nutny
+entertainment-rules;Pouze akustická hudba;pouze-akusticka-hudba
+entertainment-rules;Tichá diskotéka;ticha-diskoteka
+entertainment-rules;Žádná pyrotechnika;zadna-pyrotechnika
+entertainment-rules;Bez živých zvířat;bez-zivych-zvirat
+entertainment-rules;Venkovní vystoupení;venkovni-vystoupeni
+entertainment-rules;Pouze interiér;pouze-interior
 entertainment-types;Živá hudba;ziva-hudba
 entertainment-types;DJ;dj
 entertainment-types;Kouzelník;kouzelnik
@@ -139,6 +147,24 @@ event-types;Absolventský večírek;absolventsky-vecirek
 event-types;Rozlučka se svobodou;rozlucka-se-svobodou
 event-types;Dětská oslava;detska-oslava
 event-types;Tiskový brífinkg;tiskovy-brifink
+food-preparation-styles;Živá kuchyně;ziva-kuchyne
+food-preparation-styles;Předpřipravená jídla;predpripravena-jidla
+food-preparation-styles;Grilování na místě;grilovani-na-miste
+food-preparation-styles;Sushi live;sushi-live
+food-preparation-styles;Wok live;wok-live
+food-preparation-styles;Flambé;flambe
+food-preparation-styles;Sous vide;sous-vide
+food-preparation-styles;Molekulární gastronomie;molekularni-gastronomie
+food-service-types;Stánek;stanek
+food-service-types;Food truck;food-truck
+food-service-types;Pojízdná kuchyň;pojizda-kuchyn
+food-service-types;Samostatný kuchař;samostatny-kuchar
+food-service-types;Cateringová firma;cateringova-firma
+food-service-types;Mobilní bar;mobilni-bar
+food-service-types;Mobilní cukrárna;mobilni-cukrarna
+food-service-types;Pop-up restaurace;pop-up-restaurace
+food-service-types;Bistro;bistro
+food-service-types;Grill station;grill-station-type
 food-service-styles;Bufet;bufet
 food-service-styles;À la carte;a-la-carte
 food-service-styles;Raut;raut
@@ -239,3 +265,88 @@ technologies;Dýmový stroj;dymovy-stroj
 technologies;Laserová show technika;laserova-show-technika
 technologies;Zvuková závora;zvukova-zavora
 technologies;4K displej;4k-displej
+gastro-rules;Vlastní catering povolen;vlastni-catering-povolen
+gastro-rules;Pouze smluvní catering;pouze-smluvni-catering
+gastro-rules;Kuchyň k dispozici;kuchyn-k-dispozici
+gastro-rules;Alkohol povolen;alkohol-povolen
+gastro-rules;Alkohol zakázán;alkohol-zakazan
+gastro-rules;Vlastní nápoje povoleny;vlastni-napoje-povoleny
+gastro-rules;Venkovní gril povolen;venkovni-gril-povolen
+gastro-rules;Bez vepřového;bez-veproveho
+music-genres;Pop;pop
+music-genres;Rock;rock
+music-genres;Jazz;jazz
+music-genres;Blues;blues
+music-genres;R&B;r-b
+music-genres;Hip-hop;hip-hop
+music-genres;Electronic;electronic
+music-genres;House;house
+music-genres;Techno;techno
+music-genres;Disco;disco
+music-genres;Folk;folk
+music-genres;Country;country
+music-genres;Klasická hudba;klasicka-hudba
+music-genres;Swing;swing
+music-genres;Reggae;reggae
+music-genres;Latin;latin
+music-genres;Metal;metal
+music-genres;Soul;soul
+music-genres;Funk;funk
+music-genres;Indie;indie
+necessities;Vlastní ozvučení;vlastni-ozvuceni
+necessities;Světelná technika;svetelna-technika-nec
+necessities;Šatna pro umělce;satna-pro-umelce
+necessities;Parkoviště pro dodávku;parkoviste-pro-dodavku
+necessities;Přívod elektřiny 380V;privod-elektriny-380v
+necessities;Zázemí pro přípravu;zazemi-pro-pripravu
+necessities;Wifi připojení;wifi-pripojeni
+necessities;Pódium (min. 4×3 m);podium-min-4x3
+necessities;Klimatizace na pódiu;klimatizace-na-podiu
+necessities;Venkovní přípojka;venkovni-pripojka
+room-amenities;Přirozené světlo;prirozene-svetlo
+room-amenities;Klimatizace;klimatizace-room
+room-amenities;Vytápění;vytapeni
+room-amenities;Projektor;projektor-room
+room-amenities;Plátno;platno-room
+room-amenities;Ozvučení;ozvuceni-room
+room-amenities;Mikrofon;mikrofon
+room-amenities;Flipchart;flipchart
+room-amenities;Whiteboard;whiteboard
+room-amenities;Videokonference;videokonference-room
+room-amenities;Bezdrátový internet;bezdratovy-internet
+room-amenities;Rolety / žaluzie;rolety-zaluzie
+room-amenities;Bezbariérový přístup;bezbarierovy-pristup-room
+room-amenities;Vlastní vstup;vlastni-vstup
+space-rules;Zákaz kouření;zakaz-koureni
+space-rules;Kouření povoleno venku;koureni-venku
+space-rules;Zákaz vlastního alkoholu;zakaz-vlastniho-alkoholu
+space-rules;Povoleny vlastní dekorace;povoleny-vlastni-dekorace
+space-rules;Zákaz konfet a serpentýn;zakaz-konfet
+space-rules;Hluk do 22:00;hluk-do-22
+space-rules;Hluk do 24:00;hluk-do-24
+space-rules;Zákaz zvířat;zakaz-zvirat
+space-rules;Zvířata povolena;zvirata-povolena
+space-rules;Zákaz otevřeného ohně;zakaz-otevreneho-ohne
+space-types;Banketový sál;banketovy-sal
+space-types;Konferenční místnost;konferencni-mistnost
+space-types;Terasa;terasa
+space-types;Zahrada;zahrada
+space-types;Střecha / rooftop;strecha-rooftop
+space-types;Podkroví;podkrovi
+space-types;Sklep / vinný sklípek;sklep-vinsky-sklipek
+space-types;Foyer;foyer
+space-types;VIP místnost;vip-mistnost
+space-types;Venkovní amfiteátr;venkovni-amfiteatr
+space-types;Wellness prostor;wellness-prostor
+space-types;Atrium;atrium
+venue-rules;Zákaz kouření v prostoru;zakaz-koureni-venue
+venue-rules;Kouření povoleno venku;koureni-venku-venue
+venue-rules;Zákaz vlastního cateringu;zakaz-vlastniho-cateringu
+venue-rules;Vlastní catering povolen;vlastni-catering-venue
+venue-rules;Zákaz vlastního alkoholu;zakaz-vlastniho-alkoholu-venue
+venue-rules;Bezpečnostní služba povinná;bezpecnostni-sluzba-povinna
+venue-rules;Hudba do 23:00;hudba-do-23
+venue-rules;Hudba do 01:00;hudba-do-01
+venue-rules;Děti vítány;deti-vitany
+venue-rules;Pouze pro dospělé;pouze-pro-dospele
+venue-rules;Dress code;dress-code

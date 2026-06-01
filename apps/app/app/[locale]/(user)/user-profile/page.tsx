@@ -184,7 +184,8 @@ export default function UserProfilePage() {
                           : []),
                       ]}
                       link={{
-                        pathname: "/user-profile/events/[eventId]/[inquiryId]",
+                        pathname:
+                          "/user-profile/events/[eventId]/inquiries/[inquiryId]",
                         params: {
                           eventId: inquiry.event.id,
                           inquiryId: inquiry.id,

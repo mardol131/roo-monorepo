@@ -3,6 +3,7 @@ import Image from "next/image";
 import Text from "@/app/components/ui/atoms/text";
 import { IntlLink, Link } from "@/app/i18n/navigation";
 import HomepageSectionHeader from "./homepage-section-header";
+import HomepageSectionHeading from "./homepage-section-heading";
 
 type Props = {
   title: string;
@@ -63,7 +64,7 @@ const bubbles: Bubble[] = [
 export default function BubbleMasonrySection({ title, subtitle }: Props) {
   return (
     <div className="w-full py-4">
-      <HomepageSectionHeader title={title} subtitle={subtitle} />
+      <HomepageSectionHeading heading={title} subheading={subtitle} />
 
       <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mt-6">
         <MasonryCard

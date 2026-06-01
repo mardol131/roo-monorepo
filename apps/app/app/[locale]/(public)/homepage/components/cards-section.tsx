@@ -1,11 +1,10 @@
 "use client";
 
-import Text from "@/app/components/ui/atoms/text";
-import ListingCard from "@/app/components/ui/molecules/listing-card";
-import React, { useRef } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
 import Button from "@/app/components/ui/atoms/button";
-import HomepageSectionHeader from "./homepage-section-header";
+import ListingCard from "@/app/components/ui/molecules/listing-card";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useRef } from "react";
+import HomepageSectionHeading from "./homepage-section-heading";
 
 export type CardItem = {
   imageUrl: string;
@@ -39,7 +38,7 @@ export default function CardsSection({
   return (
     <div className="w-full">
       <div className="mb-6 flex items-end justify-between gap-4">
-        <HomepageSectionHeader title={title} subtitle={subtitle} />
+        <HomepageSectionHeading heading={title} subheading={subtitle} />
         <div className="flex items-center gap-3 shrink-0">
           <Button link="/catalog" text="Zobrazit vše" version="outlined" />
           <div className="flex gap-2">
@@ -65,7 +64,7 @@ export default function CardsSection({
           {listings.map((listing) => (
             <div key={listing.title} className="w-72 shrink-0">
               <ListingCard
-                imageUrl={listing.imageUrl}
+                images={[listing.imageUrl]}
                 title={listing.title}
                 price={listing.price}
                 id={listing.title}

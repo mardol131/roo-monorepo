@@ -5,14 +5,24 @@ import {
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
+import { GetCollectionParams } from "@/app/functions/api/general";
 import { variantKeys } from "../query-keys";
 import {
   createVariant,
   CreateVariantPayload,
   fetchVariant,
+  fetchVariants,
   fetchVariantsByListing,
   patchVariant,
 } from "./fetch";
+
+export function useVariants(options?: GetCollectionParams, enabled = true) {
+  return useQuery({
+    queryKey: variantKeys.all(options?.query, options?.limit),
+    queryFn: () => fetchVariants(options),
+    enabled,
+  });
+}
 
 export function useVariantsByListing(listingId: string) {
   return useQuery({

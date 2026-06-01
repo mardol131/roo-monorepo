@@ -2,7 +2,13 @@ import Text from "@/app/components/ui/atoms/text";
 import type { Event } from "@roo/common";
 import { format } from "date-fns";
 import { cs } from "date-fns/locale";
-import { CircleAlert, CircleCheck, Trash2, TriangleAlert } from "lucide-react";
+import {
+  CircleAlert,
+  CircleCheck,
+  Pencil,
+  Trash2,
+  TriangleAlert,
+} from "lucide-react";
 import { MdCheckBox, MdCheckBoxOutlineBlank } from "react-icons/md";
 
 const priorityConfig = {
@@ -16,17 +22,24 @@ type ChecklistItem = NonNullable<Event["checklist"]>[number];
 type Props = {
   item: ChecklistItem;
   onToggle: () => void;
+  onEdit?: () => void;
   onDelete?: () => void;
   disabled?: boolean;
 };
 
-export default function ChecklistItemRow({ item, onToggle, onDelete, disabled }: Props) {
+export default function ChecklistItemRow({
+  item,
+  onToggle,
+  onEdit,
+  onDelete,
+  disabled,
+}: Props) {
   const completed = !!item.completed;
 
   return (
     <div
       onClick={onToggle}
-      className="flex items-center gap-4 px-6 py-4 hover:bg-zinc-50 transition-colors"
+      className="flex items-center gap-4 hover:bg-zinc-50 transition-colors py-3"
     >
       <div className="shrink-0 transition-transform duration-200 hover:scale-110">
         {completed ? (
@@ -40,14 +53,19 @@ export default function ChecklistItemRow({ item, onToggle, onDelete, disabled }:
 
       <div className="flex-1 flex flex-col min-w-0">
         <div className="flex items-center gap-1.5">
-          {item.priority && !completed && (() => {
-            const { Icon, bgClassName } = priorityConfig[item.priority] ?? priorityConfig.medium;
-            return (
-              <span className={`w-5 h-5 rounded flex items-center justify-center shrink-0 ${bgClassName}`}>
-                <Icon className="w-3 h-3" />
-              </span>
-            );
-          })()}
+          {item.priority &&
+            !completed &&
+            (() => {
+              const { Icon, bgClassName } =
+                priorityConfig[item.priority] ?? priorityConfig.medium;
+              return (
+                <span
+                  className={`w-5 h-5 rounded flex items-center justify-center shrink-0 ${bgClassName}`}
+                >
+                  <Icon className="w-3 h-3" />
+                </span>
+              );
+            })()}
           <Text
             variant="label-lg"
             color={completed ? "secondary" : "textDark"}
@@ -58,12 +76,12 @@ export default function ChecklistItemRow({ item, onToggle, onDelete, disabled }:
         </div>
 
         {(item.description || item.dueDate) && (
-          <div className="flex items-center gap-3 mt-0.5 flex-wrap">
+          <div className="flex items-start gap-3 mt-0.5 flex-col">
             {item.description && (
-              <span className="text-xs text-zinc-400">{item.description}</span>
+              <span className="text-xs text-zinc-500">{item.description}</span>
             )}
             {item.dueDate && (
-              <span className="flex items-center gap-1 text-xs text-zinc-400">
+              <span className="flex items-center gap-1 text-xs text-zinc-500">
                 {format(new Date(item.dueDate), "d. M. yyyy HH:mm", {
                   locale: cs,
                 })}
@@ -73,14 +91,30 @@ export default function ChecklistItemRow({ item, onToggle, onDelete, disabled }:
         )}
       </div>
 
+      {onEdit && (
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            onEdit();
+          }}
+          disabled={disabled}
+          className="shrink-0 text-zinc-400 hover:text-zinc-600 transition-colors disabled:opacity-50"
+        >
+          <Pencil className="w-5 h-5" />
+        </button>
+      )}
       {onDelete && (
         <button
           type="button"
-          onClick={(e) => { e.stopPropagation(); onDelete(); }}
+          onClick={(e) => {
+            e.stopPropagation();
+            onDelete();
+          }}
           disabled={disabled}
-          className="shrink-0 text-zinc-300 hover:text-danger transition-colors disabled:opacity-50"
+          className="shrink-0 text-zinc-400 hover:text-danger transition-colors disabled:opacity-50"
         >
-          <Trash2 className="w-4 h-4" />
+          <Trash2 className="w-5 h-5" />
         </button>
       )}
     </div>

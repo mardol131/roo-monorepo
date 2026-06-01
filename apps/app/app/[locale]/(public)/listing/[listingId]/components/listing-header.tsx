@@ -18,7 +18,7 @@ interface Props {
 
 export default function ListingHeader({ listing }: Props) {
   const { data: filters } = useFilterOptions();
-  const eventTypes = (listing.properties.eventTypes ?? []).flatMap((id) => {
+  const eventTypes = (listing.filters.eventTypes ?? []).flatMap((id) => {
     const found = filters?.eventTypes.find((e) => e.id === id);
     return found ? [found.name] : [];
   });

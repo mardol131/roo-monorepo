@@ -80,12 +80,8 @@ export default function FavoritesPage() {
                 key={listing.id}
                 id={listing.id}
                 title={listing.name}
-                price={listing.price?.startsAt ?? "–"}
-                imageUrl={
-                  typeof listing.images?.coverImage === "string"
-                    ? listing.images.coverImage
-                    : ""
-                }
+                price={listing.minimumPricePerEvent ?? "–"}
+                images={[listing.images.coverImage.filename]}
               />
             ))}
           </div>

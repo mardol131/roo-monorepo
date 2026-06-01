@@ -1,0 +1,19 @@
+{
+  "name": "@roo/scrapers",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "scrape:bridee": "npx tsx websites/bridee/index.ts"
+  },
+  "dependencies": {
+    "@roo/common": "workspace:*",
+    "cheerio": "^1.2.0",
+    "puppeteer": "^25.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.19.8",
+    "tsx": "^4.20.3",
+    "typescript": "^5.7.3"
+  }
+}

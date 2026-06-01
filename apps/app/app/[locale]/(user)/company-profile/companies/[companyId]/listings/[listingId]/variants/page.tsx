@@ -2,9 +2,11 @@
 
 import CardContainer from "@/app/[locale]/(user)/components/card-container";
 import EntityCard from "@/app/[locale]/(user)/components/entity-card";
+import { EntityCompletionBadge } from "@/app/[locale]/(user)/components/entity-completion-badge";
 import Loader from "@/app/[locale]/(user)/components/loader";
 import PageHeading from "@/app/[locale]/(user)/components/page-heading";
 import { confirmActionModalEvents } from "@/app/components/ui/molecules/modals/confirm-action-modal";
+import { getVariantCompletion } from "@/app/functions/utils/variants";
 import {
   useUpdateVariant,
   useVariantsByListing,
@@ -54,7 +56,6 @@ export default function page() {
         }}
       />
       <CardContainer
-        items={variants?.docs || []}
         emptyState={{
           text: "Zatím nemáte žádné varianty",
           subtext:
@@ -75,55 +76,57 @@ export default function page() {
           },
           icon: "Building2",
         }}
-        renderItem={(item) => {
-          const variant = item as Variant;
-          return (
-            <EntityCard
-              key={variant.id}
-              link={{
-                pathname:
-                  "/company-profile/companies/[companyId]/listings/[listingId]/variants/[variantId]",
-                params: {
-                  companyId: companyId,
-                  listingId: listingId,
-                  variantId: variant.id,
-                },
-              }}
-              icon="Package"
-              iconColor="text-variant"
-              iconBackgroundColor="bg-variant-surface"
-              label={variant.name}
-              items={[
-                {
-                  icon: "DollarSign",
-                  content: `${variant.price.generalPrice} Kč`,
-                },
-              ]}
-              deleteEntityHandler={(e) => {
-                e.stopPropagation();
-                e.preventDefault();
-                confirmActionModalEvents.emit("open", {
-                  title: "Smazat službu",
-                  description:
-                    "Tato akce je nevratná a trvale odstraní tuto službu z platformy.",
-                  Icon: Trash2,
-                  buttonText: "Smazat službu",
-                  buttonVersion: "dangerFull",
-                  confirmPhrase: variant.name,
-                  whatIsGoingToHappenText: "Opravdu chcete smazat tuto službu?",
-                  whatIsGoingToHappenTextColor: "danger",
-                  whatIsGoingToHappenList: [
-                    "Služba zmizí z katalogu a nebude dohledatelná",
-                    "Varianty a prostory, které jsou pod touto službou, budou smazány.",
-                    "Změna je nevratná",
-                  ],
-                  bgColor: "bg-danger-surface",
-                  onConfirmClick: () => handleDeleteConfirm(variant.id),
-                });
-              }}
-            />
-          );
-        }}
+        items={variants?.docs?.map((variant) => (
+          <EntityCard
+            key={variant.id}
+            link={{
+              pathname:
+                "/company-profile/companies/[companyId]/listings/[listingId]/variants/[variantId]",
+              params: {
+                companyId: companyId,
+                listingId: listingId,
+                variantId: variant.id,
+              },
+            }}
+            icon="Package"
+            iconColor="text-variant"
+            iconBackgroundColor="bg-variant-surface"
+            label={variant.name}
+            items={[
+              {
+                icon: "Banknote",
+                content: `${variant.price.base} Kč`,
+              },
+            ]}
+            rightComponent={
+              <EntityCompletionBadge
+                percentage={getVariantCompletion(variant)}
+              />
+            }
+            deleteEntityHandler={(e) => {
+              e.stopPropagation();
+              e.preventDefault();
+              confirmActionModalEvents.emit("open", {
+                title: "Smazat službu",
+                description:
+                  "Tato akce je nevratná a trvale odstraní tuto službu z platformy.",
+                Icon: Trash2,
+                buttonText: "Smazat službu",
+                buttonVersion: "dangerFull",
+                confirmPhrase: variant.name,
+                whatIsGoingToHappenText: "Opravdu chcete smazat tuto službu?",
+                whatIsGoingToHappenTextColor: "danger",
+                whatIsGoingToHappenList: [
+                  "Služba zmizí z katalogu a nebude dohledatelná",
+                  "Varianty a prostory, které jsou pod touto službou, budou smazány.",
+                  "Změna je nevratná",
+                ],
+                bgColor: "bg-danger-surface",
+                onConfirmClick: () => handleDeleteConfirm(variant.id),
+              });
+            }}
+          />
+        ))}
       />
     </main>
   );

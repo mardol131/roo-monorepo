@@ -1,12 +1,15 @@
-import { Where } from "@roo/common";
+import { LocalityType, Where } from "@roo/common";
+import { GetCollectionParams } from "../functions/api/general";
 
 // Entities
 
 export const listingKeys = {
-  all: (query?: Where, limit?: number) => ["listings", query, limit] as const,
+  all: (options?: GetCollectionParams) => ["listings", options] as const,
   byId: (id: string) => ["listings", id] as const,
   byCompany: (companyId: string, query?: Where, limit?: number) =>
     ["listings", "company", companyId, query, limit] as const,
+  pinsByLocation: (locationId: string, type: LocalityType) =>
+    ["listings", "pins", locationId, type] as const,
 };
 
 export const listingDetailKeys = {
@@ -38,11 +41,13 @@ export const inquiryKeys = {
 };
 
 export const variantKeys = {
+  all: (query?: Where, limit?: number) => ["variants", query, limit] as const,
   byListing: (listingId: string) => ["variants", "listing", listingId] as const,
   byId: (id: string) => ["variants", id] as const,
 };
 
 export const spaceKeys = {
+  all: (query?: Where, limit?: number) => ["spaces", query, limit] as const,
   byListing: (listingId: string) => ["spaces", "listing", listingId] as const,
   byId: (id: string) => ["spaces", id] as const,
 };
@@ -89,6 +94,7 @@ export const districtsKeys = {
 
 export const citiesKeys = {
   all: (query?: Where, limit?: number) => ["cities", query, limit] as const,
+  byId: (id: string) => ["cities", id] as const,
 };
 
 // Filters
@@ -170,4 +176,9 @@ export const rulesKeys = {
 
 export const filterOptionsKeys = {
   all: () => ["filter-options"] as const,
+};
+
+export const userMediasKeys = {
+  all: (params?: GetCollectionParams) => ["user-medias", params] as const,
+  infinite: (limit: number) => ["user-medias", "infinite", limit] as const,
 };

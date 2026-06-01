@@ -1,5 +1,6 @@
 import { HomepageSectionWrapper } from "@/app/components/ui/sections/landing-section-wrapper";
 import HeroSection from "./components/hero-section";
+import HomepageSearchFilters from "./components/homepage-search-filters";
 import ListingTypeBanner from "./components/listing-type-banner";
 import Banner from "@/app/components/ui/molecules/banner";
 import CardsSection, { CardItem } from "./components/cards-section";
@@ -8,6 +9,9 @@ import HowItWorksSection from "./components/how-it-works-section";
 import FilterTagsSection from "./components/filter-tags-section";
 import StatsSection from "./components/stats-section";
 import { getTranslations } from "next-intl/server";
+import { generateMediaUrl } from "@/app/functions/generate-media-url";
+import HomepageSectionHeading from "./components/homepage-section-heading";
+import CtaSection from "../pages/components/cta-section";
 
 type Props = {};
 
@@ -155,19 +159,19 @@ export async function generateMetadata() {
 
 export default function page({}: Props) {
   return (
-    <div className="min-h-screen flex flex-col gap-20 mb-30">
-      <div
-        style={{
-          backgroundImage: `url('https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f')`,
-          backgroundPosition: "center",
-          backgroundSize: "cover",
-        }}
-        className="-mb-30"
-      >
-        <HeroSection />
+    <div className="min-h-screen flex flex-col gap-40 mb-30">
+      <div className="-mb-10 mt-10">
+        <HomepageSectionWrapper>
+          <HeroSection />
+        </HomepageSectionWrapper>
       </div>
+
       <HomepageSectionWrapper>
-        <div className="grid grid-cols-3 max-md:flex flex-col gap-6">
+        <HomepageSectionHeading
+          heading="Katalog plný dodavatelů"
+          subheading="Od míst, přes gastro až po zábavu."
+        />
+        <div className="grid relative z-20 grid-cols-3 max-md:flex flex-col gap-6">
           <ListingTypeBanner
             imageUrl="https://images.unsplash.com/photo-1519167758481-83f550bb49b3"
             title="Místa"
@@ -181,15 +185,14 @@ export default function page({}: Props) {
             link={{ pathname: "/catalog/gastro" }}
           />
           <ListingTypeBanner
-            imageUrl="https://images.unsplash.com/photo-1470229722913-7f419344ca51"
+            imageUrl="https://images.unsplash.com/photo-1414235077428-338989a2e8c0"
             title="Zábava"
             text="Hudba, show a entertainment pro hosty"
             link={{ pathname: "/catalog/entertainment" }}
           />
         </div>
       </HomepageSectionWrapper>
-
-      <HomepageSectionWrapper>
+      <HomepageSectionWrapper bgColor="bg-secondary">
         <HowItWorksSection />
       </HomepageSectionWrapper>
       <HomepageSectionWrapper>
@@ -218,17 +221,28 @@ export default function page({}: Props) {
       <HomepageSectionWrapper>
         <StatsSection />
       </HomepageSectionWrapper>
-      <HomepageSectionWrapper>
+      {/* <HomepageSectionWrapper>
         <FilterTagsSection />
-      </HomepageSectionWrapper>
+      </HomepageSectionWrapper> */}
       <HomepageSectionWrapper>
-        <Banner
+        <CtaSection
+          heading={"Pojďte to vyzkoušet!"}
+          subheading={
+            "Zaregistrujte se a začněte plánovat svůj event ještě dnes."
+          }
+          primaryCta={{ text: "vytvořit účet", href: "/register-company" }}
+          secondaryCta={{
+            text: "Zjistit více",
+            href: "/pages/how-it-works-for-user",
+          }}
+        />
+        {/* <Banner
           image="https://images.unsplash.com/photo-1492684223066-81342ee5ff30"
           title="Speciální nabídka"
           text="Naplánujte celý event z jednoho místa. Místo, catering i zábava — vše jednoduše a rychle."
           buttonText="Zjistit více"
           link="/catalog"
-        />
+        /> */}
       </HomepageSectionWrapper>
     </div>
   );

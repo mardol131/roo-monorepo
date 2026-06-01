@@ -1,24 +1,56 @@
 import { Field } from 'payload'
-import { getMediaFields } from '../common/common-fields'
-import { getRecordStatuses } from '@roo/common'
+import { getMediaFields, getSeasonalPricesArrayField } from '../common/common-fields'
+import {
+  COUNTRIES,
+  getRecordStatuses,
+  PRICING_UNITS_ARRAY,
+  PricingUnits,
+  TRAVEL_FEE_TYPE_ARRAY,
+} from '@roo/common'
 import { listingTypes } from './utils'
 import { isCompanyManagerOrAbove, payloadAdminOnly } from './access'
 
-type LocationSiblings = {
-  type?: string
-  district?: unknown[]
-  region?: unknown[]
-  city?: unknown[]
-}
-
-const validateRequiredForExact = (
-  value: any,
-  { siblingData }: { siblingData: LocationSiblings },
-): true | string => {
-  if (siblingData.type === 'exact' && (value === null || value === undefined)) {
-    return 'Toto pole je povinné pro přesnou lokaci'
-  }
-  return true
+export const servicableAreaFields: Field = {
+  name: 'servicableArea',
+  type: 'group',
+  required: true,
+  fields: [
+    {
+      name: 'wholeCountry',
+      type: 'checkbox',
+      required: true,
+      defaultValue: false,
+    },
+    {
+      name: 'regions',
+      type: 'relationship',
+      relationTo: 'regions',
+      hasMany: true,
+      validate: (value: unknown, { data }: { data: Record<string, unknown> }) => {
+        const area = data?.servicableArea as Record<string, unknown> | undefined
+        if (
+          (data?.type === listingTypes.gastro || data?.type === listingTypes.entertainment) &&
+          !area?.wholeCountry &&
+          !(value as unknown[])?.length
+        ) {
+          return 'Vyberte alespoň jeden kraj'
+        }
+        return true
+      },
+    },
+    {
+      name: 'districts',
+      type: 'relationship',
+      relationTo: 'districts',
+      hasMany: true,
+    },
+    {
+      name: 'cities',
+      type: 'relationship',
+      relationTo: 'cities',
+      hasMany: true,
+    },
+  ],
 }
 
 export const listingLocationField: Field = {
@@ -27,75 +59,31 @@ export const listingLocationField: Field = {
   required: true,
   fields: [
     {
-      name: 'type',
-      type: 'select',
-      options: ['regions', 'exact'],
-      required: true,
-    },
-    {
       name: 'latitude',
       type: 'number',
-      validate: validateRequiredForExact,
-      admin: {
-        condition: (_, siblingData) => siblingData?.type === 'exact',
-      },
+      required: true,
     },
     {
       name: 'longitude',
       type: 'number',
-      validate: validateRequiredForExact,
-      admin: {
-        condition: (_, siblingData) => siblingData?.type === 'exact',
-      },
+      required: true,
     },
     {
       name: 'address',
       type: 'text',
-      admin: {
-        condition: (_, siblingData) => siblingData?.type === 'exact',
-      },
+      required: true,
     },
     {
       name: 'city',
       type: 'relationship',
       relationTo: 'cities',
-      validate: validateRequiredForExact,
-      admin: {
-        condition: (_, siblingData) => siblingData?.type === 'exact',
-      },
+      required: true,
     },
     {
-      name: 'districts',
-      type: 'relationship',
-      relationTo: 'districts',
-      hasMany: true,
-      admin: {
-        condition: (_, siblingData) => siblingData?.type === 'regions',
-      },
-    },
-    {
-      name: 'regions',
-      type: 'relationship',
-      relationTo: 'regions',
-      hasMany: true,
-      validate: (value, { siblingData }: { siblingData: LocationSiblings }) => {
-        if (siblingData.type === 'regions' && !(value as any[])?.length) {
-          return 'Kraj je povinný pro typ oblasti'
-        }
-        return true
-      },
-      admin: {
-        condition: (_, siblingData) => siblingData?.type === 'regions',
-      },
-    },
-    {
-      name: 'cities',
-      type: 'relationship',
-      relationTo: 'cities',
-      hasMany: true,
-      admin: {
-        condition: (_, siblingData) => siblingData?.type === 'regions',
-      },
+      name: 'country',
+      type: 'select',
+      options: COUNTRIES,
+      required: true,
     },
   ],
 }
@@ -173,173 +161,133 @@ export const customSectionsFields: Field[] = [
   },
 ]
 
-export const commonListingDetailFields: Field[] = [
+export const priceableOptionFields: Field[] = [
   {
-    name: 'faq',
-    type: 'array',
-    fields: [
-      {
-        name: 'active',
-        type: 'checkbox',
-        defaultValue: true,
-      },
-      {
-        name: 'question',
-        type: 'text',
-        required: true,
-      },
-      {
-        name: 'answer',
-        type: 'textarea',
-        required: true,
-      },
-      {
-        name: 'group',
-        type: 'select',
-        options: ['general', 'booking', 'cancellation', 'payment', 'other'],
-        defaultValue: 'general',
-      },
-    ],
+    name: 'pricingUnit',
+    type: 'select',
+    options: PRICING_UNITS_ARRAY,
+    required: true,
   },
-  {
-    name: 'references',
-    type: 'array',
-    fields: [
-      {
-        name: 'image',
-        type: 'group',
-        required: true,
-        fields: getMediaFields(),
-      },
-      {
-        name: 'eventName',
-        type: 'text',
-        required: true,
-      },
-      {
-        name: 'description',
-        type: 'textarea',
-      },
-      {
-        name: 'clientName',
-        type: 'text',
-      },
-      {
-        name: 'eventType',
-        type: 'relationship',
-        relationTo: 'event-types',
-      },
-    ],
-  },
-  {
-    name: 'employees',
-    type: 'array',
-    fields: [
-      {
-        name: 'name',
-        type: 'text',
-        required: true,
-      },
-      {
-        name: 'role',
-        type: 'text',
-        required: true,
-      },
-      {
-        name: 'description',
-        type: 'textarea',
-      },
-      {
-        name: 'image',
-        type: 'group',
-        required: true,
-        fields: getMediaFields(),
-      },
-    ],
-  },
+  { name: 'unitPrice', type: 'number', required: true },
+  { name: 'quantity', type: 'number', required: true, defaultValue: 1, min: 1 },
 ]
 
-export const listingFilters: Field[] = [
+export const listingFilterFields: Field[] = [
+  // common
   {
     name: 'eventTypes',
-    type: 'text',
+    type: 'relationship',
+    relationTo: 'event-types',
     hasMany: true,
-    required: true,
-    minRows: 1,
+    validate: (value: unknown, { siblingData }: { siblingData: Record<string, unknown> }) => {
+      if (!siblingData?.allEventTypes && !(value as unknown[])?.length) {
+        return 'Vyberte alespoň jeden typ akce'
+      }
+      return true
+    },
   },
+  {
+    name: 'allEventTypes',
+    type: 'checkbox',
+    defaultValue: false,
+  },
+  {
+    name: 'necessities',
+    type: 'relationship',
+    relationTo: 'necessities',
+    hasMany: true,
+  },
+
+  // venue
   {
     name: 'placeTypes',
-    type: 'text',
-    hasMany: true,
-  },
-  {
-    name: 'gastroRules',
-    type: 'text',
+    type: 'relationship',
+    relationTo: 'place-types',
     hasMany: true,
   },
   {
     name: 'venueRules',
-    type: 'text',
+    type: 'relationship',
+    relationTo: 'venue-rules',
+    hasMany: true,
+  },
+
+  // entertainment
+  {
+    name: 'musicGenres',
+    type: 'relationship',
+    relationTo: 'music-genres',
     hasMany: true,
   },
   {
     name: 'entertainmentRules',
-    type: 'text',
+    type: 'relationship',
+    relationTo: 'entertainment-rules',
     hasMany: true,
   },
+
+  // gastro
   {
-    name: 'services',
-    type: 'text',
-    hasMany: true,
-  },
-  {
-    name: 'technologies',
-    type: 'text',
-    hasMany: true,
-  },
-  {
-    name: 'amenities',
-    type: 'text',
-    hasMany: true,
-  },
-  {
-    name: 'activities',
-    type: 'text',
-    hasMany: true,
-  },
-  {
-    name: 'cuisines',
-    type: 'text',
-    hasMany: true,
-  },
-  {
-    name: 'dishTypes',
-    type: 'text',
+    name: 'gastroRules',
+    type: 'relationship',
+    relationTo: 'gastro-rules',
     hasMany: true,
   },
   {
     name: 'dietaryOptions',
-    type: 'text',
+    type: 'relationship',
+    relationTo: 'dietary-options',
     hasMany: true,
   },
   {
-    name: 'foodServiceStyles',
-    type: 'text',
+    name: 'dishTypes',
+    type: 'relationship',
+    relationTo: 'dish-types',
+    hasMany: true,
+  },
+]
+
+export const listingOptionFields: Field[] = [
+  {
+    name: 'cuisines',
+    type: 'relationship',
+    relationTo: 'cuisines',
     hasMany: true,
   },
   {
-    name: 'necessities',
-    type: 'text',
+    name: 'foodPreparationStyles',
+    type: 'relationship',
+    relationTo: 'food-preparation-styles',
     hasMany: true,
   },
   {
-    name: 'entertainmentTypes',
-    type: 'text',
+    name: 'services',
+    type: 'relationship',
+    relationTo: 'services',
+    hasMany: true,
+  },
+  {
+    name: 'technologies',
+    type: 'relationship',
+    relationTo: 'technologies',
     hasMany: true,
   },
   {
     name: 'personnel',
-    type: 'text',
+    type: 'relationship',
+    relationTo: 'personnel',
+    hasMany: true,
+  },
+  {
+    name: 'amenities',
+    type: 'relationship',
+    relationTo: 'amenities',
+    hasMany: true,
+  },
+  {
+    name: 'activities',
+    type: 'relationship',
+    relationTo: 'activities',
     hasMany: true,
   },
 ]
@@ -361,9 +309,23 @@ export const listingFields: Field[] = [
     access: { update: payloadAdminOnly },
   },
   {
-    name: 'properties',
+    name: 'subType',
+    type: 'text',
+    validate: (value: string | null | undefined, { data }: { data: Record<string, unknown> }) => {
+      if (data?.type !== listingTypes.venue && !value) return 'SubType je povinný'
+      return true
+    },
+  },
+  {
+    name: 'filters',
     type: 'group',
-    fields: listingFilters,
+    fields: listingFilterFields,
+    required: true,
+  },
+  {
+    name: 'options',
+    type: 'group',
+    fields: listingOptionFields,
     required: true,
   },
   {
@@ -379,6 +341,7 @@ export const listingFields: Field[] = [
     access: { update: payloadAdminOnly },
   },
   listingLocationField,
+  servicableAreaFields,
   {
     name: 'name',
     type: 'text',
@@ -417,6 +380,7 @@ export const listingFields: Field[] = [
   {
     name: 'shortDescription',
     type: 'text',
+    required: true,
   },
   {
     name: 'indoor',
@@ -473,16 +437,5 @@ export const listingFields: Field[] = [
       },
     ],
   },
-  {
-    name: 'price',
-    type: 'group',
-    required: true,
-    fields: [
-      {
-        name: 'startsAt',
-        type: 'number',
-        required: true,
-      },
-    ],
-  },
+  { name: 'minimumPricePerEvent', type: 'number', min: 0, required: true },
 ]

@@ -9,7 +9,7 @@ type Props = {
   borderColor: string;
   bgColor?: string;
   title: string;
-  text: string;
+  text?: string;
   button?: ButtonProps;
 };
 
@@ -25,7 +25,7 @@ export function AlertSection({
 }: Props) {
   return (
     <div
-      className={`${bgColor} rounded-2xl border ${borderColor} p-5 flex items-center gap-4`}
+      className={`${bgColor} rounded-2xl border ${borderColor} p-3 flex items-center gap-4`}
     >
       <div
         className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${iconBg}`}
@@ -36,9 +36,11 @@ export function AlertSection({
         <Text variant="h4" color="textDark">
           {title}
         </Text>
-        <Text variant="body-sm" color="secondary">
-          {text}
-        </Text>
+        {text && (
+          <Text variant="body-sm" color="secondary">
+            {text}
+          </Text>
+        )}
       </div>
       {button && <Button {...button} />}
     </div>

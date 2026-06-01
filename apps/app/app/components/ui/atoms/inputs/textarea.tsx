@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 import InputLabel from "../input-label";
 import Text from "../text";
 import ErrorText from "./error-text";
@@ -10,16 +10,23 @@ export function Textarea({
   inputProps,
   error,
   maxLength,
+  height,
 }: {
   label: string;
   inputProps?: React.TextareaHTMLAttributes<HTMLTextAreaElement>;
   error?: string;
   maxLength?: number;
+  height?: string;
 }) {
   const [charCount, setCharCount] = React.useState(() => {
     const v = inputProps?.value ?? inputProps?.defaultValue;
     return typeof v === "string" ? v.length : 0;
   });
+
+  useEffect(() => {
+    const v = inputProps?.value ?? inputProps?.defaultValue;
+    setCharCount(typeof v === "string" ? v.length : 0);
+  }, [inputProps?.value, inputProps?.defaultValue]);
 
   function handleInput(e: React.FormEvent<HTMLTextAreaElement>) {
     setCharCount(e.currentTarget.value.length);
@@ -33,7 +40,7 @@ export function Textarea({
         {...inputProps}
         onInput={handleInput}
         maxLength={maxLength}
-        className={`w-full text-sm px-3 py-2.5 border bg-white ${error ? "border-red-500" : "border-zinc-300"} rounded-lg focus:outline-none focus:ring-2 focus:ring-zinc-900 focus:border-transparent resize-none`}
+        className={`${height ?? ""} w-full text-sm px-3 py-2.5 border bg-white ${error ? "border-danger" : "border-zinc-300"} rounded-lg focus:outline-none focus:ring-2 focus:ring-zinc-900 focus:border-transparent resize-none`}
       />
       {error && (
         <div>

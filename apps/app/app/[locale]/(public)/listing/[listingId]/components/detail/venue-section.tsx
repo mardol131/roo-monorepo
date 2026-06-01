@@ -30,32 +30,31 @@ const vehicleTypeLabels: Record<string, string> = {
 export default function VenueSection({ detail, listing }: Props) {
   const { data: filters } = useFilterOptions();
 
-  const amenities = (listing.properties.amenities ?? []).flatMap((id) => {
+  const amenities = (listing.options.amenities ?? []).flatMap((id) => {
     const found = filters?.amenities.find((e) => e.id === id);
     return found ? [found.name] : [];
   });
-  const services = (listing.properties.services ?? []).flatMap((id) => {
+  const services = (listing.options.services ?? []).flatMap((id) => {
     const found = filters?.services.find((e) => e.id === id);
     return found ? [found.name] : [];
   });
-  const technology = (listing.properties.technologies ?? []).flatMap((id) => {
+  const technology = (listing.options.technologies ?? []).flatMap((id) => {
     const found = filters?.technologies.find((e) => e.id === id);
     return found ? [found.name] : [];
   });
-  const activities = (listing.properties.activities ?? []).flatMap((id) => {
+  const activities = (listing.options.activities ?? []).flatMap((id) => {
     const found = filters?.activities.find((e) => e.id === id);
     return found ? [found.name] : [];
   });
 
-  const vehicleTypes = (detail.access.vehicleTypes ?? []).map(
+  const vehicleTypes = (detail.propertyAccess.vehicleTypes ?? []).map(
     (v: string) => vehicleTypeLabels[v] ?? v,
   );
   const accessFlags = [
-    detail.access.loadingRamp && "Nakládací rampa",
-    detail.access.loadingElevator && "Nákladní výtah",
-    detail.access.helpWithLoadingAndUnloading && "Pomoc s nakládkou",
-    detail.access.serviceAccess && "Servisní přístup",
-    detail.access.serviceArea && "Servisní plocha",
+    detail.propertyAccess.loadingRamp && "Nakládací rampa",
+    detail.propertyAccess.loadingElevator && "Nákladní výtah",
+    detail.propertyAccess.serviceAccess && "Servisní přístup",
+    detail.propertyAccess.serviceArea && "Servisní plocha",
   ].filter((f): f is string => !!f);
 
   return (
@@ -163,19 +162,19 @@ export default function VenueSection({ detail, listing }: Props) {
         </SectionWrapper>
       )}
 
-      {detail.hasAccommodation && (
+      {detail.accomodation.hasAccommodation && (
         <SectionWrapper title="Ubytování">
-          {detail.accommodationCapacity != null && (
+          {detail.accomodation.accommodationCapacity != null && (
             <InfoRow
               icon={<BedDouble size={16} />}
               label="Kapacita"
-              value={`${detail.accommodationCapacity} osob`}
+              value={`${detail.accomodation.accommodationCapacity} osob`}
             />
           )}
         </SectionWrapper>
       )}
 
-      {detail.breakfast.included && (
+      {detail.breakfast.breakfastIncluded && (
         <SectionWrapper title="Snídaně">
           <div className="flex flex-col gap-2">
             {detail.breakfast.timeFrom && detail.breakfast.timeTo && (
@@ -190,7 +189,7 @@ export default function VenueSection({ detail, listing }: Props) {
                 <InfoRow
                   icon={<Coffee size={16} />}
                   label="Cena"
-                  value={`${detail.breakfast.price.toLocaleString("cs-CZ")} Kč ${detail.breakfast.pricePer === "person" ? "/ osoba" : "/ rezervace"}`}
+                  value={`${detail.breakfast.price.toLocaleString("cs-CZ")} Kč ${detail.breakfast.priceUnit === "person" ? "/ osoba" : "/ rezervace"}`}
                 />
               )}
             {detail.breakfast.breakfastIsIncludedInPrice && (

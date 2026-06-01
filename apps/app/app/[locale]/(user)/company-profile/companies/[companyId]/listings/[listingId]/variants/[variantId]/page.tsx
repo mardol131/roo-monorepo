@@ -8,18 +8,19 @@ import { ItemListCard } from "@/app/[locale]/(user)/components/item-list-card";
 import Loader from "@/app/[locale]/(user)/components/loader";
 import ListingStatusTag from "@/app/[locale]/(user)/components/tags/listing-status-tag";
 import { VariantEntertainmentDetails } from "@/app/[locale]/(user)/components/variant-entertainment-details";
-import { VariantGastroDetails } from "@/app/[locale]/(user)/components/variant-gastro-details";
-import { VariantVenueDetails } from "@/app/[locale]/(user)/components/variant-venue-details";
+import { VariantGastroDetails } from "@/app/[locale]/(user)/company-profile/companies/[companyId]/listings/[listingId]/variants/[variantId]/components/variant-gastro-details";
+import { VariantVenueDetails } from "@/app/[locale]/(user)/company-profile/companies/[companyId]/listings/[listingId]/variants/[variantId]/components/variant-venue-details";
 import Text from "@/app/components/ui/atoms/text";
 import { confirmActionModalEvents } from "@/app/components/ui/molecules/modals/confirm-action-modal";
 import { useRouter } from "@/app/i18n/navigation";
 import { useUpdateVariant, useVariant } from "@/app/react-query/variants/hooks";
 import { format } from "date-fns";
 import { Package, Trash2 } from "lucide-react";
-import { useTranslations } from "next-intl";
 import { useParams } from "next/navigation";
 import { ControlSection } from "../../../../../../../components/control-section";
 import { useSpacesByListing } from "@/app/react-query/spaces/hooks";
+import { CompletionWidget } from "@/app/[locale]/(user)/components/completion-widget";
+import { getFullVariantCompletion } from "@/app/functions/utils/variants";
 
 export default function Page() {
   const { companyId, listingId, variantId } = useParams<{
@@ -31,7 +32,6 @@ export default function Page() {
   const { data: spaces } = useSpacesByListing(listingId);
   const { mutate: updateVariant, isPending: isUpdating } = useUpdateVariant();
   const router = useRouter();
-  const t = useTranslations("global.variants");
 
   if (isPending) return <Loader text="Načítám variantu..." />;
   if (!variant) return router.back();
@@ -63,24 +63,13 @@ export default function Page() {
     );
   };
 
-  const firstBlock = variant.details[0];
-  const capacityText = firstBlock
-    ? firstBlock.capacity.min
-      ? `${firstBlock.capacity.min}–${firstBlock.capacity.max} osob`
-      : `max. ${firstBlock.capacity.max} osob`
-    : null;
-
-  const availabilityText =
-    variant.availability === "allDay"
-      ? "Celý den"
-      : (variant.selectedHours?.map((h) => `${h.from}–${h.to}`).join(", ") ??
-        "Vybrané hodiny");
+  const capacityText = variant.capacity.min
+    ? `${variant.capacity.min}–${variant.capacity.max} osob`
+    : `max. ${variant.capacity.max} osob`;
 
   const infoItems = [
-    { icon: "Banknote", text: `${variant.price.generalPrice} Kč` },
-    { icon: "CalendarClock", text: t(`type.${variant.type}`) },
-    { icon: "Clock", text: availabilityText },
-    ...(capacityText ? [{ icon: "Users", text: capacityText }] : []),
+    { icon: "Banknote", text: `${variant.price.base} Kč` },
+    { icon: "Users", text: capacityText },
   ];
 
   const basicInfoItems = [
@@ -102,15 +91,6 @@ export default function Page() {
           },
         ]
       : []),
-    ...(variant.eventTypes?.length
-      ? [
-          {
-            type: "tagList" as const,
-            label: "Typy akcí",
-            items: variant.eventTypes,
-          },
-        ]
-      : []),
   ];
 
   return (
@@ -123,20 +103,37 @@ export default function Page() {
         name={variant.name}
         nameSideComponent={<ListingStatusTag status={variant.status} />}
         infoItems={infoItems}
-        button={{
-          text: "Upravit",
-          size: "sm",
-          version: "variantFull",
-          iconLeft: "Pencil",
-          link: {
-            pathname:
-              "/company-profile/companies/[companyId]/listings/[listingId]/variants/[variantId]/edit",
-            params: { companyId, listingId, variantId },
+        buttons={[
+          {
+            text: "Odkaz",
+            size: "sm",
+            version: "plain",
+            iconLeft: "Link",
+            linkTarget: "_blank",
+            link: {
+              pathname: "/listing/[listingId]",
+              params: { listingId },
+            },
           },
-        }}
+          {
+            text: "Upravit",
+            size: "sm",
+            version: "variantFull",
+            iconLeft: "Pencil",
+            link: {
+              pathname:
+                "/company-profile/companies/[companyId]/listings/[listingId]/variants/[variantId]/edit",
+              params: { companyId, listingId, variantId },
+            },
+          },
+        ]}
       />
 
       <div className="flex flex-col gap-4">
+        <CompletionWidget
+          title="Co doporučujeme vyplnit"
+          data={getFullVariantCompletion(variant)}
+        />
         <ControlSection
           rows={[
             {
@@ -242,9 +239,9 @@ export default function Page() {
                   className="py-2.5 flex items-center justify-between border-b border-zinc-100 last:border-0"
                 >
                   <div className="flex flex-col">
-                    {sp.description && (
+                    {sp.title && (
                       <Text variant="label-lg" color="textDark">
-                        {sp.description}
+                        {sp.title}
                       </Text>
                     )}
                     <Text variant="label" color="textLight">
@@ -253,7 +250,7 @@ export default function Page() {
                     </Text>
                   </div>
                   <Text variant="label-lg" color="textDark">
-                    {sp.price} Kč
+                    {sp.amount} Kč
                   </Text>
                 </div>
               ))}

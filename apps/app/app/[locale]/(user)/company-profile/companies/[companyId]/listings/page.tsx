@@ -84,74 +84,69 @@ export default function page() {
               }
             : undefined,
         }}
-        items={listings?.docs ?? []}
-        renderItem={(item) => {
-          const listing = item as Listing;
-          listings && listings?.docs?.length;
-          return (
-            <EntityCard
-              key={listing.id}
-              icon="Tag"
-              iconColor="text-listing"
-              iconBackgroundColor="bg-listing-surface"
-              label={listing.name}
-              items={[
-                {
-                  icon: "MapPin",
-                  content: t(`listings.type.${listing.type}`),
-                },
-                {
-                  icon: "Banknote",
-                  content: `${listing.price.startsAt} Kč`,
-                },
-                ...(listing.location?.address
-                  ? [
-                      {
-                        icon: "MapPin",
-                        content: listing.location.address,
-                      } as const,
-                    ]
-                  : []),
-              ]}
-              link={{
-                pathname: `/company-profile/companies/[companyId]/listings/[listingId]`,
-                params: { companyId, listingId: listing.id },
-              }}
-              rightComponent={<ListingStatusTag status={listing.status} />}
-              deleteEntityHandler={
-                hasListingRights({
-                  company,
-                  userId: user?.id,
-                  allowedRoles: ["owner", "admin", "manager"],
-                })
-                  ? (e) => {
-                      e.stopPropagation();
-                      e.preventDefault();
-                      confirmActionModalEvents.emit("open", {
-                        title: "Smazat službu",
-                        description:
-                          "Tato akce je nevratná a trvale odstraní tuto službu z platformy.",
-                        Icon: Trash2,
-                        buttonText: "Smazat službu",
-                        buttonVersion: "dangerFull",
-                        confirmPhrase: listing.name,
-                        whatIsGoingToHappenText:
-                          "Opravdu chcete smazat tuto službu?",
-                        whatIsGoingToHappenTextColor: "danger",
-                        whatIsGoingToHappenList: [
-                          "Služba zmizí z katalogu a nebude dohledatelná",
-                          "Varianty a prostory, které jsou pod touto službou, budou smazány.",
-                          "Změna je nevratná",
-                        ],
-                        bgColor: "bg-danger-surface",
-                        onConfirmClick: () => handleDeleteConfirm(listing.id),
-                      });
-                    }
-                  : undefined
-              }
-            />
-          );
-        }}
+        items={listings?.docs?.map((listing) => (
+          <EntityCard
+            key={listing.id}
+            icon="Tag"
+            iconColor="text-listing"
+            iconBackgroundColor="bg-listing-surface"
+            label={listing.name}
+            items={[
+              {
+                icon: "MapPin",
+                content: t(`listings.type.${listing.type}`),
+              },
+              {
+                icon: "Banknote",
+                content: `${listing.minimumPricePerEvent} Kč`,
+              },
+              ...(listing.location?.address
+                ? [
+                    {
+                      icon: "MapPin",
+                      content: listing.location.address,
+                    } as const,
+                  ]
+                : []),
+            ]}
+            link={{
+              pathname: `/company-profile/companies/[companyId]/listings/[listingId]`,
+              params: { companyId, listingId: listing.id },
+            }}
+            labelComponent={<ListingStatusTag status={listing.status} />}
+            deleteEntityHandler={
+              hasListingRights({
+                company,
+                userId: user?.id,
+                allowedRoles: ["owner", "admin", "manager"],
+              })
+                ? (e) => {
+                    e.stopPropagation();
+                    e.preventDefault();
+                    confirmActionModalEvents.emit("open", {
+                      title: "Smazat službu",
+                      description:
+                        "Tato akce je nevratná a trvale odstraní tuto službu z platformy.",
+                      Icon: Trash2,
+                      buttonText: "Smazat službu",
+                      buttonVersion: "dangerFull",
+                      confirmPhrase: listing.name,
+                      whatIsGoingToHappenText:
+                        "Opravdu chcete smazat tuto službu?",
+                      whatIsGoingToHappenTextColor: "danger",
+                      whatIsGoingToHappenList: [
+                        "Služba zmizí z katalogu a nebude dohledatelná",
+                        "Varianty a prostory, které jsou pod touto službou, budou smazány.",
+                        "Změna je nevratná",
+                      ],
+                      bgColor: "bg-danger-surface",
+                      onConfirmClick: () => handleDeleteConfirm(listing.id),
+                    });
+                  }
+                : undefined
+            }
+          />
+        ))}
       />
     </main>
   );

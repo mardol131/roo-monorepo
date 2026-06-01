@@ -1,10 +1,19 @@
 import {
   getCollection,
+  GetCollectionParams,
   getCollectionItem,
   patchCollectionItem,
   postCollectionItem,
 } from "@/app/functions/api/general";
 import { PayloadResponse, Variant } from "@roo/common";
+
+export async function fetchVariants(
+  options?: GetCollectionParams,
+): Promise<PayloadResponse<Variant>> {
+  const res = await getCollection({ collection: "variants", ...options });
+  if (!res) throw new Error("Failed to fetch variants");
+  return res;
+}
 
 export async function fetchVariantsByListing(
   listingId: string,

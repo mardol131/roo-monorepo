@@ -15,7 +15,7 @@ import { useEffect, useRef, useState, useCallback } from "react";
 import Image from "next/image";
 import Button, { ButtonProps } from "@/app/components/ui/atoms/button";
 import Text from "@/app/components/ui/atoms/text";
-import { IntlLink } from "@/app/i18n/navigation";
+import { IntlLink, Link } from "@/app/i18n/navigation";
 import {
   Bbox,
   Coordinates,
@@ -23,15 +23,17 @@ import {
 } from "@/app/components/ui/atoms/inputs/map-point-input";
 import { generateMediaUrl } from "@/app/functions/generate-media-url";
 
+export type PinPropsData = {
+  coordinates: Coordinates;
+  label: string;
+  tags: string[];
+  filename: string;
+  listingUrl: IntlLink;
+};
+
 export type PinProps = {
-  value?: Coordinates;
   onClick?: (coords: Coordinates) => void;
-  data: {
-    label: string;
-    tags: string[];
-    filename?: string;
-    buttonUrl?: IntlLink;
-  };
+  data: PinPropsData;
 };
 
 type Props = {
@@ -44,6 +46,9 @@ type Props = {
 
 export const CZ_BBOX: Bbox = [11.5, 48.0, 19.5, 51.7];
 const OVERLAY_PADDING = 0.3;
+// ~10 km in degrees (1° lat ≈ 111 km, 1° lon ≈ 71 km at CZ latitude)
+const KM10_DEG_LAT = 0.09;
+const KM10_DEG_LON = 0.14;
 
 const getPaddedBounds = (bbox: Bbox, padding: number = OVERLAY_PADDING) => {
   const width = bbox[2] - bbox[0];
@@ -54,6 +59,12 @@ const getPaddedBounds = (bbox: Bbox, padding: number = OVERLAY_PADDING) => {
     [bbox[2] + width * padding, bbox[3] + height * padding],
   ] as [[number, number], [number, number]];
 };
+
+const getMaxBoundsWithKm10Padding = (bbox: Bbox) =>
+  [
+    [bbox[0] - KM10_DEG_LON, bbox[1] - KM10_DEG_LAT],
+    [bbox[2] + KM10_DEG_LON, bbox[3] + KM10_DEG_LAT],
+  ] as [[number, number], [number, number]];
 
 export default function MapFilter({
   pins,
@@ -90,7 +101,9 @@ export default function MapFilter({
     const bbox = externalBbox ?? CZ_BBOX;
     const bounds = getPaddedBounds(bbox);
     setActiveBbox(bbox);
-    mapRef.current?.getMap().setMaxBounds(bounds);
+    mapRef.current
+      ?.getMap()
+      .setMaxBounds(externalBbox ? getMaxBoundsWithKm10Padding(bbox) : bounds);
     mapRef.current?.fitBounds(
       [
         [bbox[0], bbox[1]],
@@ -140,26 +153,26 @@ export default function MapFilter({
         </Source>
 
         {pins.map((pin, i) => {
-          if (!pin.value) return null;
+          if (!pin.data.coordinates) return null;
           return (
             <Marker
               key={i}
-              latitude={pin.value.latitude}
-              longitude={pin.value.longitude}
+              latitude={pin.data.coordinates.latitude}
+              longitude={pin.data.coordinates.longitude}
               color="#e11d48"
               onClick={(e) => {
                 e.originalEvent.stopPropagation();
                 setActiveIndex(i);
-                pin.onClick?.(pin.value!);
+                pin.onClick?.(pin.data.coordinates);
               }}
             />
           );
         })}
 
-        {activePin?.value && (
+        {activePin?.data.coordinates && (
           <Popup
-            latitude={activePin.value.latitude}
-            longitude={activePin.value.longitude}
+            latitude={activePin.data.coordinates.latitude}
+            longitude={activePin.data.coordinates.longitude}
             onClose={() => setActiveIndex(null)}
             closeButton={false}
             offset={20}
@@ -167,44 +180,29 @@ export default function MapFilter({
             maxWidth="240px"
           >
             <div className="flex flex-col w-60 -m-3 overflow-hidden rounded-lg">
-              {activePin.data.filename ? (
-                <div className="relative w-full h-36 shrink-0">
+              <div className="relative w-full h-36 shrink-0">
+                <Link href={activePin.data.listingUrl} target="_blank">
                   <Image
                     src={generateMediaUrl(activePin.data.filename)}
                     alt={activePin.data.label}
                     fill
                     className="object-cover"
                   />
-                  <button
-                    onClick={() => setActiveIndex(null)}
-                    className="absolute top-2 right-2 bg-black/40 hover:bg-black/60 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs leading-none"
-                  >
-                    ✕
-                  </button>
+                </Link>
+                <div className="absolute bottom-2 mx-auto left-0 right-0 w-max px-2 py-0.5 bg-black/60 rounded">
+                  <Text color="white" variant="label">
+                    {activePin.data.label}
+                  </Text>
                 </div>
-              ) : (
-                <div className="flex justify-end px-3 pt-3">
-                  <button
-                    onClick={() => setActiveIndex(null)}
-                    className="text-zinc-400 hover:text-zinc-700 text-sm leading-none"
-                  >
-                    ✕
-                  </button>
-                </div>
-              )}
-              <div className="flex flex-col gap-3 p-3">
-                <Text variant="label-lg">{activePin.data.label}</Text>
-                {activePin.data.buttonUrl && (
-                  <Button
-                    text="Otevřít listing"
-                    iconLeft="ExternalLink"
-                    size="xs"
-                    version="primary"
-                    link={activePin.data.buttonUrl}
-                    linkTarget="_blank"
-                    className="w-full justify-center"
-                  />
-                )}
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setActiveIndex(null);
+                  }}
+                  className="absolute top-2 right-2 bg-black/40 hover:bg-black/60 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs leading-none"
+                >
+                  ✕
+                </button>
               </div>
             </div>
           </Popup>

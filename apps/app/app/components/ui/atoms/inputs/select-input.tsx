@@ -4,6 +4,7 @@ import React, { useRef, useState, useEffect } from "react";
 import Text from "./../text";
 import { ChevronDown, Search } from "lucide-react";
 import InputLabel from "../input-label";
+import ErrorText from "./error-text";
 
 export type SelectOption = {
   value: string | number;
@@ -12,30 +13,42 @@ export type SelectOption = {
 
 type Props = React.InputHTMLAttributes<HTMLSelectElement> & {
   label?: string;
+  sublabel?: string;
   items: SelectOption[];
   placeholder?: string;
   error?: string;
   searchable?: boolean;
+  isRequired?: boolean;
 };
 
 const SelectInput = React.forwardRef<HTMLSelectElement, Props>(
   (
-    { label, items, placeholder, id, value, onChange, error, searchable, ...props },
+    {
+      label,
+      items,
+      placeholder,
+      id,
+      value,
+      onChange,
+      error,
+      searchable,
+      ...props
+    },
     ref,
   ) => {
     const [isOpen, setIsOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState("");
     const containerRef = useRef<HTMLDivElement>(null);
 
-    const filteredItems = searchable && searchQuery
-      ? items.filter((item) =>
-          item.label.toLowerCase().includes(searchQuery.toLowerCase()),
-        )
-      : items;
+    const filteredItems =
+      searchable && searchQuery
+        ? items.filter((item) =>
+            item.label.toLowerCase().includes(searchQuery.toLowerCase()),
+          )
+        : items;
 
     const selectedItem = items.find((item) => item.value === value);
-    const displayValue =
-      selectedItem?.label || placeholder || "Vyberte položku";
+    const displayValue = selectedItem?.label || placeholder || "Vyberte...";
 
     // Close dropdown when clicking outside
     useEffect(() => {
@@ -65,9 +78,17 @@ const SelectInput = React.forwardRef<HTMLSelectElement, Props>(
       setIsOpen(false);
     };
 
+    const { isRequired, ...rest } = props;
+
     return (
       <div ref={containerRef} className="relative">
-        {label && <InputLabel label={label} />}
+        {label && (
+          <InputLabel
+            label={label}
+            sublabel={props.sublabel}
+            isRequired={props.isRequired}
+          />
+        )}
 
         {/* Hidden select for form integration */}
         <select
@@ -76,7 +97,7 @@ const SelectInput = React.forwardRef<HTMLSelectElement, Props>(
           value={value}
           onChange={onChange}
           className="hidden"
-          {...props}
+          {...rest}
         >
           <option value="">{placeholder}</option>
           {items.map((item) => (
@@ -90,7 +111,7 @@ const SelectInput = React.forwardRef<HTMLSelectElement, Props>(
         <button
           type="button"
           onClick={() => setIsOpen(!isOpen)}
-          className="w-full px-3 py-2.5 text-sm border bg-white border-zinc-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-zinc-900 focus:border-transparent flex items-center justify-between text-left hover:border-zinc-400 transition-colors"
+          className={`w-full px-3 py-2.5 text-sm border bg-white ${error ? "border-danger" : "border-zinc-300"} rounded-lg focus:outline-none focus:ring-2 focus:ring-zinc-900 focus:border-transparent flex items-center justify-between text-left hover:border-zinc-400 transition-colors`}
         >
           <span className={value ? "text-zinc-900" : "text-zinc-500"}>
             {displayValue}
@@ -143,15 +164,7 @@ const SelectInput = React.forwardRef<HTMLSelectElement, Props>(
             )}
           </div>
         )}
-        {error && (
-          <Text
-            variant="caption"
-            color="secondary"
-            className="text-red-500 mt-1"
-          >
-            {error}
-          </Text>
-        )}
+        {error && <ErrorText error={error} />}
       </div>
     );
   },
