@@ -20,15 +20,22 @@ import {
   deleteListing,
   deleteListingDetail,
   fetchAllListings,
+  fetchGeoSearchListings,
   fetchListing,
   fetchListingDetail,
   fetchListingsByCompany,
+  GeoSearchParams,
   updateListing,
   updateListingDetail,
   CreateListingDetailPayload,
   fetchListingPinsByLocationId,
+  fetchListingsAvailability,
 } from "./fetch";
-import { GetCollectionParams, PatchData } from "@/app/functions/api/general";
+import {
+  GetCollectionItemOptions,
+  GetCollectionParams,
+  PatchData,
+} from "@/app/functions/api/general";
 import { LocationType } from "@/app/components/ui/atoms/inputs/location-input";
 
 export type ListingDetailCollectionMap = {
@@ -59,10 +66,13 @@ export function useListingsByCompany(
   });
 }
 
-export function useListing(id: string | undefined) {
+export function useListing(
+  id: string | undefined,
+  options?: GetCollectionItemOptions,
+) {
   return useQuery({
     queryKey: listingKeys.byId(id ?? ""),
-    queryFn: () => fetchListing(id!),
+    queryFn: () => fetchListing(id!, options),
     enabled: !!id,
   });
 }
@@ -223,6 +233,17 @@ export function useDeleteListingDetail<
   });
 }
 
+export function useGeoSearchListings(
+  params: GeoSearchParams & { enabled?: boolean },
+) {
+  const { enabled = true, ...fetchParams } = params;
+  return useQuery({
+    queryKey: listingKeys.geoSearch(fetchParams as Record<string, unknown>),
+    queryFn: () => fetchGeoSearchListings(fetchParams),
+    enabled,
+  });
+}
+
 export function useListingPinsByLocationId(
   locationId: string,
   type: LocalityType,
@@ -230,5 +251,25 @@ export function useListingPinsByLocationId(
   return useQuery({
     queryKey: listingKeys.pinsByLocation(locationId, type),
     queryFn: () => fetchListingPinsByLocationId(locationId, type),
+  });
+}
+
+type UseListingsAvailabilityParams = {
+  ids: string[];
+  from: string;
+  to: string;
+  enabled?: boolean;
+};
+
+export function useListingsAvailability({
+  ids,
+  from,
+  to,
+  enabled = true,
+}: UseListingsAvailabilityParams) {
+  return useQuery({
+    queryKey: listingKeys.availability(ids, from, to),
+    queryFn: () => fetchListingsAvailability(ids, from, to),
+    enabled: enabled && ids.length > 0 && !!from && !!to,
   });
 }

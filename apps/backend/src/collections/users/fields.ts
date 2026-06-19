@@ -57,4 +57,19 @@ export const usersFields: Field[] = [
     type: 'date',
     admin: { disabled: true },
   },
+  {
+    name: 'emailVerificationToken',
+    type: 'text',
+    admin: { disabled: true },
+  },
+  {
+    name: 'emailVerificationTokenExpiration',
+    type: 'date',
+    admin: { disabled: true },
+  },
+  {
+    name: 'pendingEmail',
+    type: 'text',
+    admin: { disabled: true },
+  },
 ]

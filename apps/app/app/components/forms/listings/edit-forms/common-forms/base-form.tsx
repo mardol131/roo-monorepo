@@ -83,7 +83,7 @@ export function BaseForm({
           render={({ field }) => (
             <SearchInput
               isRequired
-              label="Typ služby"
+              label="Co za službu poskytujete"
               options={subTypeOptions.filter(
                 (i) =>
                   !subTypeSearch ||

@@ -1,6 +1,8 @@
 import { CollectionSlug, Endpoint, PayloadRequest } from 'payload'
 import { Company, User } from '../../../../payload-types'
 import { getIdFromRelationshipField } from '@roo/common'
+import { Brevo, BrevoClient } from '@getbrevo/brevo'
+import { brevoTemplates } from '@/brevo/templates'
 
 export const membersInviteEndpoint: Endpoint = {
   path: '/members/invite',
@@ -87,9 +89,24 @@ export const membersInviteEndpoint: Endpoint = {
     const inviteUrl = new URL(`${baseUrl}/companies/members/invite`)
     inviteUrl.searchParams.set('companyMemberInviteToken', token)
     inviteUrl.searchParams.set('email', email)
-    console.log(inviteUrl)
 
-    // TODO: odeslat email s odkazem
+    const brevoApiKey = process.env.BREVO_API_KEY
+    if (!brevoApiKey) {
+      return Response.json({ error: 'Chybí konfigurace emailové služby' }, { status: 500 })
+    }
+
+    const brevo = new BrevoClient({ apiKey: brevoApiKey })
+
+    const res = await brevo.transactionalEmails.sendTransacEmail({
+      templateId: brevoTemplates.companyMemberInvite,
+      to: [{ email }],
+      params: {
+        companyName: company.name,
+        buttonUrl: inviteUrl.toString(),
+      },
+    })
+
+    console.log('Brevo response:', res)
 
     return Response.json({ success: true }, { status: 201 })
   },

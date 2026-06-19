@@ -1,7 +1,7 @@
 "use client";
 
 import React, { PropsWithChildren } from "react";
-import { AlertTriangle, X } from "lucide-react";
+import { AlertTriangle, CheckCircle, X } from "lucide-react";
 import Text from "../atoms/text";
 import { AlertSection } from "./alert-section";
 
@@ -11,7 +11,9 @@ interface ModalLayoutProps extends PropsWithChildren {
   isOpen?: boolean;
   maxWidth?: string;
   disableClose?: boolean;
-  errorMessage?: string;
+  errorMessages?: string[];
+  infoMessages?: string[];
+  successMessages?: string[];
 }
 
 export default function ModalLayout({
@@ -21,7 +23,9 @@ export default function ModalLayout({
   isOpen,
   maxWidth = "max-w-2xl",
   disableClose = false,
-  errorMessage,
+  errorMessages,
+  infoMessages,
+  successMessages,
 }: ModalLayoutProps) {
   if (!isOpen) return null;
 
@@ -67,19 +71,52 @@ export default function ModalLayout({
             </button>
           </div>
         </div>
-        {errorMessage && (
-          <div className="px-6 py-3">
-            <AlertSection
-              icon={AlertTriangle}
-              iconBg="bg-warning-surface"
-              iconColor="text-warning"
-              borderColor="border-warning"
-              title={errorMessage}
-              text=""
-              bgColor="bg-warning-surface"
-            />{" "}
-          </div>
-        )}
+        {infoMessages &&
+          infoMessages.length > 0 &&
+          infoMessages.map((message, index) => (
+            <div key={index} className="px-6 py-3">
+              <AlertSection
+                icon={AlertTriangle}
+                iconBg="bg-warning-surface"
+                iconColor="text-warning"
+                borderColor="border-warning"
+                title={message}
+                text=""
+                bgColor="bg-warning-surface"
+              />
+            </div>
+          ))}
+        {successMessages &&
+          successMessages.length > 0 &&
+          successMessages.map((message, index) => (
+            <div key={index} className="px-6 py-3">
+              <AlertSection
+                icon={CheckCircle}
+                iconBg="bg-success-surface"
+                iconColor="text-success"
+                borderColor="border-success"
+                title={message}
+                text=""
+                bgColor="bg-success-surface"
+              />
+            </div>
+          ))}
+        {errorMessages &&
+          errorMessages.length > 0 &&
+          errorMessages.map((message, index) => (
+            <div key={index} className="px-6 py-3">
+              <AlertSection
+                icon={AlertTriangle}
+                iconBg="bg-danger-surface"
+                iconColor="text-danger"
+                borderColor="border-danger"
+                title={message}
+                text=""
+                bgColor="bg-danger-surface"
+              />
+            </div>
+          ))}
+
         {/* Content */}
         <div className="p-6 max-h-[calc(100vh-200px)] overflow-y-auto">
           {children}

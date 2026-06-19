@@ -1,14 +1,16 @@
 import { useQuery } from "@tanstack/react-query";
 import { citiesKeys } from "../query-keys";
-import { fetchCities, FetchCitiesOptions, fetchCity } from "./fetch";
+import { fetchCities, fetchCity } from "./fetch";
+import { GetCollectionParams } from "@/app/functions/api/general";
 
 export function useCities(
-  options?: FetchCitiesOptions & { enabled?: boolean },
+  options?: GetCollectionParams & { enabled?: boolean },
 ) {
+  const { enabled, ...fetchOptions } = options ?? {};
   return useQuery({
-    queryKey: citiesKeys.all(options?.query, options?.limit),
-    queryFn: () => fetchCities(options),
-    enabled: options?.enabled ?? true,
+    queryKey: citiesKeys.all(fetchOptions),
+    queryFn: () => fetchCities(fetchOptions),
+    enabled: enabled ?? true,
   });
 }
 

@@ -1,5 +1,6 @@
-import { getRecordStatuses } from '@roo/common'
+import { getRecordStatuses, PRICING_UNITS_ARRAY } from '@roo/common'
 import { Field, Where } from 'payload'
+import { priceableOptionFields } from '../listings/fields'
 
 const INQUIRY_STATUS = ['pending', 'confirmed', 'cancelled']
 
@@ -37,7 +38,7 @@ export const inquiryFields: Field[] = [
 
   // ── Request ─────────────────────────────────────────────────────────────────
   {
-    name: 'request',
+    name: 'customRequest',
     type: 'group',
     required: true,
     fields: [
@@ -46,7 +47,50 @@ export const inquiryFields: Field[] = [
         type: 'textarea',
       },
       {
-        name: 'requirements',
+        name: 'addons',
+        type: 'array',
+        fields: [
+          {
+            name: 'name',
+            type: 'text',
+            required: true,
+          },
+          {
+            name: 'optionId',
+            type: 'text',
+            required: true,
+          },
+          ...priceableOptionFields,
+        ],
+      },
+      {
+        name: 'spaces',
+        type: 'array',
+        fields: [
+          {
+            name: 'spaceId',
+            type: 'text',
+            required: true,
+          },
+          {
+            name: 'name',
+            type: 'text',
+            required: true,
+          },
+          {
+            name: 'price',
+            type: 'number',
+          },
+          {
+            name: 'pricingUnit',
+            type: 'select',
+            options: PRICING_UNITS_ARRAY,
+            required: true,
+          },
+        ],
+      },
+      {
+        name: 'customRequirements',
         type: 'array',
         fields: [
           {
@@ -55,7 +99,53 @@ export const inquiryFields: Field[] = [
           },
         ],
       },
+      {
+        name: 'accommodation',
+        type: 'group',
+        fields: [{ name: 'guests', type: 'number', min: 0 }],
+      },
+      {
+        name: 'breakfast',
+        type: 'group',
+        fields: [{ name: 'guests', type: 'number', min: 0 }],
+      },
+      {
+        name: 'parking',
+        type: 'group',
+        fields: [{ name: 'spots', type: 'number', min: 0 }],
+      },
     ],
+  },
+  // ── Service time ────────────────────────────────────────────────────────────
+  {
+    name: 'serviceTime',
+    type: 'group',
+    fields: [
+      {
+        name: 'startTime',
+        type: 'date',
+        admin: { date: { pickerAppearance: 'dayAndTime' } },
+      },
+      {
+        name: 'endTime',
+        type: 'date',
+        admin: { date: { pickerAppearance: 'dayAndTime' } },
+      },
+      {
+        name: 'arrivalTime',
+        type: 'date',
+        admin: { date: { pickerAppearance: 'dayAndTime' } },
+      },
+    ],
+  },
+  // ── Travel fee estimate ──────────────────────────────────────────────────────
+  {
+    name: 'travelFeeAmount',
+    type: 'number',
+    min: 0,
+    admin: {
+      description: 'Odhadovaná cena cestovného (pouze informativní, nezahrnuje se do ceny)',
+    },
   },
   // ── Status ──────────────────────────────────────────────────────────────────
   {

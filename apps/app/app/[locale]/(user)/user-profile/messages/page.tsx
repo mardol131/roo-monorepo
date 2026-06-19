@@ -117,7 +117,7 @@ export default function MessagesPage() {
                         },
                         {
                           icon: "Calendar",
-                          content: `${inquiry.request ? "Zákaznická poptávka" : "Standardní poptávka"}`,
+                          content: `${inquiry.customRequest ? "Zákaznická poptávka" : "Standardní poptávka"}`,
                         },
                       ]}
                       link={{

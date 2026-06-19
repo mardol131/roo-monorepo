@@ -7,18 +7,22 @@ import { useAuth } from "@/app/context/auth/auth-context";
 import { login } from "@/app/functions/api/users";
 import { Link } from "@/app/i18n/navigation";
 import { useForm } from "react-hook-form";
+import { OAuthButton } from "../../../atoms/oauth-button";
+import { oAuthSignIn } from "@/app/functions/auth/o-auth-sign-in";
 
 type LoginFormValues = { email: string; password: string };
 
 type Props = {
   onSuccess: () => void;
   onForgotPassword: () => void;
+  onLoginWithEmail: () => void;
   onClose: () => void;
 };
 
 export default function LoginScreen({
   onSuccess,
   onForgotPassword,
+  onLoginWithEmail,
   onClose,
 }: Props) {
   const auth = useAuth();
@@ -33,17 +37,23 @@ export default function LoginScreen({
   async function onSubmit(data: LoginFormValues) {
     try {
       const res = await auth.login(data.email, data.password);
-      if (res.error) {
+      if (!res.ok) {
+        if (res.status === 401 || res.status === 403) {
+          setError("root", {
+            message: "Nesprávný e-mail nebo heslo. Zkuste to znovu.",
+          });
+          return;
+        }
         setError("root", {
-          message:
-            res?.error ?? "Nesprávný e-mail nebo heslo. Zkuste to znovu.",
+          message: "Přihlášení se nezdařilo. Zkuste to prosím znovu.",
         });
+
         return;
       }
       onSuccess();
     } catch {
       setError("root", {
-        message: "Nepodařilo se připojit k serveru. Zkuste to prosím znovu.",
+        message: "Přihlášení se nezdařilo. Zkuste to prosím znovu.",
       });
     }
   }
@@ -106,6 +116,22 @@ export default function LoginScreen({
         rounding="lg"
         loading={isSubmitting}
         className="w-full"
+      />
+      <Button
+        text="Přihlásit se emailem"
+        htmlType="button"
+        version="outlined"
+        size="md"
+        rounding="lg"
+        className="w-full"
+        onClick={onLoginWithEmail}
+      />
+      <OAuthButton
+        provider="google"
+        rounding="lg"
+        size="md"
+        className="w-full"
+        onClick={() => oAuthSignIn("google", window.location.href)}
       />
 
       <div className="flex items-center gap-2">

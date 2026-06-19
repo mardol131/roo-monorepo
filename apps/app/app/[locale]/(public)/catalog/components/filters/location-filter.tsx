@@ -28,16 +28,16 @@ export default function LocationFilter({
   const [searchQuery, setSearchQuery] = useState("");
   const searchEnabled = searchQuery.length >= 2;
 
-  const { data: regionResults, isLoading: loadingRegions } = useRegions(
-    searchEnabled ? { name: { contains: searchQuery } } : undefined,
-    3,
-    searchEnabled,
-  );
-  const { data: districtResults, isLoading: loadingDistricts } = useDistricts(
-    searchEnabled ? { name: { contains: searchQuery } } : undefined,
-    3,
-    searchEnabled,
-  );
+  const { data: regionResults, isLoading: loadingRegions } = useRegions({
+    query: searchEnabled ? { name: { contains: searchQuery } } : undefined,
+    limit: 3,
+    enabled: searchEnabled,
+  });
+  const { data: districtResults, isLoading: loadingDistricts } = useDistricts({
+    query: searchEnabled ? { name: { contains: searchQuery } } : undefined,
+    limit: 3,
+    enabled: searchEnabled,
+  });
   const { data: cityResults, isLoading: loadingCities } = useCities({
     query: searchEnabled ? { name: { contains: searchQuery } } : undefined,
     limit: 5,
@@ -49,16 +49,16 @@ export default function LocationFilter({
     limit: 1,
     enabled: !!value.city,
   });
-  const { data: selectedDistrictData } = useDistricts(
-    value.district ? { id: { equals: value.district } } : undefined,
-    1,
-    !!value.district,
-  );
-  const { data: selectedRegionData } = useRegions(
-    value.region ? { id: { equals: value.region } } : undefined,
-    1,
-    !!value.region,
-  );
+  const { data: selectedDistrictData } = useDistricts({
+    query: value.district ? { id: { equals: value.district } } : undefined,
+    limit: 1,
+    enabled: !!value.district,
+  });
+  const { data: selectedRegionData } = useRegions({
+    query: value.region ? { id: { equals: value.region } } : undefined,
+    limit: 1,
+    enabled: !!value.region,
+  });
 
   const options: SearchOption[] = [
     ...(regionResults?.docs ?? []).map((r) => ({

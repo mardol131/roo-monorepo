@@ -2,56 +2,57 @@ import { PRICING_UNITS_ARRAY, TRAVEL_FEE_TYPE_ARRAY } from '@roo/common'
 import { Field } from 'payload'
 import { getMediaFields, getSeasonalPricesArrayField } from '../common/common-fields'
 
+export const commonListingDetailPriceField: Field = {
+  name: 'price',
+  type: 'group',
+  required: true,
+  fields: [
+    {
+      name: 'base',
+      type: 'number',
+      min: 0,
+      required: true,
+    },
+    {
+      name: 'pricingUnit',
+      type: 'select',
+      options: PRICING_UNITS_ARRAY,
+      required: true,
+    },
+    getSeasonalPricesArrayField({ required: false }),
+    {
+      name: 'travelFeeEnabled',
+      type: 'checkbox',
+      defaultValue: false,
+    },
+    {
+      name: 'travelFeePerKm',
+      type: 'number',
+      min: 0,
+      admin: {
+        condition: (data) => data?.price?.travelFeeEnabled,
+      },
+    },
+    {
+      name: 'travelFeeType',
+      type: 'select',
+      options: TRAVEL_FEE_TYPE_ARRAY,
+      admin: {
+        condition: (data) => data?.price?.travelFeeEnabled,
+      },
+    },
+    {
+      name: 'travelFeeStartsAtKm',
+      type: 'number',
+      min: 0,
+      admin: {
+        condition: (data) => data?.price?.travelFeeEnabled,
+      },
+    },
+  ],
+}
+
 export const commonListingDetailFields: Field[] = [
-  {
-    name: 'price',
-    type: 'group',
-    required: true,
-    fields: [
-      {
-        name: 'base',
-        type: 'number',
-        min: 0,
-        required: true,
-      },
-      {
-        name: 'pricingUnit',
-        type: 'select',
-        options: PRICING_UNITS_ARRAY,
-        required: true,
-      },
-      getSeasonalPricesArrayField({ required: false }),
-      {
-        name: 'travelFeeEnabled',
-        type: 'checkbox',
-        defaultValue: false,
-      },
-      {
-        name: 'travelFeePerKm',
-        type: 'number',
-        min: 0,
-        admin: {
-          condition: (data) => data?.price?.travelFeeEnabled,
-        },
-      },
-      {
-        name: 'travelFeeType',
-        type: 'select',
-        options: TRAVEL_FEE_TYPE_ARRAY,
-        admin: {
-          condition: (data) => data?.price?.travelFeeEnabled,
-        },
-      },
-      {
-        name: 'travelFeeStartsAtKm',
-        type: 'number',
-        min: 0,
-        admin: {
-          condition: (data) => data?.price?.travelFeeEnabled,
-        },
-      },
-    ],
-  },
   {
     name: 'faq',
     type: 'array',

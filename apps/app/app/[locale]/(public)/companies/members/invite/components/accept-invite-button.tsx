@@ -42,7 +42,7 @@ export default function AcceptInviteButton({
         <Button
           version="primary"
           text="Přejít do aplikace"
-          link={{ pathname: "/company-profile" }}
+          link={{ pathname: "/company-profile/member-companies" }}
         />
       </div>
     );

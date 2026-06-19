@@ -13,7 +13,7 @@ type Props = {
   iconBg?: string;
   iconColor?: string;
   name: string;
-  nameSideComponent?: React.ReactNode;
+  nameSideComponent?: React.ReactNode | React.ReactNode[];
   infoItems?: InfoItemDef[];
   button?: ButtonProps;
   buttons?: ButtonProps[];
@@ -42,7 +42,15 @@ export default function DashboardHeader({
             <Text variant="h3" color="textDark" className="font-bold">
               {name}
             </Text>
-            {nameSideComponent}
+            {Array.isArray(nameSideComponent) ? (
+              <div className="flex gap-2">
+                {nameSideComponent.map((component, index) => (
+                  <React.Fragment key={index}>{component}</React.Fragment>
+                ))}
+              </div>
+            ) : (
+              nameSideComponent
+            )}
           </div>
           {infoItems && infoItems.length > 0 && (
             <div className="flex items-center gap-4 mt-1 flex-wrap">
@@ -60,7 +68,9 @@ export default function DashboardHeader({
 
       {(button || buttons) && (
         <div className="flex items-center gap-2 shrink-0">
-          {buttons?.map((b, i) => <Button key={i} {...b} />)}
+          {buttons?.map((b, i) => (
+            <Button key={i} {...b} />
+          ))}
           {button && <Button {...button} />}
         </div>
       )}

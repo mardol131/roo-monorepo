@@ -105,7 +105,7 @@ export default function page() {
               },
             },
 
-            text: "Zatím nemáte žádné firmy",
+            text: "Zatím nemáte žádné vlastní firmy",
             subtext:
               "Abyste mohli začít nabízet služby, musíte nejprve vytvořit firmu, která je bude nabízet. Klikněte na tlačítko níže.",
           }}
@@ -154,9 +154,9 @@ export default function page() {
                 : []
             }
             emptyState={{
-              text: "Zatím nemáte žádné firmy",
+              text: "Zatím nejste členem žádné firmy",
               subtext:
-                "Abyste mohli začít nabízet služby, musíte nejprve vytvořit firmu, která je bude nabízet. Klikněte na tlačítko níže.",
+                "Abyste mohli spravovat firmu, musíte být jejím členem. Požádejte vlastníka firmy o pozvání.",
             }}
           />
         )}

@@ -28,6 +28,7 @@ type Props = {
   searchable?: boolean;
   isRequired?: boolean;
   error?: string;
+  excludeUnits?: PricingUnits[];
 };
 
 export default function PriceableCheckboxGroup({
@@ -40,6 +41,7 @@ export default function PriceableCheckboxGroup({
   searchable = false,
   isRequired,
   error,
+  excludeUnits,
 }: Props) {
   const [query, setQuery] = useState("");
 
@@ -50,7 +52,7 @@ export default function PriceableCheckboxGroup({
     { value: "per_person", label: g("per_person") },
     { value: "per_hour", label: g("per_hour") },
     { value: "per_day", label: g("per_day") },
-  ];
+  ].filter((o) => !excludeUnits?.includes(o.value));
 
   const selectedIds = value.map((v) => v.id);
 

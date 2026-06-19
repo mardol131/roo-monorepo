@@ -3,15 +3,13 @@
 import { FormSection } from "@/app/[locale]/(user)/components/form-section";
 import { TocSection } from "@/app/[locale]/(user)/components/form-toc";
 import Checkbox from "@/app/components/ui/atoms/inputs/checkbox";
-import CheckboxGroup from "@/app/components/ui/atoms/inputs/checkbox-group";
 import Input from "@/app/components/ui/atoms/inputs/input";
 import LocationInput, {
   Bbox,
 } from "@/app/components/ui/atoms/inputs/location-input";
 import MapPointInput from "@/app/components/ui/atoms/inputs/map-point-input";
-import { useCities, useCity } from "@/app/react-query/cities/hooks";
-import { useDistricts } from "@/app/react-query/districts/hooks";
-import { useRegions } from "@/app/react-query/regions/hooks";
+import MapRadiusInput from "@/app/components/ui/atoms/inputs/map-radius-input";
+import { useCity } from "@/app/react-query/cities/hooks";
 import { useState } from "react";
 import { Controller, UseFormReturn } from "react-hook-form";
 import { FullLocalityData } from "../common-schema";
@@ -23,39 +21,12 @@ type Props = {
 };
 
 export function FullLocalityForm({ form, isActive, texts }: Props) {
-  const [districtSearch, setDistrictSearch] = useState("");
-  const [citySearch, setCitySearch] = useState("");
   const [userBbox, setUserBbox] = useState<Bbox | undefined>();
 
-  const regionsValue = form.watch("servicableArea.regions");
-  const districtsValue = form.watch("servicableArea.districts");
   const wholeCountry = form.watch("servicableArea.wholeCountry");
   const selectedCity = form.watch("location.city");
+  const coordinates = form.watch("location.coordinates");
 
-  const { data: regionsData } = useRegions(undefined, 20);
-  const { data: districtsData } = useDistricts(
-    regionsValue?.length || districtSearch
-      ? {
-          ...(regionsValue?.length
-            ? { region: { in: regionsValue.map((i) => i.id) } }
-            : {}),
-          ...(districtSearch ? { name: { contains: districtSearch } } : {}),
-        }
-      : undefined,
-  );
-  const { data: citiesData } = useCities({
-    query:
-      districtsValue?.length || citySearch
-        ? {
-            ...(districtsValue?.length
-              ? { district: { in: districtsValue.map((i) => i.id) } }
-              : {}),
-            ...(citySearch ? { name: { contains: citySearch } } : {}),
-          }
-        : undefined,
-  });
-
-  // Fetch bbox for the currently selected city (covers the form-load case)
   const { data: selectedCityData } = useCity(selectedCity?.id ?? "", {
     enabled: !!selectedCity?.id,
   });
@@ -148,7 +119,7 @@ export function FullLocalityForm({ form, isActive, texts }: Props) {
         subtitle={texts.servicableArea.subTitle}
         color="text-listing"
         surfaceColor="bg-listing-surface"
-        error={!!form.formState.errors.servicableArea?.regions}
+        error={!!form.formState.errors.servicableArea?.maxTravelDistanceKm}
       >
         <Controller
           control={form.control}
@@ -164,65 +135,21 @@ export function FullLocalityForm({ form, isActive, texts }: Props) {
           )}
         />
         {!wholeCountry && (
-          <>
-            <Controller
-              control={form.control}
-              name="servicableArea.regions"
-              render={({ field }) => (
-                <CheckboxGroup
-                  label="Kraj"
-                  hideTags
-                  items={regionsData?.docs ?? []}
-                  value={field.value ?? []}
-                  onChange={(val) => {
-                    field.onChange(val);
-                    form.setValue("servicableArea.districts", []);
-                    form.setValue("servicableArea.cities", []);
-                  }}
-                  checkColor="text-listing"
-                  searchable
-                  isRequired
-                  error={form.formState.errors.servicableArea?.regions?.message}
-                />
-              )}
-            />
-            <Controller
-              control={form.control}
-              name="servicableArea.districts"
-              render={({ field }) => (
-                <CheckboxGroup
-                  label="Okres"
-                  hideTags
-                  items={districtsData?.docs ?? []}
-                  value={field.value ?? []}
-                  onChange={field.onChange}
-                  checkColor="text-listing"
-                  searchable
-                  onSearchChange={setDistrictSearch}
-                  closed={!regionsValue?.length}
-                  closedMessage="Nejprve vyplňte předchozí pole"
-                />
-              )}
-            />
-            <Controller
-              control={form.control}
-              name="servicableArea.cities"
-              render={({ field }) => (
-                <CheckboxGroup
-                  label="Město"
-                  hideTags
-                  items={citiesData?.docs ?? []}
-                  value={field.value ?? []}
-                  onChange={field.onChange}
-                  checkColor="text-listing"
-                  searchable
-                  onSearchChange={setCitySearch}
-                  closed={!districtsValue?.length}
-                  closedMessage="Nejprve vyplňte předchozí pole"
-                />
-              )}
-            />
-          </>
+          <Controller
+            control={form.control}
+            name="servicableArea.maxTravelDistanceKm"
+            render={({ field }) => (
+              <MapRadiusInput
+                label="Maximální dojezdová vzdálenost"
+                center={coordinates}
+                value={field.value ?? 50}
+                onChange={field.onChange}
+                onBlur={field.onBlur}
+                error={form.formState.errors.servicableArea?.maxTravelDistanceKm?.message}
+                isRequired
+              />
+            )}
+          />
         )}
       </FormSection>
     </div>

@@ -1,37 +1,57 @@
 "use client";
 
-import { Listing } from "@roo/common";
+import { getIdFromRelationshipField, Listing } from "@roo/common";
 import { MapPin } from "lucide-react";
 import { InfoRow } from "../listing-ui";
 import SectionWrapper from "../section-wrapper";
+import { useCity } from "@/app/react-query/cities/hooks";
+import Link from "next/link";
+import Text from "@/app/components/ui/atoms/text";
 
 function ExactLocation({ listing }: { listing: Listing }) {
-  const { address, city, latitude, longitude } = listing.location;
-  const mapUrl = `https://maps.google.com/?q=${latitude},${longitude}`;
+  const loc = listing.location;
+  const [lon, lat] = loc.point;
+  const mapUrl = `https://maps.google.com/?q=${lat},${lon}`;
+
+  const cityRecord = useCity(getIdFromRelationshipField(loc.city), {
+    enabled: typeof loc.city === "string",
+  });
+
+  const city = () => {
+    if (typeof loc.city === "string") {
+      return cityRecord.data?.name ?? "";
+    }
+    return loc.city?.name ?? "";
+  };
 
   return (
     <SectionWrapper title="Kde nás najdete">
       <div className="flex flex-col gap-2">
         <InfoRow
           icon={<MapPin size={16} />}
-          label="Adresa"
-          value={`${address}${city ? `, ${city}` : ""}`}
+          label="Adresa a město"
+          value={`${loc.address}, ${city()}`}
         />
-        <a
+        <Link
           href={mapUrl}
           target="_blank"
           rel="noopener noreferrer"
           className="text-sm text-primary underline-offset-2 hover:underline ml-7"
         >
-          Zobrazit na mapě
-        </a>
+          <Text variant="label-sm" color="primary">
+            Zobrazit na mapě
+          </Text>
+        </Link>
       </div>
     </SectionWrapper>
   );
 }
 
 function ServiceableArea({ listing }: { listing: Listing }) {
-  const { wholeCountry, regions, districts, cities } = listing.servicableArea;
+  const { wholeCountry, maxTravelDistanceKm } = listing.servicableArea as {
+    wholeCountry: boolean;
+    maxTravelDistanceKm?: number | null;
+  };
 
   if (wholeCountry) {
     return (
@@ -41,20 +61,14 @@ function ServiceableArea({ listing }: { listing: Listing }) {
     );
   }
 
-  const parts = [
-    ...(regions ?? []),
-    ...(districts ?? []),
-    ...(cities ?? []),
-  ].filter(Boolean);
-
-  if (parts.length === 0) return null;
+  if (!maxTravelDistanceKm) return null;
 
   return (
     <SectionWrapper title="Kde působíme">
       <InfoRow
         icon={<MapPin size={16} />}
-        label="Oblast"
-        value={parts.join(", ")}
+        label="Dojezdová vzdálenost"
+        value={`Do ${maxTravelDistanceKm} km od základny`}
       />
     </SectionWrapper>
   );

@@ -9,7 +9,6 @@ import SeasonalPricesInput from "@/app/components/ui/atoms/inputs/seasonal-price
 import Switch from "@/app/components/ui/atoms/inputs/switch";
 import { Controller, UseFormReturn } from "react-hook-form";
 import { FullPriceData } from "../common-schema";
-
 type Props = {
   form: UseFormReturn<FullPriceData>;
   isActive: boolean;

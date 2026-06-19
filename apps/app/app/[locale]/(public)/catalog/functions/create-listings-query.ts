@@ -18,15 +18,26 @@ function pushPrice(and: Where[], minPrice?: number, maxPrice?: number) {
 function pushBbox(and: Where[], bbox: string[]) {
   if (bbox.length !== 4) return;
   const [west, south, east, north] = bbox.map(Number);
-  if (isNaN(west) || isNaN(south) || isNaN(east) || isNaN(north)) return;
-  and.push({ "location.latitude": { greater_than_equal: south } });
-  and.push({ "location.latitude": { less_than_equal: north } });
-  and.push({ "location.longitude": { greater_than_equal: west } });
-  and.push({ "location.longitude": { less_than_equal: east } });
+  if ([west, south, east, north].some(isNaN)) return;
+  const polygon = {
+    type: "Polygon",
+    coordinates: [[
+      [west, south], [east, south],
+      [east, north], [west, north],
+      [west, south],
+    ]],
+  };
+  and.push({ "location.point": { within: polygon } });
 }
 
 // Venue has a single city relationship; district/region are resolved through that city doc.
-function pushVenueLocation(and: Where[], city: string, district: string, region: string, bbox: string[]) {
+function pushVenueLocation(
+  and: Where[],
+  city: string,
+  district: string,
+  region: string,
+  bbox: string[],
+) {
   if (city) {
     and.push({ "location.city": { equals: city } });
     return;
@@ -42,54 +53,42 @@ function pushVenueLocation(and: Where[], city: string, district: string, region:
   pushBbox(and, bbox);
 }
 
-// Gastro / entertainment store arrays of cities, districts and regions directly.
-function pushRestLocation(and: Where[], city: string, district: string, region: string, bbox: string[]) {
-  if (city) {
-    and.push({ "location.cities": { in: [city] } });
-    return;
-  }
-  if (district) {
-    and.push({ "location.districts": { in: [district] } });
-    return;
-  }
-  if (region) {
-    and.push({ "location.regions": { in: [region] } });
-    return;
-  }
-  pushBbox(and, bbox);
-}
-
 export function createListingsQuery({
   catalogType,
   params,
+  skipLocation = false,
 }: {
   catalogType: CatalogType;
   params: URLSearchParams;
+  skipLocation?: boolean;
 }): Where {
   const and: Where[] = [];
   const general = generalFiltersFromParams(params);
   const common = commonFiltersFromParams(params);
 
   and.push({ status: { equals: "active" } });
+  and.push({ subscriptionStatus: { equals: "paid" } });
   and.push({ type: { equals: catalogType } });
 
   const totalGuests = general.adults + general.children;
   if (totalGuests > 1)
     and.push({ "guests.max": { greater_than_equal: totalGuests } });
-  if (general.accessibility)
-    and.push({ "guests.ztp": { equals: true } });
-  if (general.pets)
-    and.push({ "guests.pets": { equals: true } });
+  if (general.accessibility) and.push({ "guests.ztp": { equals: true } });
+  if (general.pets) and.push({ "guests.pets": { equals: true } });
 
   pushPrice(and, common.minPrice, common.maxPrice);
 
   if (common.eventTypes.length > 0)
     and.push({ "properties.eventTypes": { in: common.eventTypes } });
 
-  if (catalogType === "venue") {
-    pushVenueLocation(and, general.city, general.district, general.region, general.bbox ?? []);
-  } else {
-    pushRestLocation(and, general.city, general.district, general.region, general.bbox ?? []);
+  if (!skipLocation && catalogType === "venue") {
+    pushVenueLocation(
+      and,
+      general.city,
+      general.district,
+      general.region,
+      general.bbox ?? [],
+    );
   }
 
   if (catalogType === "venue") {

@@ -48,6 +48,11 @@ import {
   capacitySchema,
 } from "../common-forms/variant-capacity-form";
 import { useVariantEditTocData } from "../common-forms/useTocData";
+import {
+  DurationData,
+  DurationForm,
+  durationSchema,
+} from "../common-forms/variant-duration-form";
 import { CompletionWidget } from "@/app/[locale]/(user)/components/completion-widget";
 import { getFullVariantCompletion } from "@/app/functions/utils/variants";
 
@@ -89,6 +94,7 @@ export default function VenueVariantForm() {
     ],
     price: [{ label: "Cena", sections: [S.price, S.seasonalPrices] }],
     capacity: [{ label: "Kapacita", sections: [S.capacity] }],
+    duration: [{ label: "Délka", sections: [S.duration] }],
     details: [
       {
         label: "Prostor",
@@ -101,6 +107,7 @@ export default function VenueVariantForm() {
     { label: "Základ", value: "base" },
     { label: "Cena", value: "price" },
     { label: "Kapacita", value: "capacity" },
+    { label: "Délka", value: "duration" },
     { label: "Prostor", value: "details" },
   ];
 
@@ -149,12 +156,18 @@ export default function VenueVariantForm() {
     },
   });
 
+  const durationForm = useForm<DurationData>({
+    resolver: zodResolver(durationSchema) as Resolver<DurationData>,
+    defaultValues: { hasExactDuration: false },
+  });
+
   // ── Dirty state ────────────────────────────────────────────────────────────
 
   const anyDirty =
     hasDirtyFields(baseForm.formState.dirtyFields) ||
     hasDirtyFields(priceForm.formState.dirtyFields) ||
     hasDirtyFields(capacityForm.formState.dirtyFields) ||
+    hasDirtyFields(durationForm.formState.dirtyFields) ||
     hasDirtyFields(venueForm.formState.dirtyFields);
 
   const activeFormIsDirty =
@@ -164,7 +177,9 @@ export default function VenueVariantForm() {
         ? hasDirtyFields(priceForm.formState.dirtyFields)
         : activeGroup === "capacity"
           ? hasDirtyFields(capacityForm.formState.dirtyFields)
-          : hasDirtyFields(venueForm.formState.dirtyFields);
+          : activeGroup === "duration"
+            ? hasDirtyFields(durationForm.formState.dirtyFields)
+            : hasDirtyFields(venueForm.formState.dirtyFields);
 
   useUnsavedChangesWarning(anyDirty);
 
@@ -173,6 +188,7 @@ export default function VenueVariantForm() {
   const { reset: resetBase } = baseForm;
   const { reset: resetPrice } = priceForm;
   const { reset: resetCapacity } = capacityForm;
+  const { reset: resetDuration } = durationForm;
   const { reset: resetVenue } = venueForm;
 
   const resetAllForms = useCallback(() => {
@@ -233,6 +249,12 @@ export default function VenueVariantForm() {
       min: variant.capacity.min ?? undefined,
     });
 
+    resetDuration({
+      hasExactDuration: variant.duration?.hasExactDuration ?? false,
+      exactDurationMinutes: variant.duration?.exactDurationMinutes ?? undefined,
+      maxDurationMinutes: variant.duration?.maxDurationMinutes ?? undefined,
+    });
+
     resetVenue({
       includedSpaces: (block.includedSpaces ?? []).map((s) =>
         typeof s === "string"
@@ -255,7 +277,7 @@ export default function VenueVariantForm() {
       breakfastLoweredPrice:
         (block.breakfast as any)?.loweredPrice ?? undefined,
     });
-  }, [variant, resetBase, resetPrice, resetCapacity, resetVenue]);
+  }, [variant, resetBase, resetPrice, resetCapacity, resetDuration, resetVenue]);
 
   useEffect(() => {
     resetAllForms();
@@ -324,6 +346,25 @@ export default function VenueVariantForm() {
     }
   }
 
+  async function onSubmitDuration(data: DurationData) {
+    setIsSubmitting(true);
+    try {
+      await updateVariantAsync({
+        id: variantId,
+        data: {
+          duration: {
+            hasExactDuration: data.hasExactDuration,
+            exactDurationMinutes: data.hasExactDuration ? (data.exactDurationMinutes ?? null) : null,
+            maxDurationMinutes: data.maxDurationMinutes ?? null,
+          },
+        },
+      });
+      resetDuration(data);
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
+
   async function onSubmitVenue(data: VenueData) {
     if (!variant) return;
     const block = variant.details.find((d) => d.blockType === "venue");
@@ -369,6 +410,7 @@ export default function VenueVariantForm() {
     base: baseForm.handleSubmit(onSubmitBase),
     price: priceForm.handleSubmit(onSubmitPrice),
     capacity: capacityForm.handleSubmit(onSubmitCapacity),
+    duration: durationForm.handleSubmit(onSubmitDuration),
     details: venueForm.handleSubmit(onSubmitVenue),
   };
 
@@ -407,11 +449,19 @@ export default function VenueVariantForm() {
           form={priceForm}
           isActive={activeGroup === "price"}
           texts={S}
+          priceUnitOptions={["per_hour", "per_day"]}
         />
         {/* ── CAPACITY TAB ── */}
         <CapacityForm
           form={capacityForm}
           isActive={activeGroup === "capacity"}
+          texts={S}
+        />
+
+        {/* ── DURATION TAB ── */}
+        <DurationForm
+          form={durationForm}
+          isActive={activeGroup === "duration"}
           texts={S}
         />
 

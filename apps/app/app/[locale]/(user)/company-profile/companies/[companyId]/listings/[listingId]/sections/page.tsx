@@ -39,6 +39,7 @@ import { RefreshCw } from "lucide-react";
 import { useForm } from "react-hook-form";
 import PageHeading from "@/app/[locale]/(user)/components/page-heading";
 import { globalToastEvents } from "@/app/components/ui/molecules/global-toast";
+import { getPathname } from "@/app/i18n/navigation";
 
 type CustomSectionBlock = NonNullable<
   ListingVenueDetail["customSections"]
@@ -335,6 +336,10 @@ export default function SectionsPage() {
     companyId: string;
     listingId: string;
   }>();
+  const publicListingPath = getPathname({
+    href: { pathname: "/listing/[listingId]", params: { listingId } },
+    locale: "cs",
+  });
   const { data: listing, isPending } = useListing(listingId);
   const { data: detail } = useListingDetail(
     `listing-${listing?.type || "gastro"}-details`,
@@ -534,7 +539,7 @@ export default function SectionsPage() {
           >
             <iframe
               key={iframeKey}
-              src={`${process.env.NEXT_PUBLIC_WEBSITE_URL}/cs/inzerat/${listingId}`}
+              src={`${window.location.origin}${publicListingPath}`}
               className="w-full h-full"
               title="Náhled inzerátu"
               style={{ zoom: 0.5 }}

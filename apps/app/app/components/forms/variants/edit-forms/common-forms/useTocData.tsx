@@ -26,6 +26,7 @@ export function useVariantEditTocData() {
     extras: { id: "vg-extras", title: "Doplňky", icon: "Plus" },
     audience: { id: "ve-audience", title: "Publikum", icon: "Users" },
     performance: { id: "ve-performance", title: "Vystoupení", icon: "Mic" },
+    duration: { id: "vs-duration", title: "Délka", icon: "Timer" },
   } satisfies Record<string, TocSection>;
 
   return S;

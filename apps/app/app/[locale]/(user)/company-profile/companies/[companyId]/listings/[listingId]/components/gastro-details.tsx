@@ -78,10 +78,14 @@ export function GastroDetails({
   listing: Listing;
   detail: ListingGastroDetail;
 }) {
+  const cityName = listing.location?.city
+    ? typeof listing.location.city === "string"
+      ? listing.location.city
+      : listing.location.city.name
+    : null;
+
   const locationItems = [
-    ...(listing.location?.city
-      ? [{ type: "text" as const, label: "Město", value: listing.location.city }]
-      : []),
+    ...(cityName ? [{ type: "text" as const, label: "Město", value: cityName }] : []),
     ...(listing.location?.address
       ? [{ type: "text" as const, label: "Adresa", value: listing.location.address }]
       : []),

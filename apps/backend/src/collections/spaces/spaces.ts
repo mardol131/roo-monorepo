@@ -2,6 +2,7 @@ import type { CollectionConfig } from 'payload'
 import { spacesFields } from './fields'
 import { spacesAccess } from './access'
 import { cascadeStatusToChildren } from './hooks/cascade-status-to-children'
+import { syncListingFromSpaces, syncListingFromSpacesOnDelete } from './hooks/sync-listing-from-spaces'
 
 export const Spaces: CollectionConfig = {
   slug: 'spaces',
@@ -11,6 +12,7 @@ export const Spaces: CollectionConfig = {
   access: spacesAccess,
   fields: spacesFields,
   hooks: {
-    afterChange: [cascadeStatusToChildren],
+    afterChange: [cascadeStatusToChildren, syncListingFromSpaces],
+    afterDelete: [syncListingFromSpacesOnDelete],
   },
 }

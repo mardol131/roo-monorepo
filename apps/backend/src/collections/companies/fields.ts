@@ -113,4 +113,15 @@ export const companyFields: Field[] = [
       memberRoleField,
     ],
   },
+  {
+    name: 'stripeCustomerId',
+    type: 'text',
+    admin: {
+      description: 'Stripe Customer ID (cus_...)',
+      readOnly: true,
+    },
+    access: {
+      update: ({ req }) => req.user?.collection === 'admins',
+    },
+  },
 ]

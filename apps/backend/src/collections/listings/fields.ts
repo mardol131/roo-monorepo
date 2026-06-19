@@ -22,33 +22,21 @@ export const servicableAreaFields: Field = {
       defaultValue: false,
     },
     {
-      name: 'regions',
-      type: 'relationship',
-      relationTo: 'regions',
-      hasMany: true,
+      name: 'maxTravelDistanceKm',
+      type: 'number',
+      min: 1,
+      max: 500,
       validate: (value: unknown, { data }: { data: Record<string, unknown> }) => {
         const area = data?.servicableArea as Record<string, unknown> | undefined
         if (
           (data?.type === listingTypes.gastro || data?.type === listingTypes.entertainment) &&
           !area?.wholeCountry &&
-          !(value as unknown[])?.length
+          !value
         ) {
-          return 'Vyberte alespoň jeden kraj'
+          return 'Zadejte maximální dojezdovou vzdálenost'
         }
         return true
       },
-    },
-    {
-      name: 'districts',
-      type: 'relationship',
-      relationTo: 'districts',
-      hasMany: true,
-    },
-    {
-      name: 'cities',
-      type: 'relationship',
-      relationTo: 'cities',
-      hasMany: true,
     },
   ],
 }
@@ -59,13 +47,8 @@ export const listingLocationField: Field = {
   required: true,
   fields: [
     {
-      name: 'latitude',
-      type: 'number',
-      required: true,
-    },
-    {
-      name: 'longitude',
-      type: 'number',
+      name: 'point',
+      type: 'point',
       required: true,
     },
     {
@@ -296,7 +279,7 @@ export const listingFields: Field[] = [
   {
     name: 'tariff',
     type: 'select',
-    options: ['basic', 'premium'],
+    options: ['basic'],
     defaultValue: 'basic',
     required: true,
     access: { update: payloadAdminOnly },
@@ -358,13 +341,15 @@ export const listingFields: Field[] = [
     type: 'select',
     options: getRecordStatuses(['active', 'archived', 'inactive', 'disabled']),
     required: true,
-    defaultValue: 'inactive',
+    defaultValue: 'active',
     access: { update: isCompanyManagerOrAbove },
   },
   {
-    name: 'subscriptionActive',
-    type: 'checkbox',
-    defaultValue: false,
+    name: 'subscriptionStatus',
+    type: 'select',
+    options: ['unpaid', 'paid', 'cancelling', 'expired'],
+    defaultValue: 'unpaid',
+    required: true,
     access: { update: payloadAdminOnly },
   },
   {
@@ -438,4 +423,7 @@ export const listingFields: Field[] = [
     ],
   },
   { name: 'minimumPricePerEvent', type: 'number', min: 0, required: true },
+  { name: 'pricingUnit', type: 'select', options: PRICING_UNITS_ARRAY, admin: { readOnly: true } },
+  { name: 'minimumVariantPrice', type: 'number', min: 0, admin: { readOnly: true } },
+  { name: 'variantPricingUnit', type: 'select', options: PRICING_UNITS_ARRAY, admin: { readOnly: true } },
 ]

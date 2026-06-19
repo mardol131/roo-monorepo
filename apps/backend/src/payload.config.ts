@@ -55,6 +55,9 @@ import { SpaceRules } from './collections/specific/space-rules'
 import { MusicGenres } from './collections/filters/music-genres'
 import { FoodPreparationStyle } from './collections/filters/food-preparation-style'
 import { Countries } from './collections/locality/country'
+import { ListingSubscriptions } from './collections/listing-subscriptions/listing-subscriptions'
+import { OAuthAccounts } from './collections/oauth-accounts/oauth-accounts'
+import { stripeEndpoints } from './endpoints/stripe/stripe-endpoints'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -127,6 +130,8 @@ export default buildConfig({
     ListingVenueDetails,
     RoadmapItems,
     UserNotifications,
+    ListingSubscriptions,
+    OAuthAccounts,
   ],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || '',
@@ -136,7 +141,7 @@ export default buildConfig({
   db: mongooseAdapter({
     url: process.env.DATABASE_URL || '',
   }),
-  endpoints: [uploadFileToCloud, getFiltersAndSpecifics],
+  endpoints: [uploadFileToCloud, getFiltersAndSpecifics, ...stripeEndpoints],
   plugins: [],
   cors: ['http://localhost:3000', process.env.NEXT_PUBLIC_WEBSITE_URL || ''],
   csrf: ['http://localhost:3000', process.env.NEXT_PUBLIC_WEBSITE_URL || ''],

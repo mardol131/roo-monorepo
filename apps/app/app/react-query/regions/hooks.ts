@@ -1,12 +1,15 @@
 import { useQuery } from "@tanstack/react-query";
 import { regionsKeys } from "../query-keys";
 import { fetchRegions } from "./fetch";
-import { Where } from "@roo/common";
+import { GetCollectionParams } from "@/app/functions/api/general";
 
-export function useRegions(query?: Where, limit = 10, enabled = true) {
+export function useRegions(
+  options?: GetCollectionParams & { enabled?: boolean },
+) {
+  const { enabled, ...fetchOptions } = options ?? {};
   return useQuery({
-    queryKey: regionsKeys.all(query, limit),
-    queryFn: () => fetchRegions(query, limit),
-    enabled,
+    queryKey: regionsKeys.all(fetchOptions),
+    queryFn: () => fetchRegions(fetchOptions),
+    enabled: enabled ?? true,
   });
 }

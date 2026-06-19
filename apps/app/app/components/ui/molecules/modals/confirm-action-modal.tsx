@@ -71,7 +71,7 @@ export function ConfirmActionModal() {
     }
   };
 
-  if (!config) return null;
+  if (!config || !isOpen) return null;
 
   const {
     confirmPhrase,

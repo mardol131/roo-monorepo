@@ -1,48 +1,47 @@
 "use client";
 
 import Breadcrumbs from "@/app/[locale]/(user)/components/breadcrumbs";
+import { CompletionWidget } from "@/app/[locale]/(user)/components/completion-widget";
 import DashboardHeader from "@/app/[locale]/(user)/components/dashboard-header";
 import { DashboardSection } from "@/app/[locale]/(user)/components/dashboard-section";
+import { EntityCompletionBadge } from "@/app/[locale]/(user)/components/entity-completion-badge";
 import EntityRow from "@/app/[locale]/(user)/components/entity-row";
 import InfoSection from "@/app/[locale]/(user)/components/info-section";
 import Loader from "@/app/[locale]/(user)/components/loader";
 import RowContainer from "@/app/[locale]/(user)/components/row-container";
 import EntityComponentTag from "@/app/[locale]/(user)/components/tags/entity-component-tag";
+import InquiryStatusTag from "@/app/[locale]/(user)/components/tags/inquiry-status-tag";
 import ListingStatusTag from "@/app/[locale]/(user)/components/tags/listing-status-tag";
 import Button from "@/app/components/ui/atoms/button";
-import { confirmActionModalEvents } from "@/app/components/ui/molecules/modals/confirm-action-modal";
-import { useRouter } from "@/app/i18n/navigation";
-import { useFilterOptions } from "@/app/react-query/filters/aggregated-filters/hooks";
+import { useAuth } from "@/app/context/auth/auth-context";
 import {
-  useDeleteListing,
+  getFullListingCompletion,
+  hasListingRights,
+} from "@/app/functions/utils/listings";
+import { getVariantCompletion } from "@/app/functions/utils/variants";
+import { useRouter } from "@/app/i18n/navigation";
+import { useCompany } from "@/app/react-query/companies/hooks";
+import { useFilterOptions } from "@/app/react-query/filters/aggregated-filters/hooks";
+import { useInquiriesByListing } from "@/app/react-query/inquiries/hooks";
+import {
   useListing,
   useListingDetail,
   useUpdateListing,
 } from "@/app/react-query/listings/hooks";
 import { useSpacesByListing } from "@/app/react-query/spaces/hooks";
 import { useVariantsByListing } from "@/app/react-query/variants/hooks";
-import { useInquiriesByListing } from "@/app/react-query/inquiries/hooks";
-import { formatEventAddress, getIdFromRelationshipField } from "@roo/common";
+import { getIdFromRelationshipField } from "@roo/common";
 import { format } from "date-fns";
-import { TagIcon, Trash2 } from "lucide-react";
+import { TagIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useParams } from "next/navigation";
-import { ControlSection } from "../../../../../components/control-section";
+import { ListingControlSection } from "./components/control-section";
 import { EntertainmentDetails } from "./components/entertainment-details";
 import { GastroDetails } from "./components/gastro-details";
 import { SpacesSection } from "./components/spaces-section";
 import { VenueDetails } from "./components/venue-details";
-import {
-  getFullListingCompletion,
-  hasListingRights,
-} from "@/app/functions/utils/listings";
-import { useCompany } from "@/app/react-query/companies/hooks";
-import { useAuth } from "@/app/context/auth/auth-context";
-import InquiryStatusTag from "@/app/[locale]/(user)/components/tags/inquiry-status-tag";
-import { hasInquiryUpdateCompanyRights } from "@/app/functions/utils/inquiries";
-import { EntityCompletionBadge } from "@/app/[locale]/(user)/components/entity-completion-badge";
-import { getVariantCompletion } from "@/app/functions/utils/variants";
-import { CompletionWidget } from "@/app/[locale]/(user)/components/completion-widget";
+import ListingAlertsSectionGroup from "./components/listing-alerts-section-group";
+import ListingSubscriptionStatusTag from "@/app/[locale]/(user)/components/tags/listing-subscription-status-tag";
 
 export default function Page() {
   const { companyId, listingId } = useParams<{
@@ -71,51 +70,6 @@ export default function Page() {
 
   //filters
 
-  const isActive = listing.status === "active";
-
-  const handleToggleStatus = () => {
-    updateListing({
-      id: listingId,
-      data: { status: isActive ? "inactive" : "active" },
-    });
-  };
-
-  const handleDeleteConfirm = () => {
-    updateListing(
-      {
-        id: listingId,
-        data: { status: "archived" },
-      },
-      {
-        onSuccess: () => {
-          router.back();
-        },
-      },
-    );
-  };
-
-  const openDeleteConfirmModal = () =>
-    confirmActionModalEvents.emit("open", {
-      title: "Smazat službu",
-      description:
-        "Tato akce je nevratná a trvale odstraní tuto službu z platformy.",
-      Icon: Trash2,
-      buttonText: "Smazat službu",
-      buttonVersion: "dangerFull",
-      confirmPhrase: listing.name,
-      whatIsGoingToHappenText: "Opravdu chcete smazat tuto službu?",
-      whatIsGoingToHappenTextColor: "danger",
-      whatIsGoingToHappenList: [
-        "Služba zmizí z katalogu a nebude dohledatelná",
-        "Veškerá data, fotografie a nastavení budou trvale odstraněna",
-        "Platby za tuto službu se přestanou strhávat",
-      ],
-      bgColor: "bg-danger-surface",
-      onConfirmClick: async () => {
-        handleDeleteConfirm();
-      },
-    });
-
   const listingType = listing.type;
 
   const headerInfoItems = [
@@ -142,9 +96,6 @@ export default function Page() {
     }
   };
   const subType = getSubType();
-
-  console.log(listing);
-  console.log(filters);
 
   const basicInfoItems = [
     ...(subType
@@ -249,7 +200,10 @@ export default function Page() {
         iconBg="bg-listing-surface"
         iconColor="text-listing"
         name={listing.name}
-        nameSideComponent={<ListingStatusTag status={listing.status} />}
+        nameSideComponent={[
+          <ListingStatusTag status={listing.status} />,
+          <ListingSubscriptionStatusTag status={listing.subscriptionStatus} />,
+        ]}
         infoItems={headerInfoItems}
         buttons={[
           {
@@ -291,42 +245,10 @@ export default function Page() {
           allowedRoles: ["owner", "admin", "manager"],
           company,
           userId: user?.id,
-        }) && (
-          <ControlSection
-            rows={[
-              {
-                icon: isActive ? "CircleMinus" : "CircleCheck",
-                iconColor: isActive ? "text-amber-500" : "text-success",
-                iconBgColor: isActive ? "bg-amber-50" : "bg-success-surface",
-                title: isActive ? "Deaktivovat službu" : "Aktivovat službu",
-                text: isActive
-                  ? "Služba přestane být zobrazována v katalogu. Kdykoli ji lze znovu aktivovat."
-                  : "Po aktivaci budete přesměrováni do platební brány. Služba se zobrazí v katalogu po úspěšné platbě.",
-                button: {
-                  text: isActive ? "Deaktivovat" : "Aktivovat",
-                  version: isActive ? "warningFull" : "successFull",
-                  iconLeft: isActive ? "CircleMinus" : "CircleCheck",
-                  size: "sm",
-                  disabled: isUpdating,
-                  onClick: handleToggleStatus,
-                },
-              },
-              {
-                icon: "Trash2",
-                iconColor: "text-danger",
-                iconBgColor: "bg-danger-surface",
-                title: "Smazat službu",
-                text: "Trvalé smazání nelze vrátit zpět. Všechna data budou odstraněna.",
-                button: {
-                  text: "Smazat",
-                  version: "dangerFull",
-                  iconLeft: "Trash2",
-                  size: "sm",
-                  onClick: openDeleteConfirmModal,
-                },
-              },
-            ]}
-          />
+        }) && <ListingAlertsSectionGroup listing={listing} />}
+
+        {company && listing && (
+          <ListingControlSection company={company} listing={listing} />
         )}
         <RowContainer
           icon="MessageSquare"
@@ -390,7 +312,10 @@ export default function Page() {
                       },
                       {
                         icon: "MapPin" as const,
-                        content: formatEventAddress(inquiry.event),
+                        content:
+                          typeof inquiry.event.location.district === "object"
+                            ? inquiry.event.location.district.name
+                            : inquiry.event.location.district,
                       },
                     ]
                   : []),
@@ -408,6 +333,28 @@ export default function Page() {
             icon: "Inbox",
           }}
         />
+
+        {basicInfoItems.length > 0 && (
+          <DashboardSection
+            title="Základní informace"
+            icon={"Package"}
+            iconBg="bg-listing-surface"
+            iconColor="text-listing"
+          >
+            <InfoSection items={basicInfoItems} />
+          </DashboardSection>
+        )}
+        {listing.type === "entertainment" &&
+          detail &&
+          detail.type === "entertainment" && (
+            <EntertainmentDetails listing={listing} detail={detail} />
+          )}
+        {listing.type === "gastro" && detail && detail.type === "gastro" && (
+          <GastroDetails listing={listing} detail={detail} />
+        )}
+        {listing.type === "venue" && detail && detail.type === "venue" && (
+          <VenueDetails listing={listing} detail={detail} />
+        )}
         <RowContainer
           icon="Package"
           iconColor="text-variant"
@@ -484,27 +431,6 @@ export default function Page() {
           }}
         />
         <SpacesSection listingId={listingId} companyId={companyId} />
-        {basicInfoItems.length > 0 && (
-          <DashboardSection
-            title="Základní informace"
-            icon={"Package"}
-            iconBg="bg-listing-surface"
-            iconColor="text-listing"
-          >
-            <InfoSection items={basicInfoItems} />
-          </DashboardSection>
-        )}
-        {listing.type === "entertainment" &&
-          detail &&
-          detail.type === "entertainment" && (
-            <EntertainmentDetails listing={listing} detail={detail} />
-          )}
-        {listing.type === "gastro" && detail && detail.type === "gastro" && (
-          <GastroDetails listing={listing} detail={detail} />
-        )}
-        {listing.type === "venue" && detail && detail.type === "venue" && (
-          <VenueDetails listing={listing} detail={detail} />
-        )}
         <RowContainer
           icon="User"
           iconColor="text-violet-500"

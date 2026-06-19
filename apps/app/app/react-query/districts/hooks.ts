@@ -1,12 +1,15 @@
 import { useQuery } from "@tanstack/react-query";
 import { districtsKeys } from "../query-keys";
 import { fetchDistricts } from "./fetch";
-import { Where } from "@roo/common";
+import { GetCollectionParams } from "@/app/functions/api/general";
 
-export function useDistricts(query?: Where, limit = 10, enabled = true) {
+export function useDistricts(
+  options?: GetCollectionParams & { enabled?: boolean },
+) {
+  const { enabled, ...fetchOptions } = options ?? {};
   return useQuery({
-    queryKey: districtsKeys.all(query, limit),
-    queryFn: () => fetchDistricts(query, limit),
-    enabled,
+    queryKey: districtsKeys.all(fetchOptions),
+    queryFn: () => fetchDistricts(fetchOptions),
+    enabled: enabled ?? true,
   });
 }

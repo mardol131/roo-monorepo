@@ -16,6 +16,7 @@ type Props = {
   onUnitChange?: (value: PricingUnits) => void;
   amountError?: string;
   unitError?: string;
+  options?: PricingUnits[];
 };
 
 export default function PriceInput({
@@ -27,14 +28,17 @@ export default function PriceInput({
   onUnitChange,
   amountError,
   unitError,
+  options,
 }: Props) {
   const g = useTranslations("global.pricing.units");
-  const PRICING_UNIT_OPTIONS: { value: PricingUnits; label: string }[] = [
-    { value: "lump_sum", label: g("lump_sum") },
-    { value: "per_person", label: g("per_person") },
-    { value: "per_hour", label: g("per_hour") },
-    { value: "per_day", label: g("per_day") },
-  ];
+  const PRICING_UNIT_OPTIONS: { value: PricingUnits; label: string }[] = options
+    ? options.map((option) => ({ value: option, label: g(option) }))
+    : [
+        { value: "lump_sum", label: g("lump_sum") },
+        { value: "per_person", label: g("per_person") },
+        { value: "per_hour", label: g("per_hour") },
+        { value: "per_day", label: g("per_day") },
+      ];
   return (
     <div className="w-full">
       {label && (

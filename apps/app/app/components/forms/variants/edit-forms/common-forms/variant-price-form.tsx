@@ -17,6 +17,8 @@ export const priceSchema = z.object({
 });
 export type PriceData = z.infer<typeof priceSchema>;
 
+import type { PricingUnits } from "@roo/common";
+
 type Props = {
   form: UseFormReturn<PriceData>;
   isActive: boolean;
@@ -24,9 +26,10 @@ type Props = {
     price: TocSection;
     seasonalPrices: TocSection;
   };
+  priceUnitOptions?: PricingUnits[];
 };
 
-export function PriceForm({ form, isActive, texts }: Props) {
+export function PriceForm({ form, isActive, texts, priceUnitOptions }: Props) {
   return (
     <div className={isActive ? "flex flex-col gap-4" : "hidden"}>
       <FormSection
@@ -50,6 +53,7 @@ export function PriceForm({ form, isActive, texts }: Props) {
               onUnitChange={field.onChange}
               amountError={form.formState.errors.price?.base?.message}
               unitError={form.formState.errors.price?.pricingUnit?.message}
+              options={priceUnitOptions}
             />
           )}
         />

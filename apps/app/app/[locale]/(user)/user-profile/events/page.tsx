@@ -1,7 +1,7 @@
 "use client";
 
 import { useEvents } from "@/app/react-query/events/hooks";
-import { Event, formatEventAddress } from "@roo/common";
+import { Event } from "@roo/common";
 import CardContainer from "../../components/card-container";
 import EntityCard from "../../components/entity-card";
 import PageHeading from "../../components/page-heading";
@@ -21,6 +21,7 @@ export default function page() {
       query: {
         owner: { equals: user?.id ?? "" },
       },
+      depth: 4,
     },
     enabled: !!user?.id,
   });
@@ -28,7 +29,7 @@ export default function page() {
   const [activeFilter, setActiveFilter] = useState<Event["status"] | "all">(
     "all",
   );
-
+  console.log(events);
   if (isPending) return <Loader text="Vaše události se načítají..." />;
 
   return (
@@ -74,7 +75,13 @@ export default function page() {
               iconColor="text-event"
               iconBackgroundColor="bg-event-surface"
               items={[
-                { icon: "MapPin", content: formatEventAddress(event) },
+                {
+                  icon: "MapPin",
+                  content:
+                    typeof event.location.district === "object"
+                      ? event.location.district.name
+                      : event.location.district,
+                },
                 {
                   icon: "Clock",
                   content: `Od ${format(

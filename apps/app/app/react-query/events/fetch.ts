@@ -9,12 +9,9 @@ import {
 import type { Event } from "@roo/common";
 
 export async function fetchEvents(options?: GetCollectionParams) {
-  const { query, limit, sort = "-createdAt" } = options ?? {};
   const res = await getCollection({
     collection: "events",
-    query,
-    limit,
-    sort,
+    ...options,
   });
   if (!res) throw new Error("Failed to fetch events");
   return res;

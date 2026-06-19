@@ -14,7 +14,7 @@ type Props = {
   isLastStep: boolean;
   isSubmitting: boolean;
   children: React.ReactNode;
-  colorScheme?: "listing" | "variant";
+  colorScheme?: "listing" | "variant" | "event" | "primary";
 };
 
 export default function WizardLayout({
@@ -31,14 +31,38 @@ export default function WizardLayout({
   colorScheme = "listing",
 }: Props) {
   const isVariant = colorScheme === "variant";
-  const completedCircle = isVariant ? "bg-variant text-white" : "bg-listing text-white";
-  const currentCircle = isVariant
+  const isEvent = colorScheme === "event";
+  const isPrimary = colorScheme === "primary";
+  const completedCircle = isPrimary
+    ? "bg-primary text-white"
+    : isEvent
+    ? "bg-event text-white"
+    : isVariant
+    ? "bg-variant text-white"
+    : "bg-listing text-white";
+  const currentCircle = isPrimary
+    ? "bg-primary text-white ring-2 ring-primary ring-offset-2"
+    : isEvent
+    ? "bg-event text-white ring-2 ring-event ring-offset-2"
+    : isVariant
     ? "bg-variant text-white ring-2 ring-variant ring-offset-2"
     : "bg-listing text-white ring-2 ring-listing ring-offset-2";
-  const currentLabel = isVariant ? "text-variant" : "text-listing";
-  const reachableLabel = isVariant ? "text-gray-600 hover:text-variant" : "text-gray-600 hover:text-listing";
-  const completedLine = isVariant ? "bg-variant" : "bg-listing";
-  const btnVersion = isVariant ? "variantFull" as const : "listingFull" as const;
+  const currentLabel = isPrimary ? "text-primary" : isEvent ? "text-event" : isVariant ? "text-variant" : "text-listing";
+  const reachableLabel = isPrimary
+    ? "text-gray-600 hover:text-primary"
+    : isEvent
+    ? "text-gray-600 hover:text-event"
+    : isVariant
+    ? "text-gray-600 hover:text-variant"
+    : "text-gray-600 hover:text-listing";
+  const completedLine = isPrimary ? "bg-primary" : isEvent ? "bg-event" : isVariant ? "bg-variant" : "bg-listing";
+  const btnVersion = isPrimary
+    ? "primary" as const
+    : isEvent
+    ? "eventFull" as const
+    : isVariant
+    ? "variantFull" as const
+    : "listingFull" as const;
 
   return (
     <div className="flex flex-col gap-6">

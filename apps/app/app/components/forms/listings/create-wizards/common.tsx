@@ -9,12 +9,13 @@ import ImageInput from "@/app/components/ui/atoms/inputs/images/image-input";
 import Input from "@/app/components/ui/atoms/inputs/input";
 import LocationInput from "@/app/components/ui/atoms/inputs/location-input";
 import MapPointInput from "@/app/components/ui/atoms/inputs/map-point-input";
+import MapRadiusInput from "@/app/components/ui/atoms/inputs/map-radius-input";
 import PriceInput from "@/app/components/ui/atoms/inputs/price-input";
 import SearchInput from "@/app/components/ui/atoms/inputs/search-input";
 import SelectInput from "@/app/components/ui/atoms/inputs/select-input";
 import Switch from "@/app/components/ui/atoms/inputs/switch";
 import { uploadFileToCloud } from "@/app/functions/upload-file-to-cloud";
-import { LucideIcons, TRAVEL_FEE_TYPE_ARRAY } from "@roo/common";
+import { LucideIcons, PricingUnits, TRAVEL_FEE_TYPE_ARRAY } from "@roo/common";
 import { useTranslations } from "next-intl";
 import {
   Control,
@@ -180,6 +181,7 @@ type PriceStepProps<T extends FieldValues> = {
   register: UseFormRegister<T>;
   watch: UseFormWatch<T>;
   errors: FieldErrors<T>;
+  priceUnitOptions?: PricingUnits[];
 };
 
 export function PriceStep<T extends FieldValues>({
@@ -187,6 +189,7 @@ export function PriceStep<T extends FieldValues>({
   register,
   watch,
   errors,
+  priceUnitOptions,
 }: PriceStepProps<T>) {
   const g = useTranslations("global");
   const e = errors as FieldErrors<{
@@ -205,8 +208,6 @@ export function PriceStep<T extends FieldValues>({
     "price.travelFeeEnabled",
   );
 
-  console.log(e);
-
   return (
     <FormSection
       title="Cena"
@@ -215,18 +216,6 @@ export function PriceStep<T extends FieldValues>({
       color="text-listing"
       error={!!e.price?.base?.message}
     >
-      <Input
-        label="Minimální cena za akci (Kč)"
-        sublabel="Pod tuto částku nepřijímáte poptávky. Slouží pro filtrování v katalogu."
-        inputProps={{
-          ...register("price.minimumPricePerEvent" as Path<T>),
-          type: "number",
-          min: 0,
-        }}
-        isRequired
-        placeholder="15000"
-        error={e.price?.minimumPricePerEvent?.message}
-      />
       <Controller
         control={control as Control<FieldValues>}
         name={"price.pricingUnit" as Path<T>}
@@ -239,6 +228,7 @@ export function PriceStep<T extends FieldValues>({
             onUnitChange={field.onChange}
             amountError={e.price?.base?.message}
             unitError={e.price?.pricingUnit?.message}
+            options={priceUnitOptions}
           />
         )}
       />
@@ -307,22 +297,21 @@ type SimplePriceStepProps<T extends FieldValues> = {
   control: Control<T>;
   register: UseFormRegister<T>;
   errors: FieldErrors<T>;
+  priceUnitOptions?: PricingUnits[];
 };
 
 export function SimplePriceStep<T extends FieldValues>({
   control,
   register,
   errors,
+  priceUnitOptions,
 }: SimplePriceStepProps<T>) {
   const e = errors as FieldErrors<{
     price: {
       base: unknown;
-      minimumPricePerEvent: unknown;
       pricingUnit: unknown;
     };
   }>;
-
-  console.log("price errors", e);
 
   return (
     <FormSection
@@ -332,18 +321,6 @@ export function SimplePriceStep<T extends FieldValues>({
       color="text-listing"
       error={!!e.price?.base?.message}
     >
-      <Input
-        label="Minimální cena za akci (Kč)"
-        sublabel="Pod tuto částku nepřijímáte poptávky. Slouží pro filtrování v katalogu."
-        inputProps={{
-          ...register("price.minimumPricePerEvent" as Path<T>),
-          type: "number",
-          min: 0,
-        }}
-        placeholder="15000"
-        isRequired
-        error={e.price?.minimumPricePerEvent?.message}
-      />
       <Controller
         control={control as Control<FieldValues>}
         name={"price.pricingUnit" as Path<T>}
@@ -356,6 +333,7 @@ export function SimplePriceStep<T extends FieldValues>({
             onUnitChange={field.onChange}
             amountError={e.price?.base?.message}
             unitError={e.price?.pricingUnit?.message}
+            options={priceUnitOptions}
           />
         )}
       />
@@ -445,22 +423,12 @@ type ServicableAreaStepProps<T extends FieldValues> = {
   control: Control<T>;
   register: UseFormRegister<T>;
   watch: UseFormWatch<T>;
-  setValue: UseFormSetValue<T>;
   errors: FieldErrors<T>;
-  filteredRegions: { id: string; name: string }[];
-  filteredDistricts: { id: string; name: string }[];
-  filteredCities: { id: string; name: string }[];
-  regionIds: string[];
-  districtIds: string[];
   selectedCity?: { id: string } | null;
   cityBbox?: [number, number, number, number];
   onCityBboxChange: (
     bbox: [number, number, number, number] | undefined,
   ) => void;
-  onRegionSearchChange: (q: string) => void;
-  onDistrictSearchChange: (q: string) => void;
-  onCitySearchChange: (q: string) => void;
-  onTriggerRegionsValidation?: () => void;
   checkColor?: CheckColor;
   locationTitle?: string;
   locationSubtitle?: string;
@@ -470,30 +438,23 @@ export function ServicableAreaStep<T extends FieldValues>({
   control,
   register,
   watch,
-  setValue,
   errors,
-  filteredRegions,
-  filteredDistricts,
-  filteredCities,
-  regionIds,
-  districtIds,
   selectedCity,
   cityBbox,
   onCityBboxChange,
-  onRegionSearchChange,
-  onDistrictSearchChange,
-  onCitySearchChange,
-  onTriggerRegionsValidation,
   checkColor = "text-listing",
   locationTitle = "Základna",
   locationSubtitle = "Zde vyberte místo, ze kterého vyjíždíte. Bude používáno pro přibližný výpočet ceny za cestu.",
 }: ServicableAreaStepProps<T>) {
   const e = errors as FieldErrors<{
     location: { address: unknown; city: unknown; coordinates: unknown };
-    servicableArea: { regions: unknown };
+    servicableArea: { maxTravelDistanceKm: unknown };
   }>;
   const wholeCountry = (watch as UseFormWatch<FieldValues>)(
     "servicableArea.wholeCountry",
+  );
+  const coordinates = (watch as UseFormWatch<FieldValues>)(
+    "location.coordinates",
   );
 
   return (
@@ -555,94 +516,43 @@ export function ServicableAreaStep<T extends FieldValues>({
         icon="MapPin"
         surfaceColor="bg-listing-surface"
         color="text-listing"
-        error={!!e.servicableArea?.regions?.message}
+        error={!!e.servicableArea?.maxTravelDistanceKm?.message}
       >
         <Controller
           control={control as Control<FieldValues>}
           name={"servicableArea.wholeCountry"}
           render={({ field }) => (
             <Checkbox
-              title="Pokud obsluhujete celou Českou republiku, zaškrtněte tuto možnost. "
+              title="Pokud obsluhujete celou Českou republiku, zaškrtněte tuto možnost."
               checked={field.value ?? false}
-              onChange={(val) => {
-                field.onChange(val);
-                onTriggerRegionsValidation?.();
-              }}
+              onChange={field.onChange}
               label="Působíme po celé České republice"
               checkColor={checkColor}
             />
           )}
         />
         {!wholeCountry && (
-          <>
-            <Controller
-              control={control as Control<FieldValues>}
-              name={"servicableArea.regions" as Path<T>}
-              render={({ field }) => (
-                <CheckboxGroup
-                  label="Kraje"
-                  isRequired
-                  items={filteredRegions}
-                  value={field.value ?? []}
-                  onChange={(val) => {
-                    field.onChange(val);
-                    (setValue as UseFormSetValue<FieldValues>)(
-                      "servicableArea.districts",
-                      [],
-                    );
-                    (setValue as UseFormSetValue<FieldValues>)(
-                      "servicableArea.cities",
-                      [],
-                    );
-                  }}
-                  checkColor={checkColor}
-                  searchable
-                  onSearchChange={onRegionSearchChange}
-                  error={e.servicableArea?.regions?.message}
-                />
-              )}
-            />
-            <Controller
-              control={control as Control<FieldValues>}
-              name={"servicableArea.districts" as Path<T>}
-              render={({ field }) => (
-                <CheckboxGroup
-                  label="Okresy (volitelné)"
-                  items={filteredDistricts}
-                  value={field.value ?? []}
-                  onChange={(val) => {
-                    field.onChange(val);
-                    (setValue as UseFormSetValue<FieldValues>)(
-                      "servicableArea.cities",
-                      [],
-                    );
-                  }}
-                  checkColor={checkColor}
-                  searchable
-                  onSearchChange={onDistrictSearchChange}
-                  closed={regionIds.length === 0}
-                  closedMessage="Nejprve vyberte kraj"
-                />
-              )}
-            />
-            <Controller
-              control={control as Control<FieldValues>}
-              name={"servicableArea.cities" as Path<T>}
-              render={({ field }) => (
-                <CheckboxGroup
-                  label="Města (volitelné)"
-                  items={filteredCities}
-                  value={field.value ?? []}
-                  onChange={field.onChange}
-                  checkColor={checkColor}
-                  searchable
-                  onSearchChange={onCitySearchChange}
-                  closed={districtIds.length === 0}
-                  closedMessage="Nejprve vyberte okres"
-                />
-              )}
-            />
-          </>
+          <Controller
+            control={control as Control<FieldValues>}
+            name={"servicableArea.maxTravelDistanceKm" as Path<T>}
+            render={({ field }) => (
+              <MapRadiusInput
+                label="Maximální dojezdová vzdálenost"
+                center={coordinates}
+                value={field.value ?? 50}
+                onChange={field.onChange}
+                onBlur={field.onBlur}
+                error={
+                  (
+                    e.servicableArea?.maxTravelDistanceKm as
+                      | { message?: string }
+                      | undefined
+                  )?.message
+                }
+                isRequired
+              />
+            )}
+          />
         )}
       </FormSection>
     </>

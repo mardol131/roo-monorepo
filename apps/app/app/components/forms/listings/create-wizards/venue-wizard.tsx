@@ -13,20 +13,21 @@ import { getPositiveNumber } from "@/app/validation/schema/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useParams } from "next/navigation";
 import { useState } from "react";
-import { Resolver, useForm } from "react-hook-form";
+import { Controller, Resolver, useForm } from "react-hook-form";
 import z from "zod";
 import {
   eventTypeSelectionSchema,
   fullLocationSchema,
   listingImagesSchema,
-  priceWithTravelFeeSchema,
 } from "../edit-forms/common-schema";
 import {
   EventTypesStep,
   ImagesStep,
   LocationStep,
-  SimplePriceStep,
 } from "./common";
+import { createSpace } from "@/app/react-query/spaces/fetch";
+import PriceInput from "@/app/components/ui/atoms/inputs/price-input";
+import SelectInput from "@/app/components/ui/atoms/inputs/select-input";
 import WizardLayout from "./wizard-layout";
 
 const schema = z.object({
@@ -36,20 +37,24 @@ const schema = z.object({
   eventTypeSelection: eventTypeSelectionSchema,
   location: fullLocationSchema,
   images: listingImagesSchema,
-  price: priceWithTravelFeeSchema.extend({
-    minimumPricePerEvent: getPositiveNumber(
-      "Zadejte minimální cenu, za kterou přijímáte poptávku",
-    ),
+  space: z.object({
+    name: z.string().min(1, "Název prostoru je povinný"),
+    type: z.enum(["area", "building", "room"] as const),
+    price: z.object({
+      base: getPositiveNumber("Zadejte cenu prostoru"),
+      pricingUnit: z.enum(["per_hour", "per_day"] as const),
+    }),
+    capacity: z.coerce.number().positive().optional(),
   }),
 });
 
 type FormInputs = z.infer<typeof schema>;
 
-const STEPS = ["Základní info", "Cena", "Typy akcí", "Místo působení", "Fotky"];
+const STEPS = ["Základní info", "Prostory", "Typy akcí", "Místo působení", "Fotky"];
 
 const STEP_FIELDS: (keyof FormInputs | string)[][] = [
   ["name", "area", "shortDescription"],
-  ["price.base", "price.pricingUnit", "price.minimumPricePerEvent"],
+  ["space.name", "space.type", "space.price.base", "space.price.pricingUnit"],
   ["eventTypeSelection.types", "eventTypeSelection.servesAll"],
   [
     "servicableArea.regions",
@@ -134,12 +139,12 @@ export default function VenueWizard({ onCancel }: Props) {
         breakfast: {
           breakfastIncluded: false,
         },
-        price: data.price,
+        catering: {},
         parking: {},
         propertyAccess: {},
         accomodation: {},
       });
-      await createListing({
+      const newListing = await createListing({
         type: "venue",
         filters: {
           allEventTypes: data.eventTypeSelection.servesAll,
@@ -155,12 +160,15 @@ export default function VenueWizard({ onCancel }: Props) {
           logo: data.images.logo,
           gallery: data.images.gallery,
         },
-        minimumPricePerEvent: data.price.minimumPricePerEvent,
+        minimumPricePerEvent: data.space.price.base,
+        pricingUnit: data.space.price.pricingUnit,
         location: {
           address: data.location.address,
           city: data.location.city.id,
-          latitude: data.location.coordinates.latitude,
-          longitude: data.location.coordinates.longitude,
+          point: [
+            data.location.coordinates.longitude,
+            data.location.coordinates.latitude,
+          ],
           country: "cz",
         },
         servicableArea: {
@@ -170,6 +178,16 @@ export default function VenueWizard({ onCancel }: Props) {
           relationTo: "listing-venue-details",
           value: detail.id,
         },
+      });
+      await createSpace({
+        name: data.space.name,
+        type: data.space.type,
+        price: {
+          base: data.space.price.base,
+          pricingUnit: data.space.price.pricingUnit,
+        },
+        listing: newListing.id,
+        ...(data.space.capacity ? { capacity: data.space.capacity } : {}),
       });
       router.push({
         pathname: "/company-profile/companies/[companyId]/listings",
@@ -247,11 +265,67 @@ export default function VenueWizard({ onCancel }: Props) {
           </>
         )}
         {step === 1 && (
-          <SimplePriceStep
-            control={control}
-            register={register}
-            errors={errors}
-          />
+          <FormSection
+            title="První prostor"
+            icon="House"
+            surfaceColor="bg-listing-surface"
+            color="text-listing"
+          >
+            <Input
+              label="Název prostoru"
+              isRequired
+              inputProps={{
+                ...register("space.name"),
+                type: "text",
+                placeholder: "Velký sál",
+              }}
+              error={errors.space?.name?.message}
+            />
+            <Controller
+              control={control}
+              name="space.type"
+              render={({ field }) => (
+                <SelectInput
+                  label="Typ prostoru"
+                  isRequired
+                  value={field.value}
+                  onChange={(e) => field.onChange(e.target.value)}
+                  items={[
+                    { value: "area", label: "Venkovní plocha" },
+                    { value: "building", label: "Budova / areál" },
+                    { value: "room", label: "Místnost / sál" },
+                  ]}
+                  error={errors.space?.type?.message}
+                />
+              )}
+            />
+            <Controller
+              control={control}
+              name="space.price.pricingUnit"
+              render={({ field }) => (
+                <PriceInput
+                  label="Cena prostoru (Kč)"
+                  isRequired
+                  amountProps={register("space.price.base")}
+                  unitValue={field.value}
+                  onUnitChange={field.onChange}
+                  amountError={errors.space?.price?.base?.message}
+                  unitError={errors.space?.price?.pricingUnit?.message}
+                  options={["per_hour", "per_day"]}
+                />
+              )}
+            />
+            <Input
+              label="Kapacita (osob)"
+              inputProps={{
+                ...register("space.capacity"),
+                type: "number",
+                min: 1,
+                placeholder: "150",
+              }}
+              error={errors.space?.capacity?.message}
+            />
+          </FormSection>
         )}
 
         {step === 2 && (

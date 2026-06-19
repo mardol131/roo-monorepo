@@ -51,16 +51,16 @@ export default function LocationInput({
   const searchCities = types.includes("cities");
   const showInfo = types.length > 1;
 
-  const { data: regionResults, isLoading: loadingRegions } = useRegions(
-    searchEnabled && searchRegions ? { name: { contains: searchQuery } } : undefined,
-    5,
-    searchEnabled && searchRegions,
-  );
-  const { data: districtResults, isLoading: loadingDistricts } = useDistricts(
-    searchEnabled && searchDistricts ? { name: { contains: searchQuery } } : undefined,
-    5,
-    searchEnabled && searchDistricts,
-  );
+  const { data: regionResults, isLoading: loadingRegions } = useRegions({
+    query: searchEnabled && searchRegions ? { name: { contains: searchQuery } } : undefined,
+    limit: 5,
+    enabled: searchEnabled && searchRegions,
+  });
+  const { data: districtResults, isLoading: loadingDistricts } = useDistricts({
+    query: searchEnabled && searchDistricts ? { name: { contains: searchQuery } } : undefined,
+    limit: 5,
+    enabled: searchEnabled && searchDistricts,
+  });
   const { data: cityResults, isLoading: loadingCities } = useCities({
     query: searchEnabled && searchCities ? { name: { contains: searchQuery } } : undefined,
     limit: 5,
@@ -68,18 +68,18 @@ export default function LocationInput({
   });
 
   const cityDistrictIds = cityResults?.docs?.map((c) => c.district).filter(Boolean) ?? [];
-  const { data: cityDistrictsLookup } = useDistricts(
-    cityDistrictIds.length ? { id: { in: cityDistrictIds } } : undefined,
-    cityDistrictIds.length,
-    cityDistrictIds.length > 0,
-  );
+  const { data: cityDistrictsLookup } = useDistricts({
+    query: cityDistrictIds.length ? { id: { in: cityDistrictIds } } : undefined,
+    limit: cityDistrictIds.length,
+    enabled: cityDistrictIds.length > 0,
+  });
 
   const districtRegionIds = districtResults?.docs?.map((d) => d.region).filter(Boolean) ?? [];
-  const { data: districtRegionsLookup } = useRegions(
-    districtRegionIds.length ? { id: { in: districtRegionIds } } : undefined,
-    districtRegionIds.length,
-    districtRegionIds.length > 0,
-  );
+  const { data: districtRegionsLookup } = useRegions({
+    query: districtRegionIds.length ? { id: { in: districtRegionIds } } : undefined,
+    limit: districtRegionIds.length,
+    enabled: districtRegionIds.length > 0,
+  });
 
   // Parent lookups for the selected option (used when value comes from outside, e.g. form load)
   const { data: selectedCityData } = useCity(
@@ -87,23 +87,23 @@ export default function LocationInput({
     { enabled: value?.type === "city" },
   );
   const selectedCityDistrictId = selectedCityData?.district ?? "";
-  const { data: selectedCityDistrictData } = useDistricts(
-    selectedCityDistrictId ? { id: { in: [selectedCityDistrictId] } } : undefined,
-    1,
-    !!selectedCityDistrictId,
-  );
+  const { data: selectedCityDistrictData } = useDistricts({
+    query: selectedCityDistrictId ? { id: { in: [selectedCityDistrictId] } } : undefined,
+    limit: 1,
+    enabled: !!selectedCityDistrictId,
+  });
 
-  const { data: selectedDistrictData } = useDistricts(
-    value?.type === "district" ? { id: { in: [value.id] } } : undefined,
-    1,
-    value?.type === "district",
-  );
+  const { data: selectedDistrictData } = useDistricts({
+    query: value?.type === "district" ? { id: { in: [value.id] } } : undefined,
+    limit: 1,
+    enabled: value?.type === "district",
+  });
   const selectedDistrictRegionId = selectedDistrictData?.docs?.[0]?.region ?? "";
-  const { data: selectedDistrictRegionData } = useRegions(
-    selectedDistrictRegionId ? { id: { in: [selectedDistrictRegionId] } } : undefined,
-    1,
-    !!selectedDistrictRegionId,
-  );
+  const { data: selectedDistrictRegionData } = useRegions({
+    query: selectedDistrictRegionId ? { id: { in: [selectedDistrictRegionId] } } : undefined,
+    limit: 1,
+    enabled: !!selectedDistrictRegionId,
+  });
 
   const options: SearchOption[] = [
     ...(searchRegions

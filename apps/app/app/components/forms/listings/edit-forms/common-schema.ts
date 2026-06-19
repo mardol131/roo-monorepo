@@ -96,16 +96,14 @@ export const eventTypeSelectionSchema = z
 export const servicableAreaSchema = z
   .object({
     wholeCountry: z.boolean().default(false),
-    regions: z.array(relationshipItemSchema).default([]),
-    districts: z.array(relationshipItemSchema).default([]),
-    cities: z.array(relationshipItemSchema).default([]),
+    maxTravelDistanceKm: z.number().min(1).max(500).optional(),
   })
   .superRefine((data, ctx) => {
-    if (!data.wholeCountry && data.regions.length === 0) {
+    if (!data.wholeCountry && !data.maxTravelDistanceKm) {
       ctx.addIssue({
         code: "custom",
-        message: "Vyberte alespoň jeden kraj",
-        path: ["regions"],
+        message: "Zadejte maximální dojezdovou vzdálenost",
+        path: ["maxTravelDistanceKm"],
       });
     }
   }) satisfies z.ZodType<{ [K in keyof Listing["servicableArea"]]: unknown }>;
@@ -122,7 +120,7 @@ export const fullLocationSchema = z.object({
   ),
 }) satisfies z.ZodType<
   { [K in keyof Pick<Listing["location"], "address" | "city">]: unknown } & {
-    coordinates: { [K in "latitude" | "longitude"]: unknown };
+    coordinates: unknown;
   }
 >;
 

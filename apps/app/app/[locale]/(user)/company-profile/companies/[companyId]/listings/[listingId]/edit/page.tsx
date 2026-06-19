@@ -1,15 +1,14 @@
 "use client";
 
+import Loader from "@/app/[locale]/(user)/components/loader";
 import PageHeading from "@/app/[locale]/(user)/components/page-heading";
 import { useRouter } from "@/app/i18n/navigation";
-import { useListing, useUpdateListing } from "@/app/react-query/listings/hooks";
+import { useListing } from "@/app/react-query/listings/hooks";
 import { useParams, useSearchParams } from "next/navigation";
+import { useEffect } from "react";
 import EntertainmentListingForm from "../../../../../../../../components/forms/listings/edit-forms/entertainment/entertainment-listing-form";
 import GastroListingForm from "../../../../../../../../components/forms/listings/edit-forms/gastro/gastro-listing-form";
 import VenueListingForm from "../../../../../../../../components/forms/listings/edit-forms/venue/venue-listing-form";
-import { Listing } from "@roo/common";
-import { useEffect } from "react";
-import Loader from "@/app/[locale]/(user)/components/loader";
 
 type Props = {};
 
@@ -46,7 +45,7 @@ export default function page({}: Props) {
         description="Zde můžeš upravit všechny detaily vaší služby. Nezapomeň změny uložit!"
         button={{
           text: "Opustit formulář",
-          version: "plainFull",
+          version: "plain",
           size: "sm",
           iconLeft: "ArrowLeft",
           onClick: router.back,

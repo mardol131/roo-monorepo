@@ -90,7 +90,7 @@ export function UserImagesGalleryModal() {
     return () => observer.disconnect();
   }, [isOpen, hasNextPage, isFetchingNextPage, fetchNextPage]);
 
-  if (!auth.user) return null;
+  if (!auth.user || !isOpen) return null;
 
   const allMedia = data?.pages.flatMap((p) => p.docs ?? []) ?? [];
 

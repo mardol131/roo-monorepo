@@ -134,62 +134,69 @@ export default function Page() {
           title="Co doporučujeme vyplnit"
           data={getFullVariantCompletion(variant)}
         />
-        <ControlSection
-          rows={[
-            {
-              icon: isActive ? "CircleMinus" : "CircleCheck",
-              iconColor: isActive ? "text-amber-500" : "text-success",
-              iconBgColor: isActive ? "bg-amber-50" : "bg-success-surface",
-              title: isActive ? "Deaktivovat variantu" : "Aktivovat variantu",
-              text: isActive
-                ? "Varianta přestane být dostupná pro nové poptávky."
-                : "Varianta bude opět dostupná pro nové poptávky.",
-              button: {
-                text: isActive ? "Deaktivovat" : "Aktivovat",
-                version: isActive ? "warningFull" : "successFull",
-                iconLeft: isActive ? "CircleMinus" : "CircleCheck",
-                size: "sm",
-                disabled: isUpdating,
-                onClick: handleToggleStatus,
-              },
-            },
-            {
-              icon: "Trash",
-              iconColor: "text-red-500",
-              iconBgColor: "bg-red-50",
-              title: "Smazat variantu",
-              text: "Varianta bude nenávratně smazána. Tuto akci nelze vrátit zpět.",
-              button: {
-                text: "Smazat",
-                version: "dangerFull",
-                iconLeft: "Trash",
-                size: "sm",
-                disabled: isUpdating,
-                onClick: () => {
-                  confirmActionModalEvents.emit("open", {
-                    title: "Smazat variantu",
-                    description:
-                      "Tato akce je nevratná a trvale odstraní tuto variantu z platformy.",
-                    Icon: Trash2,
-                    buttonText: "Smazat variantu",
-                    buttonVersion: "dangerFull",
-                    confirmPhrase: variant.name,
-                    whatIsGoingToHappenText:
-                      "Opravdu chcete smazat tuto variantu?",
-                    whatIsGoingToHappenTextColor: "danger",
-                    whatIsGoingToHappenList: [
-                      "Varianta zmizí z katalogu a nebude dohledatelná",
-                      "Varianta bude u nepotvrzených poptávek označena jako smazaná",
-                      "Změna je nevratná",
-                    ],
-                    bgColor: "bg-danger-surface",
-                    onConfirmClick: async () => handleDelete(),
-                  });
+        <DashboardSection
+          title="Ovládání"
+          icon={"Cog"}
+          iconBg="bg-zinc-100"
+          iconColor="text-zinc-500"
+        >
+          <ControlSection
+            rows={[
+              {
+                icon: isActive ? "CircleMinus" : "CircleCheck",
+                iconColor: isActive ? "text-amber-500" : "text-success",
+                iconBgColor: isActive ? "bg-amber-50" : "bg-success-surface",
+                title: isActive ? "Deaktivovat variantu" : "Aktivovat variantu",
+                text: isActive
+                  ? "Varianta přestane být dostupná pro nové poptávky."
+                  : "Varianta bude opět dostupná pro nové poptávky.",
+                button: {
+                  text: isActive ? "Deaktivovat" : "Aktivovat",
+                  version: isActive ? "warningFull" : "successFull",
+                  iconLeft: isActive ? "CircleMinus" : "CircleCheck",
+                  size: "sm",
+                  disabled: isUpdating,
+                  onClick: handleToggleStatus,
                 },
               },
-            },
-          ]}
-        />
+              {
+                icon: "Trash",
+                iconColor: "text-red-500",
+                iconBgColor: "bg-red-50",
+                title: "Smazat variantu",
+                text: "Varianta bude nenávratně smazána. Tuto akci nelze vrátit zpět.",
+                button: {
+                  text: "Smazat",
+                  version: "dangerFull",
+                  iconLeft: "Trash",
+                  size: "sm",
+                  disabled: isUpdating,
+                  onClick: () => {
+                    confirmActionModalEvents.emit("open", {
+                      title: "Smazat variantu",
+                      description:
+                        "Tato akce je nevratná a trvale odstraní tuto variantu z platformy.",
+                      Icon: Trash2,
+                      buttonText: "Smazat variantu",
+                      buttonVersion: "dangerFull",
+                      confirmPhrase: variant.name,
+                      whatIsGoingToHappenText:
+                        "Opravdu chcete smazat tuto variantu?",
+                      whatIsGoingToHappenTextColor: "danger",
+                      whatIsGoingToHappenList: [
+                        "Varianta zmizí z katalogu a nebude dohledatelná",
+                        "Varianta bude u nepotvrzených poptávek označena jako smazaná",
+                        "Změna je nevratná",
+                      ],
+                      bgColor: "bg-danger-surface",
+                      onConfirmClick: async () => handleDelete(),
+                    });
+                  },
+                },
+              },
+            ]}
+          />
+        </DashboardSection>
 
         {basicInfoItems.length > 0 && (
           <DashboardSection

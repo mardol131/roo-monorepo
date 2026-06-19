@@ -47,6 +47,12 @@ import {
 import { BaseForm } from "../common-forms/base-form";
 import { FullPriceForm } from "../common-forms/full-price-form";
 import { FullLocalityForm } from "../common-forms/full-locality-form";
+import { CompletionWidget } from "@/app/[locale]/(user)/components/completion-widget";
+import {
+  getFullListingCompletion,
+  getListingCompletion,
+} from "@/app/functions/utils/listings";
+import { useVariantsByListing } from "@/app/react-query/variants/hooks";
 
 type Props = { onCancel?: () => void };
 
@@ -67,6 +73,7 @@ export default function EntertainmentListingForm({ onCancel }: Props) {
     "listing-entertainment-details",
     listing ? getIdFromRelationshipField(listing.detail.value) : undefined,
   );
+  const { data: variants } = useVariantsByListing(listingId);
   const { data: filters } = useFilterOptions();
 
   const { mutateAsync: updateListingAsync } = useUpdateListing(companyId);
@@ -84,6 +91,14 @@ export default function EntertainmentListingForm({ onCancel }: Props) {
       },
     },
   });
+
+  const ENTERTAINMENT_BASE_TOC_GROUP: readonly TocGroup[] = [
+    {
+      label: "Základní",
+      sections: [LISTING_FORM_TOCS.basic, LISTING_FORM_TOCS.images],
+    },
+    { label: "Kategorizace", sections: [LISTING_FORM_TOCS.eventTypes] },
+  ];
 
   const ENTERTAINMENT_RECOMMENDED_GROUPS: readonly TocGroup[] = [
     {
@@ -126,7 +141,7 @@ export default function EntertainmentListingForm({ onCancel }: Props) {
 
   const activeTocGroups =
     activeGroup === "base"
-      ? BASE_TOC_GROUP
+      ? ENTERTAINMENT_BASE_TOC_GROUP
       : activeGroup === "price"
         ? FULL_PRICE_TOC_GROUP
         : activeGroup === "locality"
@@ -168,7 +183,7 @@ export default function EntertainmentListingForm({ onCancel }: Props) {
   const localityForm = useForm<FullLocalityData>({
     resolver: zodResolver(fullLocalitySchema) as Resolver<FullLocalityData>,
     defaultValues: {
-      servicableArea: { regions: [], districts: [], cities: [] },
+      servicableArea: { wholeCountry: false, maxTravelDistanceKm: undefined },
       location: undefined,
     },
   });
@@ -268,9 +283,8 @@ export default function EntertainmentListingForm({ onCancel }: Props) {
     const locality: FullLocalityData = {
       servicableArea: {
         wholeCountry: listing.servicableArea.wholeCountry ?? false,
-        regions: listing.servicableArea.regions?.map(toItem) ?? [],
-        districts: listing.servicableArea.districts?.map(toItem) ?? [],
-        cities: listing.servicableArea.cities?.map(toItem) ?? [],
+        maxTravelDistanceKm:
+          listing.servicableArea.maxTravelDistanceKm ?? undefined,
       },
       location: {
         address: listing.location.address ?? "",
@@ -286,8 +300,8 @@ export default function EntertainmentListingForm({ onCancel }: Props) {
             }
           : { id: "", name: "" },
         coordinates: {
-          latitude: listing.location.latitude,
-          longitude: listing.location.longitude,
+          latitude: listing.location.point?.[1] ?? 0,
+          longitude: listing.location.point?.[0] ?? 0,
         },
       },
     };
@@ -399,15 +413,16 @@ export default function EntertainmentListingForm({ onCancel }: Props) {
         data: undefinedToNull({
           servicableArea: {
             wholeCountry: data.servicableArea.wholeCountry,
-            regions: toIds(data.servicableArea.regions),
-            districts: toIds(data.servicableArea.districts),
-            cities: toIds(data.servicableArea.cities),
+            maxTravelDistanceKm: data.servicableArea.maxTravelDistanceKm,
           },
           location: {
             address: data.location.address,
-            latitude: data.location.coordinates.latitude,
-            longitude: data.location.coordinates.longitude,
+            point: [
+              data.location.coordinates.longitude,
+              data.location.coordinates.latitude,
+            ],
             city: data.location.city?.id,
+            country: "cz",
           },
         }),
       });
@@ -578,6 +593,16 @@ export default function EntertainmentListingForm({ onCancel }: Props) {
           activeTab={activeGroup}
           onChange={handleTabChange}
         />
+        {listing && entertainmentDetail && variants && (
+          <CompletionWidget
+            data={getFullListingCompletion(
+              listing,
+              entertainmentDetail,
+              0,
+              variants.docs?.length,
+            )}
+          />
+        )}
 
         <BaseForm
           form={baseForm}
@@ -588,6 +613,7 @@ export default function EntertainmentListingForm({ onCancel }: Props) {
             images: LISTING_FORM_TOCS.images,
             eventTypes: LISTING_FORM_TOCS.eventTypes,
           }}
+          subTypeOptions={filters?.entertainmentTypes ?? []}
         />
         <FullPriceForm
           form={priceForm}

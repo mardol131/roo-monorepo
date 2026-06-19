@@ -103,22 +103,22 @@ export default function InquiryDetails({ inquiry, listing }: Props) {
             }
           />
         )}
-        {inquiry.request?.note && (
+        {inquiry.customRequest?.note && (
           <Row
             label="Zpráva od zákazníka"
             value={
               <Text variant="body-sm" color="textDark">
-                {inquiry.request.note}
+                {inquiry.customRequest.note}
               </Text>
             }
           />
         )}
-        {(inquiry.request?.requirements ?? []).length > 0 && (
+        {(inquiry.customRequest?.customRequirements ?? []).length > 0 && (
           <Row
             label="Požadavky"
             value={
               <ul className="flex flex-col gap-1">
-                {inquiry.request.requirements!.map((req, index) => (
+                {inquiry.customRequest.customRequirements!.map((req, index) => (
                   <li key={index} className="flex items-center gap-2">
                     <span className="w-1.5 h-1.5 rounded-full bg-zinc-400 shrink-0" />
                     <Text variant="body-sm" color="textDark">

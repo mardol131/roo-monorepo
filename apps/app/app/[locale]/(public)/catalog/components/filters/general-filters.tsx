@@ -175,16 +175,16 @@ export default function GeneralFilters({ type: typeProp }: Props) {
     limit: 1,
     enabled: !!filters.city,
   });
-  const { data: selectedDistrict } = useDistricts(
-    filters.district ? { id: { equals: filters.district } } : undefined,
-    1,
-    !!filters.district,
-  );
-  const { data: selectedRegion } = useRegions(
-    filters.region ? { id: { equals: filters.region } } : undefined,
-    1,
-    !!filters.region,
-  );
+  const { data: selectedDistrict } = useDistricts({
+    query: filters.district ? { id: { equals: filters.district } } : undefined,
+    limit: 1,
+    enabled: !!filters.district,
+  });
+  const { data: selectedRegion } = useRegions({
+    query: filters.region ? { id: { equals: filters.region } } : undefined,
+    limit: 1,
+    enabled: !!filters.region,
+  });
 
   const locationText =
     selectedCity?.docs?.[0]?.name ??
@@ -345,16 +345,23 @@ export default function GeneralFilters({ type: typeProp }: Props) {
       )}
 
       {active === "location" && (
-        <div className="absolute top-full mt-2 left-0 w-80 bg-white border border-zinc-200 rounded-2xl shadow-lg z-20 p-4">
+        <div className="absolute top-full mt-2 left-0 w-120 bg-white border border-zinc-200 rounded-2xl shadow-lg z-20 p-4">
           <LocationFilter
             value={{
               city: filters.city,
               district: filters.district,
               region: filters.region,
             }}
-            onChange={({ city, district, region }) =>
-              replaceParams((f) => ({ ...f, city, district, region, bbox: [] }))
-            }
+            onChange={({ city, district, region }) => {
+              replaceParams((f) => ({
+                ...f,
+                city,
+                district,
+                region,
+                bbox: [],
+              }));
+              setActive(null);
+            }}
           />
         </div>
       )}

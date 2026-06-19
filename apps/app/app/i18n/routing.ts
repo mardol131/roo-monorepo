@@ -6,13 +6,15 @@ export const routing = defineRouting({
   localePrefix: "as-needed",
   pathnames: {
     "/homepage": { cs: "/" },
-    "/login-required": { cs: "/prihlaseni" },
+    "/login-required": { cs: "/prihlaseni-povinne" },
     "/catalog": { cs: "/katalog" },
     "/catalog/gastro": { cs: "/katalog/gastro" },
     "/catalog/venue": { cs: "/katalog/misto" },
     "/catalog/entertainment": { cs: "/katalog/zabava" },
     "/listing/[listingId]": { cs: "/inzerat/[listingId]" },
     "/listing/[listingId]/inquiry": { cs: "/inzerat/[listingId]/poptavka" },
+
+    "/error": { cs: "/chyba" },
 
     // legal
     "/gdpr": { cs: "/gdpr" },
@@ -38,7 +40,6 @@ export const routing = defineRouting({
     "/pages/roadmap": { cs: "/stranky/roadmapa" },
 
     // authorization
-    "/login": { cs: "/prihlaseni" },
     "/register": { cs: "/registrace" },
     "/register-company": { cs: "/registrace-firemniho-uctu" },
     "/password-reset": { cs: "/obnoveni-hesla" },
@@ -95,6 +96,10 @@ export const routing = defineRouting({
     },
     "/company-profile/companies/[companyId]/edit": {
       cs: "/firemni-ucet/firmy/[companyId]/upravit",
+    },
+
+    "/company-profile/companies/[companyId]/payments": {
+      cs: "/firemni-ucet/firmy/[companyId]/platby",
     },
 
     // company listing profile

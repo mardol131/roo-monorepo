@@ -98,16 +98,16 @@ export function EntertainmentDetails({
     (c): c is string => typeof c === "string",
   );
 
-  const { data: regionsData } = useRegions(
-    regionIds.length ? { id: { in: regionIds } } : undefined,
-    regionIds.length || 10,
-    regionIds.length > 0,
-  );
-  const { data: districtsData } = useDistricts(
-    districtIds.length ? { id: { in: districtIds } } : undefined,
-    districtIds.length || 10,
-    districtIds.length > 0,
-  );
+  const { data: regionsData } = useRegions({
+    query: regionIds.length ? { id: { in: regionIds } } : undefined,
+    limit: regionIds.length || 10,
+    enabled: regionIds.length > 0,
+  });
+  const { data: districtsData } = useDistricts({
+    query: districtIds.length ? { id: { in: districtIds } } : undefined,
+    limit: districtIds.length || 10,
+    enabled: districtIds.length > 0,
+  });
   const { data: citiesData } = useCities({
     query: cityIds.length ? { id: { in: cityIds } } : undefined,
     limit: cityIds.length || 10,

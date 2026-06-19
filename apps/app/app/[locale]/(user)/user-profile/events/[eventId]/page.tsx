@@ -9,8 +9,6 @@ import { useEvent, useUpdateEvent } from "@/app/react-query/events/hooks";
 import { useInquiries } from "@/app/react-query/inquiries/hooks";
 import {
   aggregateInquiryStatus,
-  formatEventAddress,
-  formatGuestsString,
   getIdFromRelationshipField,
 } from "@roo/common";
 import { format } from "date-fns";
@@ -208,18 +206,24 @@ export default function page() {
         name={event.name}
         nameSideComponent={<EventStatusTag eventStatus={event.status} />}
         infoItems={[
-          { icon: "MapPin", text: formatEventAddress(event) },
+          {
+            icon: "MapPin",
+            text:
+              typeof event.location.district === "object"
+                ? event.location.district.name
+                : event.location.district,
+          },
           {
             icon: "Calendar",
-            text: `${format(event.date.start, "d. M. yyyy", {
+            text: `${format(new Date(event.date.start), "d. M. yyyy", {
               locale: cs,
-            })} ${format(event.date.start, "HH:mm", {
+            })} ${format(new Date(event.date.start), "HH:mm", {
               locale: cs,
-            })} – ${format(event.date.end, "HH:mm", { locale: cs })}`,
+            })} – ${format(new Date(event.date.end), "HH:mm", { locale: cs })}`,
           },
           {
             icon: "Users",
-            text: formatGuestsString({ ...event.guests }),
+            text: `Počet hostů: ${event.guests.adults + event.guests.children}`,
           },
         ]}
         button={{
@@ -261,90 +265,87 @@ export default function page() {
             note="pouze potvrzené"
           />
         </div>
+        <DashboardSection
+          title="Ovládání"
+          icon={"Cog"}
+          iconBg="bg-zinc-100"
+          iconColor="text-zinc-500"
+        >
+          {" "}
+          <ControlSection
+            rows={[
+              {
+                kind: "switch",
+                icon: "MapPin",
+                iconColor: "text-violet-500",
+                iconBgColor: "bg-violet-50",
+                title: "Sdílet místo konání",
+                text: "Dodavatelé uvidí přesnou adresu místa konání události.",
+                checked: event.sharing?.place ?? false,
+                onEnable: () => shareInfoHandler("place"),
+                onDisable: () => cancelShareInfoHandler("place"),
+              },
+              {
+                kind: "switch",
+                icon: "MessageSquare",
+                iconColor: "text-emerald-500",
+                iconBgColor: "bg-emerald-50",
+                title: "Sdílet potvrzené dodavatele",
+                text: "Ostatní dodavatelé uvidí, kteří dodavatelé již mají potvrzenou poptávku.",
+                checked: event.sharing?.confirmedInquiries ?? false,
+                onEnable: () => shareInfoHandler("confirmedInquiries"),
+                onDisable: () => cancelShareInfoHandler("confirmedInquiries"),
+              },
+              {
+                icon: "CircleCheck",
+                iconColor: "text-success",
+                iconBgColor: "bg-success-surface",
+                title: "Dokončit událost",
+                text: "Po dokončení události budou všechny související poptávky uzavřeny.",
+                button: {
+                  text: "Dokončit",
+                  version: "successFull",
+                  iconLeft: "CircleCheck",
+                  size: "sm",
+                  disabled:
+                    event.status === "completed" ||
+                    event.status === "archived" ||
+                    event.status === "disabled",
+                  onClick: () => confirmFinishEventHandler(),
+                },
+              },
+              {
+                icon: "CircleMinus",
+                iconColor: "text-danger",
+                iconBgColor: "bg-danger-surface",
+                title: "Zrušit událost",
+                text: "Po zrušení události budou všechny související informace odstraněny.",
+                button: {
+                  text: "Zrušit",
+                  version: "dangerFull",
+                  iconLeft: "CircleMinus",
+                  size: "sm",
+                  disabled:
+                    event.status === "completed" ||
+                    event.status === "archived" ||
+                    event.status === "disabled",
+                  onClick: () => confirmCancelEventHandler(),
+                },
+              },
+            ]}
+          />
+        </DashboardSection>
 
-        <ControlSection
-          rows={[
-            // {
-            //   kind: "switch",
-            //   icon: "UserRound",
-            //   iconColor: "text-blue-500",
-            //   iconBgColor: "bg-blue-50",
-            //   title: "Sdílet kontaktní údaje",
-            //   text: "Dodavatelé uvidí vaše kontaktní údaje (jméno, email, telefon).",
-            //   checked: event.sharing?.contactDetails ?? false,
-            //   onEnable: () => shareInfoHandler("contactDetails"),
-            //   onDisable: () => cancelShareInfoHandler("contactDetails"),
-            // },
-            {
-              kind: "switch",
-              icon: "MapPin",
-              iconColor: "text-violet-500",
-              iconBgColor: "bg-violet-50",
-              title: "Sdílet místo konání",
-              text: "Dodavatelé uvidí přesnou adresu místa konání události.",
-              checked: event.sharing?.place ?? false,
-              onEnable: () => shareInfoHandler("place"),
-              onDisable: () => cancelShareInfoHandler("place"),
-            },
-            {
-              kind: "switch",
-              icon: "MessageSquare",
-              iconColor: "text-emerald-500",
-              iconBgColor: "bg-emerald-50",
-              title: "Sdílet potvrzené dodavatele",
-              text: "Ostatní dodavatelé uvidí, kteří dodavatelé již mají potvrzenou poptávku.",
-              checked: event.sharing?.confirmedInquiries ?? false,
-              onEnable: () => shareInfoHandler("confirmedInquiries"),
-              onDisable: () => cancelShareInfoHandler("confirmedInquiries"),
-            },
-            {
-              icon: "CircleCheck",
-              iconColor: "text-success",
-              iconBgColor: "bg-success-surface",
-              title: "Dokončit událost",
-              text: "Po dokončení události budou všechny související poptávky uzavřeny.",
-              button: {
-                text: "Dokončit",
-                version: "successFull",
-                iconLeft: "CircleCheck",
-                size: "sm",
-                disabled:
-                  event.status === "completed" ||
-                  event.status === "archived" ||
-                  event.status === "disabled",
-                onClick: () => confirmFinishEventHandler(),
-              },
-            },
-            {
-              icon: "CircleMinus",
-              iconColor: "text-danger",
-              iconBgColor: "bg-danger-surface",
-              title: "Zrušit událost",
-              text: "Po zrušení události budou všechny související informace odstraněny.",
-              button: {
-                text: "Zrušit",
-                version: "dangerFull",
-                iconLeft: "CircleMinus",
-                size: "sm",
-                disabled:
-                  event.status === "completed" ||
-                  event.status === "archived" ||
-                  event.status === "disabled",
-                onClick: () => confirmCancelEventHandler(),
-              },
-            },
-          ]}
-        />
         {/* Inquiries */}
         <RowContainer
           iconBgColor="bg-inquiry-surface"
           iconColor="text-inquiry"
           icon="MessageSquare"
           label="Poptávky dodavatelů"
-          subLabel={`${inquiries?.docs?.length || 0} celkem, ${pending?.length || 0} čekají na odpověď`}
+          subLabel={`Celkem: ${inquiries?.docs?.length || 0},  Čeká na odpověď: ${pending?.length || 0}`}
           headerRightComponent={
             <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-amber-100 text-amber-700">
-              {pending?.length || 0} čekají na odpověď
+              Čeká na odpověď: {pending?.length || 0}
             </span>
           }
           rowComponents={
@@ -400,22 +401,7 @@ export default function page() {
             },
           }}
         />
-        <EventLocationSection
-          event={event}
-          confirmedVenueInquiries={
-            inquiries?.docs?.filter(
-              (i) =>
-                i.listingType === "venue" &&
-                aggregateInquiryStatus(i.status) === "confirmed",
-            ) ?? []
-          }
-          onSetVenue={(venueId) =>
-            updateEvent({
-              id: eventId,
-              data: { location: { ...event.location, venue: venueId } },
-            })
-          }
-        />
+        <EventLocationSection event={event} />
         <DashboardSection
           title="Detaily události"
           icon="Info"

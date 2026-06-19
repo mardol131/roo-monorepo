@@ -96,7 +96,7 @@ const getVersionClass = (
     space: "bg-space-surface text-space hover:bg-space-surface",
     spaceFull: "bg-space text-white",
     outlined:
-      "bg-transparent text-secondary border border-secondary hover:bg-black/5",
+      "bg-transparent text-secondary border border-zinc-200 shadow-sm hover:bg-black/5",
     link: "bg-transparent text-rose-500 underline hover:opacity-80 active:opacity-60 transition-opacity p-0",
     white: "bg-white text-dark shadow hover:shadow-md",
     none: ownColor || "",
@@ -140,7 +140,7 @@ export default function Button({
   version = "primary",
   text,
   size = "md",
-  rounding = "full",
+  rounding = "lg",
   onClick,
   link,
   linkTarget,

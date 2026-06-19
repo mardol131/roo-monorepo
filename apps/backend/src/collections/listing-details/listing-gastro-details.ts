@@ -1,7 +1,8 @@
 import type { CollectionConfig, Field } from 'payload'
 import { listingDetailAccessControl } from '../listings/access'
 import { customSectionsFields, priceableOptionFields } from '../listings/fields'
-import { commonListingDetailFields } from './common'
+import { commonListingDetailFields, commonListingDetailPriceField } from './common'
+import { syncListingFromDetail } from './hooks/sync-listing-from-detail'
 
 export const listingGastroDetailFilters: Field = {
   name: 'filters',
@@ -102,8 +103,12 @@ export const listingGastroDetailOptions: Field = {
 export const ListingGastroDetails: CollectionConfig = {
   slug: 'listing-gastro-details',
   access: listingDetailAccessControl,
+  hooks: {
+    afterChange: [syncListingFromDetail],
+  },
   fields: [
     ...customSectionsFields,
+    commonListingDetailPriceField,
     ...commonListingDetailFields,
     {
       name: 'type',

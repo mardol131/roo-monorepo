@@ -1,18 +1,17 @@
 "use client";
 
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo } from "react";
 import {
-  Plus,
-  CheckSquare2,
   Calendar,
-  MapPin,
   Check,
+  CheckSquare2,
+  MapPin,
+  Plus,
   Users,
 } from "lucide-react";
 import Text from "@/app/components/ui/atoms/text";
 import { useOrderStore } from "@/app/store/order-store";
 import EventSelectionButton from "./event-selection-button";
-import InquiryNewEventForm from "./inquiry-new-event-form";
 import { Event } from "@roo/common";
 import StepHeading from "../step-heading";
 import * as lucideIcons from "lucide-react";
@@ -21,18 +20,13 @@ import { useEvents } from "@/app/react-query/events/hooks";
 
 function getLocationLabel(location: Event["location"]): string | null {
   if (!location) return null;
-  if (location.type === "venue") {
-    if (!location.venue) return null;
-    return typeof location.venue === "string"
-      ? location.venue
-      : location.venue.name;
-  }
-  const cityName = location.city
-    ? typeof location.city === "string"
-      ? location.city
-      : location.city.name
+
+  const districtName = location.district
+    ? typeof location.district === "string"
+      ? location.district
+      : location.district.name
     : null;
-  const parts = [cityName, location.address].filter(Boolean);
+  const parts = [districtName, location.address].filter(Boolean);
   return parts.length > 0 ? parts.join(", ") : null;
 }
 
@@ -40,6 +34,15 @@ export default function OrderStepSelectEvent() {
   const { eventVariant, setEventData, eventData, setEventVariant } =
     useOrderStore();
   const { data: events } = useEvents();
+
+  const hasExistingEvents = !!(events?.docs && events.docs.length > 0);
+
+  // Auto-switch to create mode when user has no events
+  useEffect(() => {
+    if (events !== undefined && !hasExistingEvents && eventVariant === null) {
+      setEventVariant("new-event");
+    }
+  }, [events, hasExistingEvents, eventVariant, setEventVariant]);
 
   const handleSelectEventType = (type: "existing-event" | "new-event") => {
     setEventVariant(eventVariant === type ? null : type);
@@ -52,36 +55,46 @@ export default function OrderStepSelectEvent() {
     }
   };
 
-  const hasExistingEvents = events?.docs && events.docs.length > 0;
+  const { title, description } = useMemo(() => {
+    switch (eventVariant) {
+      case "existing-event":
+        return {
+          title: "Vyberte existující událost",
+          description:
+            "Vyberte událost, do které chcete přidat tohoto dodavatele",
+        };
+      default:
+        return {
+          title: "Vyberte existující událost nebo vytvořte novou",
+          description:
+            "Zvolte, zda chcete přidat dodavatele do existujícího eventu nebo vytvořit nový",
+        };
+    }
+  }, [eventVariant]);
 
-  const content = () => {
-    return (
-      <>
-        <div className="flex flex-col gap-6">
-          <div
-            className={`grid ${hasExistingEvents ? "grid-cols-2" : "grid-cols-1"} gap-5`}
-          >
-            {hasExistingEvents && (
-              <EventSelectionButton
-                icon={CheckSquare2}
-                onClick={() => handleSelectEventType("existing-event")}
-                isActive={eventVariant === "existing-event"}
-                heading="Existující událost"
-                text="Vyberu si událost z těch, které už mám vytvořené"
-              />
-            )}
-            <EventSelectionButton
-              icon={Plus}
-              onClick={() => handleSelectEventType("new-event")}
-              isActive={eventVariant === "new-event"}
-              heading="Kliknětě pro vytvoření události"
-              text="Kliknutím se vám otevře krátký formulář pro vytvoření nové události"
-            />
-          </div>
+  return (
+    <div>
+      <StepHeading title={title} description={description} />
+      <div className="flex flex-col gap-6 mt-6">
+        <div className="grid grid-cols-2 gap-5">
+          <EventSelectionButton
+            icon={CheckSquare2}
+            onClick={() => handleSelectEventType("existing-event")}
+            isActive={eventVariant === "existing-event"}
+            heading="Existující událost"
+            text="Vyberu si událost z těch, které už mám vytvořené"
+          />
+          <EventSelectionButton
+            icon={Plus}
+            onClick={() => handleSelectEventType("new-event")}
+            isActive={eventVariant === "new-event"}
+            heading="Kliknětě pro vytvoření události"
+            text="Kliknutím se vám otevře formulář pro vytvoření nové události"
+          />
         </div>
 
         {eventVariant === "existing-event" && (
-          <div className="mt-12">
+          <div>
             <Text variant="h4" color="textDark" className="font-semibold mb-4">
               Vaše události
             </Text>
@@ -97,46 +110,7 @@ export default function OrderStepSelectEvent() {
             </div>
           </div>
         )}
-
-        {eventVariant === "new-event" && <InquiryNewEventForm />}
-      </>
-    );
-  };
-
-  const { title, description } = useMemo(() => {
-    if (!hasExistingEvents) {
-      return {
-        title: "Vytvořte novou událost",
-        description:
-          "Pro odeslání poptávky je potřeba nejprve vytvořit událost, do které následně přidáte tohoto dodavatele",
-      };
-    }
-    switch (eventVariant) {
-      case "existing-event":
-        return {
-          title: "Vyberte existující událost",
-          description:
-            "Vyberte událost, do které chcete přidat tohoto dodavatele",
-        };
-      case "new-event":
-        return {
-          title: "Vytvořte novou událost",
-          description:
-            "Vytvořte novou událost, do které následně přidáte tohoto dodavatele",
-        };
-      default:
-        return {
-          title: "Vyberte existující událost nebo vytvořte novou",
-          description:
-            "Zvolte, zda chcete přidat dodavatele do existujícího eventu nebo vytvořit nový",
-        };
-    }
-  }, [hasExistingEvents, eventVariant]);
-
-  return (
-    <div>
-      <StepHeading title={title} description={description} />
-      {content()}
+      </div>
     </div>
   );
 }

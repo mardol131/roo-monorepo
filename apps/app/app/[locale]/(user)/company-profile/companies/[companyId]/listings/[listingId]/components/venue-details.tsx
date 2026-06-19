@@ -9,6 +9,7 @@ import {
   Activity,
   Amenity,
   EventType,
+  getIdFromRelationshipField,
   Listing,
   ListingVenueDetail,
   Necessity,
@@ -99,15 +100,17 @@ export function VenueDetails({
     listing.filters.placeTypes,
     filters?.placeTypes,
   );
-  const { data: city } = useCity(listing.location?.city || "");
+  const { data: city } = useCity(
+    getIdFromRelationshipField(listing.location?.city) || "",
+  );
 
   const locationItems = [
-    ...(listing.location?.city
+    ...(city?.name
       ? [
           {
             type: "text" as const,
             label: "Město",
-            value: city?.name ?? listing.location.city,
+            value: city?.name,
           },
         ]
       : []),

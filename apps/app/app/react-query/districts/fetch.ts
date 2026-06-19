@@ -1,19 +1,10 @@
-import { getCollection } from "@/app/functions/api/general";
-import { PayloadResponse, District, Where } from "@roo/common";
-import { stringify } from "qs-esm";
-
-const baseUrl = `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/districts`;
+import { getCollection, GetCollectionParams } from "@/app/functions/api/general";
+import { PayloadResponse, District } from "@roo/common";
 
 export async function fetchDistricts(
-  query?: Where,
-  limit = 10,
+  options?: GetCollectionParams,
 ): Promise<PayloadResponse<District>> {
-  const res = await getCollection({
-    collection: "districts",
-    query,
-    limit,
-  });
-
+  const res = await getCollection({ collection: "districts", ...options });
   if (!res) throw new Error("Failed to fetch districts");
   return res;
 }

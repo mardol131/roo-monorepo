@@ -12,6 +12,7 @@ import {
   updateUserNotification,
   updateUserNotifications,
 } from "./fetch";
+import { useAuth } from "@/app/context/auth/auth-context";
 
 const REFETCH_INTERVAL = 60_000;
 
@@ -19,6 +20,8 @@ export function useUserNotifications(
   options?: Omit<GetCollectionParams, "page"> & { refetchInterval?: number },
 ) {
   const { refetchInterval, ...fetchOptions } = options ?? {};
+  const auth = useAuth();
+  console.log(auth);
   return useInfiniteQuery({
     queryKey: userNotificationKeys.all(),
     queryFn: ({ pageParam }) =>
@@ -26,12 +29,14 @@ export function useUserNotifications(
     initialPageParam: 1,
     getNextPageParam: (lastPage) => lastPage.nextPage ?? undefined,
     refetchInterval: refetchInterval ?? REFETCH_INTERVAL,
+    enabled: !!auth.user,
   });
 }
 
 export function useUnreadUserNotificationsCount(options?: {
   refetchInterval?: number;
 }) {
+  const auth = useAuth();
   return useQuery({
     queryKey: userNotificationKeys.unreadCount(),
     queryFn: () =>
@@ -41,6 +46,7 @@ export function useUnreadUserNotificationsCount(options?: {
       }),
     select: (data) => data.totalDocs ?? 0,
     refetchInterval: options?.refetchInterval ?? REFETCH_INTERVAL,
+    enabled: !!auth.user,
   });
 }
 
@@ -57,7 +63,9 @@ export function useUpdateUserNotification() {
       updateUserNotification(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: userNotificationKeys.all() });
-      queryClient.invalidateQueries({ queryKey: userNotificationKeys.unreadCount() });
+      queryClient.invalidateQueries({
+        queryKey: userNotificationKeys.unreadCount(),
+      });
     },
   });
 }
@@ -75,7 +83,9 @@ export function useUpdateUserNotifications() {
       updateUserNotifications(query, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: userNotificationKeys.all() });
-      queryClient.invalidateQueries({ queryKey: userNotificationKeys.unreadCount() });
+      queryClient.invalidateQueries({
+        queryKey: userNotificationKeys.unreadCount(),
+      });
     },
   });
 }

@@ -4,7 +4,7 @@ import { Link, IntlLink } from "@/app/i18n/navigation";
 import { LucideIcons } from "@roo/common";
 import { de } from "date-fns/locale";
 import * as lucideIcons from "lucide-react";
-import { ReactNode } from "react";
+import { Fragment, ReactNode } from "react";
 
 type Item =
   | {
@@ -22,7 +22,7 @@ type Props = {
   items: Item[];
   link?: IntlLink;
   target?: React.HTMLAttributeAnchorTarget;
-  labelComponent?: ReactNode;
+  labelComponent?: ReactNode | ReactNode[];
   rightComponent?: ReactNode;
   onClick?: () => void;
   hideRightIcon?: boolean;
@@ -71,7 +71,11 @@ export default function EntityCard({
           >
             {label}
           </Text>
-          {labelComponent}
+          {Array.isArray(labelComponent)
+            ? labelComponent.map((component, index) => (
+                <Fragment key={index}>{component}</Fragment>
+              ))
+            : labelComponent}
         </div>
         <div className="flex items-center gap-4 flex-wrap">
           {items

@@ -22,9 +22,12 @@ type Props = {
   message: string;
   isOpen: boolean;
   type: ToastTypes;
+  duration: number;
 };
 
-function Toast({ message, isOpen, type }: Props) {
+const DEFAULT_TOAST_DURATION = 3000;
+
+function Toast({ message, isOpen, type, duration }: Props) {
   const icon = useMemo(() => {
     if (type === "info") {
       return <InfoIcon className="text-blue-500" />;
@@ -36,15 +39,42 @@ function Toast({ message, isOpen, type }: Props) {
     return <CircleCheckIcon className="text-success" />;
   }, [type]);
 
+  const barColor = useMemo(() => {
+    if (type === "info") {
+      return "bg-blue-500";
+    } else if (type === "error") {
+      return "bg-danger";
+    } else if (type === "warning") {
+      return "bg-warning";
+    }
+    return "bg-success";
+  }, [type]);
+
   return (
     <div
-      className={`fixed bottom-5 right-5 z-50 transition-all duration-300 ease-out ${
+      className={`fixed bottom-5 left-1/2 -translate-x-1/2 z-50 transition-all duration-300 ease-out ${
         isOpen ? "translate-y-0 opacity-100" : "translate-y-8 opacity-0"
       }`}
     >
-      <div className="flex items-center gap-2 p-5 rounded-lg border bg-white border-zinc-200 shadow-lg">
-        {icon}
-        <Text variant="h4">{message}</Text>
+      <style>{`
+        @keyframes toast-shrink {
+          from { transform: scaleX(1); }
+          to { transform: scaleX(0); }
+        }
+      `}</style>
+      <div className="flex flex-col rounded-lg border bg-white border-zinc-200 shadow-lg overflow-hidden">
+        <div
+          className={`h-1 ${barColor} origin-left`}
+          style={{
+            animation: isOpen
+              ? `toast-shrink ${duration}ms linear forwards`
+              : "none",
+          }}
+        />
+        <div className="flex items-center gap-2 px-5 py-3">
+          {icon}
+          <Text variant="h4">{message}</Text>
+        </div>
       </div>
     </div>
   );
@@ -98,7 +128,7 @@ export function GlobalToast() {
         setCurrentItemToProcess(undefined);
         setQueue((prev) => prev.slice(1));
       }, 300);
-    }, nextToast?.duration || 3000);
+    }, nextToast?.duration || DEFAULT_TOAST_DURATION);
   }, [queue, currentItemToProcess]);
 
   const handler = useCallback(
@@ -125,6 +155,7 @@ export function GlobalToast() {
       isOpen={isOpen}
       type={currentItemToProcess.type}
       message={currentItemToProcess.message}
+      duration={currentItemToProcess.duration || DEFAULT_TOAST_DURATION}
     />
   );
 }

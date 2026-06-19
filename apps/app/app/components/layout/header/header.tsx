@@ -47,7 +47,7 @@ export default function Header() {
   const userIsNotLoggedInOrDoesNotHaveCompany =
     !auth.user || !auth.user.roles.includes("company");
   return (
-    <header className="sticky top-0 z-50 px-6 w-full bg-linear-to-t from-zinc-50/95 to-white/95 backdrop-blur-sm border-b border-zinc-100">
+    <header className="sticky top-0 z-50 px-6 w-full bg-linear-to-t from-zinc-50 to-white backdrop-blur-sm border-b border-zinc-100">
       <div className="max-w-content mx-auto flex items-center justify-between h-16">
         {/* Logo + nav */}
         <div className="flex items-center gap-8">

@@ -36,20 +36,21 @@ import { SupplementaryForm } from "./supplementary-form";
 import { useListingEditFormToc } from "../toc";
 import {
   BaseData,
-  baseSchema,
   SimpleBaseData,
   simpleBaseSchema,
   SimpleLocalityData,
   simpleLocalitySchema,
-  SimplePriceData,
-  simplePriceSchema,
 } from "../common-schema";
 import { useCities } from "@/app/react-query/cities/hooks";
-import { BaseForm } from "../common-forms/base-form";
-import { SimplePriceForm } from "../common-forms/simple-price-form";
 import { SimpleLocalityForm } from "../common-forms/simple-locality-form";
+import { useSpacesByListing } from "@/app/react-query/spaces/hooks";
 import { PriceableOptionsForm } from "../common-forms/priceable-options-form";
 import { SimpleBaseForm } from "../common-forms/simple-base-form";
+import { CompletionWidget } from "@/app/[locale]/(user)/components/completion-widget";
+import { AlertSection } from "@/app/components/ui/molecules/alert-section";
+import { getFullListingCompletion } from "@/app/functions/utils/listings";
+import { useVariantsByListing } from "@/app/react-query/variants/hooks";
+import { AlertCircle } from "lucide-react";
 
 type Props = { onCancel?: () => void };
 
@@ -67,7 +68,6 @@ export default function VenueListingForm({ onCancel }: Props) {
   const {
     LISTING_FORM_TOCS,
     BASE_TOC_GROUP,
-    SIMPLE_PRICE_TOC_GROUP,
     SIMPLE_LOCALITY_GROUPS,
   } = useListingEditFormToc();
   const { data: filters } = useFilterOptions();
@@ -77,7 +77,9 @@ export default function VenueListingForm({ onCancel }: Props) {
     "listing-venue-details",
   );
   const { GROUP_TABS } = useListingEditFormsCommons();
-
+  const venueGroupTabs = GROUP_TABS.filter((t) => t.value !== "price");
+  const { data: spaces } = useSpacesByListing(listingId);
+  const { data: variants } = useVariantsByListing(listingId);
   const { data: cities } = useCities({
     query: {
       id: {
@@ -125,6 +127,7 @@ export default function VenueListingForm({ onCancel }: Props) {
         LISTING_FORM_TOCS.access,
         LISTING_FORM_TOCS.parking,
         LISTING_FORM_TOCS.breakfast,
+        LISTING_FORM_TOCS.catering,
       ],
     },
     { label: "Ostatní", sections: [LISTING_FORM_TOCS.references] },
@@ -133,9 +136,7 @@ export default function VenueListingForm({ onCancel }: Props) {
   const activeTocGroups =
     activeGroup === "base"
       ? BASE_TOC_GROUP
-      : activeGroup === "price"
-        ? SIMPLE_PRICE_TOC_GROUP
-        : activeGroup === "locality"
+      : activeGroup === "locality"
           ? SIMPLE_LOCALITY_GROUPS
           : activeGroup === "recommended"
             ? RECOMMENDED_GROUPS
@@ -151,14 +152,6 @@ export default function VenueListingForm({ onCancel }: Props) {
       description: "",
       images: { coverImage: undefined, logo: undefined, gallery: [] },
       eventTypeSelection: { servesAll: false, types: [] },
-    },
-  });
-
-  const priceForm = useForm<SimplePriceData>({
-    resolver: zodResolver(simplePriceSchema) as Resolver<SimplePriceData>,
-    defaultValues: {
-      minimumPricePerEvent: undefined,
-      price: { base: undefined, pricingUnit: undefined, seasonalPrices: [] },
     },
   });
 
@@ -213,13 +206,13 @@ export default function VenueListingForm({ onCancel }: Props) {
         allowMoreBreakfastsThanAccommodation: false,
         breakfastIsIncludedInPrice: false,
       },
+      catering: { hasCatering: false, cateringIsIncludedInPrice: false, pricingUnit: "lump_sum", cuisines: [], foodPreparationStyles: [] },
       references: [],
     },
   });
 
   const anyDirty =
     hasDirtyFields(simpleBaseForm.formState.dirtyFields) ||
-    hasDirtyFields(priceForm.formState.dirtyFields) ||
     hasDirtyFields(localityForm.formState.dirtyFields) ||
     hasDirtyFields(recommendedForm.formState.dirtyFields) ||
     hasDirtyFields(priceableOptionsForm.formState.dirtyFields) ||
@@ -228,9 +221,7 @@ export default function VenueListingForm({ onCancel }: Props) {
   const activeFormIsDirty =
     activeGroup === "base"
       ? hasDirtyFields(simpleBaseForm.formState.dirtyFields)
-      : activeGroup === "price"
-        ? hasDirtyFields(priceForm.formState.dirtyFields)
-        : activeGroup === "locality"
+      : activeGroup === "locality"
           ? hasDirtyFields(localityForm.formState.dirtyFields)
           : activeGroup === "recommended"
             ? hasDirtyFields(recommendedForm.formState.dirtyFields)
@@ -250,7 +241,6 @@ export default function VenueListingForm({ onCancel }: Props) {
   }
 
   const { reset: resetSimpleBase } = simpleBaseForm;
-  const { reset: resetPrice } = priceForm;
   const { reset: resetLocality } = localityForm;
   const { reset: resetRecommended } = recommendedForm;
   const { reset: resetPriceable } = priceableOptionsForm;
@@ -271,15 +261,6 @@ export default function VenueListingForm({ onCancel }: Props) {
       images: listing.images,
     };
 
-    const priceData: SimplePriceData = {
-      minimumPricePerEvent: listing.minimumPricePerEvent,
-      price: {
-        base: venueDetail.price.base,
-        pricingUnit: venueDetail.price.pricingUnit,
-        seasonalPrices: venueDetail.price.seasonalPrices ?? [],
-      },
-    };
-
     const locality: SimpleLocalityData = {
       location: {
         address: listing.location.address ?? "",
@@ -295,8 +276,8 @@ export default function VenueListingForm({ onCancel }: Props) {
             }
           : { id: "", name: "" },
         coordinates: {
-          latitude: listing.location.latitude,
-          longitude: listing.location.longitude,
+          latitude: listing.location.point?.[1] ?? 0,
+          longitude: listing.location.point?.[0] ?? 0,
         },
       },
     };
@@ -423,6 +404,34 @@ export default function VenueListingForm({ onCancel }: Props) {
         timeFrom: venueDetail.breakfast?.timeFrom ?? undefined,
         timeTo: venueDetail.breakfast?.timeTo ?? undefined,
       },
+      catering: {
+        hasCatering: venueDetail.catering?.hasCatering ?? false,
+        cateringIsIncludedInPrice: venueDetail.catering?.cateringIsIncludedInPrice ?? false,
+        price: venueDetail.catering?.price ?? undefined,
+        pricingUnit: venueDetail.catering?.pricingUnit ?? "lump_sum",
+        cuisines:
+          venueDetail.catering?.cuisines?.map((p) => ({
+            id: getIdFromRelationshipField(p.cuisine),
+            name:
+              filters?.cuisines?.find(
+                (c) => c.id === getIdFromRelationshipField(p.cuisine),
+              )?.name ?? "",
+            pricingUnit: p.pricingUnit,
+            unitPrice: p.unitPrice,
+            quantity: p.quantity,
+          })) ?? [],
+        foodPreparationStyles:
+          venueDetail.catering?.foodPreparationStyles?.map((p) => ({
+            id: getIdFromRelationshipField(p.foodPreparationStyle),
+            name:
+              filters?.foodPreparationStyles?.find(
+                (f) => f.id === getIdFromRelationshipField(p.foodPreparationStyle),
+              )?.name ?? "",
+            pricingUnit: p.pricingUnit,
+            unitPrice: p.unitPrice,
+            quantity: p.quantity,
+          })) ?? [],
+      },
       references:
         venueDetail.references?.map((r) => ({
           image: r.image,
@@ -436,7 +445,6 @@ export default function VenueListingForm({ onCancel }: Props) {
     };
 
     resetSimpleBase(baseData);
-    resetPrice(priceData);
     resetLocality(locality);
 
     resetRecommended(recommendedData);
@@ -448,7 +456,6 @@ export default function VenueListingForm({ onCancel }: Props) {
     listing,
     venueDetail,
     resetSimpleBase,
-    resetPrice,
     resetLocality,
     resetRecommended,
     resetPriceable,
@@ -488,28 +495,6 @@ export default function VenueListingForm({ onCancel }: Props) {
     }
   }
 
-  async function onSubmitPrice(data: SimplePriceData) {
-    if (!venueDetail) return;
-    setIsSubmitting(true);
-    try {
-      await Promise.all([
-        updateListingAsync({
-          id: listingId,
-          data: undefinedToNull({
-            minimumPricePerEvent: data.minimumPricePerEvent,
-          }),
-        }),
-        updateDetailAsync({
-          id: venueDetail.id,
-          data: undefinedToNull({ price: data.price }),
-        }),
-      ]);
-      resetPrice(data);
-    } finally {
-      setIsSubmitting(false);
-    }
-  }
-
   async function onSubmitLocality(data: z.infer<typeof simpleLocalitySchema>) {
     setIsSubmitting(true);
     try {
@@ -517,11 +502,9 @@ export default function VenueListingForm({ onCancel }: Props) {
         id: listingId,
         data: undefinedToNull({
           location: {
-            type: "exact",
             address: data.location.address,
             city: data.location.city.id,
-            latitude: data.location.coordinates.latitude,
-            longitude: data.location.coordinates.longitude,
+            point: [data.location.coordinates.longitude, data.location.coordinates.latitude],
             country: "cz",
           },
         }),
@@ -655,6 +638,26 @@ export default function VenueListingForm({ onCancel }: Props) {
                 }
               : {},
             parking: data.parking ?? {},
+            catering: data.catering
+              ? {
+                  hasCatering: data.catering.hasCatering,
+                  cateringIsIncludedInPrice: data.catering.cateringIsIncludedInPrice,
+                  price: data.catering.price,
+                  pricingUnit: data.catering.pricingUnit,
+                  cuisines: data.catering.cuisines.map((p) => ({
+                    cuisine: p.id,
+                    pricingUnit: p.pricingUnit,
+                    unitPrice: p.unitPrice,
+                    quantity: p.quantity,
+                  })),
+                  foodPreparationStyles: data.catering.foodPreparationStyles.map((p) => ({
+                    foodPreparationStyle: p.id,
+                    pricingUnit: p.pricingUnit,
+                    unitPrice: p.unitPrice,
+                    quantity: p.quantity,
+                  })),
+                }
+              : {},
             breakfast: data.breakfast
               ? {
                   breakfastIncluded: data.breakfast.included,
@@ -685,7 +688,7 @@ export default function VenueListingForm({ onCancel }: Props) {
 
   const submitConfig = {
     base: simpleBaseForm.handleSubmit(onSubmitSimpleBase),
-    price: priceForm.handleSubmit(onSubmitPrice),
+    price: async () => {},
     locality: localityForm.handleSubmit(onSubmitLocality),
     recommended: recommendedForm.handleSubmit(onSubmitRecommended),
     priceable: priceableOptionsForm.handleSubmit(onSubmitPriceable),
@@ -700,11 +703,31 @@ export default function VenueListingForm({ onCancel }: Props) {
     >
       <div className="flex w-full flex-col gap-4">
         <TabFilter
-          tabs={GROUP_TABS}
+          tabs={venueGroupTabs}
           activeTab={activeGroup}
           onChange={handleTabChange}
-        />
-
+        />{" "}
+        {listing && venueDetail && variants && (
+          <CompletionWidget
+            data={getFullListingCompletion(
+              listing,
+              venueDetail,
+              0,
+              variants.docs?.length,
+            )}
+          />
+        )}
+        {spaces && spaces.docs.length === 0 && (
+          <AlertSection
+            icon={AlertCircle}
+            iconBg="bg-amber-100"
+            iconColor="text-amber-600"
+            borderColor="border-amber-200"
+            bgColor="bg-amber-50"
+            title="Bez prostorů nelze aktivovat inzerát"
+            text="Přidejte alespoň jeden prostor v záložce Prostory. Cena inzerátu se odvíjí od cen prostorů."
+          />
+        )}
         <SimpleBaseForm
           form={simpleBaseForm}
           isActive={activeGroup === "base"}
@@ -713,14 +736,6 @@ export default function VenueListingForm({ onCancel }: Props) {
             basic: LISTING_FORM_TOCS.basic,
             images: LISTING_FORM_TOCS.images,
             eventTypes: LISTING_FORM_TOCS.eventTypes,
-          }}
-        />
-        <SimplePriceForm
-          form={priceForm}
-          isActive={activeGroup === "price"}
-          texts={{
-            price: LISTING_FORM_TOCS.price,
-            seasonalPrices: LISTING_FORM_TOCS.seasonalPrices,
           }}
         />
         <SimpleLocalityForm
@@ -785,12 +800,12 @@ export default function VenueListingForm({ onCancel }: Props) {
             access: LISTING_FORM_TOCS.access,
             parking: LISTING_FORM_TOCS.parking,
             breakfast: LISTING_FORM_TOCS.breakfast,
+            catering: LISTING_FORM_TOCS.catering,
             references: LISTING_FORM_TOCS.references,
             storage: LISTING_FORM_TOCS.storage,
             rules: LISTING_FORM_TOCS.rules,
           }}
         />
-
         <div className="flex justify-end gap-3 pt-2">
           {activeFormIsDirty && (
             <>

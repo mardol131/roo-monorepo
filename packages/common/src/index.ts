@@ -6,7 +6,6 @@ export * from "./types/media";
 export * from "./types/custom";
 export * from "./types/pricing";
 
-export * from "./functions/event-utils";
 export * from "./functions/inquiry-utils";
 export * from "./functions/get-id-from-relationship-field";
 export * from "./functions/convert-image-to-webp";

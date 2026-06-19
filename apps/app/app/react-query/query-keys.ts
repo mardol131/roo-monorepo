@@ -1,5 +1,14 @@
-import { LocalityType, Where } from "@roo/common";
-import { GetCollectionParams } from "../functions/api/general";
+import { Config, LocalityType, Where } from "@roo/common";
+import {
+  GetCollectionCountOptions,
+  GetCollectionParams,
+} from "../functions/api/general";
+
+// Global
+export const globalKeys = {
+  count: (options: GetCollectionCountOptions<keyof Config["collections"]>) =>
+    ["global", "count", options] as const,
+};
 
 // Entities
 
@@ -10,11 +19,25 @@ export const listingKeys = {
     ["listings", "company", companyId, query, limit] as const,
   pinsByLocation: (locationId: string, type: LocalityType) =>
     ["listings", "pins", locationId, type] as const,
+  availability: (ids: string[], from: string, to: string) =>
+    ["listings", "availability", ids, from, to] as const,
+  geoSearch: (params: Record<string, unknown>) =>
+    ["listings", "geo-search", params] as const,
 };
 
 export const listingDetailKeys = {
   byId: (collection: string, id: string) =>
     ["listing-detail", collection, id] as const,
+};
+
+export const listingSubscriptionKeys = {
+  byId: (id: string) => ["listing-subscriptions", id] as const,
+  byListing: (listingId: string) =>
+    ["listing-subscriptions", "listing", listingId] as const,
+  byCompany: (companyId: string) =>
+    ["listing-subscriptions", "company", companyId] as const,
+  paymentHistory: (subscriptionId: string) =>
+    ["listing-subscriptions", "payment-history", subscriptionId] as const,
 };
 
 export const invitationKeys = {
@@ -65,7 +88,7 @@ export const chatMessageKeys = {
 };
 
 export const eventKeys = {
-  all: (query?: Where, limit?: number) => ["events", query, limit] as const,
+  all: (options?: GetCollectionParams) => ["events", options] as const,
   byId: (id: string) => ["events", id] as const,
 };
 
@@ -85,15 +108,15 @@ export const userNotificationKeys = {
 // Locality
 
 export const regionsKeys = {
-  all: (query?: Where, limit?: number) => ["regions", query, limit] as const,
+  all: (options?: GetCollectionParams) => ["regions", options] as const,
 };
 
 export const districtsKeys = {
-  all: (query?: Where, limit?: number) => ["districts", query, limit] as const,
+  all: (options?: GetCollectionParams) => ["districts", options] as const,
 };
 
 export const citiesKeys = {
-  all: (query?: Where, limit?: number) => ["cities", query, limit] as const,
+  all: (options?: GetCollectionParams) => ["cities", options] as const,
   byId: (id: string) => ["cities", id] as const,
 };
 

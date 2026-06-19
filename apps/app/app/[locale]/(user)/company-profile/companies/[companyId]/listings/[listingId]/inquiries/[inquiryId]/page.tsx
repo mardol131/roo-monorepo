@@ -35,6 +35,7 @@ import { useCompany } from "@/app/react-query/companies/hooks";
 import { useAuth } from "@/app/context/auth/auth-context";
 import { useEvent } from "@/app/react-query/events/hooks";
 import { useListing } from "@/app/react-query/listings/hooks";
+import { DashboardSection } from "@/app/[locale]/(user)/components/dashboard-section";
 
 export default function page() {
   const { companyId, listingId, inquiryId } = useParams<{
@@ -218,64 +219,71 @@ export default function page() {
         successMessage={`Navrhli jste novou cenu pro tuto poptávku. Zákazník bude informován o navrhované změně ceny.`}
       />
       {hasInquiryUpdateCompanyRights({ company, userId: user?.id }) && (
-        <ControlSection
-          rows={[
-            ...(inquiry.status.user === "pending" &&
-            inquiry.status.company === "pending" &&
-            inquiry.pricing.quotedPrice
-              ? [
-                  {
-                    title: "Potvrdit poptávku",
-                    text: "Potvrzením poptávky informujete zákazníka, že jeho požadavek akceptujete. Zákazník bude muset potvrdit svou stranu, aby poptávka přešla do stavu 'Závazně potvrzeno'.",
-                    icon: "Check",
-                    iconColor: "text-success",
-                    iconBgColor: "bg-success-surface",
-                    button: {
-                      version: "successFull",
-                      text: "Potvrdit",
-                      iconLeft: "Check",
-                      size: "sm",
-                      onClick: acceptInquiryHandler,
-                    },
-                  } as const,
-                ]
-              : []),
-            ...(inquiry.status.company === "pending"
-              ? [
-                  {
-                    disabled: inquiry.status.user === "confirmed",
-                    title: "Navrhnout novou cenu",
-                    text: "Můžete přizpůsobit cenu poptávky a odeslat návrh zákazníkovi.",
-                    icon: "Coins",
-                    iconColor: "text-yellow-600",
-                    iconBgColor: "bg-yellow-100",
-                    button: {
-                      version: "none",
-                      className: "bg-yellow-500 text-white",
-                      text: "Změnit cenu",
-                      iconLeft: "Coins",
-                      size: "sm",
-                      onClick: () => priceChangeModalStateHandler(),
-                    },
-                  } as const,
-                ]
-              : []),
-            {
-              title: "Odmítnout poptávku",
-              text: "Odmítnutím poptávky informujete zákazníka, že nemůžete nabídnout své služby pro jeho požadavek.",
-              icon: "X",
-              iconColor: "text-danger",
-              iconBgColor: "bg-danger-surface",
-              button: {
-                version: "dangerFull",
-                text: "Odmítnout",
-                iconLeft: "X",
-                size: "sm",
-                onClick: () => cancelInquiryHandler(),
+        <DashboardSection
+          title="Ovládání"
+          icon={"Cog"}
+          iconBg="bg-zinc-100"
+          iconColor="text-zinc-500"
+        >
+          <ControlSection
+            rows={[
+              ...(inquiry.status.user === "pending" &&
+              inquiry.status.company === "pending" &&
+              inquiry.pricing.quotedPrice
+                ? [
+                    {
+                      title: "Potvrdit poptávku",
+                      text: "Potvrzením poptávky informujete zákazníka, že jeho požadavek akceptujete. Zákazník bude muset potvrdit svou stranu, aby poptávka přešla do stavu 'Závazně potvrzeno'.",
+                      icon: "Check",
+                      iconColor: "text-success",
+                      iconBgColor: "bg-success-surface",
+                      button: {
+                        version: "successFull",
+                        text: "Potvrdit",
+                        iconLeft: "Check",
+                        size: "sm",
+                        onClick: acceptInquiryHandler,
+                      },
+                    } as const,
+                  ]
+                : []),
+              ...(inquiry.status.company === "pending"
+                ? [
+                    {
+                      disabled: inquiry.status.user === "confirmed",
+                      title: "Navrhnout novou cenu",
+                      text: "Můžete přizpůsobit cenu poptávky a odeslat návrh zákazníkovi.",
+                      icon: "Coins",
+                      iconColor: "text-yellow-600",
+                      iconBgColor: "bg-yellow-100",
+                      button: {
+                        version: "none",
+                        className: "bg-yellow-500 text-white",
+                        text: "Změnit cenu",
+                        iconLeft: "Coins",
+                        size: "sm",
+                        onClick: () => priceChangeModalStateHandler(),
+                      },
+                    } as const,
+                  ]
+                : []),
+              {
+                title: "Odmítnout poptávku",
+                text: "Odmítnutím poptávky informujete zákazníka, že nemůžete nabídnout své služby pro jeho požadavek.",
+                icon: "X",
+                iconColor: "text-danger",
+                iconBgColor: "bg-danger-surface",
+                button: {
+                  version: "dangerFull",
+                  text: "Odmítnout",
+                  iconLeft: "X",
+                  size: "sm",
+                  onClick: () => cancelInquiryHandler(),
+                },
               },
-            },
-          ]}
-        />
+            ]}
+          />
+        </DashboardSection>
       )}
 
       <ChatWindow

@@ -111,6 +111,8 @@ export interface Config {
     'listing-venue-details': ListingVenueDetail;
     'roadmap-items': RoadmapItem;
     'user-notifications': UserNotification;
+    'listing-subscriptions': ListingSubscription;
+    'oauth-accounts': OauthAccount;
     'payload-kv': PayloadKv;
     'payload-jobs': PayloadJob;
     'payload-locked-documents': PayloadLockedDocument;
@@ -162,6 +164,8 @@ export interface Config {
     'listing-venue-details': ListingVenueDetailsSelect<false> | ListingVenueDetailsSelect<true>;
     'roadmap-items': RoadmapItemsSelect<false> | RoadmapItemsSelect<true>;
     'user-notifications': UserNotificationsSelect<false> | UserNotificationsSelect<true>;
+    'listing-subscriptions': ListingSubscriptionsSelect<false> | ListingSubscriptionsSelect<true>;
+    'oauth-accounts': OauthAccountsSelect<false> | OauthAccountsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-jobs': PayloadJobsSelect<false> | PayloadJobsSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -339,6 +343,9 @@ export interface User {
   marketingConsent?: boolean | null;
   loginToken?: string | null;
   loginTokenExpiration?: string | null;
+  emailVerificationToken?: string | null;
+  emailVerificationTokenExpiration?: string | null;
+  pendingEmail?: string | null;
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -444,6 +451,11 @@ export interface Variant {
         id?: string | null;
       }[]
     | null;
+  duration?: {
+    hasExactDuration?: boolean | null;
+    exactDurationMinutes?: number | null;
+    maxDurationMinutes?: number | null;
+  };
   images: {
     coverImage: {
       filename?: string | null;
@@ -512,7 +524,7 @@ export interface Variant {
  */
 export interface Listing {
   id: string;
-  tariff: 'basic' | 'premium';
+  tariff: 'basic';
   type: 'venue' | 'gastro' | 'entertainment';
   subType?: string | null;
   filters: {
@@ -550,22 +562,23 @@ export interface Listing {
         value: string | ListingEntertainmentDetail;
       };
   location: {
-    latitude: number;
-    longitude: number;
+    /**
+     * @minItems 2
+     * @maxItems 2
+     */
+    point: [number, number];
     address: string;
     city: string | City;
     country: 'cz';
   };
   servicableArea: {
     wholeCountry: boolean;
-    regions?: (string | Region)[] | null;
-    districts?: (string | District)[] | null;
-    cities?: (string | City)[] | null;
+    maxTravelDistanceKm?: number | null;
   };
   name: string;
   slug: string;
   status: 'active' | 'inactive' | 'disabled' | 'archived';
-  subscriptionActive?: boolean | null;
+  subscriptionStatus: 'unpaid' | 'paid' | 'cancelling' | 'expired';
   company: string | Company;
   description?: string | null;
   shortDescription: string;
@@ -608,6 +621,9 @@ export interface Listing {
     }[];
   };
   minimumPricePerEvent: number;
+  pricingUnit?: ('per_day' | 'per_person' | 'per_hour' | 'lump_sum') | null;
+  minimumVariantPrice?: number | null;
+  variantPricingUnit?: ('per_day' | 'per_person' | 'per_hour' | 'lump_sum') | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -840,25 +856,6 @@ export interface ListingVenueDetail {
         id?: string | null;
       }[]
     | null;
-  price: {
-    base: number;
-    pricingUnit: 'per_day' | 'per_person' | 'per_hour' | 'lump_sum';
-    seasonalPrices?:
-      | {
-          amount: number;
-          adjustmentType: 'surcharge' | 'discount';
-          valueType: 'absolute' | 'percentage';
-          title: string;
-          from: string;
-          to: string;
-          id?: string | null;
-        }[]
-      | null;
-    travelFeeEnabled?: boolean | null;
-    travelFeePerKm?: number | null;
-    travelFeeType?: ('one_way' | 'round_trip') | null;
-    travelFeeStartsAtKm?: number | null;
-  };
   faq?:
     | {
         active?: boolean | null;
@@ -932,6 +929,7 @@ export interface ListingVenueDetail {
     parkingCapacity?: number | null;
     parkingIsIncludedInPrice?: boolean | null;
     parkingPrice?: number | null;
+    parkingPriceUnit?: ('space' | 'event') | null;
   };
   filters: {
     allEventTypes: boolean;
@@ -980,6 +978,30 @@ export interface ListingVenueDetail {
     services?:
       | {
           service: string | Service;
+          pricingUnit: 'per_day' | 'per_person' | 'per_hour' | 'lump_sum';
+          unitPrice: number;
+          quantity: number;
+          id?: string | null;
+        }[]
+      | null;
+  };
+  catering: {
+    hasCatering?: boolean | null;
+    cateringIsIncludedInPrice?: boolean | null;
+    price?: number | null;
+    pricingUnit?: ('per_person' | 'per_hour' | 'lump_sum') | null;
+    cuisines?:
+      | {
+          cuisine: string | Cuisine;
+          pricingUnit: 'per_day' | 'per_person' | 'per_hour' | 'lump_sum';
+          unitPrice: number;
+          quantity: number;
+          id?: string | null;
+        }[]
+      | null;
+    foodPreparationStyles?:
+      | {
+          foodPreparationStyle: string | FoodPreparationStyle;
           pricingUnit: 'per_day' | 'per_person' | 'per_hour' | 'lump_sum';
           unitPrice: number;
           quantity: number;
@@ -1552,6 +1574,10 @@ export interface Company {
         id?: string | null;
       }[]
     | null;
+  /**
+   * Stripe Customer ID (cus_...)
+   */
+  stripeCustomerId?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1613,11 +1639,7 @@ export interface Event {
     place?: boolean | null;
   };
   location: {
-    type: 'custom' | 'venue';
-    /**
-     * Vyberte venue z katalogu služeb.
-     */
-    venue?: (string | null) | Listing;
+    district: string | District;
     city?: (string | null) | City;
     address?: string | null;
     spaceType?: (string | null) | SpaceType;
@@ -1695,15 +1717,52 @@ export interface Inquiry {
   variant?: (string | null) | Variant;
   event: string | Event;
   listingType: 'venue' | 'gastro' | 'entertainment';
-  request: {
+  customRequest: {
     note?: string | null;
-    requirements?:
+    addons?:
+      | {
+          name: string;
+          optionId: string;
+          pricingUnit: 'per_day' | 'per_person' | 'per_hour' | 'lump_sum';
+          unitPrice: number;
+          quantity: number;
+          id?: string | null;
+        }[]
+      | null;
+    spaces?:
+      | {
+          spaceId: string;
+          name: string;
+          price?: number | null;
+          pricingUnit: 'per_day' | 'per_person' | 'per_hour' | 'lump_sum';
+          id?: string | null;
+        }[]
+      | null;
+    customRequirements?:
       | {
           text?: string | null;
           id?: string | null;
         }[]
       | null;
+    accommodation?: {
+      guests?: number | null;
+    };
+    breakfast?: {
+      guests?: number | null;
+    };
+    parking?: {
+      spots?: number | null;
+    };
   };
+  serviceTime?: {
+    startTime?: string | null;
+    endTime?: string | null;
+    arrivalTime?: string | null;
+  };
+  /**
+   * Odhadovaná cena cestovného (pouze informativní, nezahrnuje se do ceny)
+   */
+  travelFeeAmount?: number | null;
   status: {
     company: 'pending' | 'confirmed' | 'cancelled';
     user: 'pending' | 'confirmed' | 'cancelled';
@@ -1817,6 +1876,57 @@ export interface UserNotification {
   seenAt?: string | null;
   clicked?: boolean | null;
   clickedAt?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "listing-subscriptions".
+ */
+export interface ListingSubscription {
+  id: string;
+  listing: string | Listing;
+  company: string | Company;
+  tariff: 'basic';
+  /**
+   * Očekávaná částka v Kč
+   */
+  amount: number;
+  status: 'pending' | 'paid' | 'cancelling' | 'expired';
+  /**
+   * Datum expirace subscription
+   */
+  validUntil?: string | null;
+  paidAt?: string | null;
+  /**
+   * Stripe Customer ID (cus_...)
+   */
+  stripeCustomerId?: string | null;
+  /**
+   * Stripe Subscription ID (sub_...) pro opakované platby
+   */
+  stripeSubscriptionId?: string | null;
+  /**
+   * Stripe Payment Intent ID (pi_...) pro jednorázové platby
+   */
+  stripePaymentIntentId?: string | null;
+  /**
+   * Stripe Price ID (price_...) — který produkt/tariff byl zakoupen
+   */
+  stripePriceId?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "oauth-accounts".
+ */
+export interface OauthAccount {
+  id: string;
+  user: string | User;
+  provider: 'google';
+  providerAccountId: string;
+  email?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -2107,6 +2217,14 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'user-notifications';
         value: string | UserNotification;
+      } | null)
+    | ({
+        relationTo: 'listing-subscriptions';
+        value: string | ListingSubscription;
+      } | null)
+    | ({
+        relationTo: 'oauth-accounts';
+        value: string | OauthAccount;
       } | null);
   globalSlug?: string | null;
   user:
@@ -2263,6 +2381,9 @@ export interface UsersSelect<T extends boolean = true> {
   marketingConsent?: T;
   loginToken?: T;
   loginTokenExpiration?: T;
+  emailVerificationToken?: T;
+  emailVerificationTokenExpiration?: T;
+  pendingEmail?: T;
   updatedAt?: T;
   createdAt?: T;
   email?: T;
@@ -2366,6 +2487,13 @@ export interface VariantsSelect<T extends boolean = true> {
     | {
         item?: T;
         id?: T;
+      };
+  duration?:
+    | T
+    | {
+        hasExactDuration?: T;
+        exactDurationMinutes?: T;
+        maxDurationMinutes?: T;
       };
   images?:
     | T
@@ -2511,8 +2639,7 @@ export interface ListingsSelect<T extends boolean = true> {
   location?:
     | T
     | {
-        latitude?: T;
-        longitude?: T;
+        point?: T;
         address?: T;
         city?: T;
         country?: T;
@@ -2521,14 +2648,12 @@ export interface ListingsSelect<T extends boolean = true> {
     | T
     | {
         wholeCountry?: T;
-        regions?: T;
-        districts?: T;
-        cities?: T;
+        maxTravelDistanceKm?: T;
       };
   name?: T;
   slug?: T;
   status?: T;
-  subscriptionActive?: T;
+  subscriptionStatus?: T;
   company?: T;
   description?: T;
   shortDescription?: T;
@@ -2581,6 +2706,9 @@ export interface ListingsSelect<T extends boolean = true> {
             };
       };
   minimumPricePerEvent?: T;
+  pricingUnit?: T;
+  minimumVariantPrice?: T;
+  variantPricingUnit?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -2698,6 +2826,7 @@ export interface CompaniesSelect<T extends boolean = true> {
         role?: T;
         id?: T;
       };
+  stripeCustomerId?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -2893,8 +3022,7 @@ export interface EventsSelect<T extends boolean = true> {
   location?:
     | T
     | {
-        type?: T;
-        venue?: T;
+        district?: T;
         city?: T;
         address?: T;
         spaceType?: T;
@@ -2967,17 +3095,59 @@ export interface InquiriesSelect<T extends boolean = true> {
   variant?: T;
   event?: T;
   listingType?: T;
-  request?:
+  customRequest?:
     | T
     | {
         note?: T;
-        requirements?:
+        addons?:
+          | T
+          | {
+              name?: T;
+              optionId?: T;
+              pricingUnit?: T;
+              unitPrice?: T;
+              quantity?: T;
+              id?: T;
+            };
+        spaces?:
+          | T
+          | {
+              spaceId?: T;
+              name?: T;
+              price?: T;
+              pricingUnit?: T;
+              id?: T;
+            };
+        customRequirements?:
           | T
           | {
               text?: T;
               id?: T;
             };
+        accommodation?:
+          | T
+          | {
+              guests?: T;
+            };
+        breakfast?:
+          | T
+          | {
+              guests?: T;
+            };
+        parking?:
+          | T
+          | {
+              spots?: T;
+            };
       };
+  serviceTime?:
+    | T
+    | {
+        startTime?: T;
+        endTime?: T;
+        arrivalTime?: T;
+      };
+  travelFeeAmount?: T;
   status?:
     | T
     | {
@@ -3594,27 +3764,6 @@ export interface ListingVenueDetailsSelect<T extends boolean = true> {
         key?: T;
         id?: T;
       };
-  price?:
-    | T
-    | {
-        base?: T;
-        pricingUnit?: T;
-        seasonalPrices?:
-          | T
-          | {
-              amount?: T;
-              adjustmentType?: T;
-              valueType?: T;
-              title?: T;
-              from?: T;
-              to?: T;
-              id?: T;
-            };
-        travelFeeEnabled?: T;
-        travelFeePerKm?: T;
-        travelFeeType?: T;
-        travelFeeStartsAtKm?: T;
-      };
   faq?:
     | T
     | {
@@ -3698,6 +3847,7 @@ export interface ListingVenueDetailsSelect<T extends boolean = true> {
         parkingCapacity?: T;
         parkingIsIncludedInPrice?: T;
         parkingPrice?: T;
+        parkingPriceUnit?: T;
       };
   filters?:
     | T
@@ -3757,6 +3907,32 @@ export interface ListingVenueDetailsSelect<T extends boolean = true> {
               id?: T;
             };
       };
+  catering?:
+    | T
+    | {
+        hasCatering?: T;
+        cateringIsIncludedInPrice?: T;
+        price?: T;
+        pricingUnit?: T;
+        cuisines?:
+          | T
+          | {
+              cuisine?: T;
+              pricingUnit?: T;
+              unitPrice?: T;
+              quantity?: T;
+              id?: T;
+            };
+        foodPreparationStyles?:
+          | T
+          | {
+              foodPreparationStyle?: T;
+              pricingUnit?: T;
+              unitPrice?: T;
+              quantity?: T;
+              id?: T;
+            };
+      };
   breakfast?:
     | T
     | {
@@ -3798,6 +3974,37 @@ export interface UserNotificationsSelect<T extends boolean = true> {
   seenAt?: T;
   clicked?: T;
   clickedAt?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "listing-subscriptions_select".
+ */
+export interface ListingSubscriptionsSelect<T extends boolean = true> {
+  listing?: T;
+  company?: T;
+  tariff?: T;
+  amount?: T;
+  status?: T;
+  validUntil?: T;
+  paidAt?: T;
+  stripeCustomerId?: T;
+  stripeSubscriptionId?: T;
+  stripePaymentIntentId?: T;
+  stripePriceId?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "oauth-accounts_select".
+ */
+export interface OauthAccountsSelect<T extends boolean = true> {
+  user?: T;
+  provider?: T;
+  providerAccountId?: T;
+  email?: T;
   updatedAt?: T;
   createdAt?: T;
 }

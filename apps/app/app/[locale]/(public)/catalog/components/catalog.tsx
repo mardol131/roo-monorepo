@@ -1,10 +1,12 @@
 "use client";
 
 import Text from "@/app/components/ui/atoms/text";
-import ListingCard from "@/app/components/ui/molecules/listing-card";
+import ListingCard from "@/app/components/ui/molecules/listing-card/listing-card";
 import {
+  useGeoSearchListings,
   useListingPinsByLocationId,
   useListings,
+  useListingsAvailability,
 } from "@/app/react-query/listings/hooks";
 import { useCities } from "@/app/react-query/cities/hooks";
 import { useDistricts } from "@/app/react-query/districts/hooks";
@@ -46,6 +48,8 @@ type Props = {
   type: "venue" | "gastro" | "entertainment";
 };
 
+const CATALOG_LIMIT = 12;
+
 export default function Catalog({ type }: Props) {
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -53,17 +57,46 @@ export default function Catalog({ type }: Props) {
 
   const currentPage = parseInt(searchParams.get("page") ?? "1", 10) || 1;
 
-  const { data: listings } = useListings({
+  const {
+    city: cityFilter,
+    district: districtFilter,
+    region: regionFilter,
+    dateFrom,
+    dateTo,
+  } = generalFiltersFromParams(searchParams);
+
+  const isGeoType = type === "gastro" || type === "entertainment";
+  const hasLocation = !!(cityFilter || districtFilter || regionFilter);
+  const useGeoSearch = isGeoType && hasLocation;
+
+  const baseQuery = createListingsQuery({
+    catalogType: type,
+    params: searchParams,
+    skipLocation: useGeoSearch,
+  });
+
+  const { data: standardListings } = useListings({
     options: {
-      query: createListingsQuery({
-        catalogType: type,
-        params: searchParams,
-      }),
+      query: baseQuery,
       depth: 0,
-      limit: 1,
+      limit: CATALOG_LIMIT,
       page: currentPage,
     },
+    enabled: !useGeoSearch,
   });
+
+  const { data: geoListings } = useGeoSearchListings({
+    type: type as "gastro" | "entertainment",
+    city: cityFilter || undefined,
+    district: districtFilter || undefined,
+    region: regionFilter || undefined,
+    page: currentPage,
+    limit: CATALOG_LIMIT,
+    where: baseQuery,
+    enabled: useGeoSearch,
+  });
+
+  const listings = useGeoSearch ? geoListings : standardListings;
 
   const initialModalFilters = useMemo(() => {
     const general = generalFiltersFromParams(searchParams);
@@ -98,27 +131,21 @@ export default function Catalog({ type }: Props) {
     };
   }, [searchParams, type]);
 
-  const {
-    city: cityFilter,
-    district: districtFilter,
-    region: regionFilter,
-  } = generalFiltersFromParams(searchParams);
-
   const { data: cityData } = useCities({
     query: cityFilter ? { id: { equals: cityFilter } } : undefined,
     limit: 1,
     enabled: !!cityFilter,
   });
-  const { data: districtData } = useDistricts(
-    districtFilter ? { id: { equals: districtFilter } } : undefined,
-    1,
-    !!districtFilter,
-  );
-  const { data: regionData } = useRegions(
-    regionFilter ? { id: { equals: regionFilter } } : undefined,
-    1,
-    !!regionFilter,
-  );
+  const { data: districtData } = useDistricts({
+    query: districtFilter ? { id: { equals: districtFilter } } : undefined,
+    limit: 1,
+    enabled: !!districtFilter,
+  });
+  const { data: regionData } = useRegions({
+    query: regionFilter ? { id: { equals: regionFilter } } : undefined,
+    limit: 1,
+    enabled: !!regionFilter,
+  });
 
   const locationBboxSource =
     cityData?.docs?.[0] ?? districtData?.docs?.[0] ?? regionData?.docs?.[0];
@@ -179,6 +206,23 @@ export default function Catalog({ type }: Props) {
           : "country",
   );
 
+  const listingIds = useMemo(
+    () => listings?.docs?.map((l) => l.id) ?? [],
+    [listings?.docs],
+  );
+
+  const showAvailability = useMemo(
+    () => !!dateFrom && !!dateTo && listingIds.length > 0,
+    [dateFrom, dateTo, listingIds],
+  );
+
+  const { data: listingsAvailability } = useListingsAvailability({
+    ids: listingIds,
+    from: dateFrom,
+    to: dateTo,
+    enabled: showAvailability,
+  });
+
   const formattedMapPins: PinProps[] = useMemo(() => {
     if (!mapPins) return [];
     const pins: PinProps[] = mapPins.data.map((pin) => ({
@@ -224,6 +268,9 @@ export default function Catalog({ type }: Props) {
     );
   };
 
+  console.log("geoListings", geoListings);
+  console.log("standardListings", standardListings);
+
   return (
     <>
       {renderModal()}
@@ -232,9 +279,18 @@ export default function Catalog({ type }: Props) {
         <div
           className={`flex flex-col items-start w-full max-w-content  gap-6`}
         >
-          <Text variant="body" color="textLight">
-            Počet nalezených inzerátů: {listings?.totalDocs ?? 0}
-          </Text>
+          <div className="flex items-center gap-4 flex-wrap">
+            <Text variant="body" color="textLight">
+              Počet nalezených inzerátů: {listings?.totalDocs ?? 0}
+            </Text>
+            {!showAvailability && (
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary-surface text-primary border border-primary">
+                <Text variant="label-lg" color="primary">
+                  Pro zobrazení dostupnosti zvolte datum události
+                </Text>
+              </div>
+            )}
+          </div>
           {listings?.docs?.length === 0 ? (
             <div className="w-full flex flex-col items-center justify-center gap-3 py-20">
               <Text variant="h3">Nic jsme nenašli</Text>
@@ -247,20 +303,50 @@ export default function Catalog({ type }: Props) {
               className={`w-full min-h-screen ${mapSegmentActive ? "grid gap-20 grid-cols-2" : ""}`}
             >
               <div className="w-full grid grid-cols-[repeat(auto-fill,minmax(250px,1fr))] content-start gap-5">
-                {listings?.docs?.map((listing) => (
-                  <ListingCard
-                    key={listing.id}
-                    id={listing.id}
-                    images={[
-                      listing.images.coverImage.filename,
-                      ...listing.images.gallery.map((img) => img.filename),
-                    ]}
-                    title={listing.name}
-                    shortDescription={listing.shortDescription ?? undefined}
-                    price={listing.minimumPricePerEvent}
-                    linkTarget="_self"
-                  />
-                ))}
+                {listings?.docs?.map((listing) => {
+                  let distance:
+                    | { type: "geoDistance"; distanceKm: number }
+                    | { type: "max"; distanceKm: number }
+                    | undefined = undefined;
+
+                  if (isGeoType) {
+                    if (useGeoSearch) {
+                      const km = geoListings?.distances?.[listing.id];
+                      if (km !== undefined)
+                        distance = { type: "geoDistance", distanceKm: km };
+                    } else {
+                      const { wholeCountry, maxTravelDistanceKm } =
+                        listing.servicableArea;
+                      if (!wholeCountry && maxTravelDistanceKm)
+                        distance = {
+                          type: "max",
+                          distanceKm: maxTravelDistanceKm,
+                        };
+                    }
+                  }
+
+                  return (
+                    <ListingCard
+                      key={listing.id}
+                      id={listing.id}
+                      images={[
+                        listing.images.coverImage.filename,
+                        ...listing.images.gallery.map((img) => img.filename),
+                      ]}
+                      title={listing.name}
+                      shortDescription={listing.shortDescription ?? undefined}
+                      price={listing.minimumPricePerEvent}
+                      linkTarget="_self"
+                      showAvailability={showAvailability}
+                      availability={
+                        listingsAvailability?.data.find(
+                          (a) => a.id === listing.id,
+                        )?.status
+                      }
+                      distance={distance}
+                    />
+                  );
+                })}
               </div>
               {mapSegmentActive && (
                 <div>

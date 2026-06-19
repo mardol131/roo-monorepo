@@ -17,7 +17,6 @@ export const Companies: CollectionConfig = {
   hooks: {
     beforeValidate: [generateSlug],
     beforeChange: [cleanupLogo],
-    afterRead: [stripForPublic],
   },
   fields: companyFields,
 }

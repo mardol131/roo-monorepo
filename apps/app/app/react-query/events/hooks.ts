@@ -21,7 +21,7 @@ export function useEvents({
   enabled,
 }: { options?: GetCollectionParams; enabled?: boolean } = {}) {
   return useQuery({
-    queryKey: eventKeys.all(options?.query, options?.limit),
+    queryKey: eventKeys.all(options),
     queryFn: () => fetchEvents(options),
     enabled,
   });
@@ -72,7 +72,12 @@ export function useAddEventNote(eventId: string) {
       const existing = current?.notes ?? [];
       return addNoteToEvent(eventId, [
         ...existing,
-        { note, description, createdAt: new Date().toISOString() },
+        {
+          title: note,
+          description,
+          status: "active",
+          createdAt: new Date().toISOString(),
+        },
       ]);
     },
     onSuccess: (updated) => {

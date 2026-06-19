@@ -5,7 +5,13 @@ import { useRouter } from "@/app/i18n/navigation";
 import { useCompany } from "@/app/react-query/companies/hooks";
 import { useListingsByCompany } from "@/app/react-query/listings/hooks";
 import { formatCompanyBillingAddress, formatPhoneNumber } from "@roo/common";
-import { Building2, MessageCircle, Tag } from "lucide-react";
+import {
+  Building2,
+  MessageCircle,
+  MessageSquare,
+  Tag,
+  User2,
+} from "lucide-react";
 import { useParams } from "next/navigation";
 import Breadcrumbs from "../../../components/breadcrumbs";
 import DashboardHeader from "../../../components/dashboard-header";
@@ -20,11 +26,23 @@ import { CompletionWidget } from "../../../components/completion-widget";
 import { useAuth } from "@/app/context/auth/auth-context";
 import { canEditCompany } from "../../../../../functions/utils/companies";
 import { useTranslations } from "next-intl";
+import { useCollectionItemsCount } from "@/app/react-query/global/hooks";
 
 export default function page() {
   const { companyId } = useParams<{ companyId: string }>();
   const { user } = useAuth();
   const g = useTranslations("global");
+
+  const { data: inquiriesCount } = useCollectionItemsCount({
+    collection: "inquiries",
+    query: {
+      "listing.company": { equals: companyId },
+      or: [
+        { "status.company": { in: ["pending", "confirmed"] } },
+        { "status.user": { in: ["pending"] } },
+      ],
+    },
+  });
 
   const { data: company, isLoading: isCompanyLoading } = useCompany(companyId);
   const { data: listings, isLoading: isListingsLoading } =
@@ -92,24 +110,20 @@ export default function page() {
             iconBg="bg-listing-surface"
             iconColor="text-listing"
           />
-          {/* <SummaryCard
-            label="Nepřečtených zpráv"
-            value={listings?.docs.filter((listing) => {
-                if (listing)
-            })} // TODO: get real number of unread messages
-            icon={MessageCircle}
+          <SummaryCard
+            label="Počet členů týmu"
+            value={String(company?.members?.length || 0)}
+            icon={User2}
+            iconBg="bg-orange-100"
+            iconColor="text-orange-500"
+          />
+          <SummaryCard
+            label="Počet rozpracovaných poptávek"
+            value={String(inquiriesCount?.totalDocs || 0)}
+            icon={MessageSquare}
             iconBg="bg-inquiry-surface"
             iconColor="text-inquiry"
-          /> */}
-          {/* 
-        <SummaryCard
-          label="Průměrné hodnocení"
-          value={avgRating}
-          icon={Star}
-          iconBg="bg-amber-50"
-          iconColor="text-amber-500"
-          note="ze všech služeb"
-        /> */}
+          />
         </div>
         {/* Listings */}
         <RowContainer

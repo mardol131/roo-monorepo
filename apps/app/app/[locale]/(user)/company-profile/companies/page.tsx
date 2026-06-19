@@ -72,7 +72,7 @@ export default function page() {
       />
       <CardContainer
         emptyState={{
-          text: "Zatím nemáte žádné firmy",
+          text: "Zatím nemáte žádné vlastní firmy",
           subtext:
             "Abyste mohli nabízet služby, musíte nejprve vytvořit firmu, která je nabízí. Začněte kliknutím na tlačítko níže.",
           button: {
@@ -181,9 +181,9 @@ export default function page() {
               />
             ))}
             emptyState={{
-              text: "Zatím nemáte žádné firmy",
+              text: "Zatím nejste členem žádné firmy",
               subtext:
-                "Abyste mohli nabízet služby, musíte nejprve vytvořit firmu, která je nabízí. Začněte kliknutím na tlačítko níže.",
+                "Abyste mohli spravovat firmu, musíte být jejím členem. Požádejte vlastníka firmy o pozvání.",
               button: {
                 text: "Přidat firmu",
                 version: "primary",

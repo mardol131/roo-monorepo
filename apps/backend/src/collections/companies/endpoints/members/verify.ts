@@ -1,5 +1,6 @@
 import { Endpoint, PayloadRequest } from 'payload'
 import { Company, Invitation, User } from '../../../../payload-types'
+import { getIdFromRelationshipField } from '@roo/common'
 
 export const verifyMemberEndpoint: Endpoint = {
   path: '/members/verify',
@@ -69,12 +70,13 @@ export const verifyMemberEndpoint: Endpoint = {
         members: [
           ...(company.members ?? []).map((m) => ({
             ...m,
-            user: typeof m.user === 'string' ? m.user : m.user.id,
+            user: getIdFromRelationshipField(m.user),
             invitationEmail: m.invitationEmail,
           })),
           {
             user: user.id,
             role: invitation.role,
+            invitationEmail: invitation.email,
           },
         ],
       },

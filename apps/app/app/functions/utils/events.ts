@@ -1,0 +1,16 @@
+import { Event } from "@roo/common";
+
+export function useGuestsString(
+  guests: Event["guests"],
+  includeDetails = false,
+) {
+  const sum = guests.adults + guests.children;
+  if (sum === 0) return "Žádní hosté";
+  let guestFormat = "hostů";
+  if (sum === 1) guestFormat = "host";
+  else if (sum > 1 && sum < 5) guestFormat = "hosté";
+  if (includeDetails) {
+    return `Celkem ${sum} ${guestFormat}, ZTP: ${guests.ztp ? "ano" : "ne"}, Zvířata: ${guests.pets ? "ano" : "ne"}`;
+  }
+  return `${sum} ${guestFormat}`;
+}

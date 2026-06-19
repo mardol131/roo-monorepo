@@ -1,5 +1,6 @@
 import Button from "@/app/components/ui/atoms/button";
 import Text from "@/app/components/ui/atoms/text";
+import { loginModalEvents } from "@/app/components/ui/molecules/modals/login-modal/login-modal";
 import { verifyUsersEmail } from "@/app/functions/api/users";
 
 type Props = {
@@ -53,8 +54,10 @@ export default async function UserVerificationPage({ searchParams }: Props) {
         ) : (
           <Button
             version="primary"
-            text="Přejít na přihlášení"
-            link={{ pathname: "/login" }}
+            text="Přihlásit se"
+            onClick={() => {
+              loginModalEvents.emit("open", undefined);
+            }}
           />
         )}
       </div>
@@ -78,7 +81,9 @@ export default async function UserVerificationPage({ searchParams }: Props) {
       <Button
         version="primary"
         text="Přejít na přihlášení"
-        link={{ pathname: "/login" }}
+        onClick={() => {
+          loginModalEvents.emit("open", undefined);
+        }}
       />
     </div>
   );

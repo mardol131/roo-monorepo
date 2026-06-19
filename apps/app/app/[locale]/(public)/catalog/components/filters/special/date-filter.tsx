@@ -182,8 +182,55 @@ export default function DateFilter({
     currentMonth.getMonth() + 1,
   );
 
+  const selectingFrom = !startDate || (!!startDate && !!endDate);
+  const selectingTo = !!startDate && !endDate;
+
   const calendarPanel = (
     <div className="grid grid-cols-2 gap-6 p-4">
+      {/* From / To banners */}
+      <div className="col-span-2 grid grid-cols-2 gap-2">
+        <button
+          type="button"
+          onClick={() => {
+            setStartDate(null);
+            setEndDate(null);
+          }}
+          className={`flex flex-col items-start px-3 py-2 rounded-lg border text-left transition-colors ${
+            selectingFrom
+              ? "border-rose-400 bg-rose-50 text-rose-600"
+              : "border-zinc-200 bg-white text-zinc-500 hover:border-zinc-300"
+          }`}
+        >
+          <span className="text-xs font-semibold uppercase tracking-wide mb-0.5">
+            Od
+          </span>
+          <span className="text-sm font-medium">
+            {startDate
+              ? `${startDate.toLocaleDateString("cs-CZ")} ${startTime}`
+              : "Vyberte datum"}
+          </span>
+        </button>
+        <button
+          type="button"
+          onClick={() => {
+            if (startDate) setEndDate(null);
+          }}
+          className={`flex flex-col items-start px-3 py-2 rounded-lg border text-left transition-colors ${
+            selectingTo
+              ? "border-rose-400 bg-rose-50 text-rose-600"
+              : "border-zinc-200 bg-white text-zinc-500 hover:border-zinc-300"
+          }`}
+        >
+          <span className="text-xs font-semibold uppercase tracking-wide mb-0.5">
+            Do
+          </span>
+          <span className="text-sm font-medium">
+            {endDate
+              ? `${endDate.toLocaleDateString("cs-CZ")} ${endTime}`
+              : "Vyberte datum"}
+          </span>
+        </button>
+      </div>
       {/* Start month */}
       <div>
         <div className="flex items-center justify-between mb-4">
@@ -298,12 +345,18 @@ export default function DateFilter({
 
       {/* Times */}
       <div className="col-span-2 border-t border-zinc-100 pt-4 grid grid-cols-2 gap-3">
-        <TimeInput label="Začátek" value={startTime} onChange={setStartTime} />
+        <TimeInput
+          label="Začátek"
+          value={startTime}
+          onChange={setStartTime}
+          hideClearButton
+        />
         <TimeInput
           label="Konec"
           value={endTime}
           onChange={setEndTime}
           min={startTime}
+          hideClearButton
         />
       </div>
     </div>

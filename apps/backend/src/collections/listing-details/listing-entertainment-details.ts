@@ -1,7 +1,8 @@
 import type { CollectionConfig, Field } from 'payload'
 import { customSectionsFields, priceableOptionFields } from '../listings/fields'
 import { listingDetailAccessControl } from '../listings/access'
-import { commonListingDetailFields } from './common'
+import { commonListingDetailFields, commonListingDetailPriceField } from './common'
+import { syncListingFromDetail } from './hooks/sync-listing-from-detail'
 
 export const listingEntertainmentDetailFilters: Field = {
   name: 'filters',
@@ -81,8 +82,12 @@ export const listingEntertainmentDetailOptions: Field = {
 export const ListingEntertainmentDetails: CollectionConfig = {
   slug: 'listing-entertainment-details',
   access: listingDetailAccessControl,
+  hooks: {
+    afterChange: [syncListingFromDetail],
+  },
   fields: [
     ...customSectionsFields,
+    commonListingDetailPriceField,
     ...commonListingDetailFields,
     {
       name: 'type',

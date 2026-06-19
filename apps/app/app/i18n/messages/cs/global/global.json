@@ -5,11 +5,21 @@
   "listings": {
     "singular": "Služba",
     "plural": "Služby",
+    "availability": {
+      "likely-free": "Pravděpodobně dostupné",
+      "limited": "Možná nedostupné"
+    },
     "status": {
-      "active": "Aktivní",
-      "inactive": "Neaktivní",
+      "active": "Viditelné",
+      "inactive": "Skryté",
       "archived": "Archivované",
       "disabled": "Smazané"
+    },
+    "subscriptionStatus": {
+      "paid": "Zaplaceno",
+      "unpaid": "Nezaplaceno",
+      "cancelling": "Neprodlužuje se",
+      "expired": "Vypršelo"
     },
     "type": {
       "gastro": "Gastro",

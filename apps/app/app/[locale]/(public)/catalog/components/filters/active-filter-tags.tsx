@@ -123,7 +123,11 @@ function DistrictTagGroup({
   id: string;
   onRemove: () => void;
 }) {
-  const { data } = useDistricts({ id: { equals: id } }, 1, !!id);
+  const { data } = useDistricts({
+    query: { id: { equals: id } },
+    limit: 1,
+    enabled: !!id,
+  });
   const name = data?.docs?.[0]?.name;
   if (!name) return null;
   return (
@@ -140,7 +144,11 @@ function RegionTagGroup({
   id: string;
   onRemove: () => void;
 }) {
-  const { data } = useRegions({ id: { equals: id } }, 1, !!id);
+  const { data } = useRegions({
+    query: { id: { equals: id } },
+    limit: 1,
+    enabled: !!id,
+  });
   const name = data?.docs?.[0]?.name;
   if (!name) return null;
   return (
@@ -260,7 +268,9 @@ export default function ActiveFilterTags({ type }: { type: CatalogType }) {
         <CityTagGroup
           label="Město"
           ids={[general.city]}
-          onRemove={() => updateGeneral({ city: "", district: "", region: "", bbox: [] })}
+          onRemove={() =>
+            updateGeneral({ city: "", district: "", region: "", bbox: [] })
+          }
         />
       )}
       {!general.city && general.district && (
@@ -402,7 +412,7 @@ export default function ActiveFilterTags({ type }: { type: CatalogType }) {
         <IdTagGroup
           label="Styl obsluhy"
           selectedIds={gastro.foodServiceStyles}
-          options={filters?.foodServiceStyles ?? []}
+          options={filters?.foodPreparationStyles ?? []}
           onRemove={(id) =>
             updateGastro({
               foodServiceStyles: gastro.foodServiceStyles.filter(

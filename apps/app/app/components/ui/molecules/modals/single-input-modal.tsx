@@ -7,6 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import z from "zod";
+import Text from "../../atoms/text";
 
 type Props = {
   isOpen: boolean;
@@ -20,7 +21,7 @@ type Props = {
   submitLabel?: string;
   isLoading?: boolean;
   errorMessage?: string;
-  successMessage?: React.ReactNode;
+  successMessage?: React.ReactNode | string;
   successHeader?: string;
 };
 
@@ -79,9 +80,18 @@ export function SingleInputModal({
     >
       {succeeded && successMessage ? (
         <div className="flex flex-col gap-4">
-          <p className="text-sm text-zinc-600">{successMessage}</p>
+          {typeof successMessage === "string" ? (
+            <Text variant="label-lg">{successMessage}</Text>
+          ) : (
+            successMessage
+          )}
           <div className="flex justify-end">
-            <Button htmlType="button" text="Zavřít" version="primary" onClick={handleClose} />
+            <Button
+              htmlType="button"
+              text="Zavřít"
+              version="primary"
+              onClick={handleClose}
+            />
           </div>
         </div>
       ) : (
@@ -89,7 +99,7 @@ export function SingleInputModal({
           onSubmit={handleSubmit((data) => handleSubmitWrapper(data.value))}
           className="flex flex-col gap-4"
         >
-          {description && <p className="text-sm text-zinc-500">{description}</p>}
+          {description && <Text variant="label-lg">{description}</Text>}
           <Input
             label={inputLabel}
             isRequired
@@ -97,8 +107,18 @@ export function SingleInputModal({
             error={errors.value?.message}
           />
           <div className="flex justify-end gap-3 pt-2">
-            <Button htmlType="button" text="Zrušit" version="plain" onClick={handleClose} />
-            <Button htmlType="submit" text={submitLabel} version="primary" loading={isLoading} />
+            <Button
+              htmlType="button"
+              text="Zrušit"
+              version="plain"
+              onClick={handleClose}
+            />
+            <Button
+              htmlType="submit"
+              text={submitLabel}
+              version="primary"
+              loading={isLoading}
+            />
           </div>
         </form>
       )}

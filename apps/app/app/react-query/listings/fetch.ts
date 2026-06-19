@@ -2,6 +2,7 @@ import {
   deleteCollectionItem,
   getCollection,
   getCollectionItem,
+  GetCollectionItemOptions,
   GetCollectionParams,
   patchCollectionItem,
   PatchData,
@@ -14,6 +15,7 @@ import {
   ListingVenueDetail,
   LocalityType,
   Where,
+  type AvailabilityStatus,
 } from "@roo/common";
 
 type ListingDetailCollectionMap = {
@@ -48,10 +50,14 @@ export async function fetchListingsByCompany(
   return res;
 }
 
-export async function fetchListing(id: string): Promise<Listing> {
+export async function fetchListing(
+  id: string,
+  options?: GetCollectionItemOptions,
+): Promise<Listing> {
   const res = await getCollectionItem({
     collection: "listings",
     id,
+    ...options,
   });
   if (!res) throw new Error("Failed to fetch listing");
   return res;
@@ -69,7 +75,13 @@ export async function updateListing(id: string, data: PatchData<Listing>) {
 
 export type CreateListingPayload = Omit<
   Listing,
-  "id" | "createdAt" | "updatedAt" | "status" | "slug" | "tariff"
+  | "id"
+  | "createdAt"
+  | "updatedAt"
+  | "status"
+  | "slug"
+  | "tariff"
+  | "subscriptionStatus"
 >;
 
 export async function createListing(data: CreateListingPayload) {
@@ -173,8 +185,74 @@ export async function fetchListingPinsByLocationId(
     },
   );
 
-  console.log(res);
-
   if (!res.ok) throw new Error("Failed to fetch listing pins");
   return res.json() as Promise<MapPinsResponse>;
+}
+
+export type GeoSearchParams = {
+  type: "gastro" | "entertainment";
+  city?: string;
+  district?: string;
+  region?: string;
+  page?: number;
+  limit?: number;
+  where?: object;
+};
+
+export type GeoSearchResponse = {
+  docs: Listing[];
+  /** id → vzdálenost v km (zaokrouhlená na 2 desetinná místa) */
+  distances: Record<string, number>;
+  totalDocs: number;
+  totalPages: number;
+  page: number;
+  limit: number;
+  hasNextPage: boolean;
+  hasPrevPage: boolean;
+  nextPage: number | null;
+  prevPage: number | null;
+};
+
+export async function fetchGeoSearchListings(
+  params: GeoSearchParams,
+): Promise<GeoSearchResponse> {
+  const urlParams = new URLSearchParams({
+    type: params.type,
+    page: String(params.page ?? 1),
+    limit: String(params.limit ?? 12),
+  });
+  if (params.city) urlParams.set("city", params.city);
+  if (params.district) urlParams.set("district", params.district);
+  if (params.region) urlParams.set("region", params.region);
+  if (params.where) urlParams.set("where", JSON.stringify(params.where));
+
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/listings/geo-search?${urlParams}`,
+    { method: "GET", credentials: "include" },
+  );
+  if (!res.ok) throw new Error("Failed to fetch geo search listings");
+  return res.json() as Promise<GeoSearchResponse>;
+}
+
+export type ListingsAvailabilityItem = {
+  id: string;
+  status: AvailabilityStatus;
+};
+
+export type ListingsAvailabilityResponse = {
+  data: ListingsAvailabilityItem[];
+};
+
+export async function fetchListingsAvailability(
+  ids: string[],
+  from: string,
+  to: string,
+): Promise<ListingsAvailabilityResponse> {
+  const params = new URLSearchParams({ ids: ids.join(","), from, to });
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/listings/listings-availability?${params}`,
+    { method: "GET" },
+  );
+  if (!res.ok) throw new Error("Failed to fetch listings availability");
+  return res.json() as Promise<ListingsAvailabilityResponse>;
 }

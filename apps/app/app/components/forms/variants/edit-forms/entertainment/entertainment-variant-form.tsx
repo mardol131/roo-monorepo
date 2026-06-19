@@ -45,6 +45,11 @@ import {
   CapacityForm,
   capacitySchema,
 } from "../common-forms/variant-capacity-form";
+import {
+  DurationData,
+  DurationForm,
+  durationSchema,
+} from "../common-forms/variant-duration-form";
 
 const COLOR = { text: "text-variant", surface: "bg-variant-surface" };
 
@@ -92,6 +97,7 @@ export default function EntertainmentVariantForm() {
     ],
     price: [{ label: "Cena", sections: [S.price, S.seasonalPrices] }],
     capacity: [{ label: "Kapacita", sections: [S.capacity] }],
+    duration: [{ label: "Délka", sections: [S.duration] }],
     details: [{ label: "Program", sections: [S.audience, S.performance] }],
   };
 
@@ -140,12 +146,18 @@ export default function EntertainmentVariantForm() {
     },
   });
 
+  const durationForm = useForm<DurationData>({
+    resolver: zodResolver(durationSchema) as Resolver<DurationData>,
+    defaultValues: { hasExactDuration: false },
+  });
+
   // ── Dirty state ────────────────────────────────────────────────────────────
 
   const anyDirty =
     hasDirtyFields(baseForm.formState.dirtyFields) ||
     hasDirtyFields(priceForm.formState.dirtyFields) ||
     hasDirtyFields(capacityForm.formState.dirtyFields) ||
+    hasDirtyFields(durationForm.formState.dirtyFields) ||
     hasDirtyFields(entertainmentForm.formState.dirtyFields);
 
   const activeFormIsDirty =
@@ -155,7 +167,9 @@ export default function EntertainmentVariantForm() {
         ? hasDirtyFields(priceForm.formState.dirtyFields)
         : activeGroup === "capacity"
           ? hasDirtyFields(capacityForm.formState.dirtyFields)
-          : hasDirtyFields(entertainmentForm.formState.dirtyFields);
+          : activeGroup === "duration"
+            ? hasDirtyFields(durationForm.formState.dirtyFields)
+            : hasDirtyFields(entertainmentForm.formState.dirtyFields);
 
   useUnsavedChangesWarning(anyDirty);
 
@@ -164,6 +178,7 @@ export default function EntertainmentVariantForm() {
   const { reset: resetBase } = baseForm;
   const { reset: resetPrice } = priceForm;
   const { reset: resetCapacity } = capacityForm;
+  const { reset: resetDuration } = durationForm;
   const { reset: resetEntertainment } = entertainmentForm;
 
   const resetAllForms = useCallback(() => {
@@ -224,6 +239,12 @@ export default function EntertainmentVariantForm() {
       min: variant.capacity.min ?? undefined,
     });
 
+    resetDuration({
+      hasExactDuration: variant.duration?.hasExactDuration ?? false,
+      exactDurationMinutes: variant.duration?.exactDurationMinutes ?? undefined,
+      maxDurationMinutes: variant.duration?.maxDurationMinutes ?? undefined,
+    });
+
     resetEntertainment({
       audience: (block.audience ?? []) as ("adults" | "kids" | "seniors")[],
       numberOfSets: block.performance?.numberOfSets ?? undefined,
@@ -232,7 +253,7 @@ export default function EntertainmentVariantForm() {
       entertainmentIsPerformance:
         block.performance?.entertainmentIsPerformance ?? false,
     });
-  }, [variant, resetBase, resetPrice, resetCapacity, resetEntertainment]);
+  }, [variant, resetBase, resetPrice, resetCapacity, resetDuration, resetEntertainment]);
 
   useEffect(() => {
     resetAllForms();
@@ -301,6 +322,25 @@ export default function EntertainmentVariantForm() {
     }
   }
 
+  async function onSubmitDuration(data: DurationData) {
+    setIsSubmitting(true);
+    try {
+      await updateVariantAsync({
+        id: variantId,
+        data: {
+          duration: {
+            hasExactDuration: data.hasExactDuration,
+            exactDurationMinutes: data.hasExactDuration ? (data.exactDurationMinutes ?? null) : null,
+            maxDurationMinutes: data.maxDurationMinutes ?? null,
+          },
+        },
+      });
+      resetDuration(data);
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
+
   async function onSubmitEntertainment(data: EntertainmentData) {
     if (!variant) return;
     const block = variant.details.find((d) => d.blockType === "entertainment");
@@ -338,6 +378,7 @@ export default function EntertainmentVariantForm() {
     base: baseForm.handleSubmit(onSubmitBase),
     price: priceForm.handleSubmit(onSubmitPrice),
     capacity: capacityForm.handleSubmit(onSubmitCapacity),
+    duration: durationForm.handleSubmit(onSubmitDuration),
     details: entertainmentForm.handleSubmit(onSubmitEntertainment),
   };
 
@@ -367,6 +408,11 @@ export default function EntertainmentVariantForm() {
         <CapacityForm
           form={capacityForm}
           isActive={activeGroup === "capacity"}
+          texts={S}
+        />
+        <DurationForm
+          form={durationForm}
+          isActive={activeGroup === "duration"}
           texts={S}
         />
         {/* ENTERTAINMENT */}

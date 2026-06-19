@@ -7,6 +7,7 @@ import PageHeading from "@/app/[locale]/(user)/components/page-heading";
 import { canEditCompany } from "@/app/functions/utils/companies";
 import AddTeamMemberModal from "@/app/components/ui/molecules/modals/add-team-member-modal";
 import EditTeamMemberRoleModal from "@/app/components/ui/molecules/modals/edit-team-member-role-modal";
+import { simpleConfirmActionModalEvents } from "@/app/components/ui/molecules/modals/simple-confirm-action-modal";
 import { useAuth } from "@/app/context/auth/auth-context";
 import { useRouter } from "@/app/i18n/navigation";
 import {
@@ -52,12 +53,20 @@ export default function page() {
     updateInvitation({ id, data: { status } });
   }
 
-  function handleDeleteMember(memberId: string) {
-    if (!company) return;
-    const updatedMembers = company.members?.filter(
-      (member) => member.id !== memberId,
-    );
-    updateCompany({ id: companyId, data: { members: updatedMembers } });
+  function handleDeleteMember(memberId: string, memberName: string) {
+    simpleConfirmActionModalEvents.emit("open", {
+      header: "Odebrat člena",
+      description: `Opravdu chcete odebrat člena ${memberName} z týmu?`,
+      confirmLabel: "Odebrat",
+      confirmVersion: "dangerFull",
+      onConfirm: () => {
+        if (!company) return;
+        const updatedMembers = company.members?.filter(
+          (member) => member.id !== memberId,
+        );
+        updateCompany({ id: companyId, data: { members: updatedMembers } });
+      },
+    });
   }
 
   return (
@@ -120,7 +129,8 @@ export default function page() {
             }
             deleteEntityHandler={
               canEditCompany(company, user?.id)
-                ? () => handleDeleteMember(member.id ?? "")
+                ? () =>
+                    handleDeleteMember(member.id ?? "", member.invitationEmail)
                 : undefined
             }
           />
@@ -144,8 +154,16 @@ export default function page() {
                 label={invitation.email}
                 iconColor="text-company"
                 iconBackgroundColor="bg-company-surface"
+                hideRightIcon
                 deleteEntityHandler={() =>
-                  updateInvitationStatus(invitation.id, "cancelled")
+                  simpleConfirmActionModalEvents.emit("open", {
+                    header: "Zrušit pozvánku",
+                    description: `Opravdu chcete zrušit pozvánku pro ${invitation.email}?`,
+                    confirmLabel: "Zrušit pozvánku",
+                    confirmVersion: "dangerFull",
+                    onConfirm: () =>
+                      updateInvitationStatus(invitation.id, "cancelled"),
+                  })
                 }
                 items={[
                   ...(invitation.email

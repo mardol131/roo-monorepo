@@ -1,9 +1,18 @@
 import Text from "@/app/components/ui/atoms/text";
+import { useId } from "react";
+import { Tooltip } from "react-tooltip";
 
 const RADIUS = 9;
 const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
 
-export function EntityCompletionBadge({ percentage }: { percentage: number }) {
+export function EntityCompletionBadge({
+  percentage,
+  tooltipContent,
+}: {
+  percentage: number;
+  tooltipContent?: string;
+}) {
+  const id = useId();
   const offset = CIRCUMFERENCE * (1 - percentage / 100);
 
   const colorClass =
@@ -21,8 +30,10 @@ export function EntityCompletionBadge({ percentage }: { percentage: number }) {
         : "bg-success-surface";
 
   return (
+    <>
     <div
       className={`flex items-center gap-2 px-3 py-1.5 rounded-xl shrink-0 ${bgClass} ${colorClass}`}
+      data-tooltip-id={tooltipContent ? id : undefined}
     >
       <div className="relative w-6 h-6 shrink-0">
         <svg className="w-full h-full -rotate-90" viewBox="0 0 24 24">
@@ -52,5 +63,7 @@ export function EntityCompletionBadge({ percentage }: { percentage: number }) {
         {percentage} %
       </Text>
     </div>
+    {tooltipContent && <Tooltip id={id} content={tooltipContent} />}
+    </>
   );
 }

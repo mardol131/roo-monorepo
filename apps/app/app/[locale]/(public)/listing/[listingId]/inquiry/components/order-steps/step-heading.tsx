@@ -8,7 +8,7 @@ type Props = {
 export default function StepHeading({ title, description }: Props) {
   return (
     <div className="pb-6 border-b border-zinc-100 mb-6">
-      <Text variant="h3" color="textDark" className="font-bold">
+      <Text variant="h1" color="textDark" className="font-bold">
         {title}
       </Text>
       <Text variant="body" color="secondary" className="mt-1">

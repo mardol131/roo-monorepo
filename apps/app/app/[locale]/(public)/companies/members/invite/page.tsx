@@ -10,8 +10,26 @@ import { usePathname } from "@/app/i18n/navigation";
 export default function InvitePage() {
   const searchParams = useSearchParams();
   const companyMemberInviteToken = searchParams.get("companyMemberInviteToken");
-  const { user, isLoading } = useAuth();
+  const email = searchParams.get("email");
+  const { user, isLoading, logout } = useAuth();
   const pathname = usePathname();
+
+  if (user && email !== user?.email) {
+    return (
+      <div className="flex min-h-[60vh] flex-col items-center justify-center gap-6 px-4 text-center">
+        <div className="flex flex-col gap-2">
+          <h1 className="text-2xl font-semibold">
+            Tato pozvánka není pro tento email
+          </h1>
+          <p className="text-muted-foreground max-w-sm text-sm">
+            Odhlašte se a přihlaste se ke správnému účtu, který je spojen s
+            touto pozvánkou.
+          </p>
+        </div>
+        <Button version="companyFull" text="Odhlásit se" onClick={logout} />
+      </div>
+    );
+  }
 
   if (!companyMemberInviteToken) {
     return (
@@ -40,11 +58,12 @@ export default function InvitePage() {
   }
   companyMemberInviteToken;
   if (!user) {
-    const returnUrl = new URL(pathname, process.env.NEXT_PUBLIC_WEBSITE_URL);
+    const returnUrl = new URL(pathname, window.location.origin);
     returnUrl.searchParams.set(
       "companyMemberInviteToken",
       companyMemberInviteToken,
     );
+    if (email) returnUrl.searchParams.set("email", email);
 
     return (
       <div className="flex min-h-[60vh] flex-col items-center justify-center gap-6 px-4 text-center">
@@ -66,7 +85,7 @@ export default function InvitePage() {
               query: {
                 redirectTo: returnUrl.href,
                 accountType: "company",
-                email: searchParams.get("email") ?? undefined,
+                email: email ?? undefined,
               },
             }}
           />

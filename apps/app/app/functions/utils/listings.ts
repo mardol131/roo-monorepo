@@ -58,7 +58,11 @@ export function hasListingRights({
 }
 
 type CompletionField = { label: string; filled: boolean; relevant?: boolean };
-type CompletionGroup = { label: string; weight: number; fields: CompletionField[] };
+type CompletionGroup = {
+  label: string;
+  weight: number;
+  fields: CompletionField[];
+};
 
 function getVenueGroups(
   listing: Listing,
@@ -77,12 +81,10 @@ function getVenueGroups(
         {
           label: "Prostory",
           filled: spacesCount != null && spacesCount > 0,
-          relevant: spacesCount == null || spacesCount > 0,
         },
         {
           label: "Varianty",
           filled: variantsCount != null && variantsCount > 0,
-          relevant: variantsCount == null || variantsCount > 0,
         },
       ],
     },
@@ -91,17 +93,17 @@ function getVenueGroups(
       weight: 3,
       fields: [
         { label: "Logo", filled: !!listing.images.logo?.filename },
-        { label: "Galerie", filled: !!(listing.images.gallery?.length) },
+        { label: "Galerie", filled: !!listing.images.gallery?.length },
       ],
     },
     {
       label: "Prezentace",
       weight: 3,
       fields: [
-        { label: "Reference", filled: !!(detail.references?.length) },
-        { label: "FAQ", filled: !!(detail.faq?.length) },
-        { label: "Zaměstnanci", filled: !!(detail.employees?.length) },
-        { label: "Vlastní sekce", filled: !!(detail.customSections?.length) },
+        { label: "Reference", filled: !!detail.references?.length },
+        { label: "FAQ", filled: !!detail.faq?.length },
+        { label: "Zaměstnanci", filled: !!detail.employees?.length },
+        { label: "Vlastní sekce", filled: !!detail.customSections?.length },
       ],
     },
   ];
@@ -123,7 +125,6 @@ function getGastroGroups(
         {
           label: "Varianty",
           filled: variantsCount != null && variantsCount > 0,
-          relevant: variantsCount == null || variantsCount > 0,
         },
       ],
     },
@@ -132,17 +133,17 @@ function getGastroGroups(
       weight: 2,
       fields: [
         { label: "Logo", filled: !!listing.images.logo?.filename },
-        { label: "Galerie", filled: !!(listing.images.gallery?.length) },
+        { label: "Galerie", filled: !!listing.images.gallery?.length },
       ],
     },
     {
       label: "Prezentace",
       weight: 3,
       fields: [
-        { label: "Reference", filled: !!(detail.references?.length) },
-        { label: "FAQ", filled: !!(detail.faq?.length) },
-        { label: "Zaměstnanci", filled: !!(detail.employees?.length) },
-        { label: "Vlastní sekce", filled: !!(detail.customSections?.length) },
+        { label: "Reference", filled: !!detail.references?.length },
+        { label: "FAQ", filled: !!detail.faq?.length },
+        { label: "Zaměstnanci", filled: !!detail.employees?.length },
+        { label: "Vlastní sekce", filled: !!detail.customSections?.length },
       ],
     },
   ];
@@ -164,7 +165,6 @@ function getEntertainmentGroups(
         {
           label: "Varianty",
           filled: variantsCount != null && variantsCount > 0,
-          relevant: variantsCount == null || variantsCount > 0,
         },
       ],
     },
@@ -173,7 +173,7 @@ function getEntertainmentGroups(
       weight: 2,
       fields: [
         { label: "Logo", filled: !!listing.images.logo?.filename },
-        { label: "Galerie", filled: !!(listing.images.gallery?.length) },
+        { label: "Galerie", filled: !!listing.images.gallery?.length },
       ],
     },
     {
@@ -181,18 +181,21 @@ function getEntertainmentGroups(
       weight: 3,
       fields: [
         { label: "Kapacita", filled: listing.guests?.max != null },
-        { label: "Cílová skupina", filled: !!(detail.audience?.length) },
-        { label: "Logistika", filled: detail.setupAndTearDown?.setupTime != null },
+        { label: "Cílová skupina", filled: !!detail.audience?.length },
+        {
+          label: "Logistika",
+          filled: detail.setupAndTearDown?.setupTime != null,
+        },
       ],
     },
     {
       label: "Prezentace",
       weight: 3,
       fields: [
-        { label: "Reference", filled: !!(detail.references?.length) },
-        { label: "FAQ", filled: !!(detail.faq?.length) },
-        { label: "Zaměstnanci", filled: !!(detail.employees?.length) },
-        { label: "Vlastní sekce", filled: !!(detail.customSections?.length) },
+        { label: "Reference", filled: !!detail.references?.length },
+        { label: "FAQ", filled: !!detail.faq?.length },
+        { label: "Zaměstnanci", filled: !!detail.employees?.length },
+        { label: "Vlastní sekce", filled: !!detail.customSections?.length },
       ],
     },
   ];
@@ -223,14 +226,17 @@ function computeFromGroups(groups: CompletionGroup[]): CompletionFullResult {
 
 export function getListingCompletion(listing: Listing): number {
   const value = listing.detail?.value;
-  const detail = typeof value === "string" ? null : value ?? null;
+  const detail = typeof value === "string" ? null : (value ?? null);
 
   let groups: CompletionGroup[];
   if (listing.type === "venue" && detail?.type === "venue") {
     groups = getVenueGroups(listing, detail);
   } else if (listing.type === "gastro" && detail?.type === "gastro") {
     groups = getGastroGroups(listing, detail);
-  } else if (listing.type === "entertainment" && detail?.type === "entertainment") {
+  } else if (
+    listing.type === "entertainment" &&
+    detail?.type === "entertainment"
+  ) {
     groups = getEntertainmentGroups(listing, detail);
   } else {
     return 0;

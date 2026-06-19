@@ -13,9 +13,9 @@ type Props = {
 const color = (status: Listing["status"]) => {
   switch (status) {
     case "active":
-      return { bgColor: "bg-green-50", textColor: "text-green-500" };
+      return { bgColor: "bg-success-surface", textColor: "text-success" };
     case "archived":
-      return { bgColor: "bg-red-50", textColor: "text-red-500" };
+      return { bgColor: "bg-danger-surface", textColor: "text-danger" };
     default:
       return { bgColor: "bg-zinc-50", textColor: "text-zinc-500" };
   }

@@ -2,9 +2,10 @@ import React, { useState, useRef, useEffect } from "react";
 import { Users, X } from "lucide-react";
 import Text from "@/app/components/ui/atoms/text";
 import { useClickOutside } from "@/app/hooks/use-click-outside";
-import { Event, formatGuestsString } from "@roo/common";
+import { Event } from "@roo/common";
 import ErrorText from "./error-text";
 import InputLabel from "../input-label";
+import { useGuestsString } from "@/app/functions/utils/events";
 
 interface GuestsFilterProps {
   value: Event["guests"];
@@ -30,7 +31,7 @@ export default function GuestsInput({
   useClickOutside(ref, () => setIsOpen(false));
 
   const handleAdultsChange = (newValue: number) => {
-    onChange({ ...value, adults: Math.max(1, newValue) });
+    onChange({ ...value, adults: Math.max(0, newValue) });
   };
 
   const handleChildrenChange = (newValue: number) => {
@@ -45,7 +46,7 @@ export default function GuestsInput({
     onChange({ ...value, pets: !value.pets });
   };
 
-  const displayText = formatGuestsString(value);
+  const displayText = useGuestsString(value);
 
   const controls = (
     <>
@@ -65,7 +66,8 @@ export default function GuestsInput({
           <input
             type="number"
             value={value.adults}
-            onChange={(e) => handleAdultsChange(parseInt(e.target.value))}
+            onChange={(e) => handleAdultsChange(parseInt(e.target.value) || 0)}
+            min="0"
             className="flex-1 px-3 py-2 border border-zinc-200 rounded-lg text-center text-sm focus:outline-none focus:ring-1 focus:ring-rose-500"
           />
           <button
@@ -153,7 +155,7 @@ export default function GuestsInput({
           <button
             type="button"
             onClick={() => setIsOpen(!isOpen)}
-            className="w-full px-3 py-2.5 border border-zinc-200 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-rose-500 bg-white text-left flex items-center justify-between"
+            className={`w-full px-3 py-2.5 border ${error ? "border-danger" : "border-zinc-200"} rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-rose-500 bg-white text-left flex items-center justify-between`}
           >
             <span className="text-zinc-900">{displayText}</span>
             <Users className="w-4 h-4 text-zinc-400" />

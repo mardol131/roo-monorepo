@@ -7,12 +7,24 @@ import OrderCustomRequestCard from "./order-custom-request-card";
 import { useVariantsByListing } from "@/app/react-query/variants/hooks";
 import { useParams } from "next/navigation";
 import Text from "@/app/components/ui/atoms/text";
+import ServiceTimeSection from "../../service-time-section";
 
-export default function OrderStepSelectVariant() {
+export default function OrderStepSelectVariant({
+  eventStart,
+  eventEnd,
+  listingType,
+}: {
+  eventStart?: string;
+  eventEnd?: string;
+  listingType?: string;
+}) {
   const { listingId } = useParams<{ listingId: string }>();
   const { data: variants } = useVariantsByListing(listingId);
+  const { currentVariantId } = useOrderStore();
 
   if (!variants) return null;
+
+  const selectedVariant = variants.docs?.find((v) => v.id === currentVariantId);
 
   return (
     <div>
@@ -26,6 +38,19 @@ export default function OrderStepSelectVariant() {
             <OrderVariantSummaryCard key={v.id} variant={v} index={index} />
           ))}
         </div>
+
+        {selectedVariant && (
+          <ServiceTimeSection
+            duration={selectedVariant.duration ?? undefined}
+            eventStart={eventStart}
+            eventEnd={eventEnd}
+            isOneTime={
+              listingType !== 'venue' &&
+              (selectedVariant.price.pricingUnit === 'lump_sum' ||
+                selectedVariant.price.pricingUnit === 'per_person')
+            }
+          />
+        )}
 
         <div className="flex items-center gap-3">
           <div className="flex-1 h-px bg-zinc-200" />

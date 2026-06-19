@@ -1,17 +1,17 @@
 "use client";
 
-import { usePathname } from "@/app/i18n/navigation";
-import React, { PropsWithChildren, useMemo } from "react";
-import Sidebar, { SidebarProps } from "../components/sidebar";
-import { SubSidebar, SubSidebarProps } from "../components/sub-sidebar";
-import { SidebarItem } from "../components/sidebar-item";
-import { useListing } from "@/app/react-query/listings/hooks";
-import { useCompany } from "@/app/react-query/companies/hooks";
-import { useParams } from "next/navigation";
-import Navbar from "../components/navbar";
-import { canEditCompany } from "../../../functions/utils/companies";
 import { useAuth } from "@/app/context/auth/auth-context";
+import { useCompany } from "@/app/react-query/companies/hooks";
+import { useListing } from "@/app/react-query/listings/hooks";
+import { useParams } from "next/navigation";
+import { PropsWithChildren, useMemo } from "react";
+import { canEditCompany } from "../../../functions/utils/companies";
 import { hasInquiryUpdateCompanyRights } from "../../../functions/utils/inquiries";
+import Navbar from "../components/navbar";
+import Sidebar, { SidebarProps } from "../components/sidebar";
+import { SidebarItem } from "../components/sidebar-item";
+import { SubSidebar, SubSidebarProps } from "../components/sub-sidebar";
+import { usePathname } from "@/app/i18n/navigation";
 
 export default function ContentWrapper({ children }: PropsWithChildren) {
   const pathname = usePathname();
@@ -79,6 +79,19 @@ export default function ContentWrapper({ children }: PropsWithChildren) {
         },
         icon: "Users",
       },
+      ...(hasInquiryUpdateCompanyRights({ company, userId: user?.id })
+        ? [
+            {
+              label: "Platby",
+              href: {
+                pathname: "/company-profile/companies/[companyId]/payments",
+                params: { companyId },
+              },
+              icon: "CreditCard",
+            } as const,
+          ]
+        : []),
+
       {
         label: "Služby",
         href: {
@@ -88,18 +101,18 @@ export default function ContentWrapper({ children }: PropsWithChildren) {
         icon: "Tag",
       },
 
-      ...(canEditCompany(company, user?.id)
-        ? [
-            {
-              label: "Nová služba",
-              href: {
-                pathname: "/company-profile/companies/[companyId]/listings/new",
-                params: { companyId },
-              },
-              icon: "Plus",
-            } as const,
-          ]
-        : []),
+      //   ...(canEditCompany(company, user?.id)
+      //     ? [
+      //         {
+      //           label: "Nová služba",
+      //           href: {
+      //             pathname: "/company-profile/companies/[companyId]/listings/new",
+      //             params: { companyId },
+      //           },
+      //           icon: "Plus",
+      //         } as const,
+      //       ]
+      //     : []),
     ];
 
     const spaceMenuItem: SidebarItem = {
@@ -182,15 +195,6 @@ export default function ContentWrapper({ children }: PropsWithChildren) {
               params: { companyId, listingId },
             },
             icon: "Layers",
-          },
-          {
-            label: "Nová varianta",
-            href: {
-              pathname:
-                "/company-profile/companies/[companyId]/listings/[listingId]/variants/new",
-              params: { companyId, listingId },
-            },
-            icon: "Plus",
           },
         ]
       : undefined;

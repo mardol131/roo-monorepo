@@ -18,7 +18,7 @@ export const inquiryAccess: CollectionAccess = {
       overrideAccess: true,
     })
 
-    return listing?.status === 'active' && listing?.subscriptionActive === true
+    return listing?.status === 'active' && listing?.subscriptionStatus === 'paid'
   },
 
   read: async ({ req }) => {
@@ -56,10 +56,7 @@ export const inquiryAccess: CollectionAccess = {
     const sharedEvents = await req.payload.find({
       collection: 'events',
       where: {
-        and: [
-          { id: { in: eventIds } },
-          { 'sharing.confirmedInquiries': { equals: true } },
-        ],
+        and: [{ id: { in: eventIds } }, { 'sharing.confirmedInquiries': { equals: true } }],
       },
       overrideAccess: true,
       depth: 0,
@@ -74,30 +71,43 @@ export const inquiryAccess: CollectionAccess = {
       or: [
         ...((ownQuery.or as Where[]) ?? []),
         {
-          and: [
-            { event: { in: sharedEventIds } },
-            { 'status.company': { equals: 'confirmed' } },
-          ],
+          and: [{ event: { in: sharedEventIds } }, { 'status.company': { equals: 'confirmed' } }],
         },
       ],
     }
     return query
   },
 
-  update: ({ req }) => {
+  update: async ({ req }) => {
     if (!req.user) return false
     if (req.user.collection === 'admins') return true
+
+    const companies = await req.payload.find({
+      collection: 'companies',
+      where: {
+        or: [{ owner: { equals: req.user.id } }, { 'members.user': { equals: req.user.id } }],
+      },
+      overrideAccess: true,
+      depth: 0,
+    })
+
+    const allowedCompanyIds = companies.docs
+      .filter((company) => {
+        const ownerId = getIdFromRelationshipField(company.owner)
+        if (ownerId === req.user!.id) return true
+        return company.members?.some((member) => {
+          const memberId = getIdFromRelationshipField(member.user)
+          return memberId === req.user!.id && (member.role === 'admin' || member.role === 'manager')
+        })
+      })
+      .map((c) => c.id)
 
     const where: Where = {
       or: [
         { user: { equals: req.user.id } },
-        { 'listing.company.owner': { equals: req.user.id } },
-        {
-          and: [
-            { 'listing.company.members.user': { equals: req.user.id } },
-            { 'listing.company.members.role': { in: ['admin', 'manager'] } },
-          ],
-        },
+        ...(allowedCompanyIds.length > 0
+          ? [{ 'listing.company': { in: allowedCompanyIds.join(',') } }]
+          : []),
       ],
     }
     return where

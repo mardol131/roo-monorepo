@@ -135,30 +135,15 @@ export const eventsFields: Field[] = [
     required: true,
     fields: [
       {
-        name: 'type',
-        type: 'select',
-        required: true,
-        defaultValue: 'custom',
-        options: ['custom', 'venue'],
-      },
-      {
-        name: 'venue',
+        name: 'district',
         type: 'relationship',
-        relationTo: 'listings',
-        admin: {
-          description: 'Vyberte venue z katalogu služeb.',
-        },
+        relationTo: 'districts',
+        required: true,
       },
       {
         name: 'city',
         type: 'relationship',
         relationTo: 'cities',
-        validate: (value: unknown, { siblingData }: { siblingData: Record<string, unknown> }) => {
-          if (siblingData?.type === 'custom' && !value) {
-            return 'Město je povinné, pokud není zvoleno venue z katalogu.'
-          }
-          return true
-        },
       },
       {
         name: 'address',
@@ -168,12 +153,6 @@ export const eventsFields: Field[] = [
         name: 'spaceType',
         type: 'relationship',
         relationTo: 'space-types',
-        validate: (value: unknown, { siblingData }: { siblingData: Record<string, unknown> }) => {
-          if (siblingData?.type === 'custom' && !value) {
-            return 'Typ prostoru je povinný, pokud není zvoleno venue z katalogu.'
-          }
-          return true
-        },
       },
       {
         name: 'description',

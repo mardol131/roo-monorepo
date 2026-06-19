@@ -59,6 +59,43 @@ export async function getCollection<T extends keyof Config["collections"]>({
   return res.json();
 }
 
+export type GetCollectionCountOptions<T extends keyof Config["collections"]> = {
+  collection: T;
+} & Pick<GetCollectionParams, "query" | "searchParams" | "headers">;
+
+export async function getCollectionItemsCount<
+  T extends keyof Config["collections"],
+>({
+  collection,
+  query,
+  searchParams,
+  headers,
+}: GetCollectionCountOptions<T>): Promise<{ totalDocs: number }> {
+  const url = `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/${collection}/count`;
+  const stringifiedQuery = query
+    ? stringify({ where: query }, { encodeValuesOnly: true })
+    : undefined;
+
+  const queryParams = [stringifiedQuery, searchParams?.toString()]
+    .filter(Boolean)
+    .join("&");
+
+  const res = await fetch(`${url}?${queryParams}`, {
+    headers: {
+      "Content-Type": "application/json",
+      ...headers,
+    },
+    credentials: "include",
+  });
+  if (!res.ok) throw new Error(`Failed to fetch collection ${collection}`);
+  return res.json();
+}
+
+export type GetCollectionItemOptions = Omit<
+  GetCollectionParams,
+  "query" | "limit" | "page"
+>;
+
 export async function getCollectionItem<T extends keyof Config["collections"]>({
   collection,
   id,
@@ -68,23 +105,16 @@ export async function getCollectionItem<T extends keyof Config["collections"]>({
 }: {
   collection: T;
   id: string;
-  headers?: Record<string, string>;
-  searchParams?: URLSearchParams;
-} & Omit<GetCollectionParams, "query" | "limit" | "page">): Promise<
-  Config["collections"][T]
-> {
+} & GetCollectionItemOptions): Promise<Config["collections"][T]> {
   const url = new URL(
     `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/${collection}/${id}`,
   );
 
-  const depthQuery =
-    depth !== null && depth !== undefined ? `depth=${depth}` : undefined;
-
   if (searchParams) {
     url.search = searchParams.toString();
   }
-  if (depthQuery) {
-    url.searchParams.set("depth", depthQuery);
+  if (depth !== null && depth !== undefined) {
+    url.searchParams.set("depth", String(depth));
   }
 
   const res = await fetch(url.toString(), {
@@ -179,6 +209,7 @@ export async function postCollectionItem<
     | "user"
     | "type"
     | "tariff"
+    | "subscriptionStatus"
   >;
 }): Promise<{ doc: Config["collections"][T]; message: string }> {
   const url = new URL(

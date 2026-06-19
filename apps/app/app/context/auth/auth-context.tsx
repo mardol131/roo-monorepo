@@ -5,6 +5,8 @@ import {
   logout,
   refreshToken,
   refreshUser,
+  requestEmailChange,
+  requestPasswordReset,
   switchAccountTypeToCompany,
 } from "@/app/functions/api/users";
 import { usePathname } from "next/navigation";
@@ -28,10 +30,18 @@ interface AuthContextValue {
   user: User | null;
   isLoading: boolean;
   isAuthenticated: boolean;
-  login: (email: string, password: string) => Promise<{ error?: string }>;
+  login: (email: string, password: string) => Promise<Response>;
   logout: () => Promise<void>;
   refresh: () => Promise<void>;
   switchProfileTypeToCompany: () => Promise<void>;
+  requestEmailChange: (
+    newEmail: string,
+    redirectTo?: string,
+  ) => Promise<Response | undefined>;
+  requestPasswordReset: (
+    email: string,
+    redirectTo?: string,
+  ) => Promise<Response>;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -44,6 +54,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const queryClient = useQueryClient();
+
+  console.log(user);
 
   useEffect(() => {
     if (isLoading) return;
@@ -79,6 +91,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }, msUntilRefresh);
   }, []);
 
+  const requestEmailChangeHandler = useCallback(
+    async (newEmail: string, redirectTo?: string) => {
+      if (!user) return;
+
+      const res = await requestEmailChange(newEmail, redirectTo);
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data?.errors?.[0]?.message ?? "Změna e-mailu selhala.");
+      }
+
+      return res;
+    },
+    [user],
+  );
+
   const refresh = useCallback(async () => {
     try {
       const res = await refreshUser();
@@ -88,7 +115,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       } else {
         setUser(null);
       }
-    } catch {
+    } catch (error) {
+      console.error("Error refreshing user:", error);
       setUser(null);
     }
   }, []);
@@ -101,13 +129,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [refresh]);
 
   const loginHandler = useCallback(
-    async (email: string, password: string): Promise<{ error?: string }> => {
+    async (email: string, password: string): Promise<Response> => {
       const res = await login(email, password);
-
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        return { error: data?.errors?.[0]?.message ?? "Přihlášení selhalo" };
-      }
 
       const data = await res.json();
       setUser(data.user ?? null);
@@ -116,7 +139,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         tokenExpRef.current = data.exp;
         scheduleRefresh(data.exp);
       }
-      return {};
+      return res;
     },
     [scheduleRefresh],
   );
@@ -133,6 +156,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     await refresh();
   }, [user, refresh]);
 
+  const requestPasswordResetHandler = useCallback(
+    async (email: string, redirectTo?: string) => {
+      const res = await requestPasswordReset({ email, redirectTo });
+      return res;
+    },
+    [],
+  );
+
   return (
     <AuthContext.Provider
       value={{
@@ -143,6 +174,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         logout: logoutHandler,
         refresh,
         switchProfileTypeToCompany,
+        requestEmailChange: requestEmailChangeHandler,
+        requestPasswordReset: requestPasswordResetHandler,
       }}
     >
       {children}

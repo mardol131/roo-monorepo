@@ -99,7 +99,7 @@ export const listingAccessControl: CollectionAccess = {
     if (req.user?.collection === 'admins') return true
     if (!req.user) {
       const query: Where = {
-        and: [{ status: { equals: 'active' } }, { subscriptionActive: { equals: true } }],
+        and: [{ status: { equals: 'active' } }, { subscriptionStatus: { equals: 'paid' } }],
       }
       return query
     }
@@ -119,7 +119,7 @@ export const listingAccessControl: CollectionAccess = {
           ],
         },
         {
-          and: [{ status: { equals: 'active' } }, { subscriptionActive: { equals: true } }],
+          and: [{ status: { equals: 'active' } }, { subscriptionStatus: { equals: 'paid' } }],
         },
       ],
     }

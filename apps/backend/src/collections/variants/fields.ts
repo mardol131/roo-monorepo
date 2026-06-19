@@ -201,6 +201,37 @@ export const variantsCommonFields: Field[] = [
     ],
   },
   {
+    name: 'duration',
+    type: 'group',
+    fields: [
+      {
+        name: 'hasExactDuration',
+        type: 'checkbox',
+        defaultValue: false,
+      },
+      {
+        name: 'exactDurationMinutes',
+        type: 'number',
+        min: 1,
+        admin: {
+          condition: (_: unknown, siblingData: Record<string, unknown>) =>
+            !!siblingData?.hasExactDuration,
+        },
+        validate: (value: unknown, { siblingData }: { siblingData: Record<string, unknown> }) => {
+          if (siblingData?.hasExactDuration && (value === undefined || value === null)) {
+            return 'Zadejte přesnou délku v minutách'
+          }
+          return true
+        },
+      },
+      {
+        name: 'maxDurationMinutes',
+        type: 'number',
+        min: 1,
+      },
+    ],
+  },
+  {
     name: 'images',
     type: 'group',
     required: true,

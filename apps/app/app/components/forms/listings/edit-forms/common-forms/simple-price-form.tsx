@@ -7,6 +7,7 @@ import SeasonalPricesInput from "@/app/components/ui/atoms/inputs/seasonal-price
 import { Controller, UseFormReturn } from "react-hook-form";
 import { SimplePriceData } from "../common-schema";
 import PriceInput from "@/app/components/ui/atoms/inputs/price-input";
+import type { PricingUnits } from "@roo/common";
 
 type Props = {
   form: UseFormReturn<SimplePriceData>;
@@ -15,9 +16,10 @@ type Props = {
     price: TocSection;
     seasonalPrices: TocSection;
   };
+  priceUnitOptions?: PricingUnits[];
 };
 
-export function SimplePriceForm({ form, isActive, texts }: Props) {
+export function SimplePriceForm({ form, isActive, texts, priceUnitOptions }: Props) {
   return (
     <div className={!isActive ? "hidden" : "flex flex-col gap-4"}>
       <FormSection
@@ -53,6 +55,7 @@ export function SimplePriceForm({ form, isActive, texts }: Props) {
               onUnitChange={field.onChange}
               amountError={form.formState.errors.price?.base?.message}
               unitError={form.formState.errors.price?.pricingUnit?.message}
+              options={priceUnitOptions}
             />
           )}
         />

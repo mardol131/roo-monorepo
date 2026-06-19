@@ -1,19 +1,10 @@
-import { getCollection } from "@/app/functions/api/general";
-import { PayloadResponse, Region, Where } from "@roo/common";
-import { stringify } from "qs-esm";
-
-const baseUrl = `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/regions`;
+import { getCollection, GetCollectionParams } from "@/app/functions/api/general";
+import { PayloadResponse, Region } from "@roo/common";
 
 export async function fetchRegions(
-  query?: Where,
-  limit = 10,
+  options?: GetCollectionParams,
 ): Promise<PayloadResponse<Region>> {
-  const res = await getCollection({
-    collection: "regions",
-    query,
-    limit,
-  });
-
+  const res = await getCollection({ collection: "regions", ...options });
   if (!res) throw new Error("Failed to fetch regions");
   return res;
 }

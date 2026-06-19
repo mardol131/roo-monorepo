@@ -37,7 +37,9 @@ export function FormSection({
         iconColor={color}
         headerRightComponent={headerRightComponent}
       />
-      <div className="px-6 py-5 flex flex-col gap-4">{children}</div>
+      {children !== null && (
+        <div className="px-6 py-5 flex flex-col gap-4">{children}</div>
+      )}
     </div>
   );
 }

@@ -85,7 +85,10 @@ export default function Page() {
   const router = useRouter();
   const { user, isAuthenticated } = useAuth();
 
-  const { data: listing, isLoading: isLoadingListing } = useListing(listingId);
+  const { data: listing, isLoading: isLoadingListing } = useListing(listingId, {
+    depth: 3,
+  });
+
   const { data: company } = useCompany(
     listing ? getIdFromRelationshipField(listing.company) : undefined,
   );

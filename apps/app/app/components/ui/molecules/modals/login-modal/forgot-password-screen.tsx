@@ -3,6 +3,7 @@
 import Button from "@/app/components/ui/atoms/button";
 import Input from "@/app/components/ui/atoms/inputs/input";
 import Text from "@/app/components/ui/atoms/text";
+import { useAuth } from "@/app/context/auth/auth-context";
 import { useForm } from "react-hook-form";
 
 type ForgotFormValues = { email: string };
@@ -19,20 +20,18 @@ export default function ForgotPasswordScreen({ onSuccess, onBack }: Props) {
     formState: { errors, isSubmitting },
     setError,
   } = useForm<ForgotFormValues>();
+  const { requestPasswordReset } = useAuth();
 
   async function onSubmit(data: ForgotFormValues) {
     try {
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_PAYLOAD_URL}/api/users/forgot-password`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email: data.email }),
-        },
+      const res = await requestPasswordReset(
+        data.email,
+        window.location.pathname,
       );
-      if (!res.ok) {
-        const body = await res.json().catch(() => null);
-        setError("root", {
+
+      if (!res?.ok) {
+        const body = await res?.json().catch(() => null);
+        setError("email", {
           message:
             body?.errors?.[0]?.message ??
             "Nepodařilo se odeslat e-mail. Zkuste to prosím znovu.",
@@ -87,16 +86,16 @@ export default function ForgotPasswordScreen({ onSuccess, onBack }: Props) {
         loading={isSubmitting}
         className="w-full"
       />
-
-      <div className="text-center">
-        <button
-          type="button"
-          onClick={onBack}
-          className="text-sm text-zinc-400 hover:text-zinc-700 hover:underline transition-colors"
-        >
-          Zpět na přihlášení
-        </button>
-      </div>
+      <Button
+        text="Zpět na přihlášení"
+        htmlType="button"
+        version="plain"
+        size="md"
+        rounding="lg"
+        loading={isSubmitting}
+        className="w-full"
+        onClick={onBack}
+      />
     </form>
   );
 }

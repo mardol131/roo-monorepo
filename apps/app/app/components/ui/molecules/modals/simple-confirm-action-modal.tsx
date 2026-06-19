@@ -4,6 +4,7 @@ import Button, { ButtonProps } from "@/app/components/ui/atoms/button";
 import { createEvents } from "@/app/functions/create-events";
 import { useState } from "react";
 import ModalLayout from "../modal-layout";
+import Text from "../../atoms/text";
 
 type ModalConfig = {
   header: string;
@@ -50,13 +51,15 @@ export function SimpleConfirmActionModal() {
       await config.onConfirm();
       handleClose();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Nastala chyba. Zkuste to znovu.");
+      setError(
+        err instanceof Error ? err.message : "Nastala chyba. Zkuste to znovu.",
+      );
     } finally {
       setIsProcessing(false);
     }
   }
 
-  if (!config) return null;
+  if (!config || !isOpen) return null;
 
   return (
     <ModalLayout
@@ -64,11 +67,11 @@ export function SimpleConfirmActionModal() {
       isOpen={isOpen}
       onClose={handleClose}
       disableClose={isProcessing}
-      errorMessage={error ?? undefined}
+      errorMessages={error ? [error] : undefined}
       maxWidth="max-w-md"
     >
       <div className="flex flex-col gap-5">
-        <p className="text-sm text-zinc-600">{config.description}</p>
+        <Text variant="label-lg">{config.description}</Text>
         <div className="flex justify-end gap-3">
           <Button
             htmlType="button"

@@ -18,6 +18,7 @@ import { Listing } from "@roo/common";
 import { Trash2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useParams } from "next/navigation";
+import ListingSubscriptionStatusTag from "@/app/[locale]/(user)/components/tags/listing-subscription-status-tag";
 
 export default function page() {
   const { companyId } = useParams<{ companyId: string }>();
@@ -113,7 +114,13 @@ export default function page() {
               pathname: `/company-profile/companies/[companyId]/listings/[listingId]`,
               params: { companyId, listingId: listing.id },
             }}
-            labelComponent={<ListingStatusTag status={listing.status} />}
+            labelComponent={[
+              <ListingStatusTag key="status" status={listing.status} />,
+              <ListingSubscriptionStatusTag
+                key="subscription"
+                status={listing.subscriptionStatus}
+              />,
+            ]}
             deleteEntityHandler={
               hasListingRights({
                 company,

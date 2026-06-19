@@ -20,18 +20,16 @@ const audienceLabels: Record<string, string> = {
 export default function EntertainmentSection({ detail, listing }: Props) {
   const { data: filters } = useFilterOptions();
 
-  const entertainmentTypes = (
-    listing.properties.entertainmentTypes ?? []
-  ).flatMap((id) => {
-    const found = filters?.entertainmentTypes.find((e) => e.id === id);
+  const musicGenres = (listing.filters?.musicGenres ?? []).flatMap((id) => {
+    const found = filters?.musicGenres.find((e) => e.id === (typeof id === "string" ? id : id.id));
     return found ? [found.name] : [];
   });
-  const rules = (listing.properties.entertainmentRules ?? []).flatMap((id) => {
-    const found = filters?.rules.find((e) => e.id === id);
+  const rules = (listing.filters.entertainmentRules ?? []).flatMap((id) => {
+    const found = filters?.entertainmentRules.find((e) => e.id === (typeof id === "string" ? id : id.id));
     return found ? [found.name] : [];
   });
-  const necessities = (listing.properties.necessities ?? []).flatMap((id) => {
-    const found = filters?.necessities.find((e) => e.id === id);
+  const necessities = (listing.filters.necessities ?? []).flatMap((id) => {
+    const found = filters?.necessities.find((e) => e.id === (typeof id === "string" ? id : id.id));
     return found ? [found.name] : [];
   });
 
@@ -39,9 +37,9 @@ export default function EntertainmentSection({ detail, listing }: Props) {
 
   return (
     <>
-      {entertainmentTypes.length > 0 && (
-        <SectionWrapper title="Typy zábavy">
-          <ChipList items={entertainmentTypes} />
+      {musicGenres.length > 0 && (
+        <SectionWrapper title="Hudební žánry">
+          <ChipList items={musicGenres} />
         </SectionWrapper>
       )}
 
@@ -51,22 +49,22 @@ export default function EntertainmentSection({ detail, listing }: Props) {
         </SectionWrapper>
       )}
 
-      {(detail.setupAndTearDownRules.setupTime != null ||
-        detail.setupAndTearDownRules.tearDownTime != null) && (
+      {(detail.setupAndTearDown.setupTime != null ||
+        detail.setupAndTearDown.tearDownTime != null) && (
         <SectionWrapper title="Příprava a úklid">
           <div className="flex flex-col gap-2">
-            {detail.setupAndTearDownRules.setupTime != null && (
+            {detail.setupAndTearDown.setupTime != null && (
               <InfoRow
                 icon={<Clock size={16} />}
                 label="Příprava"
-                value={`${detail.setupAndTearDownRules.setupTime} min`}
+                value={`${detail.setupAndTearDown.setupTime} min`}
               />
             )}
-            {detail.setupAndTearDownRules.tearDownTime != null && (
+            {detail.setupAndTearDown.tearDownTime != null && (
               <InfoRow
                 icon={<Clock size={16} />}
                 label="Úklid"
-                value={`${detail.setupAndTearDownRules.tearDownTime} min`}
+                value={`${detail.setupAndTearDown.tearDownTime} min`}
               />
             )}
           </div>

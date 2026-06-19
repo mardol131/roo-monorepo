@@ -20,8 +20,7 @@ export const getMapPins: Endpoint = {
       id: string
       name: string
       location: {
-        latitude: number
-        longitude: number
+        point: [number, number]
       }
       images: {
         coverImage: {
@@ -35,10 +34,9 @@ export const getMapPins: Endpoint = {
         collection: 'listings',
         where: {
           and: [
-            { 'location.latitude': { exists: true } },
-            { 'location.longitude': { exists: true } },
+            { 'location.point': { exists: true } },
             { status: { equals: 'active' } },
-            { subscriptionActive: { equals: true } },
+            { subscriptionStatus: { equals: 'paid' } },
           ],
         },
         depth: 0,
@@ -71,18 +69,24 @@ export const getMapPins: Endpoint = {
         bboxMaxLat: number
       }
 
+      const bboxPolygon = {
+        type: 'Polygon',
+        coordinates: [[
+          [bboxMinLon, bboxMinLat],
+          [bboxMaxLon, bboxMinLat],
+          [bboxMaxLon, bboxMaxLat],
+          [bboxMinLon, bboxMaxLat],
+          [bboxMinLon, bboxMinLat],
+        ]],
+      }
+
       const listings = await req.payload.find({
         collection: 'listings',
         where: {
           and: [
-            { 'location.longitude': { greater_than_equal: bboxMinLon } },
-            { 'location.longitude': { less_than_equal: bboxMaxLon } },
-            { 'location.latitude': { greater_than_equal: bboxMinLat } },
-            { 'location.latitude': { less_than_equal: bboxMaxLat } },
-            { 'location.latitude': { exists: true } },
-            { 'location.longitude': { exists: true } },
+            { 'location.point': { within: bboxPolygon } },
             { status: { equals: 'active' } },
-            { subscriptionActive: { equals: true } },
+            { subscriptionStatus: { equals: 'paid' } },
           ],
         },
         depth: 0,
@@ -104,8 +108,8 @@ export const getMapPins: Endpoint = {
       data: listingsDocs.map((l) => ({
         id: l.id,
         name: l.name,
-        latitude: l.location.latitude,
-        longitude: l.location.longitude,
+        latitude: l.location.point[1],
+        longitude: l.location.point[0],
         coverImage: l.images.coverImage.filename,
       })),
     })

@@ -15,12 +15,13 @@ interface TimeInputProps {
   placeholder?: string;
   error?: string;
   isRequired?: boolean;
+  hideClearButton?: boolean;
 }
 
 function generateTimeOptions(min?: string, max?: string): string[] {
   const options: string[] = [];
   for (let h = 0; h < 24; h++) {
-    for (let m = 0; m < 60; m += 5) {
+    for (let m = 0; m < 60; m += 15) {
       const time = `${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}`;
       if (min && time < min) continue;
       if (max && time > max) continue;
@@ -40,6 +41,7 @@ export default function TimeInput({
   placeholder = "Vyberte čas",
   error,
   isRequired,
+  hideClearButton,
 }: TimeInputProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [openUpward, setOpenUpward] = useState(false);
@@ -55,7 +57,10 @@ export default function TimeInput({
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
-      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+      if (
+        containerRef.current &&
+        !containerRef.current.contains(e.target as Node)
+      ) {
         setIsOpen(false);
       }
     };
@@ -69,7 +74,8 @@ export default function TimeInput({
         if (selectedRef.current && listRef.current) {
           const list = listRef.current;
           const item = selectedRef.current;
-          list.scrollTop = item.offsetTop - list.clientHeight / 2 + item.offsetHeight / 2;
+          list.scrollTop =
+            item.offsetTop - list.clientHeight / 2 + item.offsetHeight / 2;
         }
       }, 0);
     } else {
@@ -104,11 +110,13 @@ export default function TimeInput({
         >
           <div className="flex items-center gap-2">
             <Clock className="w-4 h-4 text-zinc-400 shrink-0" />
-            <span className={`text-sm ${value ? "text-zinc-900" : "text-zinc-400"}`}>
+            <span
+              className={`text-sm ${value ? "text-zinc-900" : "text-zinc-400"}`}
+            >
               {value ?? placeholder}
             </span>
           </div>
-          {value ? (
+          {!hideClearButton && value ? (
             <button
               type="button"
               onClick={(e) => {

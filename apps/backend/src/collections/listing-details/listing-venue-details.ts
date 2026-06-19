@@ -1,4 +1,5 @@
 import type { CollectionConfig, Field } from 'payload'
+import { PRICING_UNITS_ARRAY } from '@roo/common'
 import { customSectionsFields, priceableOptionFields } from '../listings/fields'
 import { listingDetailAccessControl } from '../listings/access'
 import { commonListingDetailFields } from './common'
@@ -234,10 +235,70 @@ export const ListingVenueDetails: CollectionConfig = {
             return true
           },
         },
+        {
+          name: 'parkingPriceUnit',
+          type: 'select',
+          options: ['space', 'event'],
+          defaultValue: 'space',
+          validate: (value: unknown, { siblingData }: { siblingData: Record<string, unknown> }) => {
+            if (siblingData?.parkingIsIncludedInPrice && (value === undefined || value === null)) {
+              return 'Zadejte cenu parkování'
+            }
+            return true
+          },
+        },
       ],
     },
     listingVenueDetailFilters,
     listingVenueDetailOptions,
+    {
+      name: 'catering',
+      type: 'group',
+      required: true,
+      fields: [
+        {
+          name: 'hasCatering',
+          type: 'checkbox',
+          defaultValue: false,
+        },
+        {
+          name: 'cateringIsIncludedInPrice',
+          type: 'checkbox',
+          defaultValue: false,
+        },
+        {
+          name: 'price',
+          type: 'number',
+          min: 0,
+        },
+        {
+          name: 'pricingUnit',
+          type: 'select',
+          options: PRICING_UNITS_ARRAY.filter((u) => u !== 'per_day'),
+        },
+        {
+          name: 'cuisines',
+          type: 'array',
+          fields: [
+            { name: 'cuisine', type: 'relationship', relationTo: 'cuisines', required: true },
+            ...priceableOptionFields,
+          ],
+        },
+        {
+          name: 'foodPreparationStyles',
+          type: 'array',
+          fields: [
+            {
+              name: 'foodPreparationStyle',
+              type: 'relationship',
+              relationTo: 'food-preparation-styles',
+              required: true,
+            },
+            ...priceableOptionFields,
+          ],
+        },
+      ],
+    },
     {
       name: 'breakfast',
       type: 'group',

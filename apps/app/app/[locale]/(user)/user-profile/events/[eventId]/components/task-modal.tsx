@@ -18,11 +18,23 @@ type Props = {
   isLoading?: boolean;
 };
 
-export default function TaskModal({ isOpen, onClose, onSubmit, initialValues, isLoading }: Props) {
+export default function TaskModal({
+  isOpen,
+  onClose,
+  onSubmit,
+  initialValues,
+  isLoading,
+}: Props) {
   const [label, setLabel] = useState(initialValues?.label ?? "");
-  const [description, setDescription] = useState(initialValues?.description ?? "");
-  const [dueDate, setDueDate] = useState<string | null>(initialValues?.dueDate ?? null);
-  const [priority, setPriority] = useState<"low" | "medium" | "high">(initialValues?.priority ?? "medium");
+  const [description, setDescription] = useState(
+    initialValues?.description ?? "",
+  );
+  const [dueDate, setDueDate] = useState<string | null>(
+    initialValues?.dueDate ?? null,
+  );
+  const [priority, setPriority] = useState<"low" | "medium" | "high">(
+    initialValues?.priority ?? "medium",
+  );
 
   useEffect(() => {
     if (isOpen) {
@@ -48,6 +60,7 @@ export default function TaskModal({ isOpen, onClose, onSubmit, initialValues, is
       dueDate: dueDate ?? undefined,
       completed: initialValues?.completed ?? false,
       priority,
+      status: initialValues?.status ?? "active",
     });
   }
 
@@ -89,6 +102,7 @@ export default function TaskModal({ isOpen, onClose, onSubmit, initialValues, is
           onChange={setDueDate}
           placeholder="Volitelný termín…"
           dateOnly
+          calendarPosition="fixed"
         />
 
         <div className="flex flex-col gap-1.5">
@@ -122,7 +136,13 @@ export default function TaskModal({ isOpen, onClose, onSubmit, initialValues, is
         </div>
 
         <div className="flex justify-end gap-2 pt-2">
-          <Button text="Zrušit" version="plain" size="sm" disabled={isLoading} onClick={handleClose} />
+          <Button
+            text="Zrušit"
+            version="plain"
+            size="sm"
+            disabled={isLoading}
+            onClick={handleClose}
+          />
           <Button
             text={isEditing ? "Uložit" : "Přidat úkol"}
             iconLeft={isEditing ? "Save" : "Plus"}

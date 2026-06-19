@@ -193,16 +193,16 @@ export default function CatalogSidebarFilters({ type }: CatalogFiltersProps) {
     query: cityFilter ? { id: { equals: cityFilter } } : undefined,
     enabled: !!cityFilter,
   });
-  const { data: districts } = useDistricts(
-    districtFilter ? { id: { equals: districtFilter } } : undefined,
-    1,
-    !!districtFilter,
-  );
-  const { data: regions } = useRegions(
-    regionFilter ? { id: { equals: regionFilter } } : undefined,
-    1,
-    !!regionFilter,
-  );
+  const { data: districts } = useDistricts({
+    query: districtFilter ? { id: { equals: districtFilter } } : undefined,
+    limit: 1,
+    enabled: !!districtFilter,
+  });
+  const { data: regions } = useRegions({
+    query: regionFilter ? { id: { equals: regionFilter } } : undefined,
+    limit: 1,
+    enabled: !!regionFilter,
+  });
 
   const city = cityFilter ? cities?.docs?.[0] : undefined;
   const district = districtFilter ? districts?.docs?.[0] : undefined;

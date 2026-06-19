@@ -57,21 +57,52 @@ export async function verifyUsersEmail(token: string) {
   return res;
 }
 
-export async function changeEmail(userId: string, email: string) {
-  return fetch(`${apiUrl}/api/users/${userId}`, {
-    method: "PATCH",
+export async function requestEmailChange(
+  newEmail: string,
+  redirectTo?: string,
+) {
+  return fetch(`${apiUrl}/api/users/verify-new-email`, {
+    method: "POST",
     headers: { "Content-Type": "application/json" },
     credentials: "include",
-    body: JSON.stringify({ email }),
+    body: JSON.stringify({ pendingEmail: newEmail, redirectTo }),
   });
 }
 
-export async function changePassword(userId: string, password: string) {
+export async function confirmNewEmail(token: string) {
+  return fetch(`${apiUrl}/api/users/confirm-new-email`, {
+    method: "post",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify({ token }),
+  });
+}
+
+export async function requestPasswordReset({
+  email,
+  redirectTo,
+}: {
+  email: string;
+  redirectTo?: string;
+}) {
+  return fetch(`${apiUrl}/api/users/forgot-password`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify({ email, redirectTo }),
+  });
+}
+
+export async function updateUserName(
+  userId: string,
+  firstName: string,
+  lastName: string,
+) {
   return fetch(`${apiUrl}/api/users/${userId}`, {
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
     credentials: "include",
-    body: JSON.stringify({ password }),
+    body: JSON.stringify({ firstName, lastName }),
   });
 }
 
@@ -110,6 +141,23 @@ export async function refreshToken() {
     headers: { "Content-Type": "application/json" },
     credentials: "include",
   });
+
+  return response;
+}
+
+export async function sendMagicLinkLoginEmail(
+  email: string,
+  redirectTo: string,
+) {
+  const response = await fetch(
+    `${apiUrl}/api/users/magic-link-login/send-email`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({ email, redirectTo }),
+    },
+  );
 
   return response;
 }

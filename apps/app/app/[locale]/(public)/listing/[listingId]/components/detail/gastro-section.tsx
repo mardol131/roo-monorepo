@@ -13,26 +13,27 @@ interface Props {
 export default function GastroSection({ detail, listing }: Props) {
   const { data: filters } = useFilterOptions();
 
-  const cuisines = (listing.properties.cuisines ?? []).flatMap((id) => {
-    const found = filters?.cuisines.find((e) => e.id === id);
+  const resolve = (id: string | { id: string }) =>
+    typeof id === "string" ? id : id.id;
+
+  const cuisines = (listing.options?.cuisines ?? []).flatMap((id) => {
+    const found = filters?.cuisines.find((e) => e.id === resolve(id));
     return found ? [found.name] : [];
   });
-  const dishTypes = (listing.properties.dishTypes ?? []).flatMap((id) => {
-    const found = filters?.dishTypes.find((e) => e.id === id);
+  const dishTypes = (listing.filters?.dishTypes ?? []).flatMap((id) => {
+    const found = filters?.dishTypes.find((e) => e.id === resolve(id));
     return found ? [found.name] : [];
   });
-  const dietary = (listing.properties.dietaryOptions ?? []).flatMap((id) => {
-    const found = filters?.dietaryOptions.find((e) => e.id === id);
+  const dietary = (listing.filters?.dietaryOptions ?? []).flatMap((id) => {
+    const found = filters?.dietaryOptions.find((e) => e.id === resolve(id));
     return found ? [found.name] : [];
   });
-  const serviceStyles = (listing.properties.foodServiceStyles ?? []).flatMap(
-    (id) => {
-      const found = filters?.foodServiceStyles.find((e) => e.id === id);
-      return found ? [found.name] : [];
-    },
-  );
-  const necessities = (listing.properties.necessities ?? []).flatMap((id) => {
-    const found = filters?.necessities.find((e) => e.id === id);
+  const serviceStyles = (listing.options?.foodPreparationStyles ?? []).flatMap((id) => {
+    const found = filters?.foodPreparationStyles.find((e) => e.id === resolve(id));
+    return found ? [found.name] : [];
+  });
+  const necessities = (listing.filters?.necessities ?? []).flatMap((id) => {
+    const found = filters?.necessities.find((e) => e.id === resolve(id));
     return found ? [found.name] : [];
   });
 

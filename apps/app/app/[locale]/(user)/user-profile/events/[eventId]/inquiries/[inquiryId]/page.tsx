@@ -29,6 +29,7 @@ import { useEffect } from "react";
 import AlertInfoSections from "./components/alert-info-sections";
 import { useListing } from "@/app/react-query/listings/hooks";
 import { useEvent, useUpdateEvent } from "@/app/react-query/events/hooks";
+import { DashboardSection } from "@/app/[locale]/(user)/components/dashboard-section";
 
 export default function page() {
   const { inquiryId } = useParams<{
@@ -136,13 +137,21 @@ export default function page() {
   };
 
   const setAsEventVenueHandler = () => {
-    if (!event) return;
+    if (!event || !listing) return;
+    const venueAddress =
+      typeof listing.location.city === "object"
+        ? [listing.location.address, listing.location.city.name]
+            .filter(Boolean)
+            .join(", ")
+        : listing.location.address;
     updateEvent({
       id: event.id,
       data: {
         location: {
           ...event.location,
-          venue: listing?.id || "",
+          venue: listing.id,
+          venueName: listing.name,
+          venueAddress,
         },
       },
     });
@@ -203,59 +212,67 @@ export default function page() {
       <div
         className={`flex flex-col gap-6 w-full ${aggregatedStatus === "cancelled" ? "opacity-50 pointer-events-none cursor-default" : ""}`}
       >
-        <ControlSection
-          rows={[
-            {
-              disabled: !listingCanBeSetAsEventVenue,
-              title: "Nastavit jako místo konání",
-              text: "Tímto krokem nastavíte tuto službu jako místo konání pro tento event. Tuto akci nelze vrátit zpět.",
-              icon: "Building",
-              iconColor: "text-event",
-              iconBgColor: "bg-event-surface",
-              button: {
-                version: "successFull",
-                text: "Nastavit jako místo konání",
-                iconLeft: "Building",
-                size: "sm",
-                onClick: confirmSetAsEventVenue,
+        <DashboardSection
+          title="Ovládání"
+          icon={"Cog"}
+          iconBg="bg-zinc-100"
+          iconColor="text-zinc-500"
+        >
+          <ControlSection
+            rows={[
+              {
+                disabled: !listingCanBeSetAsEventVenue,
+                title: "Nastavit jako místo konání",
+                text: "Tímto krokem nastavíte tuto službu jako místo konání pro tento event. Tuto akci nelze vrátit zpět.",
+                icon: "Building",
+                iconColor: "text-event",
+                iconBgColor: "bg-event-surface",
+                button: {
+                  version: "successFull",
+                  text: "Nastavit jako místo konání",
+                  iconLeft: "Building",
+                  size: "sm",
+                  onClick: confirmSetAsEventVenue,
+                },
               },
-            },
-            {
-              disabled:
-                inquiry.status.user === "confirmed" ||
-                inquiry.status.company !== "confirmed",
-              title: "Potvrdit poptávku",
-              text: "Potvzením poptávky uzavíráte dohodu s firmou. Z vaší strany již budou podmínky neměnné",
-              icon: "Check",
-              iconColor: "text-success",
-              iconBgColor: "bg-success-surface",
-              button: {
-                version: "successFull",
-                text: "Potvrdit",
-                iconLeft: "Check",
-                size: "sm",
-                onClick: acceptInquiryHandler,
+              {
+                disabled:
+                  inquiry.status.user === "confirmed" ||
+                  inquiry.status.company !== "confirmed",
+                title: "Potvrdit poptávku",
+                text: "Potvzením poptávky uzavíráte dohodu s firmou. Z vaší strany již budou podmínky neměnné",
+                icon: "Check",
+                iconColor: "text-success",
+                iconBgColor: "bg-success-surface",
+                button: {
+                  version: "successFull",
+                  text: "Potvrdit",
+                  iconLeft: "Check",
+                  size: "sm",
+                  onClick: acceptInquiryHandler,
+                },
               },
-            },
-            {
-              title: "Zrušit poptávku",
-              text: "Zrušením poptávky informujete zákazníka, že nemůžete nabídnout své služby pro jeho požadavek.",
-              icon: "X",
-              iconColor: "text-danger",
-              iconBgColor: "bg-danger-surface",
-              disabled:
-                aggregateInquiryStatus(inquiry.status) === "cancelled" ||
-                aggregateInquiryStatus(inquiry.status) === "confirmed",
-              button: {
-                version: "dangerFull",
-                text: "Zrušit",
-                iconLeft: "X",
-                size: "sm",
-                onClick: cancelInquiryHandler,
+              {
+                title: "Zrušit poptávku",
+                text: "Zrušením poptávky informujete zákazníka, že nemůžete nabídnout své služby pro jeho požadavek.",
+                icon: "X",
+                iconColor: "text-danger",
+                iconBgColor: "bg-danger-surface",
+                disabled:
+                  aggregateInquiryStatus(inquiry.status) === "cancelled" ||
+                  aggregateInquiryStatus(inquiry.status) === "confirmed",
+                button: {
+                  version: "dangerFull",
+                  text: "Zrušit",
+                  iconLeft: "X",
+                  size: "sm",
+                  onClick: cancelInquiryHandler,
+                },
               },
-            },
-          ]}
-        />
+            ]}
+          />
+        </DashboardSection>
+
         <ChatWindow
           senderRole="user"
           inquiryId={inquiry.id}

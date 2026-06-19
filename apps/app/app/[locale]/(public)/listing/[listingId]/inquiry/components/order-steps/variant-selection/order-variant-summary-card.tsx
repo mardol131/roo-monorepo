@@ -4,7 +4,7 @@ import Text from "@/app/components/ui/atoms/text";
 import { generateMediaUrl } from "@/app/functions/generate-media-url";
 import { useOrderStore } from "@/app/store/order-store";
 import { Variant } from "@roo/common";
-import { Calendar, Check, Clock, Users, X } from "lucide-react";
+import { Check, Clock, Users, X } from "lucide-react";
 import Image from "next/image";
 
 type Props = {
@@ -12,22 +12,18 @@ type Props = {
   index: number;
 };
 
-const TYPE_LABEL: Record<Variant["type"], string> = {
-  allYear: "Celý rok",
-  seasonal: "Sezónní",
-};
-
-const AVAIL_LABEL: Record<Variant["availability"], string> = {
-  allDay: "Celý den",
-  selectedHours: "Vybrané hodiny",
+const PRICING_UNIT_LABEL: Record<Variant["price"]["pricingUnit"], string> = {
+  per_hour: "za hodinu",
+  per_day: "za den",
+  per_person: "za osobu",
+  lump_sum: "paušál",
 };
 
 export default function OrderVariantSummaryCard({ variant, index }: Props) {
   const { currentVariantId, setCurrentVariantId } = useOrderStore();
   const isSelected = variant.id === currentVariantId;
 
-  const detail = variant.details?.[0];
-  const capacity = detail?.capacity;
+  const capacity = variant.capacity;
 
   const includeItems = (variant.includes ?? [])
     .map((i) => i.item)
@@ -97,14 +93,13 @@ export default function OrderVariantSummaryCard({ variant, index }: Props) {
             color="primary"
             className="font-bold whitespace-nowrap shrink-0"
           >
-            {variant.price.generalPrice.toLocaleString("cs-CZ")} Kč
+            {variant.price.base.toLocaleString("cs-CZ")} Kč
           </Text>
         </div>
 
         {/* Info badges */}
         <div className="flex flex-wrap gap-2">
-          <InfoBadge icon={Calendar} label={TYPE_LABEL[variant.type]} />
-          <InfoBadge icon={Clock} label={AVAIL_LABEL[variant.availability]} />
+          <InfoBadge icon={Clock} label={PRICING_UNIT_LABEL[variant.price.pricingUnit]} />
           {capacity && (
             <InfoBadge
               icon={Users}

@@ -6,7 +6,7 @@ import { useFavouriteListings } from "@/app/react-query/favourite-listings/hooks
 import { useListings } from "@/app/react-query/listings/hooks";
 import Loader from "../../components/loader";
 import { EmptyState } from "../../components/empty-state";
-import ListingCard from "@/app/components/ui/molecules/listing-card";
+import ListingCard from "@/app/components/ui/molecules/listing-card/listing-card";
 import TabFilter from "../../components/tab-filter";
 import { Listing } from "@roo/common";
 

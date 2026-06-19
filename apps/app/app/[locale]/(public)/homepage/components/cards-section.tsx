@@ -1,7 +1,7 @@
 "use client";
 
 import Button from "@/app/components/ui/atoms/button";
-import ListingCard from "@/app/components/ui/molecules/listing-card";
+import ListingCard from "@/app/components/ui/molecules/listing-card/listing-card";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useRef } from "react";
 import HomepageSectionHeading from "./homepage-section-heading";

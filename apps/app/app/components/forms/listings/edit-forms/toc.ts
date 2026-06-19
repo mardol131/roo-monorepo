@@ -39,6 +39,7 @@ export function useListingEditFormToc() {
     access: TocSection;
     parking: TocSection;
     breakfast: TocSection;
+    catering: TocSection;
   } & { seasonalPrices: TocSection } = {
     basic: {
       id: "section-basic",
@@ -169,6 +170,7 @@ export function useListingEditFormToc() {
       icon: "ParkingSquare",
     },
     breakfast: { id: "section-breakfast", title: "Snídaně", icon: "Coffee" },
+    catering: { id: "section-catering", title: "Catering", icon: "UtensilsCrossed" },
     seasonalPrices: {
       id: "section-seasonal-prices",
       title: "Sezonní ceny",

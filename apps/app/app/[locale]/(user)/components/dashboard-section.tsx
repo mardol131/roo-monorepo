@@ -1,8 +1,8 @@
 import { ButtonProps } from "@/app/components/ui/atoms/button";
 import Text from "@/app/components/ui/atoms/text";
 import { ElementType, ReactElement } from "react";
-import { LucideIcons } from "../../../../../../packages/common/dist/types/icons";
 import DashboardSectionHeader from "./dashboard-section-header";
+import { LucideIcons } from "@roo/common";
 
 export function DashboardSection({
   id,

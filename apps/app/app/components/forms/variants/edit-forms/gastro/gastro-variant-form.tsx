@@ -48,6 +48,11 @@ import {
   capacitySchema,
 } from "../common-forms/variant-capacity-form";
 import { useVariantEditTocData } from "../common-forms/useTocData";
+import {
+  DurationData,
+  DurationForm,
+  durationSchema,
+} from "../common-forms/variant-duration-form";
 
 const COLOR = { text: "text-variant", surface: "bg-variant-surface" };
 
@@ -73,6 +78,7 @@ export default function GastroVariantForm() {
     ],
     price: [{ label: "Cena", sections: [S.price, S.seasonalPrices] }],
     capacity: [{ label: "Kapacita", sections: [S.capacity] }],
+    duration: [{ label: "Délka", sections: [S.duration] }],
     details: [
       {
         label: "Gastronomie",
@@ -127,12 +133,18 @@ export default function GastroVariantForm() {
     },
   });
 
+  const durationForm = useForm<DurationData>({
+    resolver: zodResolver(durationSchema) as Resolver<DurationData>,
+    defaultValues: { hasExactDuration: false },
+  });
+
   // ── Dirty state ────────────────────────────────────────────────────────────
 
   const anyDirty =
     hasDirtyFields(baseForm.formState.dirtyFields) ||
     hasDirtyFields(priceForm.formState.dirtyFields) ||
     hasDirtyFields(capacityForm.formState.dirtyFields) ||
+    hasDirtyFields(durationForm.formState.dirtyFields) ||
     hasDirtyFields(gastroForm.formState.dirtyFields);
 
   const activeFormIsDirty =
@@ -142,7 +154,9 @@ export default function GastroVariantForm() {
         ? hasDirtyFields(priceForm.formState.dirtyFields)
         : activeGroup === "capacity"
           ? hasDirtyFields(capacityForm.formState.dirtyFields)
-          : hasDirtyFields(gastroForm.formState.dirtyFields);
+          : activeGroup === "duration"
+            ? hasDirtyFields(durationForm.formState.dirtyFields)
+            : hasDirtyFields(gastroForm.formState.dirtyFields);
 
   useUnsavedChangesWarning(anyDirty);
 
@@ -151,6 +165,7 @@ export default function GastroVariantForm() {
   const { reset: resetBase } = baseForm;
   const { reset: resetPrice } = priceForm;
   const { reset: resetCapacity } = capacityForm;
+  const { reset: resetDuration } = durationForm;
   const { reset: resetGastro } = gastroForm;
 
   const resetAllForms = useCallback(() => {
@@ -211,11 +226,17 @@ export default function GastroVariantForm() {
       min: variant.capacity.min ?? undefined,
     });
 
+    resetDuration({
+      hasExactDuration: variant.duration?.hasExactDuration ?? false,
+      exactDurationMinutes: variant.duration?.exactDurationMinutes ?? undefined,
+      maxDurationMinutes: variant.duration?.maxDurationMinutes ?? undefined,
+    });
+
     resetGastro({
       kidsMenu: block.kidsMenu ?? false,
       alcoholIncluded: block.alcoholIncluded ?? false,
     });
-  }, [variant, resetBase, resetPrice, resetCapacity, resetGastro]);
+  }, [variant, resetBase, resetPrice, resetCapacity, resetDuration, resetGastro]);
 
   useEffect(() => {
     resetAllForms();
@@ -284,6 +305,25 @@ export default function GastroVariantForm() {
     }
   }
 
+  async function onSubmitDuration(data: DurationData) {
+    setIsSubmitting(true);
+    try {
+      await updateVariantAsync({
+        id: variantId,
+        data: {
+          duration: {
+            hasExactDuration: data.hasExactDuration,
+            exactDurationMinutes: data.hasExactDuration ? (data.exactDurationMinutes ?? null) : null,
+            maxDurationMinutes: data.maxDurationMinutes ?? null,
+          },
+        },
+      });
+      resetDuration(data);
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
+
   async function onSubmitGastro(data: GastroData) {
     if (!variant) return;
     const block = variant.details.find((d) => d.blockType === "gastro");
@@ -317,6 +357,7 @@ export default function GastroVariantForm() {
     base: baseForm.handleSubmit(onSubmitBase),
     price: priceForm.handleSubmit(onSubmitPrice),
     capacity: capacityForm.handleSubmit(onSubmitCapacity),
+    duration: durationForm.handleSubmit(onSubmitDuration),
     details: gastroForm.handleSubmit(onSubmitGastro),
   };
 
@@ -344,6 +385,11 @@ export default function GastroVariantForm() {
         <CapacityForm
           form={capacityForm}
           isActive={activeGroup === "capacity"}
+          texts={S}
+        />
+        <DurationForm
+          form={durationForm}
+          isActive={activeGroup === "duration"}
           texts={S}
         />
 

@@ -9,8 +9,6 @@
 
         "PAYLOAD_SECRET",
 
-        "CMS_API_KEY",
-
         "NEXT_PUBLIC_WEBSITE_URL",
         "WEBSITE_URL",
 

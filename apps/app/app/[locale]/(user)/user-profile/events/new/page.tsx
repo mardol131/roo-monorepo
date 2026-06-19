@@ -1,4 +1,4 @@
-import NewEventForm from "../../../../../components/forms/new-event-form";
+import NewEventForm from "../../../../../components/forms/events/new-event-form";
 import PageHeading from "../../../components/page-heading";
 
 export default function page() {

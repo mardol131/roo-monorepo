@@ -7,7 +7,6 @@ import { AcceptedInquiryPublicData } from "@/app/react-query/inquiries/fetch";
 import { Inquiry, type Event } from "@roo/common";
 import { Building2, MapPin, Music, UtensilsCrossed, Users } from "lucide-react";
 import { useTranslations } from "next-intl";
-import Link from "next/link";
 
 type Props = {
   event: Event;
@@ -35,12 +34,7 @@ export default function EventSharingCard({
   contactUser,
 }: Props) {
   const { sharing, location } = event;
-  const hasAny =
-    sharing.contactDetails || sharing.confirmedInquiries || sharing.place;
-  if (!hasAny) return null;
   const t = useTranslations("global.listings");
-
-  const showInfoSection = sharing.contactDetails || sharing.place;
 
   return (
     <DashboardSection
@@ -50,95 +44,69 @@ export default function EventSharingCard({
       iconColor="text-zinc-500"
     >
       <div className="flex flex-col gap-6">
-        {showInfoSection && (
-          <div className="grid grid-cols-2 gap-6">
-            {sharing.contactDetails && contactUser && (
-              <section className="flex flex-col gap-2">
-                <SectionLabel>Kontakt zákazníka</SectionLabel>
-                <div>
-                  <DetailRow label="Jméno">
+        <div className="grid grid-cols-2 gap-6">
+          {contactUser && (
+            <section className="flex flex-col gap-2">
+              <SectionLabel>Kontakt zákazníka</SectionLabel>
+              <div>
+                <DetailRow label="Jméno">
+                  <Text variant="label" color="textDark">
+                    {contactUser.name}
+                  </Text>
+                </DetailRow>
+                <DetailRow label="Email">
+                  <Text variant="label" color="textDark">
+                    {contactUser.email}
+                  </Text>
+                </DetailRow>
+                {contactUser.phone && (
+                  <DetailRow label="Telefon">
                     <Text variant="label" color="textDark">
-                      {contactUser.name}
+                      + {contactUser.phone.countryCode}{" "}
+                      {contactUser.phone.number}
                     </Text>
                   </DetailRow>
-                  <DetailRow label="Email">
+                )}
+              </div>
+            </section>
+          )}
+
+          {sharing.place && location && (
+            <section className="flex flex-col gap-2">
+              <SectionLabel>Místo konání</SectionLabel>
+              <div>
+                <DetailRow label="Okres">
+                  <Text variant="label" color="textDark">
+                    {typeof location.district === "object"
+                      ? location.district.name
+                      : null}
+                  </Text>
+                </DetailRow>
+                {location.city && typeof location.city === "object" && (
+                  <DetailRow label="Město">
                     <Text variant="label" color="textDark">
-                      {contactUser.email}
+                      {location.city.name}
                     </Text>
                   </DetailRow>
-                  {contactUser.phone && (
-                    <DetailRow label="Telefon">
-                      <Text variant="label" color="textDark">
-                        {contactUser.phone.countryCode}{" "}
-                        {contactUser.phone.number}
-                      </Text>
-                    </DetailRow>
-                  )}
-                </div>
-              </section>
-            )}
-
-            {sharing.place && location && (
-              <section className="flex flex-col gap-2">
-                <SectionLabel>Místo konání</SectionLabel>
-                <div>
-                  {location.type === "venue" &&
-                    (() => {
-                      const venue =
-                        typeof location.venue !== "string" && location.venue
-                          ? location.venue
-                          : null;
-                      return (
-                        <DetailRow label="Vybrané místo">
-                          <div className="flex items-center justify-between">
-                            <Text variant="label" color="textDark">
-                              {venue?.name ?? "Zatím nevybráno"}
-                            </Text>
-                            {venue && (
-                              <Link
-                                href={`/listing/${venue.id}`}
-                                className="text-xs text-blue-500 hover:underline shrink-0"
-                              >
-                                Zobrazit v katalogu
-                              </Link>
-                            )}
-                          </div>
-                        </DetailRow>
-                      );
-                    })()}
-
-                  {location.type === "custom" && (
-                    <>
-                      {location.city && (
-                        <DetailRow label="Město">
-                          <Text variant="label" color="textDark">
-                            {typeof location.city !== "string"
-                              ? location.city.name
-                              : location.city}
-                          </Text>
-                        </DetailRow>
-                      )}
-                      {location.address && (
-                        <DetailRow label="Adresa">
-                          <Text variant="label" color="textDark">
-                            {location.address}
-                          </Text>
-                        </DetailRow>
-                      )}
-                      {location.description && (
-                        <DetailRow label="Poznámka">
-                          <Text variant="label" color="secondary">
-                            {location.description}
-                          </Text>
-                        </DetailRow>
-                      )}
-                    </>
-                  )}
-                </div>
-              </section>
-            )}
-          </div>
-        )}
+                )}
+                {location.address && (
+                  <DetailRow label="Adresa">
+                    <Text variant="label" color="textDark">
+                      {location.address}
+                    </Text>
+                  </DetailRow>
+                )}
+                {location.description && (
+                  <DetailRow label="Poznámka">
+                    <Text variant="label" color="secondary">
+                      {location.description}
+                    </Text>
+                  </DetailRow>
+                )}
+              </div>
+            </section>
+          )}
+        </div>
 
         {sharing.confirmedInquiries && inquiries.length > 0 && (
           <section className="flex flex-col gap-2">
