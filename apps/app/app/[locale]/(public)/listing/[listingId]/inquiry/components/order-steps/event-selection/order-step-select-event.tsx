@@ -136,7 +136,7 @@ function EventCard({
   return (
     <button
       onClick={() => handleSelectEvent(event.id)}
-      className={`group w-full flex items-center gap-4 p-4 rounded-2xl border-2 transition-all text-left ${
+      className={`group w-full flex items-center gap-4 p-4 rounded-2xl border transition-all text-left ${
         isActive
           ? "border-primary bg-zinc-50 shadow-sm"
           : "border-zinc-200 bg-white hover:border-zinc-300 hover:shadow-md"

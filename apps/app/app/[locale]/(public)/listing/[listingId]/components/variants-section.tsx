@@ -34,10 +34,6 @@ export default function VariantsSection({
 
   return (
     <section className="flex flex-col gap-6">
-      <Text variant="h4" color="textDark">
-        {title}
-      </Text>
-
       <div className="grid grid-cols-1 gap-6">
         {variants?.docs?.map((variant) => (
           <VariantItem

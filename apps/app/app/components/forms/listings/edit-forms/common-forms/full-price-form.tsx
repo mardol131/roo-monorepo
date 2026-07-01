@@ -99,7 +99,7 @@ export function FullPriceForm({ form, isActive, texts }: Props) {
         )}
       </FormSection>
 
-      <FormSection
+      {/* <FormSection
         id={texts.seasonalPrices.id}
         icon={texts.seasonalPrices.icon}
         title={texts.seasonalPrices.title}
@@ -112,7 +112,7 @@ export function FullPriceForm({ form, isActive, texts }: Props) {
           register={form.register}
           errors={(form.formState.errors?.price?.seasonalPrices as any) ?? []}
         />
-      </FormSection>
+      </FormSection> */}
     </div>
   );
 }

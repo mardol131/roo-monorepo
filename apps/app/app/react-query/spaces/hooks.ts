@@ -5,7 +5,7 @@ import {
   useQueryClient,
 } from "@tanstack/react-query";
 import { GetCollectionParams } from "@/app/functions/api/general";
-import { spaceKeys } from "../query-keys";
+import { listingKeys, spaceKeys } from "../query-keys";
 import {
   createSpace,
   CreateSpaceInput,
@@ -49,6 +49,7 @@ export function useCreateSpace(listingId: string) {
       queryClient.invalidateQueries({
         queryKey: spaceKeys.byListing(listingId),
       });
+      queryClient.invalidateQueries({ queryKey: listingKeys.byId(listingId) });
     },
   });
 }
@@ -62,6 +63,7 @@ export function useUpdateSpace(id: string, listingId: string) {
       queryClient.invalidateQueries({
         queryKey: spaceKeys.byListing(listingId),
       });
+      queryClient.invalidateQueries({ queryKey: listingKeys.byId(listingId) });
     },
   });
 }

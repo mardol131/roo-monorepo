@@ -417,27 +417,16 @@ export interface Variant {
   id: string;
   listing: string | Listing;
   status: 'active' | 'inactive' | 'disabled' | 'archived';
+  name: string;
+  shortDescription: string;
+  description?: string | null;
   capacity: {
     min?: number | null;
     max?: number | null;
   };
-  name: string;
-  shortDescription: string;
-  description?: string | null;
   price: {
     base: number;
-    pricingUnit: 'per_day' | 'per_person' | 'per_hour' | 'lump_sum';
-    seasonalPrices?:
-      | {
-          amount: number;
-          adjustmentType: 'surcharge' | 'discount';
-          valueType: 'absolute' | 'percentage';
-          title: string;
-          from: string;
-          to: string;
-          id?: string | null;
-        }[]
-      | null;
+    pricingUnit: 'per_person' | 'lump_sum';
   };
   includes?:
     | {
@@ -451,14 +440,11 @@ export interface Variant {
         id?: string | null;
       }[]
     | null;
-  duration?: {
-    hasExactDuration?: boolean | null;
-    exactDurationMinutes?: number | null;
-    maxDurationMinutes?: number | null;
-  };
+  isOneTime?: boolean | null;
+  durationMinutes?: number | null;
   images: {
     coverImage: {
-      filename?: string | null;
+      filename: string;
       alt?: string | null;
       width?: number | null;
       height?: number | null;
@@ -479,42 +465,6 @@ export interface Variant {
         }[]
       | null;
   };
-  details: (
-    | {
-        includedSpaces?: (string | Space)[] | null;
-        accommodation: {
-          included?: boolean | null;
-          capacity?: number | null;
-        };
-        breakfast: {
-          included?: boolean | null;
-          price?: number | null;
-          loweredPrice?: number | null;
-        };
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'venue';
-      }
-    | {
-        kidsMenu?: boolean | null;
-        alcoholIncluded?: boolean | null;
-        minimumOrderAmount?: number | null;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'gastro';
-      }
-    | {
-        audience?: ('adults' | 'kids' | 'seniors')[] | null;
-        performance: {
-          entertainmentIsPerformance?: boolean | null;
-          numberOfSets?: number | null;
-          pauseBetweenSetsInMinutes?: number | null;
-        };
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'entertainment';
-      }
-  )[];
   updatedAt: string;
   createdAt: string;
 }
@@ -987,43 +937,15 @@ export interface ListingVenueDetail {
   };
   catering: {
     hasCatering?: boolean | null;
-    cateringIsIncludedInPrice?: boolean | null;
     price?: number | null;
     pricingUnit?: ('per_person' | 'per_hour' | 'lump_sum') | null;
-    cuisines?:
-      | {
-          cuisine: string | Cuisine;
-          pricingUnit: 'per_day' | 'per_person' | 'per_hour' | 'lump_sum';
-          unitPrice: number;
-          quantity: number;
-          id?: string | null;
-        }[]
-      | null;
-    foodPreparationStyles?:
-      | {
-          foodPreparationStyle: string | FoodPreparationStyle;
-          pricingUnit: 'per_day' | 'per_person' | 'per_hour' | 'lump_sum';
-          unitPrice: number;
-          quantity: number;
-          id?: string | null;
-        }[]
-      | null;
+    description?: string | null;
   };
   breakfast: {
     breakfastIncluded: boolean;
-    allowAccommodationWithoutBreakfast?: boolean | null;
-    allowMoreBreakfastsThanAccommodation?: boolean | null;
     breakfastIsIncludedInPrice?: boolean | null;
     price?: number | null;
     priceUnit?: ('person' | 'booking') | null;
-    /**
-     * Čas, od kterého je snídaně k dispozici (např. 07:00)
-     */
-    timeFrom?: string | null;
-    /**
-     * Čas, do kterého je snídaně k dispozici (např. 10:00)
-     */
-    timeTo?: string | null;
   };
   updatedAt: string;
   createdAt: string;
@@ -1063,18 +985,29 @@ export interface Space {
    * Plocha v m²
    */
   area?: number | null;
-  images?:
-    | {
-        filename?: string | null;
-        alt?: string | null;
-        width?: number | null;
-        height?: number | null;
-        size?: number | null;
-        mimeType?: string | null;
-        bucket?: ('listings-images' | 'listings-videos') | null;
-        id?: string | null;
-      }[]
-    | null;
+  images: {
+    coverImage: {
+      filename: string;
+      alt?: string | null;
+      width?: number | null;
+      height?: number | null;
+      size?: number | null;
+      mimeType?: string | null;
+      bucket?: ('listings-images' | 'listings-videos') | null;
+    };
+    gallery?:
+      | {
+          filename?: string | null;
+          alt?: string | null;
+          width?: number | null;
+          height?: number | null;
+          size?: number | null;
+          mimeType?: string | null;
+          bucket?: ('listings-images' | 'listings-videos') | null;
+          id?: string | null;
+        }[]
+      | null;
+  };
   /**
    * Indikuje, zda prostor nabízí ubytování
    */
@@ -2450,31 +2383,20 @@ export interface UserMediaSelect<T extends boolean = true> {
 export interface VariantsSelect<T extends boolean = true> {
   listing?: T;
   status?: T;
+  name?: T;
+  shortDescription?: T;
+  description?: T;
   capacity?:
     | T
     | {
         min?: T;
         max?: T;
       };
-  name?: T;
-  shortDescription?: T;
-  description?: T;
   price?:
     | T
     | {
         base?: T;
         pricingUnit?: T;
-        seasonalPrices?:
-          | T
-          | {
-              amount?: T;
-              adjustmentType?: T;
-              valueType?: T;
-              title?: T;
-              from?: T;
-              to?: T;
-              id?: T;
-            };
       };
   includes?:
     | T
@@ -2488,13 +2410,8 @@ export interface VariantsSelect<T extends boolean = true> {
         item?: T;
         id?: T;
       };
-  duration?:
-    | T
-    | {
-        hasExactDuration?: T;
-        exactDurationMinutes?: T;
-        maxDurationMinutes?: T;
-      };
+  isOneTime?: T;
+  durationMinutes?: T;
   images?:
     | T
     | {
@@ -2520,53 +2437,6 @@ export interface VariantsSelect<T extends boolean = true> {
               mimeType?: T;
               bucket?: T;
               id?: T;
-            };
-      };
-  details?:
-    | T
-    | {
-        venue?:
-          | T
-          | {
-              includedSpaces?: T;
-              accommodation?:
-                | T
-                | {
-                    included?: T;
-                    capacity?: T;
-                  };
-              breakfast?:
-                | T
-                | {
-                    included?: T;
-                    price?: T;
-                    loweredPrice?: T;
-                  };
-              id?: T;
-              blockName?: T;
-            };
-        gastro?:
-          | T
-          | {
-              kidsMenu?: T;
-              alcoholIncluded?: T;
-              minimumOrderAmount?: T;
-              id?: T;
-              blockName?: T;
-            };
-        entertainment?:
-          | T
-          | {
-              audience?: T;
-              performance?:
-                | T
-                | {
-                    entertainmentIsPerformance?: T;
-                    numberOfSets?: T;
-                    pauseBetweenSetsInMinutes?: T;
-                  };
-              id?: T;
-              blockName?: T;
             };
       };
   updatedAt?: T;
@@ -2745,14 +2615,29 @@ export interface SpacesSelect<T extends boolean = true> {
   images?:
     | T
     | {
-        filename?: T;
-        alt?: T;
-        width?: T;
-        height?: T;
-        size?: T;
-        mimeType?: T;
-        bucket?: T;
-        id?: T;
+        coverImage?:
+          | T
+          | {
+              filename?: T;
+              alt?: T;
+              width?: T;
+              height?: T;
+              size?: T;
+              mimeType?: T;
+              bucket?: T;
+            };
+        gallery?:
+          | T
+          | {
+              filename?: T;
+              alt?: T;
+              width?: T;
+              height?: T;
+              size?: T;
+              mimeType?: T;
+              bucket?: T;
+              id?: T;
+            };
       };
   hasAccommodation?: T;
   accommodationCapacity?: T;
@@ -3911,39 +3796,17 @@ export interface ListingVenueDetailsSelect<T extends boolean = true> {
     | T
     | {
         hasCatering?: T;
-        cateringIsIncludedInPrice?: T;
         price?: T;
         pricingUnit?: T;
-        cuisines?:
-          | T
-          | {
-              cuisine?: T;
-              pricingUnit?: T;
-              unitPrice?: T;
-              quantity?: T;
-              id?: T;
-            };
-        foodPreparationStyles?:
-          | T
-          | {
-              foodPreparationStyle?: T;
-              pricingUnit?: T;
-              unitPrice?: T;
-              quantity?: T;
-              id?: T;
-            };
+        description?: T;
       };
   breakfast?:
     | T
     | {
         breakfastIncluded?: T;
-        allowAccommodationWithoutBreakfast?: T;
-        allowMoreBreakfastsThanAccommodation?: T;
         breakfastIsIncludedInPrice?: T;
         price?: T;
         priceUnit?: T;
-        timeFrom?: T;
-        timeTo?: T;
       };
   updatedAt?: T;
   createdAt?: T;

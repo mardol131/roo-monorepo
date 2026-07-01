@@ -32,6 +32,7 @@ import ListingHeader from "./components/listing-header";
 import OrderBox from "./components/order-box";
 import ReferencesSection from "./components/references-section";
 import SectionWrapper from "./components/section-wrapper";
+import SpacesSection from "./components/spaces-section";
 import VariantsSection from "./components/variants-section";
 import { useAuth } from "@/app/context/auth/auth-context";
 import { useCompany } from "@/app/react-query/companies/hooks";
@@ -129,6 +130,7 @@ export default function Page() {
     location: () => <ListingLocationSection listing={listing} />,
     basics: () => <ListingBasicsSection listing={listing} />,
     detail: () => <ListingDetailSection listing={listing} />,
+    spaces: () => (listing.type === "venue" ? <SpacesSection /> : null),
     employees: () =>
       employees.length > 0 ? (
         <SectionWrapper title="Náš tým">
@@ -197,6 +199,11 @@ export default function Page() {
         <ListingHeader listing={listing} />
         <div className="grid grid-cols-[1fr_400px] gap-6 mt-5">
           <div className="min-h-screen flex flex-col w-full gap-10">
+            {variants?.docs && variants.docs.length > 0 && (
+              <SectionWrapper title={"Dostupné Varianty"}>
+                <VariantsSection />
+              </SectionWrapper>
+            )}
             {orderedKeys.map((key) => {
               if (isFixedSectionKey(key)) {
                 return (
@@ -220,11 +227,6 @@ export default function Page() {
             <OrderBox startingPrice={listing.minimumPricePerEvent} />
           </div>
         </div>
-        {variants?.docs && variants.docs.length > 0 && (
-          <div className="mt-10">
-            <VariantsSection />
-          </div>
-        )}
       </div>
     </div>
   );

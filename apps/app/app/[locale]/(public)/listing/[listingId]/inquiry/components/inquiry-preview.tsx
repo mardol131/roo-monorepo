@@ -8,6 +8,7 @@ import { generateMediaUrl } from "@/app/functions/generate-media-url";
 import {
   Banknote,
   Calendar,
+  ListChecks,
   MapPin,
   MessageCircle,
   Send,
@@ -30,22 +31,15 @@ import type {
   ListingEntertainmentDetail,
   ListingGastroDetail,
   ListingVenueDetail,
+  PricingUnits,
 } from "@roo/common";
 import { FormSection } from "@/app/[locale]/(user)/components/form-section";
+import { useTranslations } from "next-intl";
 
 type AnyDetail =
   | ListingVenueDetail
   | ListingGastroDetail
   | ListingEntertainmentDetail;
-
-function getVariantPrice(variant: Variant): number | null {
-  const currentDate = new Date();
-  const seasonal = variant.price.seasonalPrices?.find((sp) => {
-    if (!sp.from || !sp.to) return false;
-    return currentDate >= new Date(sp.from) && currentDate <= new Date(sp.to);
-  });
-  return seasonal?.amount ?? variant.price.base ?? null;
-}
 
 function PlaceholderRow({ text }: { text: string }) {
   return (
@@ -190,7 +184,8 @@ function EventPreviewRows({ data }: { data: NormalizedEventPreview }) {
           <InfoRow
             icon={<Calendar className="w-3.5 h-3.5" />}
             value={`${formatEventDateTime(data.startDate)}${
-              data.endDate && data.endDate.getTime() !== data.startDate.getTime()
+              data.endDate &&
+              data.endDate.getTime() !== data.startDate.getTime()
                 ? ` – ${formatEventDateTime(data.endDate)}`
                 : ""
             }`}
@@ -243,7 +238,7 @@ const PRICING_UNIT_LABELS: Record<string, string> = {
 
 function VariantPreview({ variant }: { variant: Variant }) {
   const { eventData, serviceTime } = useOrderStore();
-  const unitPrice = getVariantPrice(variant) ?? variant.price.base;
+  const unitPrice = variant.price.base;
   const coverFilename = variant.images?.coverImage?.filename;
 
   const startMs = eventData?.date?.start
@@ -306,18 +301,24 @@ function VariantPreview({ variant }: { variant: Variant }) {
 function PriceBreakdownRow({
   label,
   amount,
+  pricingUnit,
+  quantity,
 }: {
   label: string;
   amount: number;
+  pricingUnit?: PricingUnits;
+  quantity?: number;
 }) {
+  const t = useTranslations("global.pricing.units");
   if (amount === 0) return null;
   return (
     <div className="flex items-center justify-between gap-2">
-      <Text variant="caption" color="secondary">
-        {label}
+      <Text variant="label" color="secondary">
+        {label} {quantity && `×${quantity}`}
       </Text>
-      <Text variant="caption" color="secondary">
+      <Text variant="label" color="secondary">
         {amount.toLocaleString("cs-CZ")} Kč
+        {pricingUnit ? ` / ${t(pricingUnit)}` : ""}
       </Text>
     </div>
   );
@@ -339,6 +340,7 @@ function CustomRequestPreview({
     accommodation,
     breakfast,
     parking,
+    wantsCatering,
     eventData,
     serviceTime,
   } = useOrderStore();
@@ -351,6 +353,7 @@ function CustomRequestPreview({
     accommodation,
     breakfast,
     parking,
+    wantsCatering,
     serviceTime,
     listingLocation,
   });
@@ -360,7 +363,8 @@ function CustomRequestPreview({
     selectedSpaces.length > 0 ||
     !!accommodation ||
     !!breakfast ||
-    !!parking;
+    !!parking ||
+    wantsCatering;
 
   if (!customRequest?.note && !hasSelections) {
     return <PlaceholderRow text="Poptávka se vyplňuje…" />;
@@ -377,20 +381,30 @@ function CustomRequestPreview({
         </div>
       )}
 
+      {customRequest?.requirements && customRequest.requirements.length > 0 && (
+        <div className="flex items-start gap-2">
+          <ListChecks className="w-4 h-4 text-zinc-400 shrink-0 mt-0.5" />
+          <ul className="flex flex-col gap-0.5">
+            {customRequest.requirements.map((requirement, index) => (
+              <li key={index}>
+                <Text variant="label" color="secondary">
+                  {requirement.text}
+                </Text>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
       {selectedSpaces.length > 0 && (
         <div className="flex flex-col gap-1">
           {selectedSpaces.map((s) => (
-            <div
-              key={s.spaceId}
-              className="flex items-center justify-between gap-2"
-            >
-              <Text variant="caption" color="textDark">
-                {s.name}
-              </Text>
-              <Text variant="caption" color="secondary">
-                {s.price.toLocaleString("cs-CZ")} Kč / den
-              </Text>
-            </div>
+            <PriceBreakdownRow
+              key={s.name}
+              label={s.name}
+              amount={s.price}
+              pricingUnit={s.pricingUnit}
+            />
           ))}
         </div>
       )}
@@ -398,18 +412,13 @@ function CustomRequestPreview({
       {selectedAddons.length > 0 && (
         <div className="flex flex-col gap-1">
           {selectedAddons.map((a) => (
-            <div
-              key={a.optionId}
-              className="flex items-center justify-between gap-2"
-            >
-              <Text variant="caption" color="textDark">
-                {a.name}
-                {a.quantity > 1 && ` ×${a.quantity}`}
-              </Text>
-              <Text variant="caption" color="secondary">
-                {(a.unitPrice * a.quantity).toLocaleString("cs-CZ")} Kč
-              </Text>
-            </div>
+            <PriceBreakdownRow
+              key={a.name + a.optionId}
+              label={a.name}
+              amount={a.unitPrice * a.quantity}
+              quantity={a.quantity}
+              pricingUnit={a.pricingUnit}
+            />
           ))}
         </div>
       )}

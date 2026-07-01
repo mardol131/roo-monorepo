@@ -29,6 +29,7 @@ type Props = {
   isRequired?: boolean;
   error?: string;
   excludeUnits?: PricingUnits[];
+  disableQuantity?: boolean;
 };
 
 export default function PriceableCheckboxGroup({
@@ -42,6 +43,7 @@ export default function PriceableCheckboxGroup({
   isRequired,
   error,
   excludeUnits,
+  disableQuantity,
 }: Props) {
   const [query, setQuery] = useState("");
 
@@ -52,7 +54,11 @@ export default function PriceableCheckboxGroup({
     { value: "per_person", label: g("per_person") },
     { value: "per_hour", label: g("per_hour") },
     { value: "per_day", label: g("per_day") },
-  ].filter((o) => !excludeUnits?.includes(o.value));
+  ];
+
+  const filteredOptions = PRICE_TYPE_OPTIONS.filter(
+    (o) => !excludeUnits?.includes(o.value),
+  );
 
   const selectedIds = value.map((v) => v.id);
 
@@ -131,17 +137,23 @@ export default function PriceableCheckboxGroup({
       {/* Detail rows for selected items */}
       {value.length > 0 && (
         <div className="flex flex-col gap-2 mt-1">
-          <div className="grid grid-cols-[1fr_140px_100px_80px_auto] gap-2 px-3 py-1">
+          <div
+            className={`grid ${!disableQuantity ? "grid-cols-[1fr_140px_100px_100px_auto]" : "grid-cols-[1fr_140px_120px_auto]"} gap-2 px-3 py-1`}
+          >
             <span className="text-xs font-medium text-zinc-500">Položka</span>
             <span className="text-xs font-medium text-zinc-500">Typ ceny</span>
-            <span className="text-xs font-medium text-zinc-500">Cena (Kč)</span>
-            <span className="text-xs font-medium text-zinc-500">Počet</span>
+            <span className="text-xs font-medium text-zinc-500">
+              Příplatek (Kč)
+            </span>
+            {!disableQuantity && (
+              <span className="text-xs font-medium text-zinc-500">Počet</span>
+            )}
             <span />
           </div>
           {value.map((item) => (
             <div
               key={item.id}
-              className="grid grid-cols-[1fr_140px_100px_80px_auto] gap-2 items-center bg-zinc-50 border border-zinc-200 rounded-lg px-3 py-2"
+              className={`grid ${!disableQuantity ? "grid-cols-[1fr_140px_100px_80px_auto]" : "grid-cols-[1fr_140px_100px_auto]"} gap-2 items-center bg-zinc-50 border border-zinc-200 rounded-lg px-3 py-2`}
             >
               <span className="text-sm text-zinc-800 font-medium truncate">
                 {item.name}
@@ -154,14 +166,14 @@ export default function PriceableCheckboxGroup({
                     pricingUnit: e.target.value as PricingUnits,
                   })
                 }
-                items={PRICE_TYPE_OPTIONS}
+                items={filteredOptions}
               />
 
               <Input
                 inputProps={{
                   type: "number",
                   min: 0,
-                  value: item.unitPrice === 0 ? "" : item.unitPrice,
+                  value: item.unitPrice === 0 ? 0 : item.unitPrice,
                   placeholder: "0",
                   onChange: (e) =>
                     updateItem(item.id, {
@@ -171,17 +183,19 @@ export default function PriceableCheckboxGroup({
                 }}
               />
 
-              <Input
-                inputProps={{
-                  type: "number",
-                  min: 1,
-                  value: item.quantity,
-                  onChange: (e) =>
-                    updateItem(item.id, {
-                      quantity: Math.max(1, Number(e.target.value) || 1),
-                    }),
-                }}
-              />
+              {!disableQuantity && (
+                <Input
+                  inputProps={{
+                    type: "number",
+                    min: 1,
+                    value: item.quantity,
+                    onChange: (e) =>
+                      updateItem(item.id, {
+                        quantity: Math.max(1, Number(e.target.value) || 1),
+                      }),
+                  }}
+                />
+              )}
 
               <button
                 type="button"

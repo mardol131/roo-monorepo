@@ -1,10 +1,8 @@
 "use client";
 
-import Loader from "@/app/[locale]/(user)/components/loader";
 import PageHeading from "@/app/[locale]/(user)/components/page-heading";
-import VariantCreateWizard from "@/app/components/forms/variants/create-wizards/variant-wizard";
+import VariantForm from "@/app/components/forms/variants/variant-form";
 import { useRouter } from "@/app/i18n/navigation";
-import { useListing } from "@/app/react-query/listings/hooks";
 import { useParams } from "next/navigation";
 
 export default function NewVariantPage() {
@@ -13,22 +11,24 @@ export default function NewVariantPage() {
     companyId: string;
   }>();
   const router = useRouter();
-  const { data: listing, isFetching } = useListing(listingId);
 
-  if (isFetching || !listing) return <Loader text="Formulář se načítá" />;
-
-  const blockType = listing.type as "venue" | "gastro" | "entertainment";
+  function goToVariantsList() {
+    router.push({
+      pathname:
+        "/company-profile/companies/[companyId]/listings/[listingId]/variants",
+      params: { companyId, listingId },
+    });
+  }
 
   return (
     <main className="w-full">
       <PageHeading
         heading="Nová varianta"
-        description="Vytvořte novou variantu nabídky. Detaily lze doplnit po vytvoření."
+        description="Vytvořte novou variantu nabídky."
       />
-      <VariantCreateWizard
-        blockType={blockType}
+      <VariantForm
         listingId={listingId}
-        companyId={companyId}
+        onSuccess={goToVariantsList}
         onCancel={() => router.back()}
       />
     </main>

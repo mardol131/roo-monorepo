@@ -17,19 +17,32 @@ const audienceLabels: Record<string, string> = {
   seniors: "Senioři",
 };
 
+const resolve = (id: string | { id: string }) =>
+  typeof id === "string" ? id : id.id;
+
 export default function EntertainmentSection({ detail, listing }: Props) {
   const { data: filters } = useFilterOptions();
 
   const musicGenres = (listing.filters?.musicGenres ?? []).flatMap((id) => {
-    const found = filters?.musicGenres.find((e) => e.id === (typeof id === "string" ? id : id.id));
+    const found = filters?.musicGenres.find((e) => e.id === resolve(id));
     return found ? [found.name] : [];
   });
   const rules = (listing.filters.entertainmentRules ?? []).flatMap((id) => {
-    const found = filters?.entertainmentRules.find((e) => e.id === (typeof id === "string" ? id : id.id));
+    const found = filters?.entertainmentRules.find((e) => e.id === resolve(id));
     return found ? [found.name] : [];
   });
   const necessities = (listing.filters.necessities ?? []).flatMap((id) => {
-    const found = filters?.necessities.find((e) => e.id === (typeof id === "string" ? id : id.id));
+    const found = filters?.necessities.find((e) => e.id === resolve(id));
+    return found ? [found.name] : [];
+  });
+  const technologies = (detail.options.technologies ?? []).flatMap((entry) => {
+    const found = filters?.technologies.find(
+      (e) => e.id === resolve(entry.technology),
+    );
+    return found ? [found.name] : [];
+  });
+  const services = (detail.options.services ?? []).flatMap((entry) => {
+    const found = filters?.services.find((e) => e.id === resolve(entry.service));
     return found ? [found.name] : [];
   });
 
@@ -46,6 +59,18 @@ export default function EntertainmentSection({ detail, listing }: Props) {
       {audience.length > 0 && (
         <SectionWrapper title="Cílové publikum">
           <ChipList items={audience} />
+        </SectionWrapper>
+      )}
+
+      {technologies.length > 0 && (
+        <SectionWrapper title="Technika">
+          <ChipList items={technologies} />
+        </SectionWrapper>
+      )}
+
+      {services.length > 0 && (
+        <SectionWrapper title="Služby">
+          <ChipList items={services} />
         </SectionWrapper>
       )}
 

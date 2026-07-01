@@ -1,19 +1,5 @@
 import type { CollectionAfterChangeHook, CollectionAfterDeleteHook, PayloadRequest } from 'payload'
-
-type SeasonalPrice = {
-  amount: number
-  adjustmentType: 'surcharge' | 'discount'
-  valueType: 'absolute' | 'percentage'
-}
-
-function effectiveMin(base: number, seasonalPrices: SeasonalPrice[] = []): number {
-  const discountedPrices = seasonalPrices
-    .filter((sp) => sp.adjustmentType === 'discount')
-    .map((sp) =>
-      sp.valueType === 'absolute' ? base - sp.amount : base * (1 - sp.amount / 100),
-    )
-  return Math.min(base, ...discountedPrices)
-}
+import type { Variant } from '@/payload-types'
 
 function resolveListingId(listing: string | { id: string } | null | undefined): string | null {
   if (!listing) return null
@@ -43,14 +29,12 @@ async function syncVariantPrice(listingId: string, req: PayloadRequest) {
   }
 
   let minPrice = Infinity
-  let minPricingUnit: string | null = null
+  let minPricingUnit: Variant['price']['pricingUnit'] | null = null
 
   for (const variant of result.docs) {
     const base = variant.price?.base ?? 0
-    const seasonal = variant.price?.seasonalPrices ?? []
-    const effective = effectiveMin(base, seasonal)
-    if (effective < minPrice) {
-      minPrice = effective
+    if (base < minPrice) {
+      minPrice = base
       minPricingUnit = variant.price?.pricingUnit ?? null
     }
   }

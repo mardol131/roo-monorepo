@@ -44,8 +44,12 @@ export interface OrderDraft {
   accommodation: { guests: number } | null;
   breakfast: { guests: number } | null;
   parking: { spots: number } | null;
+  wantsCatering: boolean;
   serviceTime: ServiceTime | null;
   newEventFormValues?: Record<string, unknown>;
+  // Wizard step the user was on (distinct from the store's own `currentStep`,
+  // which drives an unrelated pre-inquiry CTA flow on the listing page).
+  wizardStep?: number;
 }
 
 interface OrderStore {
@@ -62,6 +66,7 @@ interface OrderStore {
   accommodation: { guests: number } | null;
   breakfast: { guests: number } | null;
   parking: { spots: number } | null;
+  wantsCatering: boolean;
   serviceTime: ServiceTime | null;
   setListingId: (id: string) => void;
   setCurrentVariantId: (variantId: string) => void;
@@ -72,10 +77,11 @@ interface OrderStore {
   setCustomRequest: (req: CustomRequest | undefined) => void;
   toggleAddon: (addon: SelectedAddon) => void;
   setAddonQuantity: (optionId: string, quantity: number) => void;
-  toggleSpace: (space: SelectedSpace) => void;
+  toggleSpace: (space: SelectedSpace, descendantIdsToRemove?: string[]) => void;
   setAccommodation: (v: { guests: number } | null) => void;
   setBreakfast: (v: { guests: number } | null) => void;
   setParking: (v: { spots: number } | null) => void;
+  setWantsCatering: (v: boolean) => void;
   setServiceTime: (v: ServiceTime | null) => void;
   restoreDraft: (draft: OrderDraft) => void;
   isOrderStepActivated: (step: number) => boolean;
@@ -97,6 +103,7 @@ export const useOrderStore = create<OrderStore>((set, get) => {
     accommodation: null,
     breakfast: null,
     parking: null,
+    wantsCatering: false,
     serviceTime: null,
     clearEventData: () => set({ eventData: undefined }),
     setListingId: (id) => set({ listingId: id }),
@@ -127,15 +134,33 @@ export const useOrderStore = create<OrderStore>((set, get) => {
           a.optionId === optionId ? { ...a, quantity } : a,
         ),
       })),
-    toggleSpace: (space) =>
-      set((state) => ({
-        selectedSpaces: state.selectedSpaces.some((s) => s.spaceId === space.spaceId)
-          ? state.selectedSpaces.filter((s) => s.spaceId !== space.spaceId)
-          : [...state.selectedSpaces, space],
-      })),
+    toggleSpace: (space, descendantIdsToRemove = []) =>
+      set((state) => {
+        const isCurrentlySelected = state.selectedSpaces.some(
+          (s) => s.spaceId === space.spaceId,
+        );
+        if (isCurrentlySelected) {
+          return {
+            selectedSpaces: state.selectedSpaces.filter(
+              (s) => s.spaceId !== space.spaceId,
+            ),
+          };
+        }
+        // Selecting a space that has descendants means its price now covers
+        // them, so any of those descendants that were selected get dropped.
+        return {
+          selectedSpaces: [
+            ...state.selectedSpaces.filter(
+              (s) => !descendantIdsToRemove.includes(s.spaceId),
+            ),
+            space,
+          ],
+        };
+      }),
     setAccommodation: (v) => set({ accommodation: v }),
     setBreakfast: (v) => set({ breakfast: v }),
     setParking: (v) => set({ parking: v }),
+    setWantsCatering: (v) => set({ wantsCatering: v }),
     setServiceTime: (v) => set({ serviceTime: v }),
     setEventVariant: (variant: EventVariant) => {
       set({ eventVariant: variant });
@@ -157,6 +182,7 @@ export const useOrderStore = create<OrderStore>((set, get) => {
         accommodation: draft.accommodation,
         breakfast: draft.breakfast,
         parking: draft.parking,
+        wantsCatering: draft.wantsCatering,
         serviceTime: draft.serviceTime,
       }),
 
@@ -202,6 +228,7 @@ export const useOrderStore = create<OrderStore>((set, get) => {
         accommodation: null,
         breakfast: null,
         parking: null,
+        wantsCatering: false,
         serviceTime: null,
         eventData: undefined,
         eventVariant: null,

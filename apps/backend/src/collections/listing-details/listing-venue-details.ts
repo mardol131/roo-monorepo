@@ -261,11 +261,11 @@ export const ListingVenueDetails: CollectionConfig = {
           type: 'checkbox',
           defaultValue: false,
         },
-        {
-          name: 'cateringIsIncludedInPrice',
-          type: 'checkbox',
-          defaultValue: false,
-        },
+        // {
+        //   name: 'cateringIsIncludedInPrice',
+        //   type: 'checkbox',
+        //   defaultValue: false,
+        // },
         {
           name: 'price',
           type: 'number',
@@ -277,26 +277,30 @@ export const ListingVenueDetails: CollectionConfig = {
           options: PRICING_UNITS_ARRAY.filter((u) => u !== 'per_day'),
         },
         {
-          name: 'cuisines',
-          type: 'array',
-          fields: [
-            { name: 'cuisine', type: 'relationship', relationTo: 'cuisines', required: true },
-            ...priceableOptionFields,
-          ],
+          name: 'description',
+          type: 'text',
         },
-        {
-          name: 'foodPreparationStyles',
-          type: 'array',
-          fields: [
-            {
-              name: 'foodPreparationStyle',
-              type: 'relationship',
-              relationTo: 'food-preparation-styles',
-              required: true,
-            },
-            ...priceableOptionFields,
-          ],
-        },
+        // {
+        //   name: 'cuisines',
+        //   type: 'array',
+        //   fields: [
+        //     { name: 'cuisine', type: 'relationship', relationTo: 'cuisines', required: true },
+        //     ...priceableOptionFields,
+        //   ],
+        // },
+        // {
+        //   name: 'foodPreparationStyles',
+        //   type: 'array',
+        //   fields: [
+        //     {
+        //       name: 'foodPreparationStyle',
+        //       type: 'relationship',
+        //       relationTo: 'food-preparation-styles',
+        //       required: true,
+        //     },
+        //     ...priceableOptionFields,
+        //   ],
+        // },
       ],
     },
     {
@@ -309,14 +313,6 @@ export const ListingVenueDetails: CollectionConfig = {
           type: 'checkbox',
           required: true,
           defaultValue: false,
-        },
-        {
-          name: 'allowAccommodationWithoutBreakfast',
-          type: 'checkbox',
-        },
-        {
-          name: 'allowMoreBreakfastsThanAccommodation',
-          type: 'checkbox',
         },
         {
           name: 'breakfastIsIncludedInPrice',
@@ -349,20 +345,6 @@ export const ListingVenueDetails: CollectionConfig = {
               return 'Zadejte jednotku ceny snídaně'
             }
             return true
-          },
-        },
-        {
-          name: 'timeFrom',
-          type: 'text',
-          admin: {
-            description: 'Čas, od kterého je snídaně k dispozici (např. 07:00)',
-          },
-        },
-        {
-          name: 'timeTo',
-          type: 'text',
-          admin: {
-            description: 'Čas, do kterého je snídaně k dispozici (např. 10:00)',
           },
         },
       ],

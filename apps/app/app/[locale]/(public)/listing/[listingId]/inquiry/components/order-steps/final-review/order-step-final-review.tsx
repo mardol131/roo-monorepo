@@ -30,12 +30,6 @@ import Loader from "@/app/[locale]/(user)/components/loader";
 
 function getLocationLabel(location: Event["location"]): string | null {
   if (!location) return null;
-  if (location.type === "venue") {
-    if (!location.venue) return "Zatím neurčeno";
-    return typeof location.venue === "string"
-      ? location.venue
-      : location.venue.name;
-  }
   const cityName = location.city
     ? typeof location.city === "string"
       ? location.city
@@ -101,17 +95,7 @@ export default function OrderStepFinalReview({
         (v) => v.id === currentVariantId,
       );
 
-      const currentDate = new Date();
-      const seasonalPricing = selectedVariant?.price.seasonalPrices?.find(
-        (sp) => {
-          if (!sp.from || !sp.to) return false;
-          const startDate = new Date(sp.from);
-          const endDate = new Date(sp.to);
-          return currentDate >= startDate && currentDate <= endDate;
-        },
-      );
-      price =
-        seasonalPricing?.price ?? selectedVariant?.price.generalPrice ?? null;
+      price = selectedVariant?.price.base ?? null;
     }
 
     createInquiry(
@@ -120,10 +104,10 @@ export default function OrderStepFinalReview({
         ...(isCustom ? {} : { variant: currentVariantId }),
         event: typeof eventData.id === "string" ? eventData.id : eventData.id,
         listingType: listing.type,
-        request: isCustom
+        customRequest: isCustom
           ? {
               note: customRequest?.note,
-              requirements: customRequest?.requirements,
+              customRequirements: customRequest?.requirements,
             }
           : { note: "" },
         status: {

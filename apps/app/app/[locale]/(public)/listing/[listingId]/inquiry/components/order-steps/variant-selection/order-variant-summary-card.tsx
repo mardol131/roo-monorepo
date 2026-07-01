@@ -2,9 +2,11 @@
 
 import Text from "@/app/components/ui/atoms/text";
 import { generateMediaUrl } from "@/app/functions/generate-media-url";
+import { formatVariantCapacity } from "@/app/functions/utils/variants";
 import { useOrderStore } from "@/app/store/order-store";
 import { Variant } from "@roo/common";
 import { Check, Clock, Users, X } from "lucide-react";
+import { useTranslations } from "next-intl";
 import Image from "next/image";
 
 type Props = {
@@ -12,18 +14,13 @@ type Props = {
   index: number;
 };
 
-const PRICING_UNIT_LABEL: Record<Variant["price"]["pricingUnit"], string> = {
-  per_hour: "za hodinu",
-  per_day: "za den",
-  per_person: "za osobu",
-  lump_sum: "paušál",
-};
-
 export default function OrderVariantSummaryCard({ variant, index }: Props) {
   const { currentVariantId, setCurrentVariantId } = useOrderStore();
   const isSelected = variant.id === currentVariantId;
 
-  const capacity = variant.capacity;
+  const t = useTranslations("global.pricing.units");
+
+  const capacityText = formatVariantCapacity(variant.capacity);
 
   const includeItems = (variant.includes ?? [])
     .map((i) => i.item)
@@ -99,17 +96,8 @@ export default function OrderVariantSummaryCard({ variant, index }: Props) {
 
         {/* Info badges */}
         <div className="flex flex-wrap gap-2">
-          <InfoBadge icon={Clock} label={PRICING_UNIT_LABEL[variant.price.pricingUnit]} />
-          {capacity && (
-            <InfoBadge
-              icon={Users}
-              label={
-                capacity.min
-                  ? `${capacity.min}–${capacity.max} osob`
-                  : `max. ${capacity.max} osob`
-              }
-            />
-          )}
+          <InfoBadge icon={Clock} label={t(variant.price.pricingUnit)} />
+          {capacityText && <InfoBadge icon={Users} label={capacityText} />}
         </div>
 
         {/* Includes / Excludes */}

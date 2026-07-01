@@ -8,15 +8,23 @@ import { useVariantsByListing } from "@/app/react-query/variants/hooks";
 import { useParams } from "next/navigation";
 import Text from "@/app/components/ui/atoms/text";
 import ServiceTimeSection from "../../service-time-section";
+import type { Control, FieldErrors, UseFormSetValue } from "react-hook-form";
+import type { CustomRequestFormData } from "../custom-request/custom-request-form-schema";
 
 export default function OrderStepSelectVariant({
   eventStart,
   eventEnd,
   listingType,
+  control,
+  setValue,
+  errors,
 }: {
   eventStart?: string;
   eventEnd?: string;
   listingType?: string;
+  control: Control<CustomRequestFormData>;
+  setValue: UseFormSetValue<CustomRequestFormData>;
+  errors: FieldErrors<CustomRequestFormData>;
 }) {
   const { listingId } = useParams<{ listingId: string }>();
   const { data: variants } = useVariantsByListing(listingId);
@@ -41,14 +49,13 @@ export default function OrderStepSelectVariant({
 
         {selectedVariant && (
           <ServiceTimeSection
-            duration={selectedVariant.duration ?? undefined}
+            durationMinutes={selectedVariant.durationMinutes ?? undefined}
             eventStart={eventStart}
             eventEnd={eventEnd}
-            isOneTime={
-              listingType !== 'venue' &&
-              (selectedVariant.price.pricingUnit === 'lump_sum' ||
-                selectedVariant.price.pricingUnit === 'per_person')
-            }
+            isOneTime={!!selectedVariant.isOneTime}
+            control={control}
+            setValue={setValue}
+            errors={errors}
           />
         )}
 

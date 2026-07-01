@@ -19,6 +19,7 @@ import {
   useUpdateListingDetail,
 } from "@/app/react-query/listings/hooks";
 import {
+  FixedSectionKey,
   getIdFromRelationshipField,
   Listing,
   ListingEntertainmentDetail,
@@ -142,6 +143,38 @@ const BLOCK_TYPES: CustomSectionBlockType[] = [
   "gallery4",
   "gallery5",
 ];
+
+// Prodejní funnel: zaujmout nabídkou → fakta → sociální důkaz a důvěra →
+// námitky → praktické info → firma. Vlastní (vizuální) sekce podporují
+// pitch hned za popisem.
+const RECOMMENDED_FUNNEL_ORDER: FixedSectionKey[] = [
+  "description",
+  "spaces",
+  "basics",
+  "detail",
+  "references",
+  "employees",
+  "faq",
+  "location",
+  "company",
+];
+
+const CUSTOM_SECTIONS_AFTER: FixedSectionKey = "description";
+
+function applyRecommendedOrder(items: SectionOrderItem[]): SectionOrderItem[] {
+  const fixedByKey = new Map(
+    items.flatMap((item) => (item.type === "fixed" ? [[item.key, item]] : [])),
+  );
+  const customItems = items.filter((item) => item.type === "custom");
+
+  const result: SectionOrderItem[] = [];
+  for (const key of RECOMMENDED_FUNNEL_ORDER) {
+    const fixed = fixedByKey.get(key);
+    if (fixed) result.push(fixed);
+    if (key === CUSTOM_SECTIONS_AFTER) result.push(...customItems);
+  }
+  return result;
+}
 
 function BlockTypePicker({
   onSelect,
@@ -363,7 +396,14 @@ export default function SectionsPage() {
     if (!detail) return;
     const sections = initCustomSections(detail);
     setCustomSections(sections);
-    setOrderItems(initOrderItems(detail, sections));
+    const items = initOrderItems(detail, sections);
+    setOrderItems(
+      detail.type === "venue"
+        ? items
+        : items.filter(
+            (item) => !(item.type === "fixed" && item.key === "spaces"),
+          ),
+    );
   }, [detail]);
 
   if (!detail || detailIsPending || !listing || isPending) return <Loader />;
@@ -389,6 +429,22 @@ export default function SectionsPage() {
     setCustomSections((prev) => prev.filter((s) => s.blockName !== blockName));
     setOrderItems((prev) =>
       prev.filter((item) => !(item.type === "custom" && item.id === blockName)),
+    );
+  };
+
+  // deleting a custom item in the order list must also drop its section card,
+  // otherwise the save re-appends the orphaned section at the end
+  const handleOrderItemsChange = (items: SectionOrderItem[]) => {
+    setOrderItems(items);
+    const remainingCustomIds = new Set(
+      items.flatMap((item) => (item.type === "custom" ? [item.id] : [])),
+    );
+    setCustomSections((prev) =>
+      prev.filter((s) => {
+        if (remainingCustomIds.has(s.blockName)) return true;
+        cardRefs.current.delete(s.blockName);
+        return false;
+      }),
     );
   };
 
@@ -451,14 +507,27 @@ export default function SectionsPage() {
 
       <div className="flex flex-col gap-6 mt-6">
         <div className="flex flex-col gap-3">
-          <Text variant="h4" color="textDark">
-            Pořadí sekcí
-          </Text>
+          <div className="flex items-center justify-between">
+            <Text variant="h4" color="textDark">
+              Pořadí sekcí
+            </Text>
+            <Button
+              text="Seřadit doporučeně"
+              version="plain"
+              size="sm"
+              iconLeft="Sparkles"
+              onClick={() => setOrderItems(applyRecommendedOrder(orderItems))}
+            />
+          </div>
           <Text variant="body-sm" color="textLight">
             Přetáhněte sekce do požadovaného pořadí. Pevné sekce nelze smazat,
-            pouze přemístit.
+            pouze přemístit. Doporučené řazení seřadí sekce podle osvědčeného
+            prodejního postupu — změnu je potřeba uložit.
           </Text>
-          <SectionOrderInput value={orderItems} onChange={setOrderItems} />
+          <SectionOrderInput
+            value={orderItems}
+            onChange={handleOrderItemsChange}
+          />
         </div>
 
         <div className="flex flex-col gap-3">
@@ -506,7 +575,7 @@ export default function SectionsPage() {
           ))}
         </div>
 
-        <div className="flex items-center gap-3 pt-2">
+        <div className="flex w-full justify-end gap-3 pt-2">
           <Button
             text={saved ? "Uloženo" : "Uložit změny"}
             version={saved ? "successFull" : "listingFull"}

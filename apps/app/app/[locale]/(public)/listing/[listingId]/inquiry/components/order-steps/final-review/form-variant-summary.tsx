@@ -2,29 +2,10 @@
 
 import Text from "@/app/components/ui/atoms/text";
 import { generateMediaUrl } from "@/app/functions/generate-media-url";
-import {
-  Amenity,
-  Cuisine,
-  DietaryOption,
-  DishType,
-  FoodServiceStyle,
-  Necessity,
-  Service,
-  Technology,
-  Variant,
-} from "@roo/common";
-import { BedDouble, Car, Clock, Coffee, Users } from "lucide-react";
+import { formatVariantCapacity } from "@/app/functions/utils/variants";
+import { Variant } from "@roo/common";
+import { Users } from "lucide-react";
 import { FaCircleCheck, FaCircleXmark } from "react-icons/fa6";
-
-type VariantDetail = Variant["details"][number];
-
-function Chip({ label }: { label: string }) {
-  return (
-    <span className="px-2.5 py-0.5 bg-zinc-100 text-zinc-700 rounded-full text-xs font-medium whitespace-nowrap">
-      {label}
-    </span>
-  );
-}
 
 function InfoRow({
   icon,
@@ -48,166 +29,9 @@ function InfoRow({
   );
 }
 
-function VenueStats({
-  detail,
-}: {
-  detail: Extract<VariantDetail, { blockType: "venue" }>;
-}) {
-  const amenities = (detail.amenities ?? [])
-    .filter((a): a is Amenity => typeof a !== "string")
-    .map((a) => a.name);
-  const services = (detail.services ?? [])
-    .filter((s): s is Service => typeof s !== "string")
-    .map((s) => s.name);
-  const technology = (detail.technology ?? [])
-    .filter((t): t is Technology => typeof t !== "string")
-    .map((t) => t.name);
-  const allChips = [...amenities, ...services, ...technology].slice(0, 5);
-
-  return (
-    <div className="flex flex-col gap-2">
-      <div className="flex flex-wrap gap-2">
-        <InfoRow
-          icon={<Users size={13} />}
-          label="Kapacita"
-          value={
-            detail.capacity.min
-              ? `${detail.capacity.min}–${detail.capacity.max} osob`
-              : `až ${detail.capacity.max} osob`
-          }
-        />
-        {detail.accommodation.included && (
-          <InfoRow
-            icon={<BedDouble size={13} />}
-            label="Ubytování"
-            value={
-              detail.accommodation.capacity
-                ? `${detail.accommodation.capacity} míst`
-                : "v ceně"
-            }
-          />
-        )}
-        {detail.parking.included && (
-          <InfoRow
-            icon={<Car size={13} />}
-            label="Parkování"
-            value={detail.parking.spots ? `${detail.parking.spots} míst` : "v ceně"}
-          />
-        )}
-        {detail.breakfast.included && (
-          <InfoRow icon={<Coffee size={13} />} label="Snídaně" value="v ceně" />
-        )}
-      </div>
-      {allChips.length > 0 && (
-        <div className="flex flex-wrap gap-1.5">
-          {allChips.map((chip) => (
-            <Chip key={chip} label={chip} />
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}
-
-function GastroStats({
-  detail,
-}: {
-  detail: Extract<VariantDetail, { blockType: "gastro" }>;
-}) {
-  const cuisines = (detail.cuisines ?? [])
-    .filter((c): c is Cuisine => typeof c !== "string")
-    .map((c) => c.name);
-  const dishTypes = (detail.dishTypes ?? [])
-    .filter((d): d is DishType => typeof d !== "string")
-    .map((d) => d.name);
-  const dietary = (detail.dietaryOptions ?? [])
-    .filter((d): d is DietaryOption => typeof d !== "string")
-    .map((d) => d.name);
-  const styles = (detail.foodServiceStyle ?? [])
-    .filter((s): s is FoodServiceStyle => typeof s !== "string")
-    .map((s) => s.name);
-  const allChips = [...cuisines, ...dishTypes, ...dietary, ...styles].slice(0, 5);
-
-  return (
-    <div className="flex flex-col gap-2">
-      <div className="flex flex-wrap gap-2">
-        <InfoRow
-          icon={<Users size={13} />}
-          label="Kapacita"
-          value={
-            detail.capacity.min
-              ? `${detail.capacity.min}–${detail.capacity.max} osob`
-              : `až ${detail.capacity.max} osob`
-          }
-        />
-        {detail.pricePerPerson != null && (
-          <InfoRow
-            icon={<Users size={13} />}
-            label="Na osobu"
-            value={`${detail.pricePerPerson.toLocaleString("cs-CZ")} Kč`}
-          />
-        )}
-      </div>
-      {allChips.length > 0 && (
-        <div className="flex flex-wrap gap-1.5">
-          {allChips.map((chip) => (
-            <Chip key={chip} label={chip} />
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}
-
-function EntertainmentStats({
-  detail,
-}: {
-  detail: Extract<VariantDetail, { blockType: "entertainment" }>;
-}) {
-  const necessities = (detail.necessities ?? [])
-    .filter((n): n is Necessity => typeof n !== "string")
-    .map((n) => n.name)
-    .slice(0, 5);
-
-  return (
-    <div className="flex flex-col gap-2">
-      <div className="flex flex-wrap gap-2">
-        <InfoRow
-          icon={<Users size={13} />}
-          label="Kapacita"
-          value={
-            detail.capacity.min
-              ? `${detail.capacity.min}–${detail.capacity.max} osob`
-              : `až ${detail.capacity.max} osob`
-          }
-        />
-        {detail.performanceDuration != null && (
-          <InfoRow
-            icon={<Clock size={13} />}
-            label="Délka"
-            value={`${detail.performanceDuration} min`}
-          />
-        )}
-      </div>
-      {necessities.length > 0 && (
-        <div className="flex flex-wrap gap-1.5">
-          {necessities.map((n) => (
-            <Chip key={n} label={n} />
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}
-
-function DetailStats({ detail }: { detail: VariantDetail }) {
-  if (detail.blockType === "venue") return <VenueStats detail={detail} />;
-  if (detail.blockType === "gastro") return <GastroStats detail={detail} />;
-  return <EntertainmentStats detail={detail} />;
-}
-
 export default function FormVariantSummary({ variant }: { variant: Variant }) {
   const coverImage = variant.images.coverImage;
+  const capacityText = formatVariantCapacity(variant.capacity);
 
   const includeItems = (variant.includes ?? [])
     .map((i) => i.item)
@@ -218,8 +42,6 @@ export default function FormVariantSummary({ variant }: { variant: Variant }) {
     .map((i) => i.item)
     .filter((i): i is string => !!i)
     .slice(0, 4);
-
-  const detail = variant.details[0];
 
   return (
     <div className="bg-zinc-50 border border-zinc-200 rounded-2xl overflow-hidden">
@@ -246,20 +68,15 @@ export default function FormVariantSummary({ variant }: { variant: Variant }) {
         </div>
         <div className="shrink-0 flex flex-col items-end gap-0.5">
           <Text variant="label-lg" color="primary" className="font-bold">
-            {variant.price.generalPrice.toLocaleString("cs-CZ")} Kč
+            {variant.price.base.toLocaleString("cs-CZ")} Kč
           </Text>
-          {(variant.price.seasonalPrices ?? []).length > 0 && (
-            <Text variant="caption" color="secondary">
-              + sezónní ceny
-            </Text>
-          )}
         </div>
       </div>
 
-      {/* Detail stats */}
-      {detail && (
+      {/* Capacity */}
+      {capacityText && (
         <div className="px-4 pb-4">
-          <DetailStats detail={detail} />
+          <InfoRow icon={<Users size={13} />} label="Kapacita" value={capacityText} />
         </div>
       )}
 

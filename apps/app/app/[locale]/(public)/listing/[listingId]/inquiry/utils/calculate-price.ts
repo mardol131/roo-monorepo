@@ -86,6 +86,7 @@ export function calculateEstimatedPrice({
   accommodation,
   breakfast,
   parking,
+  wantsCatering,
   serviceTime,
   listingLocation,
 }: {
@@ -96,6 +97,7 @@ export function calculateEstimatedPrice({
   accommodation: { guests: number } | null;
   breakfast: { guests: number } | null;
   parking: { spots: number } | null;
+  wantsCatering: boolean;
   serviceTime?: ServiceTime | null;
   listingLocation?: [number, number];
 }): PriceBreakdown {
@@ -139,9 +141,9 @@ export function calculateEstimatedPrice({
   }
 
   let cateringTotal = 0;
-  if (detail && "catering" in detail) {
+  if (wantsCatering && detail && "catering" in detail) {
     const ct = (detail as ListingVenueDetail).catering;
-    if (ct?.hasCatering && !ct.cateringIsIncludedInPrice && ct.price) {
+    if (ct?.hasCatering && ct.price) {
       cateringTotal = ct.price * pricingFactor(ct.pricingUnit ?? "lump_sum", days, adults, durationMinutes);
     }
   }

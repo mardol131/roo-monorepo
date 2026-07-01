@@ -81,53 +81,46 @@ export const supplementarySchema = z.object({
     .object({
       hasParking: z.boolean().default(false),
       parkingCapacity: z.coerce.number().nullable().optional(),
-      parkingIsIncludedInPrice: z.boolean().default(false),
-      parkingPrice: z.coerce.number().nullable().optional(),
-      parkingPriceUnit: z.enum(["space", "event"]).nullable().optional(),
+      //   parkingIsIncludedInPrice: z.boolean().default(false),
+      //   parkingPrice: z.coerce.number().nullable().optional(),
+      //   parkingPriceUnit: z.enum(["space", "event"]).nullable().optional(),
     })
-    .optional(),
+    .superRefine((data, ctx) => {
+      if (
+        data.hasParking &&
+        (!data.parkingCapacity || data.parkingCapacity <= 0)
+      ) {
+        ctx.addIssue({
+          code: "custom",
+          message: "Zadejte množství parkovacích míst",
+          path: ["parkingCapacity"],
+        });
+      }
+    }),
   breakfast: z
     .object({
-      included: z.boolean().default(false),
-      allowAccommodationWithoutBreakfast: z.boolean().default(false),
-      allowMoreBreakfastsThanAccommodation: z.boolean().default(false),
+      breakfastIncluded: z.boolean().default(false),
       breakfastIsIncludedInPrice: z.boolean().default(false),
       price: z.coerce.number().nullable().optional(),
       pricePer: z.enum(["person", "booking"]).nullable().optional(),
-      timeFrom: z.string().nullable().optional(),
-      timeTo: z.string().nullable().optional(),
     })
     .optional(),
   catering: z
     .object({
       hasCatering: z.boolean().default(false),
-      cateringIsIncludedInPrice: z.boolean().default(false),
       price: z.coerce.number().nullable().optional(),
-      pricingUnit: z.enum(["per_person", "per_hour", "lump_sum"]).default("lump_sum"),
-      cuisines: z.array(priceableItemSchema).default([]),
-      foodPreparationStyles: z.array(priceableItemSchema).default([]),
+      pricingUnit: z
+        .enum(["per_person", "per_hour", "lump_sum"])
+        .default("lump_sum"),
+      description: z.string().nullable().optional(),
     })
     .superRefine((data, ctx) => {
-      if (data.hasCatering && !data.cateringIsIncludedInPrice) {
-        if (!data.price || data.price <= 0) {
+      if (data.hasCatering) {
+        if (data.price === undefined || data.price === null) {
           ctx.addIssue({
             code: "custom",
             message: "Zadejte základní cenu cateringu",
             path: ["price"],
-          });
-        }
-        if (data.cuisines.length === 0) {
-          ctx.addIssue({
-            code: "custom",
-            message: "Vyberte alespoň jeden typ kuchyně",
-            path: ["cuisines"],
-          });
-        }
-        if (data.foodPreparationStyles.length === 0) {
-          ctx.addIssue({
-            code: "custom",
-            message: "Vyberte alespoň jeden způsob přípravy",
-            path: ["foodPreparationStyles"],
           });
         }
       }

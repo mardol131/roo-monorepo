@@ -11,7 +11,7 @@ export default function OrderStepLogin() {
   const router = useRouter();
 
   return (
-    <div className="flex flex-col items-center text-center gap-8 py-4">
+    <div className="flex flex-col items-center text-center gap-8 py-4 mt-20">
       <div className="flex flex-col items-center gap-5">
         <Text variant="display-xl" color="textDark" className="font-bold">
           Přihlaste se pro odeslání poptávky
@@ -29,7 +29,7 @@ export default function OrderStepLogin() {
         />
         <Button
           text="Vytvořit účet"
-          version="secondary"
+          version="outlined"
           onClick={() => router.push({ pathname: "/register" })}
         />
         <OAuthButton

@@ -3,12 +3,13 @@
 import ItemsSection from "../items-section";
 import SectionWrapper from "../section-wrapper";
 import { ChipList, InfoRow } from "../listing-ui";
-import { Listing, ListingVenueDetail } from "@roo/common";
+import { ListingVenueDetail } from "@roo/common";
 import {
   BedDouble,
   Car,
   Coffee,
   Tag,
+  Users,
   Wrench,
   Cpu,
   Dumbbell,
@@ -17,7 +18,6 @@ import { useFilterOptions } from "@/app/react-query/filters/aggregated-filters/h
 
 interface Props {
   detail: ListingVenueDetail;
-  listing: Listing;
 }
 
 const vehicleTypeLabels: Record<string, string> = {
@@ -27,23 +27,40 @@ const vehicleTypeLabels: Record<string, string> = {
   bus: "Autobus",
 };
 
-export default function VenueSection({ detail, listing }: Props) {
+const resolveId = (value: string | { id: string }) =>
+  typeof value === "string" ? value : value.id;
+
+export default function VenueSection({ detail }: Props) {
   const { data: filters } = useFilterOptions();
 
-  const amenities = (listing.options.amenities ?? []).flatMap((id) => {
-    const found = filters?.amenities.find((e) => e.id === id);
+  const amenities = (detail.options.amenities ?? []).flatMap((entry) => {
+    const found = filters?.amenities.find(
+      (e) => e.id === resolveId(entry.amenity),
+    );
     return found ? [found.name] : [];
   });
-  const services = (listing.options.services ?? []).flatMap((id) => {
-    const found = filters?.services.find((e) => e.id === id);
+  const services = (detail.options.services ?? []).flatMap((entry) => {
+    const found = filters?.services.find(
+      (e) => e.id === resolveId(entry.service),
+    );
     return found ? [found.name] : [];
   });
-  const technology = (listing.options.technologies ?? []).flatMap((id) => {
-    const found = filters?.technologies.find((e) => e.id === id);
+  const technology = (detail.options.technologies ?? []).flatMap((entry) => {
+    const found = filters?.technologies.find(
+      (e) => e.id === resolveId(entry.technology),
+    );
     return found ? [found.name] : [];
   });
-  const activities = (listing.options.activities ?? []).flatMap((id) => {
-    const found = filters?.activities.find((e) => e.id === id);
+  const activities = (detail.options.activities ?? []).flatMap((entry) => {
+    const found = filters?.activities.find(
+      (e) => e.id === resolveId(entry.activity),
+    );
+    return found ? [found.name] : [];
+  });
+  const personnel = (detail.options.personnel ?? []).flatMap((entry) => {
+    const found = filters?.personnel.find(
+      (e) => e.id === resolveId(entry.personnel),
+    );
     return found ? [found.name] : [];
   });
 
@@ -119,6 +136,21 @@ export default function VenueSection({ detail, listing }: Props) {
         </SectionWrapper>
       )}
 
+      {personnel.length > 0 && (
+        <SectionWrapper title="Personál">
+          <ItemsSection
+            items={personnel.map((name) => ({
+              id: name,
+              label: name,
+              icon: <Users size={18} />,
+            }))}
+            displayCount={8}
+            buttonText="Ukázat vše"
+            columns={2}
+          />
+        </SectionWrapper>
+      )}
+
       {(vehicleTypes.length > 0 || accessFlags.length > 0) && (
         <SectionWrapper title="Přístup a logistika">
           <div className="flex flex-col gap-4">
@@ -177,13 +209,6 @@ export default function VenueSection({ detail, listing }: Props) {
       {detail.breakfast.breakfastIncluded && (
         <SectionWrapper title="Snídaně">
           <div className="flex flex-col gap-2">
-            {detail.breakfast.timeFrom && detail.breakfast.timeTo && (
-              <InfoRow
-                icon={<Coffee size={16} />}
-                label="Čas"
-                value={`${detail.breakfast.timeFrom}–${detail.breakfast.timeTo}`}
-              />
-            )}
             {!detail.breakfast.breakfastIsIncludedInPrice &&
               detail.breakfast.price != null && (
                 <InfoRow

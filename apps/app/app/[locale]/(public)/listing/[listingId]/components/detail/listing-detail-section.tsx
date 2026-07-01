@@ -12,7 +12,7 @@ export default function ListingDetailSection({ listing }: Props) {
   if (!detail || typeof detail.value === "string") return null;
 
   if (detail.relationTo === "listing-venue-details")
-    return <VenueSection detail={detail.value} listing={listing} />;
+    return <VenueSection detail={detail.value} />;
   if (detail.relationTo === "listing-gastro-details")
     return <GastroSection detail={detail.value} listing={listing} />;
   if (detail.relationTo === "listing-entertainment-details")

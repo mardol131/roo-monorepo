@@ -4,16 +4,24 @@ import { FormSection } from "@/app/[locale]/(user)/components/form-section";
 import DateTimeInput from "@/app/components/ui/atoms/inputs/date-time-input";
 import Text from "@/app/components/ui/atoms/text";
 import { useOrderStore } from "@/app/store/order-store";
-import type { Variant } from "@roo/common";
 import EventTimeline from "./event-timeline";
-
-type VariantDuration = NonNullable<Variant["duration"]>;
+import Button from "@/app/components/ui/atoms/button";
+import { useEffect, useState } from "react";
+import {
+  Controller,
+  type Control,
+  type FieldErrors,
+  type UseFormSetValue,
+  useWatch,
+} from "react-hook-form";
+import type { CustomRequestFormData } from "./order-steps/custom-request/custom-request-form-schema";
 
 const DURATION_PRESETS: { label: string; minutes: number | null }[] = [
   { label: "30 min", minutes: 30 },
   { label: "1 hod", minutes: 60 },
   { label: "1,5 hod", minutes: 90 },
   { label: "2 hod", minutes: 120 },
+  { label: "5 hod", minutes: 300 },
   { label: "Celý event", minutes: null },
 ];
 
@@ -22,24 +30,43 @@ function addMinutesToIso(iso: string, minutes: number): string {
 }
 
 export default function ServiceTimeSection({
-  duration,
+  durationMinutes,
   eventStart,
   eventEnd,
   isOneTime,
+  control,
+  setValue,
+  errors,
 }: {
-  duration?: VariantDuration;
+  /** Pevná délka služby varianty — konec se dopočítá automaticky. */
+  durationMinutes?: number;
   eventStart?: string;
   eventEnd?: string;
   isOneTime: boolean;
+  control: Control<CustomRequestFormData>;
+  setValue: UseFormSetValue<CustomRequestFormData>;
+  errors: FieldErrors<CustomRequestFormData>;
 }) {
-  const { serviceTime, setServiceTime, eventData } = useOrderStore();
+  const { setServiceTime, eventData } = useOrderStore();
   // eventData used only as fallback when caller doesn't pass explicit eventStart/eventEnd
+  const [priceAxisVisible, setPriceAxisVisible] = useState(false);
+
+  const serviceTime = useWatch({ control, name: "serviceTime" });
+
+  // Mirror the form value into the order store so price calculation, the
+  // preview, and submission (which never see the RHF form) stay in sync.
+  useEffect(() => {
+    const hasValue =
+      !!serviceTime?.arrivalTime ||
+      !!serviceTime?.startTime ||
+      !!serviceTime?.endTime;
+    setServiceTime(hasValue ? serviceTime : null);
+  }, [serviceTime, setServiceTime]);
 
   const effectiveStart = eventStart ?? eventData?.date?.start ?? undefined;
   const effectiveEnd = eventEnd ?? eventData?.date?.end ?? undefined;
 
-  const hasExactDuration =
-    !!duration?.hasExactDuration && !!duration.exactDurationMinutes;
+  const hasExactDuration = !!durationMinutes;
 
   const activeDurationMinutes =
     serviceTime?.startTime && serviceTime?.endTime
@@ -61,27 +88,36 @@ export default function ServiceTimeSection({
   function applyPreset(minutes: number | null) {
     if (minutes === null) {
       if (effectiveStart && effectiveEnd) {
-        setServiceTime({ startTime: effectiveStart, endTime: effectiveEnd });
+        setValue("serviceTime.startTime", effectiveStart, {
+          shouldValidate: true,
+        });
+        setValue("serviceTime.endTime", effectiveEnd, {
+          shouldValidate: true,
+        });
       }
       return;
     }
     if (!serviceTime?.startTime) return;
-    setServiceTime({
-      startTime: serviceTime.startTime,
-      endTime: addMinutesToIso(serviceTime.startTime, minutes),
-    });
+    setValue(
+      "serviceTime.endTime",
+      addMinutesToIso(serviceTime.startTime, minutes),
+      { shouldValidate: true },
+    );
   }
 
   function handleStartChange(value: string | null) {
     if (!value) {
-      setServiceTime({ startTime: undefined, endTime: undefined });
+      setValue("serviceTime.startTime", undefined, { shouldValidate: true });
+      setValue("serviceTime.endTime", undefined, { shouldValidate: true });
       return;
     }
     if (hasExactDuration) {
-      setServiceTime({
-        startTime: value,
-        endTime: addMinutesToIso(value, duration!.exactDurationMinutes!),
-      });
+      setValue("serviceTime.startTime", value, { shouldValidate: true });
+      setValue(
+        "serviceTime.endTime",
+        addMinutesToIso(value, durationMinutes!),
+        { shouldValidate: true },
+      );
       return;
     }
     // Preserve current duration when shifting start time
@@ -89,15 +125,11 @@ export default function ServiceTimeSection({
       activeDurationMinutes && activeDurationMinutes > 0
         ? addMinutesToIso(value, activeDurationMinutes)
         : serviceTime?.endTime;
-    setServiceTime({ startTime: value, endTime });
+    setValue("serviceTime.startTime", value, { shouldValidate: true });
+    setValue("serviceTime.endTime", endTime, { shouldValidate: true });
   }
 
-  const visiblePresets = DURATION_PRESETS.filter(
-    (p) =>
-      p.minutes === null ||
-      !duration?.maxDurationMinutes ||
-      p.minutes <= duration.maxDurationMinutes,
-  );
+  const visiblePresets = DURATION_PRESETS;
 
   if (isOneTime) {
     return (
@@ -105,13 +137,25 @@ export default function ServiceTimeSection({
         icon="Clock"
         title="Čas příjezdu"
         subtitle="Kdy má dodavatel přijet?"
+        error={!!errors.serviceTime?.arrivalTime?.message}
       >
-        <DateTimeInput
-          label="Čas příjezdu"
-          value={serviceTime?.arrivalTime ?? null}
-          onChange={(v) => setServiceTime({ arrivalTime: v ?? undefined })}
-          isRequired
-          min={effectiveStart}
+        <Controller
+          control={control}
+          name="serviceTime.arrivalTime"
+          render={({ field }) => (
+            <DateTimeInput
+              label="Čas příjezdu"
+              value={field.value ?? null}
+              onChange={(v) =>
+                setValue("serviceTime.arrivalTime", v ?? undefined, {
+                  shouldValidate: true,
+                })
+              }
+              isRequired
+              min={effectiveStart}
+              error={errors.serviceTime?.arrivalTime?.message}
+            />
+          )}
         />
         <EventTimeline
           eventStart={effectiveStart}
@@ -127,38 +171,48 @@ export default function ServiceTimeSection({
       icon="Clock"
       title="Čas a délka"
       subtitle="Specifikujte, kdy chcete dodavatele využít"
+      error={
+        !!errors.serviceTime?.startTime?.message ||
+        !!errors.serviceTime?.endTime?.message
+      }
     >
       <div className="flex flex-col gap-4">
         <div className="grid grid-cols-2 gap-3">
-          <DateTimeInput
-            label="Od"
-            value={serviceTime?.startTime ?? null}
-            onChange={handleStartChange}
-            isRequired
-            min={effectiveStart}
+          <Controller
+            control={control}
+            name="serviceTime.startTime"
+            render={({ field }) => (
+              <DateTimeInput
+                label="Od"
+                value={field.value ?? null}
+                onChange={handleStartChange}
+                isRequired
+                min={effectiveStart}
+                error={errors.serviceTime?.startTime?.message}
+              />
+            )}
           />
-          <DateTimeInput
-            label="Do"
-            value={serviceTime?.endTime ?? null}
-            onChange={(v) => {
-              if (!hasExactDuration) {
-                setServiceTime({
-                  startTime: serviceTime?.startTime,
-                  endTime: v ?? undefined,
-                });
-              }
-            }}
-            min={serviceTime?.startTime}
-            isRequired
+          <Controller
+            control={control}
+            name="serviceTime.endTime"
+            render={({ field }) => (
+              <DateTimeInput
+                label="Do"
+                value={field.value ?? null}
+                error={errors.serviceTime?.endTime?.message}
+                onChange={(v) => {
+                  if (!hasExactDuration) {
+                    setValue("serviceTime.endTime", v ?? undefined, {
+                      shouldValidate: true,
+                    });
+                  }
+                }}
+                min={serviceTime?.startTime}
+                isRequired
+              />
+            )}
           />
         </div>
-
-        <EventTimeline
-          eventStart={effectiveStart}
-          eventEnd={effectiveEnd}
-          serviceStart={serviceTime?.startTime}
-          serviceEnd={serviceTime?.endTime}
-        />
 
         <div className="flex flex-wrap gap-2">
           {visiblePresets.map((preset) => {
@@ -172,31 +226,40 @@ export default function ServiceTimeSection({
                 : !effectiveStart || !effectiveEnd;
 
             return (
-              <button
+              <Button
+                text={preset.label}
                 key={preset.label}
-                type="button"
+                htmlType="button"
+                size="sm"
+                version={isActive ? "primary" : "outlined"}
                 onClick={() => applyPreset(preset.minutes)}
                 disabled={isDisabled}
-                className={`px-3 py-1.5 rounded-full text-sm font-medium border transition-colors disabled:opacity-40 disabled:cursor-not-allowed ${
-                  isActive
-                    ? "bg-primary border-primary text-white"
-                    : "bg-white border-zinc-200 text-zinc-700 hover:border-zinc-400"
-                }`}
-              >
-                {preset.label}
-              </button>
+                disableResize
+              />
             );
           })}
         </div>
-
+        <Button
+          text="Zobrazit časovou osu"
+          iconLeft={priceAxisVisible ? "ChevronUp" : "ChevronDown"}
+          size="sm"
+          version="plain"
+          className="self-start"
+          onClick={() => setPriceAxisVisible(!priceAxisVisible)}
+        />
+        {priceAxisVisible && (
+          <div>
+            <EventTimeline
+              eventStart={effectiveStart}
+              eventEnd={effectiveEnd}
+              serviceStart={serviceTime?.startTime}
+              serviceEnd={serviceTime?.endTime}
+            />
+          </div>
+        )}
         {hasExactDuration && (
           <Text variant="caption" color="secondary">
-            Délka je pevně stanovena na {duration!.exactDurationMinutes} minut.
-          </Text>
-        )}
-        {!hasExactDuration && duration?.maxDurationMinutes && (
-          <Text variant="caption" color="secondary">
-            Max. délka: {duration.maxDurationMinutes} minut
+            Délka je pevně stanovena na {durationMinutes} minut.
           </Text>
         )}
       </div>

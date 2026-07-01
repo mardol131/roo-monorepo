@@ -5,41 +5,37 @@ import Button from "@/app/components/ui/atoms/button";
 import Input from "@/app/components/ui/atoms/inputs/input";
 import { Textarea } from "@/app/components/ui/atoms/inputs/textarea";
 import Text from "@/app/components/ui/atoms/text";
+import SelectableOptionCard from "@/app/components/ui/molecules/selectable-option-card";
 import { useListingDetail } from "@/app/react-query/listings/hooks";
 import { useSpacesByListing } from "@/app/react-query/spaces/hooks";
-import {
-  type SelectedAddon,
-  type SelectedSpace,
-  useOrderStore,
-} from "@/app/store/order-store";
+import { type SelectedAddon, useOrderStore } from "@/app/store/order-store";
 import {
   getIdFromRelationshipField,
   type Listing,
   type ListingEntertainmentDetail,
   type ListingGastroDetail,
   type ListingVenueDetail,
-  type Space,
 } from "@roo/common";
-import { Check, Minus, Plus, X } from "lucide-react";
+import { Minus, Plus, X } from "lucide-react";
 import { useEffect } from "react";
 import ServiceTimeSection from "../../service-time-section";
+import SpaceTreeList from "./space-tree-card";
 import {
   Controller,
   type Control,
   type FieldErrors,
   type UseFormRegister,
+  type UseFormSetValue,
   useFieldArray,
   useWatch,
 } from "react-hook-form";
 import { useParams } from "next/navigation";
-import z from "zod";
+import type { CustomRequestFormData } from "./custom-request-form-schema";
 
-export const customRequestFormSchema = z.object({
-  note: z.string().min(10, "Popis musí mít alespoň 10 znaků"),
-  requirements: z.array(z.object({ text: z.string() })),
-});
-
-export type CustomRequestFormData = z.infer<typeof customRequestFormSchema>;
+export {
+  customRequestFormSchema,
+  type CustomRequestFormData,
+} from "./custom-request-form-schema";
 
 type PricingUnit = "per_day" | "per_person" | "per_hour" | "lump_sum";
 
@@ -50,7 +46,32 @@ const PRICING_UNIT_LABELS: Record<PricingUnit, string> = {
   lump_sum: "/ událost",
 };
 
-type FlatAddon = SelectedAddon & { defaultQuantity: number };
+type AddonGroupKey = keyof typeof ADDON_GROUP_LABELS;
+
+type FlatAddon = SelectedAddon & {
+  defaultQuantity: number;
+  group: AddonGroupKey;
+};
+
+const ADDON_GROUP_LABELS = {
+  activities: "Aktivity",
+  technologies: "Technika",
+  personnel: "Personál",
+  amenities: "Vybavení",
+  services: "Služby",
+  cuisines: "Kuchyně",
+  foodPreparationStyles: "Styl přípravy jídla",
+} as const;
+
+const ENTITY_KEYS: Record<AddonGroupKey, string> = {
+  activities: "activity",
+  technologies: "technology",
+  personnel: "personnel",
+  amenities: "amenity",
+  services: "service",
+  cuisines: "cuisine",
+  foodPreparationStyles: "foodPreparationStyle",
+};
 
 function extractAddons(
   detail: ListingVenueDetail | ListingGastroDetail | ListingEntertainmentDetail,
@@ -58,17 +79,10 @@ function extractAddons(
   const result: FlatAddon[] = [];
   const opts = detail.options as Record<string, unknown[] | null | undefined>;
 
-  const ENTITY_KEYS: Record<string, string> = {
-    activities: "activity",
-    technologies: "technology",
-    personnel: "personnel",
-    amenities: "amenity",
-    services: "service",
-    cuisines: "cuisine",
-    foodPreparationStyles: "foodPreparationStyle",
-  };
-
-  for (const [key, entityKey] of Object.entries(ENTITY_KEYS)) {
+  for (const [key, entityKey] of Object.entries(ENTITY_KEYS) as [
+    AddonGroupKey,
+    string,
+  ][]) {
     const items = opts[key];
     if (!items) continue;
     for (const item of items) {
@@ -85,6 +99,7 @@ function extractAddons(
         unitPrice: entry.unitPrice as number,
         quantity: entry.quantity as number,
         defaultQuantity: entry.quantity as number,
+        group: key,
       });
     }
   }
@@ -92,36 +107,17 @@ function extractAddons(
   return result;
 }
 
-function extractCateringAddons(detail: ListingVenueDetail): FlatAddon[] {
-  const result: FlatAddon[] = [];
-  for (const item of detail.catering?.cuisines ?? []) {
-    const entity = typeof item.cuisine === "string" ? null : item.cuisine;
-    if (!entity) continue;
-    result.push({
-      optionId: entity.id,
-      name: entity.name,
-      pricingUnit: item.pricingUnit as PricingUnit,
-      unitPrice: item.unitPrice,
-      quantity: item.quantity,
-      defaultQuantity: item.quantity,
-    });
+function groupAddonsByType(addons: FlatAddon[]): [AddonGroupKey, FlatAddon[]][] {
+  const groups = new Map<AddonGroupKey, FlatAddon[]>();
+  for (const addon of addons) {
+    const list = groups.get(addon.group);
+    if (list) {
+      list.push(addon);
+    } else {
+      groups.set(addon.group, [addon]);
+    }
   }
-  for (const item of detail.catering?.foodPreparationStyles ?? []) {
-    const entity =
-      typeof item.foodPreparationStyle === "string"
-        ? null
-        : item.foodPreparationStyle;
-    if (!entity) continue;
-    result.push({
-      optionId: entity.id,
-      name: entity.name,
-      pricingUnit: item.pricingUnit as PricingUnit,
-      unitPrice: item.unitPrice,
-      quantity: item.quantity,
-      defaultQuantity: item.quantity,
-    });
-  }
-  return result;
+  return Array.from(groups.entries());
 }
 
 function getDetailCollection(listing: Listing) {
@@ -142,116 +138,49 @@ function AddonCard({ addon }: { addon: FlatAddon }) {
   const hasQuantity = addon.defaultQuantity > 1;
 
   return (
-    <div
-      className={`flex items-center justify-between gap-3 w-full px-4 py-3 rounded-xl border-2 transition-all ${
-        isSelected
-          ? "border-success bg-success-surface"
-          : "border-zinc-200 bg-white"
-      }`}
-    >
-      <button
-        type="button"
-        onClick={() =>
-          toggleAddon({ ...addon, quantity: addon.defaultQuantity })
-        }
-        className="flex items-center gap-3 flex-1 text-left"
-      >
-        <div
-          className={`w-5 h-5 rounded flex items-center justify-center shrink-0 transition-colors ${
-            isSelected ? "bg-success" : "border-2 border-zinc-300"
-          }`}
-        >
-          {isSelected && (
-            <Check className="w-3 h-3 text-white" strokeWidth={3} />
+    <SelectableOptionCard
+      isActive={isSelected}
+      onClick={() => toggleAddon({ ...addon, quantity: addon.defaultQuantity })}
+      price={
+        <>
+          {isSelected && hasQuantity && (
+            <div className="flex items-center gap-1">
+              <button
+                type="button"
+                onClick={() =>
+                  setAddonQuantity(addon.optionId, Math.max(1, currentQty - 1))
+                }
+                className="w-6 h-6 rounded-full border border-zinc-300 flex items-center justify-center hover:bg-zinc-100 transition-colors"
+              >
+                <Minus className="w-3 h-3" />
+              </button>
+              <Text
+                variant="label"
+                color="textDark"
+                className="w-6 text-center"
+              >
+                {currentQty}
+              </Text>
+              <button
+                type="button"
+                onClick={() => setAddonQuantity(addon.optionId, currentQty + 1)}
+                className="w-6 h-6 rounded-full border border-zinc-300 flex items-center justify-center hover:bg-zinc-100 transition-colors"
+              >
+                <Plus className="w-3 h-3" />
+              </button>
+            </div>
           )}
-        </div>
-        <Text variant="label" color={isSelected ? "textDark" : "textDark"}>
-          {addon.name}
-        </Text>
-      </button>
-
-      <div className="flex items-center gap-3 shrink-0">
-        {isSelected && hasQuantity && (
-          <div className="flex items-center gap-1">
-            <button
-              type="button"
-              onClick={() =>
-                setAddonQuantity(addon.optionId, Math.max(1, currentQty - 1))
-              }
-              className="w-6 h-6 rounded-full border border-zinc-300 flex items-center justify-center hover:bg-zinc-100 transition-colors"
-            >
-              <Minus className="w-3 h-3" />
-            </button>
-            <Text variant="label" color="textDark" className="w-6 text-center">
-              {currentQty}
-            </Text>
-            <button
-              type="button"
-              onClick={() => setAddonQuantity(addon.optionId, currentQty + 1)}
-              className="w-6 h-6 rounded-full border border-zinc-300 flex items-center justify-center hover:bg-zinc-100 transition-colors"
-            >
-              <Plus className="w-3 h-3" />
-            </button>
-          </div>
-        )}
-        <Text variant="caption" color="secondary">
-          {addon.unitPrice.toLocaleString("cs-CZ")} Kč{" "}
-          {PRICING_UNIT_LABELS[addon.pricingUnit]}
-        </Text>
-      </div>
-    </div>
-  );
-}
-
-// ── Space card ────────────────────────────────────────────────────────────────
-
-function SpaceCard({ space }: { space: Space }) {
-  const { selectedSpaces, toggleSpace } = useOrderStore();
-  const isSelected = selectedSpaces.some((s) => s.spaceId === space.id);
-
-  const spaceAddon: SelectedSpace = {
-    spaceId: space.id,
-    name: space.name,
-    price: space.price.base,
-    pricingUnit: space.price.pricingUnit,
-  };
-
-  return (
-    <button
-      type="button"
-      onClick={() => toggleSpace(spaceAddon)}
-      className={`flex items-center justify-between gap-3 w-full px-4 py-3 rounded-xl border-2 text-left transition-all ${
-        isSelected
-          ? "border-primary bg-primary-surface"
-          : "border-zinc-200 bg-white hover:border-zinc-300"
-      }`}
-    >
-      <div className="flex items-center gap-3">
-        <div
-          className={`w-5 h-5 rounded flex items-center justify-center shrink-0 transition-colors ${
-            isSelected ? "bg-primary" : "border-2 border-zinc-300"
-          }`}
-        >
-          {isSelected && (
-            <Check className="w-3 h-3 text-white" strokeWidth={3} />
-          )}
-        </div>
-        <div>
-          <Text variant="label" color={isSelected ? "primary" : "textDark"}>
-            {space.name}
+          <Text variant="caption" color="secondary">
+            {addon.unitPrice.toLocaleString("cs-CZ")} Kč{" "}
+            {PRICING_UNIT_LABELS[addon.pricingUnit]}
           </Text>
-          {space.capacity && (
-            <Text variant="caption" color="secondary">
-              Kapacita: {space.capacity} osob
-            </Text>
-          )}
-        </div>
-      </div>
-      <Text variant="caption" color="secondary" className="shrink-0">
-        {space.price.base.toLocaleString("cs-CZ")} Kč{" "}
-        {PRICING_UNIT_LABELS[space.price.pricingUnit]}
+        </>
+      }
+    >
+      <Text variant="label" color="textDark">
+        {addon.name}
       </Text>
-    </button>
+    </SelectableOptionCard>
   );
 }
 
@@ -312,6 +241,7 @@ interface Props {
   listing: Listing;
   control: Control<CustomRequestFormData>;
   register: UseFormRegister<CustomRequestFormData>;
+  setValue: UseFormSetValue<CustomRequestFormData>;
   errors: FieldErrors<CustomRequestFormData>;
   eventStart?: string;
   eventEnd?: string;
@@ -322,6 +252,7 @@ export default function OrderStepFillCustomRequest({
   listing,
   control,
   register,
+  setValue,
   errors,
   eventStart,
   eventEnd,
@@ -331,12 +262,16 @@ export default function OrderStepFillCustomRequest({
   const {
     setCustomRequest,
     selectedSpaces,
+    selectedAddons,
+    toggleAddon,
     accommodation,
     breakfast,
     parking,
+    wantsCatering,
     setAccommodation,
     setBreakfast,
     setParking,
+    setWantsCatering,
   } = useOrderStore();
 
   const { fields, append, remove } = useFieldArray({
@@ -381,20 +316,25 @@ export default function OrderStepFillCustomRequest({
     !!venueDetail?.parking?.hasParking &&
     !venueDetail.parking.parkingIsIncludedInPrice &&
     !!venueDetail.parking.parkingPrice;
-  const cateringAddons: FlatAddon[] = venueDetail
-    ? extractCateringAddons(venueDetail)
-    : [];
-  const showCatering =
-    !!venueDetail?.catering?.hasCatering &&
-    !venueDetail.catering.cateringIsIncludedInPrice &&
-    cateringAddons.length > 0;
+
+  const cateringAvailable = !!venueDetail?.catering?.hasCatering;
+  function handleWantsCateringChange(next: boolean) {
+    setWantsCatering(next);
+  }
 
   void selectedSpaces;
 
   return (
     <div className="flex flex-col gap-4">
       {/* Čas a délka */}
-      <ServiceTimeSection eventStart={eventStart} eventEnd={eventEnd} isOneTime={isOneTime} />
+      <ServiceTimeSection
+        eventStart={eventStart}
+        eventEnd={eventEnd}
+        isOneTime={isOneTime}
+        control={control}
+        setValue={setValue}
+        errors={errors}
+      />
 
       {/* Prostory (venue only) */}
       {showSpaces && (
@@ -403,11 +343,7 @@ export default function OrderStepFillCustomRequest({
           title="Prostory"
           subtitle="Vyberte prostory, které chcete využít"
         >
-          <div className="flex flex-col gap-2">
-            {spaces.map((space) => (
-              <SpaceCard key={space.id} space={space} />
-            ))}
-          </div>
+          <SpaceTreeList spaces={spaces} />
         </FormSection>
       )}
 
@@ -463,20 +399,38 @@ export default function OrderStepFillCustomRequest({
       )}
 
       {/* Catering (venue only) */}
-      {showCatering && (
+      {cateringAvailable && (
         <FormSection
           icon="UtensilsCrossed"
           title="Catering"
-          subtitle={
-            venueDetail?.catering?.price
-              ? `Základní cena: ${venueDetail.catering.price.toLocaleString("cs-CZ")} Kč${venueDetail.catering.pricingUnit === "per_person" ? " / os." : venueDetail.catering.pricingUnit === "per_hour" ? " / hod." : " / akci"}`
-              : "Vyberte typ kuchyně a způsob přípravy"
-          }
+          subtitle="Catering je volitelný doplněk"
         >
-          <div className="flex flex-col gap-2">
-            {cateringAddons.map((addon) => (
-              <AddonCard key={addon.optionId} addon={addon} />
-            ))}
+          <div className="flex flex-col gap-3">
+            <SelectableOptionCard
+              isActive={wantsCatering}
+              onClick={() => handleWantsCateringChange(!wantsCatering)}
+              price={
+                venueDetail?.catering?.price ? (
+                  <Text variant="caption" color="secondary">
+                    {venueDetail.catering.price.toLocaleString("cs-CZ")} Kč
+                    {venueDetail.catering.pricingUnit === "per_person"
+                      ? " / os."
+                      : venueDetail.catering.pricingUnit === "per_hour"
+                        ? " / hod."
+                        : " / akci"}
+                  </Text>
+                ) : null
+              }
+            >
+              <Text variant="label" color="textDark">
+                Chci využít catering
+              </Text>
+            </SelectableOptionCard>
+            {wantsCatering && venueDetail?.catering?.description && (
+              <Text variant="caption" color="secondary">
+                {venueDetail?.catering?.description}
+              </Text>
+            )}
           </div>
         </FormSection>
       )}
@@ -488,9 +442,16 @@ export default function OrderStepFillCustomRequest({
           title="Doplňkové služby"
           subtitle="Vyberte doplňkové služby, které chcete zahrnout do poptávky"
         >
-          <div className="flex flex-col gap-2">
-            {availableAddons.map((addon) => (
-              <AddonCard key={addon.optionId} addon={addon} />
+          <div className="flex flex-col gap-4">
+            {groupAddonsByType(availableAddons).map(([group, addons]) => (
+              <div key={group} className="flex flex-col gap-2">
+                <Text variant="label" color="textDark" className="font-semibold">
+                  {ADDON_GROUP_LABELS[group]}
+                </Text>
+                {addons.map((addon) => (
+                  <AddonCard key={addon.optionId} addon={addon} />
+                ))}
+              </div>
             ))}
           </div>
         </FormSection>
@@ -520,15 +481,6 @@ export default function OrderStepFillCustomRequest({
         icon="ListChecks"
         title="Další požadavky"
         subtitle="Volitelné — konkrétní požadavky, které chcete upřesnit"
-        headerRightComponent={
-          <Button
-            text="Přidat požadavek"
-            iconLeft="Plus"
-            version="outlined"
-            size="xs"
-            onClick={() => append({ text: "" })}
-          />
-        }
       >
         {fields.length === 0 ? null : (
           <div className="flex flex-col gap-2">
@@ -559,6 +511,14 @@ export default function OrderStepFillCustomRequest({
             ))}
           </div>
         )}
+        <Button
+          text="Přidat požadavek"
+          iconLeft="Plus"
+          version="plain"
+          size="xs"
+          onClick={() => append({ text: "" })}
+          className="self-start"
+        />
       </FormSection>
     </div>
   );

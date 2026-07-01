@@ -73,7 +73,7 @@ export default function ListingAdminSection({ listing, companyId }: Props) {
 
   return (
     <DashboardSection
-      title="K tomuto inzerátu máte následující možnosti"
+      title="Tento inzerát je váš nebo firmy, ve které jste členem."
       icon="Settings"
       iconBg="bg-indigo-50"
       iconColor="text-indigo-500"

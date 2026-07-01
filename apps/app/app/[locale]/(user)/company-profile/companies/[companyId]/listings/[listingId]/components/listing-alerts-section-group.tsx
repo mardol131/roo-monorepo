@@ -9,6 +9,7 @@ import {
 import { hasListingRights } from "@/app/functions/utils/listings";
 import { useUpdateListing } from "@/app/react-query/listings/hooks";
 import { listingKeys } from "@/app/react-query/query-keys";
+import { useSpacesByListing } from "@/app/react-query/spaces/hooks";
 import { getIdFromRelationshipField, Listing } from "@roo/common";
 import { useQueryClient } from "@tanstack/react-query";
 import { AlertTriangle, PauseCircle, XCircle } from "lucide-react";
@@ -18,7 +19,9 @@ type Props = {
 };
 
 export default function ListingAlertsSectionGroup({ listing }: Props) {
-  const { status, subscriptionStatus } = listing;
+  const { status, subscriptionStatus, id, company } = listing;
+
+  const { data: spaces } = useSpacesByListing(id);
 
   const queryClient = useQueryClient();
   const { mutate: updateListing, isPending: isUpdating } = useUpdateListing(
@@ -74,6 +77,33 @@ export default function ListingAlertsSectionGroup({ listing }: Props) {
     (subscriptionStatus === "paid" || subscriptionStatus === "cancelling") &&
     status !== "active"
   ) {
+    if (spaces?.docs?.length === 0 && listing.type === "venue") {
+      return (
+        <AlertSection
+          icon={PauseCircle}
+          iconBg="bg-warning-surface"
+          iconColor="text-warning"
+          borderColor="border-warning"
+          bgColor="bg-warning-surface"
+          title="Služba nemá žádné prostory"
+          text="Službu není možné zobrazit v katalogu. Abyste mohli službu v katalogu, je potřeba nejdříve vytvořit alespoň jeden prostor."
+          button={{
+            text: "Přidat prostory",
+            version: "warningFull",
+            iconLeft: "Plus",
+            size: "sm",
+            link: {
+              pathname:
+                "/company-profile/companies/[companyId]/listings/[listingId]/spaces",
+              params: {
+                companyId: getIdFromRelationshipField(company),
+                listingId: id,
+              },
+            },
+          }}
+        />
+      );
+    }
     return (
       <AlertSection
         icon={PauseCircle}

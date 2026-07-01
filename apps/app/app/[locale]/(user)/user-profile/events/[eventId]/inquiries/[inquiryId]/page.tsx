@@ -22,9 +22,6 @@ import { useTranslations } from "next-intl";
 import { useParams } from "next/navigation";
 
 import InquiryDetails from "@/app/[locale]/(user)/components/inquiry-details";
-import { VariantEntertainmentDetails } from "@/app/[locale]/(user)/components/variant-entertainment-details";
-import { VariantGastroDetails } from "@/app/[locale]/(user)/company-profile/companies/[companyId]/listings/[listingId]/variants/[variantId]/components/variant-gastro-details";
-import { VariantVenueDetails } from "@/app/[locale]/(user)/company-profile/companies/[companyId]/listings/[listingId]/variants/[variantId]/components/variant-venue-details";
 import { useEffect } from "react";
 import AlertInfoSections from "./components/alert-info-sections";
 import { useListing } from "@/app/react-query/listings/hooks";
@@ -136,52 +133,6 @@ export default function page() {
     });
   };
 
-  const setAsEventVenueHandler = () => {
-    if (!event || !listing) return;
-    const venueAddress =
-      typeof listing.location.city === "object"
-        ? [listing.location.address, listing.location.city.name]
-            .filter(Boolean)
-            .join(", ")
-        : listing.location.address;
-    updateEvent({
-      id: event.id,
-      data: {
-        location: {
-          ...event.location,
-          venue: listing.id,
-          venueName: listing.name,
-          venueAddress,
-        },
-      },
-    });
-  };
-
-  const confirmSetAsEventVenue = () => {
-    confirmActionModalEvents.emit("open", {
-      title: "Nastavit jako místo konání",
-      description:
-        "Tímto krokem nastavíte tuto službu jako místo konání pro tento event. Tuto akci nelze vrátit zpět.",
-      Icon: Building,
-      buttonText: "Nastavit jako místo konání",
-      buttonVersion: "successFull",
-      textColor: "text-success",
-      whatIsGoingToHappenText:
-        "Opravdu chcete nastavit tuto službu jako místo konání?",
-      whatIsGoingToHappenTextColor: "success",
-      whatIsGoingToHappenList: [],
-      borderColor: "border-success",
-      bgColor: "bg-success-surface",
-      onConfirmClick: async () => setAsEventVenueHandler(),
-    });
-  };
-
-  const listingCanBeSetAsEventVenue =
-    listing?.type === "venue" &&
-    !event?.location?.venue &&
-    event?.location?.type === "venue" &&
-    aggregateInquiryStatus(inquiry.status) === "confirmed";
-
   return (
     <main className="w-full flex flex-col gap-6">
       <Breadcrumbs />
@@ -220,21 +171,6 @@ export default function page() {
         >
           <ControlSection
             rows={[
-              {
-                disabled: !listingCanBeSetAsEventVenue,
-                title: "Nastavit jako místo konání",
-                text: "Tímto krokem nastavíte tuto službu jako místo konání pro tento event. Tuto akci nelze vrátit zpět.",
-                icon: "Building",
-                iconColor: "text-event",
-                iconBgColor: "bg-event-surface",
-                button: {
-                  version: "successFull",
-                  text: "Nastavit jako místo konání",
-                  iconLeft: "Building",
-                  size: "sm",
-                  onClick: confirmSetAsEventVenue,
-                },
-              },
               {
                 disabled:
                   inquiry.status.user === "confirmed" ||
@@ -279,21 +215,7 @@ export default function page() {
           listingId={getIdFromRelationshipField(inquiry?.listing || "")}
         />
         {typeof inquiry.variant !== "string" && inquiry.variant && (
-          <>
-            <VariantSection
-              variant={inquiry.variant}
-              title="Vybraná varianta"
-            />
-            {inquiry.variant.details.map((block, i) => {
-              if (block.blockType === "venue")
-                return <VariantVenueDetails key={i} block={block} />;
-              if (block.blockType === "gastro")
-                return <VariantGastroDetails key={i} block={block} />;
-              if (block.blockType === "entertainment")
-                return <VariantEntertainmentDetails key={i} block={block} />;
-              return null;
-            })}
-          </>
+          <VariantSection variant={inquiry.variant} title="Vybraná varianta" />
         )}
       </div>
     </main>

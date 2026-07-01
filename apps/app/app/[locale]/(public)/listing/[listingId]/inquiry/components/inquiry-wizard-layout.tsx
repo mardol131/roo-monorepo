@@ -147,8 +147,8 @@ export default function InquiryWizardLayout({
           </div>
 
           {/* ── Right column: live preview ────────────────────────────────── */}
-          <div className="hidden lg:block">
-            <div className="sticky top-6">{preview}</div>
+          <div className="hidden relative h-full lg:block">
+            <div className="sticky top-24">{preview}</div>
           </div>
         </div>
       </div>

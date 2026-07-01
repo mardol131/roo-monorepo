@@ -2,23 +2,19 @@
 
 import { DashboardSection } from "@/app/[locale]/(user)/components/dashboard-section";
 import InfoSection from "@/app/[locale]/(user)/components/info-section";
-import { useCities } from "@/app/react-query/cities/hooks";
-import { useDistricts } from "@/app/react-query/districts/hooks";
-import { useRegions } from "@/app/react-query/regions/hooks";
 import Text from "@/app/components/ui/atoms/text";
 import {
-  City,
-  District,
   EntertainmentRule,
   EventType,
   Listing,
   ListingEntertainmentDetail,
   MusicGenre,
   Necessity,
-  Region,
+  PricingUnits,
   Service,
   Technology,
 } from "@roo/common";
+import { useTranslations } from "next-intl";
 
 const AUDIENCE_LABELS: Record<string, string> = {
   adults: "Dospělí",
@@ -26,21 +22,16 @@ const AUDIENCE_LABELS: Record<string, string> = {
   seniors: "Senioři",
 };
 
-const PRICING_UNIT_LABELS: Record<string, string> = {
-  per_day: "za den",
-  per_person: "za osobu",
-  per_hour: "za hodinu",
-  lump_sum: "paušál",
-};
-
 type PriceableItem = {
   name: string;
   unitPrice: number;
-  pricingUnit: string;
+  pricingUnit: PricingUnits;
   quantity: number;
 };
 
 function PriceableList({ items }: { items: PriceableItem[] }) {
+  const t = useTranslations("global.pricing.units");
+
   return (
     <div className="flex flex-col gap-2">
       {items.map((item, i) => (
@@ -59,7 +50,7 @@ function PriceableList({ items }: { items: PriceableItem[] }) {
               ·
             </Text>
             <Text variant="label-sm" color="secondary">
-              {item.unitPrice} Kč {PRICING_UNIT_LABELS[item.pricingUnit] ?? item.pricingUnit}
+              {item.unitPrice} Kč {t(item.pricingUnit)}
             </Text>
           </div>
         </div>
@@ -88,58 +79,18 @@ export function EntertainmentDetails({
 }) {
   const servicableArea = listing.servicableArea;
 
-  const regionIds = (servicableArea?.regions ?? []).filter(
-    (r): r is string => typeof r === "string",
-  );
-  const districtIds = (servicableArea?.districts ?? []).filter(
-    (d): d is string => typeof d === "string",
-  );
-  const cityIds = (servicableArea?.cities ?? []).filter(
-    (c): c is string => typeof c === "string",
-  );
-
-  const { data: regionsData } = useRegions({
-    query: regionIds.length ? { id: { in: regionIds } } : undefined,
-    limit: regionIds.length || 10,
-    enabled: regionIds.length > 0,
-  });
-  const { data: districtsData } = useDistricts({
-    query: districtIds.length ? { id: { in: districtIds } } : undefined,
-    limit: districtIds.length || 10,
-    enabled: districtIds.length > 0,
-  });
-  const { data: citiesData } = useCities({
-    query: cityIds.length ? { id: { in: cityIds } } : undefined,
-    limit: cityIds.length || 10,
-    enabled: cityIds.length > 0,
-  });
-
-  const regionNames = resolveNames<Region>(
-    servicableArea?.regions as (string | Region)[] | undefined,
-    regionsData?.docs,
-  );
-  const districtNames = resolveNames<District>(
-    servicableArea?.districts as (string | District)[] | undefined,
-    districtsData?.docs,
-  );
-  const cityNames = resolveNames<City>(
-    servicableArea?.cities as (string | City)[] | undefined,
-    citiesData?.docs,
-  );
-
   const locationItems = [
     ...(servicableArea?.wholeCountry
       ? [{ type: "text" as const, label: "Působiště", value: "Celá ČR" }]
-      : []),
-    ...(regionNames.length
-      ? [{ type: "tagList" as const, label: "Kraj", items: regionNames }]
-      : []),
-    ...(districtNames.length
-      ? [{ type: "tagList" as const, label: "Okres", items: districtNames }]
-      : []),
-    ...(cityNames.length
-      ? [{ type: "tagList" as const, label: "Město", items: cityNames }]
-      : []),
+      : servicableArea?.maxTravelDistanceKm
+        ? [
+            {
+              type: "text" as const,
+              label: "Působiště",
+              value: `Do ${servicableArea.maxTravelDistanceKm} km od adresy`,
+            },
+          ]
+        : []),
     ...(listing.location?.address
       ? [
           {
@@ -235,9 +186,7 @@ export function EntertainmentDetails({
     })),
     ...(detail.options.services ?? []).map((s) => ({
       name:
-        typeof s.service === "string"
-          ? s.service
-          : (s.service as Service).name,
+        typeof s.service === "string" ? s.service : (s.service as Service).name,
       unitPrice: s.unitPrice,
       pricingUnit: s.pricingUnit,
       quantity: s.quantity,

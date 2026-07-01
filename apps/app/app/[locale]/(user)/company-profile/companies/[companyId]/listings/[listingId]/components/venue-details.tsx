@@ -340,15 +340,6 @@ export function VenueDetails({
           },
         ]
       : []),
-    ...(detail.breakfast.timeFrom && detail.breakfast.timeTo
-      ? [
-          {
-            type: "text" as const,
-            label: "Čas snídaně",
-            value: `${detail.breakfast.timeFrom} – ${detail.breakfast.timeTo}`,
-          },
-        ]
-      : []),
   ];
 
   return (

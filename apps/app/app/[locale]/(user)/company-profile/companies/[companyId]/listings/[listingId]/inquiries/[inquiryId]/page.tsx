@@ -22,9 +22,6 @@ import { Check, Package, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useParams } from "next/navigation";
 
-import { VariantEntertainmentDetails } from "@/app/[locale]/(user)/components/variant-entertainment-details";
-import { VariantGastroDetails } from "@/app/[locale]/(user)/company-profile/companies/[companyId]/listings/[listingId]/variants/[variantId]/components/variant-gastro-details";
-import { VariantVenueDetails } from "@/app/[locale]/(user)/company-profile/companies/[companyId]/listings/[listingId]/variants/[variantId]/components/variant-venue-details";
 import { SingleInputModal } from "@/app/components/ui/molecules/modals/single-input-modal";
 import { useEffect, useState } from "react";
 import InquiryDetails from "../../../../../../../components/inquiry-details";
@@ -305,18 +302,7 @@ export default function page() {
         />
       )}
       {typeof inquiry.variant !== "string" && inquiry.variant && (
-        <>
-          <VariantSection variant={inquiry.variant} title="Vybraná varianta" />
-          {inquiry.variant.details.map((block, i) => {
-            if (block.blockType === "venue")
-              return <VariantVenueDetails key={i} block={block} />;
-            if (block.blockType === "gastro")
-              return <VariantGastroDetails key={i} block={block} />;
-            if (block.blockType === "entertainment")
-              return <VariantEntertainmentDetails key={i} block={block} />;
-            return null;
-          })}
-        </>
+        <VariantSection variant={inquiry.variant} title="Vybraná varianta" />
       )}
     </main>
   );

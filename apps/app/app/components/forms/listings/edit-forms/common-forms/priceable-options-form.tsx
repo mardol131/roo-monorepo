@@ -19,6 +19,7 @@ export type PriceableSectionConfig<T extends FieldValues = FieldValues> = {
   field: Path<T>;
   items: BaseItem[];
   label: string;
+  disableQuantity?: boolean;
 };
 
 type Props<T extends FieldValues> = {
@@ -62,6 +63,7 @@ export function PriceableOptionsForm<T extends FieldValues>({
                   searchable
                   label={section.label}
                   error={errorMessage}
+                  disableQuantity={section.disableQuantity}
                 />
               )}
             />

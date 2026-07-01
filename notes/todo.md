@@ -7,7 +7,6 @@
 # Tvorba poptávky
 
 - Dokončit flow
-- Přidat bar, který umístí objednávku na časovou osu eventu, případně mimo čas eventu a upozorní uživatele
 - Email potvrzení odeslání poptávky
 - Email upozornění na přijatou poptávku
 - Email o přijetí poptávky dodavatel
@@ -30,6 +29,7 @@
 
 - Filtrovací queries
 - Cena na kartách
+- Upravit variant kartu
 
 # Eventy
 

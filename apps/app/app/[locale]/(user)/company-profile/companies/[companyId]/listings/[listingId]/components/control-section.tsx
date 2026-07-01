@@ -18,6 +18,7 @@ import { useRouter } from "@/app/i18n/navigation";
 import { useCompany } from "@/app/react-query/companies/hooks";
 import { useUpdateListing } from "@/app/react-query/listings/hooks";
 import { listingKeys } from "@/app/react-query/query-keys";
+import { useSpacesByListing } from "@/app/react-query/spaces/hooks";
 import { Company, Listing } from "@roo/common";
 import { useQueryClient } from "@tanstack/react-query";
 import { Trash2 } from "lucide-react";
@@ -36,6 +37,8 @@ export function ListingControlSection({
   const { mutate: updateListing, isPending: isUpdating } = useUpdateListing(
     company.id,
   );
+
+  const { data: spaces } = useSpacesByListing(listing.id);
 
   const queryClient = useQueryClient();
 
@@ -250,6 +253,8 @@ export function ListingControlSection({
                 icon: isActive ? "Play" : "Play",
                 iconColor: isActive ? "text-amber-500" : "text-success",
                 iconBgColor: isActive ? "bg-amber-50" : "bg-success-surface",
+                disabled:
+                  listing.type === "venue" && spaces?.docs?.length === 0,
                 title: isActive ? "Skrýt v katalogu" : "Zobrazit v katalogu",
                 text: isActive
                   ? "Služba přestane být zobrazována v katalogu. Zobrazování lze kdykoliv zapnout zpět."

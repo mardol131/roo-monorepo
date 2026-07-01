@@ -6,7 +6,9 @@ import CheckboxGroup from "@/app/components/ui/atoms/inputs/checkbox-group";
 import ImageInput from "@/app/components/ui/atoms/inputs/images/image-input";
 import Input from "@/app/components/ui/atoms/inputs/input";
 import InputLabel from "@/app/components/ui/atoms/input-label";
-import PriceableCheckboxGroup, { PriceableItem } from "@/app/components/ui/atoms/inputs/priceable-checkbox-group";
+import PriceableCheckboxGroup, {
+  PriceableItem,
+} from "@/app/components/ui/atoms/inputs/priceable-checkbox-group";
 import RepeaterField from "@/app/components/ui/atoms/inputs/repeater-field";
 import SearchInput from "@/app/components/ui/atoms/inputs/search-input";
 import SelectInput from "@/app/components/ui/atoms/inputs/select-input";
@@ -16,6 +18,7 @@ import { useFilterOptions } from "@/app/react-query/filters/aggregated-filters/h
 import { Controller, UseFormReturn, useFieldArray } from "react-hook-form";
 import { SupplementaryData } from "./schemas";
 import { TocSection } from "@/app/[locale]/(user)/components/form-toc";
+import { Textarea } from "@/app/components/ui/atoms/inputs/textarea";
 
 type Props = {
   form: UseFormReturn<SupplementaryData>;
@@ -46,11 +49,14 @@ export function SupplementaryForm({ form, isActive, filters, texts }: Props) {
     name: "references",
   });
 
+  console.log(form.formState.errors);
+
   const hasParking = form.watch("parking.hasParking");
-  const breakfastIncluded = form.watch("breakfast.included");
-  const parkingIsIncludedInPrice = form.watch("parking.parkingIsIncludedInPrice");
+  const breakfastIncluded = form.watch("breakfast.breakfastIncluded");
+  const breakfastIsIncludedInPrice = form.watch(
+    "breakfast.breakfastIsIncludedInPrice",
+  );
   const hasCatering = form.watch("catering.hasCatering");
-  const cateringIsIncludedInPrice = form.watch("catering.cateringIsIncludedInPrice");
 
   if (!isActive) return null;
 
@@ -189,6 +195,7 @@ export function SupplementaryForm({ form, isActive, filters, texts }: Props) {
         title={texts.parking.title}
         color="text-listing"
         surfaceColor="bg-listing-surface"
+        error={!!form.formState.errors.parking}
       >
         <Controller
           control={form.control}
@@ -214,7 +221,7 @@ export function SupplementaryForm({ form, isActive, filters, texts }: Props) {
               }}
               error={form.formState.errors.parking?.parkingCapacity?.message}
             />
-            <Controller
+            {/* <Controller
               control={form.control}
               name="parking.parkingIsIncludedInPrice"
               render={({ field }) => (
@@ -262,7 +269,7 @@ export function SupplementaryForm({ form, isActive, filters, texts }: Props) {
                   )}
                 />
               </div>
-            </div>
+            </div> */}
           </div>
         </div>
       </FormSection>
@@ -276,7 +283,7 @@ export function SupplementaryForm({ form, isActive, filters, texts }: Props) {
       >
         <Controller
           control={form.control}
-          name="breakfast.included"
+          name="breakfast.breakfastIncluded"
           render={({ field }) => (
             <Checkbox
               checked={field.value ?? false}
@@ -302,31 +309,10 @@ export function SupplementaryForm({ form, isActive, filters, texts }: Props) {
                 />
               )}
             />
-            <Controller
-              control={form.control}
-              name="breakfast.allowAccommodationWithoutBreakfast"
-              render={({ field }) => (
-                <Checkbox
-                  checked={field.value ?? false}
-                  onChange={field.onChange}
-                  label="Povolit ubytování bez snídaně"
-                  checkColor="text-listing"
-                />
-              )}
-            />
-            <Controller
-              control={form.control}
-              name="breakfast.allowMoreBreakfastsThanAccommodation"
-              render={({ field }) => (
-                <Checkbox
-                  checked={field.value ?? false}
-                  onChange={field.onChange}
-                  label="Povolit více snídaní než ubytovaných"
-                  checkColor="text-listing"
-                />
-              )}
-            />
-            <div className="grid grid-cols-2 gap-4">
+
+            <div
+              className={`grid grid-cols-2 gap-4 ${breakfastIsIncludedInPrice ? "opacity-40 pointer-events-none" : ""}`}
+            >
               <Input
                 label="Cena snídaně (Kč)"
                 inputProps={{
@@ -355,22 +341,6 @@ export function SupplementaryForm({ form, isActive, filters, texts }: Props) {
                 )}
               />
             </div>
-            <div className="grid grid-cols-2 gap-4">
-              <Controller
-                control={form.control}
-                name="breakfast.timeFrom"
-                render={({ field }) => (
-                  <TimeInput label="Snídaně od" onChange={field.onChange} />
-                )}
-              />
-              <Controller
-                control={form.control}
-                name="breakfast.timeTo"
-                render={({ field }) => (
-                  <TimeInput label="Snídaně do" onChange={field.onChange} />
-                )}
-              />
-            </div>
           </div>
         </div>
       </FormSection>
@@ -396,93 +366,47 @@ export function SupplementaryForm({ form, isActive, filters, texts }: Props) {
         />
         <div className={hasCatering ? "" : "opacity-40 pointer-events-none"}>
           <div className="flex flex-col gap-4">
-            <Controller
-              control={form.control}
-              name="catering.cateringIsIncludedInPrice"
-              render={({ field }) => (
-                <Checkbox
-                  checked={field.value ?? false}
-                  onChange={field.onChange}
-                  label="Catering v ceně"
-                  checkColor="text-listing"
-                />
-              )}
-            />
-            <div
-              className={
-                hasCatering && !cateringIsIncludedInPrice
-                  ? ""
-                  : "opacity-40 pointer-events-none"
-              }
-            >
-              <div className="flex flex-col gap-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <Input
-                    label="Základní cena (Kč)"
-                    isRequired
-                    inputProps={{
-                      ...form.register("catering.price"),
-                      type: "number",
-                      min: 0,
-                      disabled: !hasCatering || cateringIsIncludedInPrice,
-                    }}
-                    error={form.formState.errors.catering?.price?.message}
+            <div className="grid grid-cols-2 gap-4">
+              <Input
+                label="Základní cena (Kč)"
+                isRequired
+                inputProps={{
+                  ...form.register("catering.price"),
+                  type: "number",
+                  min: 0,
+                  disabled: !hasCatering,
+                }}
+                error={form.formState.errors.catering?.price?.message}
+              />
+              <Controller
+                control={form.control}
+                name="catering.pricingUnit"
+                render={({ field }) => (
+                  <SelectInput
+                    label="Cena za"
+                    items={[
+                      { value: "per_person", label: "Osobu" },
+                      { value: "per_hour", label: "Hodinu" },
+                      { value: "lump_sum", label: "Celou akci" },
+                    ]}
+                    value={field.value ?? ""}
+                    onChange={(e) => field.onChange(e.target.value)}
+                    placeholder="Vyberte..."
+                    disabled={!hasCatering}
                   />
-                  <Controller
-                    control={form.control}
-                    name="catering.pricingUnit"
-                    render={({ field }) => (
-                      <SelectInput
-                        label="Cena za"
-                        items={[
-                          { value: "per_person", label: "Osobu" },
-                          { value: "per_hour", label: "Hodinu" },
-                          { value: "lump_sum", label: "Celou akci" },
-                        ]}
-                        value={field.value ?? ""}
-                        onChange={(e) => field.onChange(e.target.value)}
-                        placeholder="Vyberte..."
-                        disabled={!hasCatering || cateringIsIncludedInPrice}
-                      />
-                    )}
-                  />
-                </div>
-                <Controller
-                  control={form.control}
-                  name="catering.cuisines"
-                  render={({ field }) => (
-                    <PriceableCheckboxGroup
-                      label="Kuchyně"
-                      items={filters?.cuisines ?? []}
-                      value={(field.value as PriceableItem[]) ?? []}
-                      onChange={field.onChange}
-                      checkColor="text-listing"
-                      searchable
-                      excludeUnits={["per_day"]}
-                      isRequired
-                      error={form.formState.errors.catering?.cuisines?.message}
-                    />
-                  )}
-                />
-                <Controller
-                  control={form.control}
-                  name="catering.foodPreparationStyles"
-                  render={({ field }) => (
-                    <PriceableCheckboxGroup
-                      label="Technologie přípravy"
-                      items={filters?.foodPreparationStyles ?? []}
-                      value={(field.value as PriceableItem[]) ?? []}
-                      onChange={field.onChange}
-                      checkColor="text-listing"
-                      searchable
-                      excludeUnits={["per_day"]}
-                      isRequired
-                      error={form.formState.errors.catering?.foodPreparationStyles?.message}
-                    />
-                  )}
-                />
-              </div>
+                )}
+              />
             </div>
+            <Textarea
+              label="Popis cateringu"
+              inputProps={{
+                ...form.register("catering.description"),
+                rows: 5,
+                placeholder:
+                  "Popište vaši akci, požadavky na prostory, catering, program...",
+              }}
+              error={form.formState.errors.catering?.description?.message}
+            />
           </div>
         </div>
       </FormSection>

@@ -13,7 +13,7 @@ import { calculateEstimatedPrice } from "./utils/calculate-price";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useParams } from "next/navigation";
-import { ReactNode, useEffect, useState } from "react";
+import { ReactNode, useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 
 import InquiryPreview from "./components/inquiry-preview";
@@ -35,7 +35,7 @@ import OrderStepSuccess from "./components/order-steps/success/order-step-succes
 
 // ── Draft persistence ─────────────────────────────────────────────────────────
 
-const DRAFT_KEY = "roo_inquiry_draft";
+const DRAFT_KEY = "eventShaker_inquiry_draft";
 
 function clearDraft() {
   if (typeof window !== "undefined") localStorage.removeItem(DRAFT_KEY);
@@ -80,6 +80,7 @@ export default function Page() {
     accommodation,
     breakfast,
     parking,
+    wantsCatering,
     serviceTime,
     resetIndices,
     setListingId,
@@ -90,48 +91,64 @@ export default function Page() {
   const auth = useAuth();
   const { data: variants } = useVariantsByListing(params.listingId);
   const { data: listing } = useListing(params.listingId);
-  const detailId = listing ? getIdFromRelationshipField(listing.detail.value) : undefined;
+  const detailId = listing
+    ? getIdFromRelationshipField(listing.detail.value)
+    : undefined;
   const { data: detail } = useListingDetail(
-    listing ? `listing-${listing.type}-details` : "listing-entertainment-details",
+    listing
+      ? `listing-${listing.type}-details`
+      : "listing-entertainment-details",
     detailId,
   );
   const { mutate: createInquiry } = useCreateInquiry();
   const { mutateAsync: createEventAsync } = useCreateEvent();
 
   const isOneTime =
-    listing?.type !== 'venue' &&
-    (listing?.pricingUnit === 'lump_sum' || listing?.pricingUnit === 'per_person');
+    listing?.type !== "venue" &&
+    (listing?.pricingUnit === "lump_sum" ||
+      listing?.pricingUnit === "per_person");
 
   const hasNoVariants =
     variants !== undefined && (variants.docs?.length ?? 0) === 0;
   const isNewEventMode = eventVariant === "new-event";
 
-  // Dynamic steps based on whether user is creating a new event
-  const STEPS: { key: InquiryStep; label: string; icon?: string }[] =
-    isNewEventMode
+  // Dynamic steps based on whether user is creating a new event. "event" is
+  // always first, so a user partway through creating a new event can step
+  // back to the choice between an existing event and a new one.
+  const STEPS: { key: InquiryStep; label: string; icon?: string }[] = [
+    { key: "event", label: "Událost" },
+    ...(isNewEventMode
       ? [
-          { key: "event-basic", label: "Událost" },
-          { key: "event-location", label: "Místo a kontakt", icon: "MapPin" },
-          { key: "offer", label: "Poptávka" },
-          { key: "review", label: "Přehled" },
+          { key: "event-basic" as const, label: "Základní info", icon: "Info" },
+          {
+            key: "event-location" as const,
+            label: "Místo a kontakt",
+            icon: "MapPin",
+          },
         ]
-      : [
-          { key: "event", label: "Událost" },
-          { key: "offer", label: "Poptávka" },
-          { key: "review", label: "Přehled" },
-        ];
+      : []),
+    { key: "offer", label: "Poptávka" },
+    { key: "review", label: "Přehled" },
+  ];
 
   const [currentStep, setCurrentStep] = useState(0);
   const [maxReachedStep, setMaxReachedStep] = useState(0);
   const [isSuccess, setIsSuccess] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showResumeModal, setShowResumeModal] = useState(false);
+  const hasHydratedRef = useRef(false);
+  const prevEventVariantRef = useRef(eventVariant);
+  // Draft found on mount, held back until the user explicitly chooses to
+  // resume — nothing is applied to the store/forms until then.
+  const pendingDraftRef = useRef<OrderDraft | null>(null);
 
   // Draft persistence: check stored draft on mount
   useEffect(() => {
-    const raw = typeof window !== "undefined" ? localStorage.getItem(DRAFT_KEY) : null;
+    const raw =
+      typeof window !== "undefined" ? localStorage.getItem(DRAFT_KEY) : null;
     if (!raw) {
       setListingId(params.listingId);
+      hasHydratedRef.current = true;
       return;
     }
     let draft: OrderDraft;
@@ -140,11 +157,13 @@ export default function Page() {
     } catch {
       clearDraft();
       setListingId(params.listingId);
+      hasHydratedRef.current = true;
       return;
     }
     if (draft.listingId !== params.listingId) {
       clearDraft();
       setListingId(params.listingId);
+      hasHydratedRef.current = true;
       return;
     }
     const hasMeaningfulState =
@@ -153,22 +172,50 @@ export default function Page() {
       draft.inquiryMode !== null ||
       draft.currentVariantId !== undefined;
     if (hasMeaningfulState) {
-      restoreDraft(draft);
-      if (draft.newEventFormValues) {
-        newEventForm.reset(draft.newEventFormValues as EventFormInputs);
-      }
+      pendingDraftRef.current = draft;
       setShowResumeModal(true);
     } else {
       setListingId(params.listingId);
     }
+    hasHydratedRef.current = true;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Reset step position when switching between new-event and select-event mode
+  // Reset step position when the user genuinely switches between new-event and
+  // select-event mode. A draft restore also changes `eventVariant` (from the
+  // store's initial `null` straight to the restored value in one jump) — that
+  // transition must NOT reset the step, or the restored wizardStep gets wiped
+  // immediately after being set.
   useEffect(() => {
+    const prev = prevEventVariantRef.current;
+    prevEventVariantRef.current = eventVariant;
+    if (prev === null || prev === eventVariant) return;
     setCurrentStep(0);
     setMaxReachedStep(0);
-  }, [isNewEventMode]);
+  }, [eventVariant]);
+
+  // Persist the custom-request settings (and wizard position) as they change,
+  // not just when advancing between steps. Skipped while a resume choice is
+  // pending, since the store still holds blank defaults at that point.
+  useEffect(() => {
+    if (!hasHydratedRef.current || showResumeModal) return;
+    saveDraft();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    eventVariant,
+    eventData,
+    inquiryMode,
+    currentVariantId,
+    customRequest,
+    selectedAddons,
+    selectedSpaces,
+    accommodation,
+    breakfast,
+    parking,
+    wantsCatering,
+    serviceTime,
+    currentStep,
+  ]);
 
   // Consent form — state managed here, passed down to review step
   const {
@@ -184,8 +231,20 @@ export default function Page() {
   const customRequestForm = useForm<CustomRequestFormData>({
     resolver: zodResolver(customRequestFormSchema),
     mode: "onTouched",
-    defaultValues: { note: "", requirements: [] },
+    defaultValues: {
+      note: "",
+      requirements: [],
+      isOneTimeService: isOneTime,
+      serviceTime: {},
+    },
   });
+
+  // Keep the schema's conditional time validation (arrival vs. from/to) in
+  // sync with the listing type, which is only known once it has loaded.
+  useEffect(() => {
+    customRequestForm.setValue("isOneTimeService", isOneTime);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOneTime]);
 
   // New event form — deferred API call until final submit
   const newEventForm = useForm<EventFormInputs>({
@@ -217,9 +276,16 @@ export default function Page() {
       accommodation: state.accommodation,
       breakfast: state.breakfast,
       parking: state.parking,
+      wantsCatering: state.wantsCatering,
       serviceTime: state.serviceTime,
+      wizardStep: currentStep,
       ...(state.eventVariant === "new-event"
-        ? { newEventFormValues: newEventForm.getValues() as Record<string, unknown> }
+        ? {
+            newEventFormValues: newEventForm.getValues() as Record<
+              string,
+              unknown
+            >,
+          }
         : {}),
     };
     localStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
@@ -246,7 +312,13 @@ export default function Page() {
 
   function canAdvance(): boolean {
     const stepKey = STEPS[currentStep]?.key;
-    if (stepKey === "event") return isOrderStepActivated(2);
+    if (stepKey === "event") {
+      // New-event mode has no event data yet at this point — creation is
+      // deferred until final submit — so choosing "new event" is enough to
+      // proceed to the basic-info step.
+      if (isNewEventMode) return true;
+      return isOrderStepActivated(2);
+    }
     if (stepKey === "offer") {
       if (isNewEventMode) {
         if (inquiryMode === "variant" && currentVariantId !== undefined)
@@ -278,13 +350,8 @@ export default function Page() {
       );
       if (!valid) return;
     } else if (stepKey === "offer" && inquiryMode === "custom") {
-      const valid = await customRequestForm.trigger(["note"]);
+      const valid = await customRequestForm.trigger(["note", "serviceTime"]);
       if (!valid) return;
-      if (isOneTime) {
-        if (!serviceTime?.arrivalTime) return;
-      } else {
-        if (!serviceTime?.startTime || !serviceTime.endTime) return;
-      }
     } else {
       if (!canAdvance()) return;
       if (stepKey === "event" && hasNoVariants) setInquiryMode("custom");
@@ -357,17 +424,21 @@ export default function Page() {
       : (variants?.docs?.find((v) => v.id === currentVariantId)?.price.base ??
         null);
 
-    const travelFeeAmount = calculateEstimatedPrice({
-      detail: detail as Parameters<typeof calculateEstimatedPrice>[0]["detail"],
-      eventData: isNewEventMode ? undefined : eventData,
-      selectedAddons,
-      selectedSpaces,
-      accommodation,
-      breakfast,
-      parking,
-      serviceTime,
-      listingLocation: listing.location.point,
-    }).travelFeeEstimate || undefined;
+    const travelFeeAmount =
+      calculateEstimatedPrice({
+        detail: detail as Parameters<
+          typeof calculateEstimatedPrice
+        >[0]["detail"],
+        eventData: isNewEventMode ? undefined : eventData,
+        selectedAddons,
+        selectedSpaces,
+        accommodation,
+        breakfast,
+        parking,
+        wantsCatering,
+        serviceTime,
+        listingLocation: listing.location.point,
+      }).travelFeeEstimate || undefined;
 
     createInquiry(
       {
@@ -379,7 +450,10 @@ export default function Page() {
           ? {
               ...(isOneTime
                 ? { arrivalTime: serviceTime.arrivalTime }
-                : { startTime: serviceTime.startTime, endTime: serviceTime.endTime }),
+                : {
+                    startTime: serviceTime.startTime,
+                    endTime: serviceTime.endTime,
+                  }),
             }
           : undefined,
         travelFeeAmount,
@@ -441,19 +515,20 @@ export default function Page() {
       case "offer": {
         const isCustomMode = inquiryMode === "custom";
         const offerEventStart = isNewEventMode
-          ? newEventForm.watch("startDate") ?? undefined
+          ? (newEventForm.watch("startDate") ?? undefined)
           : eventData?.date?.start;
         const offerEventEnd = isNewEventMode
-          ? newEventForm.watch("endDate") ?? undefined
+          ? (newEventForm.watch("endDate") ?? undefined)
           : eventData?.date?.end;
         return (
           <div className="flex flex-col gap-4">
-            {hasNoVariants || isCustomMode ? (
+            {hasNoVariants ? (
               listing ? (
                 <OrderStepFillCustomRequest
                   listing={listing}
                   control={customRequestForm.control}
                   register={customRequestForm.register}
+                  setValue={customRequestForm.setValue}
                   errors={customRequestForm.formState.errors}
                   eventStart={offerEventStart}
                   eventEnd={offerEventEnd}
@@ -466,12 +541,16 @@ export default function Page() {
                   eventStart={offerEventStart}
                   eventEnd={offerEventEnd}
                   listingType={listing?.type}
+                  control={customRequestForm.control}
+                  setValue={customRequestForm.setValue}
+                  errors={customRequestForm.formState.errors}
                 />
                 {isCustomMode && listing && (
                   <OrderStepFillCustomRequest
                     listing={listing}
                     control={customRequestForm.control}
                     register={customRequestForm.register}
+                    setValue={customRequestForm.setValue}
                     errors={customRequestForm.formState.errors}
                     eventStart={offerEventStart}
                     eventEnd={offerEventEnd}
@@ -511,11 +590,32 @@ export default function Page() {
     <>
       <ResumeDraftModal
         isOpen={showResumeModal}
-        onContinue={() => setShowResumeModal(false)}
+        onContinue={() => {
+          const draft = pendingDraftRef.current;
+          if (draft) {
+            restoreDraft(draft);
+            setCurrentStep(draft.wizardStep ?? 0);
+            setMaxReachedStep(draft.wizardStep ?? 0);
+            if (draft.newEventFormValues) {
+              newEventForm.reset(draft.newEventFormValues as EventFormInputs);
+            }
+            customRequestForm.reset({
+              note: draft.customRequest?.note ?? "",
+              requirements: draft.customRequest?.requirements ?? [],
+              isOneTimeService: isOneTime,
+              serviceTime: draft.serviceTime ?? {},
+            });
+          }
+          pendingDraftRef.current = null;
+          setShowResumeModal(false);
+        }}
         onStartFresh={() => {
+          pendingDraftRef.current = null;
           resetIndices();
           clearDraft();
           setListingId(params.listingId);
+          setCurrentStep(0);
+          setMaxReachedStep(0);
           setShowResumeModal(false);
         }}
       />

@@ -1,9 +1,12 @@
 "use client";
 
+import { CompletionWidget } from "@/app/[locale]/(user)/components/completion-widget";
 import FormToc, { TocGroup } from "@/app/[locale]/(user)/components/form-toc";
 import TabFilter from "@/app/[locale]/(user)/components/tab-filter";
 import Button from "@/app/components/ui/atoms/button";
+import { getFullListingCompletion } from "@/app/functions/utils/listings";
 import { useUnsavedChangesWarning } from "@/app/hooks/use-unsaved-changes-warning";
+import { useCities } from "@/app/react-query/cities/hooks";
 import { useFilterOptions } from "@/app/react-query/filters/aggregated-filters/hooks";
 import {
   useListing,
@@ -11,6 +14,7 @@ import {
   useUpdateListing,
   useUpdateListingDetail,
 } from "@/app/react-query/listings/hooks";
+import { useVariantsByListing } from "@/app/react-query/variants/hooks";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { getIdFromRelationshipField, undefinedToNull } from "@roo/common";
 import { useParams } from "next/navigation";
@@ -23,17 +27,9 @@ import {
   hasDirtyFields,
   useListingEditFormsCommons,
 } from "../common";
-import { RecommendedForm } from "./recommended-form";
-import {
-  PriceableData,
-  RecommendedData,
-  SupplementaryData,
-  priceableSchema,
-  recommendedSchema,
-  supplementarySchema,
-} from "./schemas";
-import { SupplementaryForm } from "./supplementary-form";
-import { useListingEditFormToc } from "../toc";
+import { PriceableOptionsForm } from "../common-forms/priceable-options-form";
+import { SimpleBaseForm } from "../common-forms/simple-base-form";
+import { SimpleLocalityForm } from "../common-forms/simple-locality-form";
 import {
   BaseData,
   SimpleBaseData,
@@ -41,16 +37,19 @@ import {
   SimpleLocalityData,
   simpleLocalitySchema,
 } from "../common-schema";
-import { useCities } from "@/app/react-query/cities/hooks";
-import { SimpleLocalityForm } from "../common-forms/simple-locality-form";
-import { useSpacesByListing } from "@/app/react-query/spaces/hooks";
-import { PriceableOptionsForm } from "../common-forms/priceable-options-form";
-import { SimpleBaseForm } from "../common-forms/simple-base-form";
-import { CompletionWidget } from "@/app/[locale]/(user)/components/completion-widget";
-import { AlertSection } from "@/app/components/ui/molecules/alert-section";
-import { getFullListingCompletion } from "@/app/functions/utils/listings";
-import { useVariantsByListing } from "@/app/react-query/variants/hooks";
-import { AlertCircle } from "lucide-react";
+import { useListingEditFormToc } from "../toc";
+import { RecommendedForm } from "./recommended-form";
+import {
+  PriceableData,
+  priceableSchema,
+  RecommendedData,
+  recommendedSchema,
+  SupplementaryData,
+  supplementarySchema,
+} from "./schemas";
+import { SupplementaryForm } from "./supplementary-form";
+import { FormSection } from "@/app/[locale]/(user)/components/form-section";
+import Text from "@/app/components/ui/atoms/text";
 
 type Props = { onCancel?: () => void };
 
@@ -65,11 +64,8 @@ export default function VenueListingForm({ onCancel }: Props) {
     "listing-venue-details",
     getIdFromRelationshipField(listing?.detail.value || "") || "",
   );
-  const {
-    LISTING_FORM_TOCS,
-    BASE_TOC_GROUP,
-    SIMPLE_LOCALITY_GROUPS,
-  } = useListingEditFormToc();
+  const { LISTING_FORM_TOCS, BASE_TOC_GROUP, SIMPLE_LOCALITY_GROUPS } =
+    useListingEditFormToc();
   const { data: filters } = useFilterOptions();
 
   const { mutateAsync: updateListingAsync } = useUpdateListing(companyId);
@@ -77,8 +73,7 @@ export default function VenueListingForm({ onCancel }: Props) {
     "listing-venue-details",
   );
   const { GROUP_TABS } = useListingEditFormsCommons();
-  const venueGroupTabs = GROUP_TABS.filter((t) => t.value !== "price");
-  const { data: spaces } = useSpacesByListing(listingId);
+  const venueGroupTabs = GROUP_TABS;
   const { data: variants } = useVariantsByListing(listingId);
   const { data: cities } = useCities({
     query: {
@@ -137,12 +132,12 @@ export default function VenueListingForm({ onCancel }: Props) {
     activeGroup === "base"
       ? BASE_TOC_GROUP
       : activeGroup === "locality"
-          ? SIMPLE_LOCALITY_GROUPS
-          : activeGroup === "recommended"
-            ? RECOMMENDED_GROUPS
-            : activeGroup === "priceable"
-              ? PRICEABLE_GROUPS
-              : SUPPLEMENTARY_GROUPS;
+        ? SIMPLE_LOCALITY_GROUPS
+        : activeGroup === "recommended"
+          ? RECOMMENDED_GROUPS
+          : activeGroup === "priceable"
+            ? PRICEABLE_GROUPS
+            : SUPPLEMENTARY_GROUPS;
 
   const simpleBaseForm = useForm<SimpleBaseData>({
     resolver: zodResolver(simpleBaseSchema) as Resolver<SimpleBaseData>,
@@ -199,14 +194,16 @@ export default function VenueListingForm({ onCancel }: Props) {
         serviceAccess: false,
         serviceArea: false,
       },
-      parking: { hasParking: false, parkingIsIncludedInPrice: false },
+      parking: { hasParking: false, parkingCapacity: undefined },
       breakfast: {
-        included: false,
-        allowAccommodationWithoutBreakfast: false,
-        allowMoreBreakfastsThanAccommodation: false,
+        breakfastIncluded: false,
         breakfastIsIncludedInPrice: false,
       },
-      catering: { hasCatering: false, cateringIsIncludedInPrice: false, pricingUnit: "lump_sum", cuisines: [], foodPreparationStyles: [] },
+      catering: {
+        hasCatering: false,
+        description: "",
+        pricingUnit: "lump_sum",
+      },
       references: [],
     },
   });
@@ -222,12 +219,12 @@ export default function VenueListingForm({ onCancel }: Props) {
     activeGroup === "base"
       ? hasDirtyFields(simpleBaseForm.formState.dirtyFields)
       : activeGroup === "locality"
-          ? hasDirtyFields(localityForm.formState.dirtyFields)
-          : activeGroup === "recommended"
-            ? hasDirtyFields(recommendedForm.formState.dirtyFields)
-            : activeGroup === "priceable"
-              ? hasDirtyFields(priceableOptionsForm.formState.dirtyFields)
-              : hasDirtyFields(supplementaryForm.formState.dirtyFields);
+        ? hasDirtyFields(localityForm.formState.dirtyFields)
+        : activeGroup === "recommended"
+          ? hasDirtyFields(recommendedForm.formState.dirtyFields)
+          : activeGroup === "priceable"
+            ? hasDirtyFields(priceableOptionsForm.formState.dirtyFields)
+            : hasDirtyFields(supplementaryForm.formState.dirtyFields);
 
   useUnsavedChangesWarning(anyDirty);
 
@@ -387,50 +384,20 @@ export default function VenueListingForm({ onCancel }: Props) {
       parking: {
         hasParking: venueDetail.parking?.hasParking ?? false,
         parkingCapacity: venueDetail.parking?.parkingCapacity ?? undefined,
-        parkingIsIncludedInPrice:
-          venueDetail.parking?.parkingIsIncludedInPrice ?? false,
-        parkingPrice: venueDetail.parking?.parkingPrice ?? undefined,
       },
       breakfast: {
-        included: venueDetail.breakfast?.breakfastIncluded ?? false,
-        allowAccommodationWithoutBreakfast:
-          venueDetail.breakfast?.allowAccommodationWithoutBreakfast ?? false,
-        allowMoreBreakfastsThanAccommodation:
-          venueDetail.breakfast?.allowMoreBreakfastsThanAccommodation ?? false,
+        breakfastIncluded: venueDetail.breakfast?.breakfastIncluded ?? false,
         breakfastIsIncludedInPrice:
           venueDetail.breakfast?.breakfastIsIncludedInPrice ?? false,
         price: venueDetail.breakfast?.price ?? undefined,
         pricePer: venueDetail.breakfast?.priceUnit ?? undefined,
-        timeFrom: venueDetail.breakfast?.timeFrom ?? undefined,
-        timeTo: venueDetail.breakfast?.timeTo ?? undefined,
       },
       catering: {
         hasCatering: venueDetail.catering?.hasCatering ?? false,
-        cateringIsIncludedInPrice: venueDetail.catering?.cateringIsIncludedInPrice ?? false,
+
         price: venueDetail.catering?.price ?? undefined,
         pricingUnit: venueDetail.catering?.pricingUnit ?? "lump_sum",
-        cuisines:
-          venueDetail.catering?.cuisines?.map((p) => ({
-            id: getIdFromRelationshipField(p.cuisine),
-            name:
-              filters?.cuisines?.find(
-                (c) => c.id === getIdFromRelationshipField(p.cuisine),
-              )?.name ?? "",
-            pricingUnit: p.pricingUnit,
-            unitPrice: p.unitPrice,
-            quantity: p.quantity,
-          })) ?? [],
-        foodPreparationStyles:
-          venueDetail.catering?.foodPreparationStyles?.map((p) => ({
-            id: getIdFromRelationshipField(p.foodPreparationStyle),
-            name:
-              filters?.foodPreparationStyles?.find(
-                (f) => f.id === getIdFromRelationshipField(p.foodPreparationStyle),
-              )?.name ?? "",
-            pricingUnit: p.pricingUnit,
-            unitPrice: p.unitPrice,
-            quantity: p.quantity,
-          })) ?? [],
+        description: venueDetail.catering?.description ?? undefined,
       },
       references:
         venueDetail.references?.map((r) => ({
@@ -504,7 +471,10 @@ export default function VenueListingForm({ onCancel }: Props) {
           location: {
             address: data.location.address,
             city: data.location.city.id,
-            point: [data.location.coordinates.longitude, data.location.coordinates.latitude],
+            point: [
+              data.location.coordinates.longitude,
+              data.location.coordinates.latitude,
+            ],
             country: "cz",
           },
         }),
@@ -641,36 +611,19 @@ export default function VenueListingForm({ onCancel }: Props) {
             catering: data.catering
               ? {
                   hasCatering: data.catering.hasCatering,
-                  cateringIsIncludedInPrice: data.catering.cateringIsIncludedInPrice,
+
                   price: data.catering.price,
                   pricingUnit: data.catering.pricingUnit,
-                  cuisines: data.catering.cuisines.map((p) => ({
-                    cuisine: p.id,
-                    pricingUnit: p.pricingUnit,
-                    unitPrice: p.unitPrice,
-                    quantity: p.quantity,
-                  })),
-                  foodPreparationStyles: data.catering.foodPreparationStyles.map((p) => ({
-                    foodPreparationStyle: p.id,
-                    pricingUnit: p.pricingUnit,
-                    unitPrice: p.unitPrice,
-                    quantity: p.quantity,
-                  })),
+                  description: data.catering.description,
                 }
               : {},
             breakfast: data.breakfast
               ? {
-                  breakfastIncluded: data.breakfast.included,
-                  allowAccommodationWithoutBreakfast:
-                    data.breakfast.allowAccommodationWithoutBreakfast,
-                  allowMoreBreakfastsThanAccommodation:
-                    data.breakfast.allowMoreBreakfastsThanAccommodation,
+                  breakfastIncluded: data.breakfast.breakfastIncluded,
                   breakfastIsIncludedInPrice:
                     data.breakfast.breakfastIsIncludedInPrice,
                   price: data.breakfast.price,
                   priceUnit: data.breakfast.pricePer,
-                  timeFrom: data.breakfast.timeFrom,
-                  timeTo: data.breakfast.timeTo,
                 }
               : {},
             references: data.references.map((r) => ({
@@ -717,16 +670,53 @@ export default function VenueListingForm({ onCancel }: Props) {
             )}
           />
         )}
-        {spaces && spaces.docs.length === 0 && (
-          <AlertSection
-            icon={AlertCircle}
-            iconBg="bg-amber-100"
-            iconColor="text-amber-600"
-            borderColor="border-amber-200"
-            bgColor="bg-amber-50"
-            title="Bez prostorů nelze aktivovat inzerát"
-            text="Přidejte alespoň jeden prostor v záložce Prostory. Cena inzerátu se odvíjí od cen prostorů."
-          />
+        {activeGroup === "price" && (
+          <FormSection
+            id={"base"}
+            icon={"Banknote"}
+            title={"Cena"}
+            subtitle="Jak je nastavována cena listingu"
+            color="text-listing"
+            surfaceColor="bg-listing-surface"
+          >
+            <Text variant="h4">
+              Cena je nastavována automaticky systémem podle ceny prostorů nebo
+              variant.
+            </Text>
+            <Text variant="body-sm">
+              Cena, kterou vidí uživatelé v katalogu, je nastavována podle
+              nejmenší ceny za prostor, který nabízíte, případně podle
+              nejlevnější varianty.
+            </Text>
+            <div className="flex gap-2 items-start">
+              <Button
+                text="Ukázat varianty"
+                size="sm"
+                version="outlined"
+                link={{
+                  pathname:
+                    "/company-profile/companies/[companyId]/listings/[listingId]/variants",
+                  params: {
+                    companyId,
+                    listingId,
+                  },
+                }}
+              />
+              <Button
+                text="Ukázat prostory"
+                size="sm"
+                version="outlined"
+                link={{
+                  pathname:
+                    "/company-profile/companies/[companyId]/listings/[listingId]/spaces",
+                  params: {
+                    companyId,
+                    listingId,
+                  },
+                }}
+              />
+            </div>
+          </FormSection>
         )}
         <SimpleBaseForm
           form={simpleBaseForm}
@@ -765,18 +755,21 @@ export default function VenueListingForm({ onCancel }: Props) {
               field: "activities",
               items: filters?.activities ?? [],
               label: "Aktivity",
+              disableQuantity: true,
             },
             {
               toc: LISTING_FORM_TOCS.services,
               field: "services",
               items: filters?.services ?? [],
               label: "Služby",
+              disableQuantity: true,
             },
             {
               toc: LISTING_FORM_TOCS.amenities,
               field: "amenities",
               items: filters?.amenities ?? [],
               label: "Vybavení",
+              disableQuantity: true,
             },
             {
               toc: LISTING_FORM_TOCS.technology,
@@ -830,7 +823,7 @@ export default function VenueListingForm({ onCancel }: Props) {
         textColor="text-listing"
         dotColor="text-listing"
         surfaceColor="bg-listing-surface"
-        groups={activeTocGroups}
+        groups={activeGroup === "price" ? [] : activeTocGroups}
         sticky={true}
         buttonVersion="listingFull"
         buttonText="Uložit"

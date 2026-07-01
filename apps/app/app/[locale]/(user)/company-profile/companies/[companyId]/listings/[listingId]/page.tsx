@@ -378,13 +378,6 @@ export default function Page() {
               : "Žádné varianty"
           }
           rowComponents={(variants?.docs ?? []).map((variant) => {
-            const firstBlock = variant.details[0];
-            const capacityItem = firstBlock
-              ? {
-                  icon: "Users" as const,
-                  content: `max. ${variant.capacity.max} osob`,
-                }
-              : null;
             return (
               <EntityRow
                 key={variant.id}
@@ -402,7 +395,6 @@ export default function Page() {
                     icon: "Banknote",
                     content: `${variant.price.base} Kč`,
                   },
-                  ...(capacityItem ? [capacityItem] : []),
                 ]}
                 link={{
                   pathname:

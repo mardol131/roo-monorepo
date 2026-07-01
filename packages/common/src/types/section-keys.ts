@@ -3,6 +3,7 @@ export const FIXED_SECTION_KEYS = [
   "location",
   "basics",
   "detail",
+  "spaces",
   "employees",
   "references",
   "faq",
@@ -13,6 +14,7 @@ export type FixedSectionKey = (typeof FIXED_SECTION_KEYS)[number];
 
 export const DEFAULT_SECTION_ORDER: FixedSectionKey[] = [
   "description",
+  "spaces",
   "location",
   "basics",
   "detail",

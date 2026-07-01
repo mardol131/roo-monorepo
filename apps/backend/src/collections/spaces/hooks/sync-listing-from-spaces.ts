@@ -4,10 +4,7 @@ async function syncListing(listingId: string, req: PayloadRequest) {
   const result = await req.payload.find({
     collection: 'spaces',
     where: {
-      and: [
-        { listing: { equals: listingId } },
-        { status: { equals: 'active' } },
-      ],
+      and: [{ listing: { equals: listingId } }, { status: { equals: 'active' } }],
     },
     limit: 1000,
     depth: 0,
@@ -19,6 +16,7 @@ async function syncListing(listingId: string, req: PayloadRequest) {
       id: listingId,
       data: { status: 'inactive' },
     })
+    console.log(`No active spaces found for listing ${listingId}. Setting status to inactive.`)
     return
   }
 
@@ -30,7 +28,6 @@ async function syncListing(listingId: string, req: PayloadRequest) {
     collection: 'listings',
     id: listingId,
     data: {
-      status: 'active',
       minimumPricePerEvent: cheapest.price.base,
       pricingUnit: cheapest.price.pricingUnit,
     },

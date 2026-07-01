@@ -1,7 +1,6 @@
 import type { CollectionConfig } from 'payload'
 import { listingFields } from './fields'
 import { generateSlug } from './hooks/generate-slug'
-import { clearVariantSpacesOnSpacesTypeChange } from './hooks/clear-variant-spaces-on-spaces-type-change'
 import { cascadeStatusChange } from './hooks/cascade-status-change'
 import { listingAccessControl } from './access'
 import { getMapPins } from './endpoints/get-map-pins/get-map-pins'
@@ -18,7 +17,7 @@ export const Listings: CollectionConfig = {
   fields: listingFields,
   hooks: {
     beforeValidate: [generateSlug],
-    afterChange: [clearVariantSpacesOnSpacesTypeChange, cascadeStatusChange],
+    afterChange: [cascadeStatusChange],
   },
   endpoints: [getMapPins, getCalendarAvailability, getListingsAvailability, geoSearch],
 }

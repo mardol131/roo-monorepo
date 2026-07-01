@@ -27,7 +27,10 @@ import { Building2, LayoutDashboard, TreePine } from "lucide-react";
 import type { Resolver } from "react-hook-form";
 import { Controller, useFieldArray, useForm } from "react-hook-form";
 import { z } from "zod";
-import { optionalMediaSchema } from "@/app/validation/schema/media-schema";
+import {
+  optionalMediaSchema,
+  requiredMediaSchema,
+} from "@/app/validation/schema/media-schema";
 import CheckboxGroup from "@/app/components/ui/atoms/inputs/checkbox-group";
 import { relationshipItemSchema } from "@/app/validation/schema/relationship-item-schema";
 import {
@@ -40,6 +43,7 @@ import PriceInput from "@/app/components/ui/atoms/inputs/price-input";
 import SeasonalPricesInput from "@/app/components/ui/atoms/inputs/seasonal-prices-input";
 import { CompletionWidget } from "@/app/[locale]/(user)/components/completion-widget";
 import { getFullSpaceCompletion } from "@/app/functions/utils/spaces";
+import ImageInput from "@/app/components/ui/atoms/inputs/images/image-input";
 
 // ── TOC ────────────────────────────────────────────────────────────────────────
 
@@ -102,32 +106,57 @@ const TYPE_ICON: Record<Space["type"], React.ElementType> = {
 
 // ── Schema ─────────────────────────────────────────────────────────────────────
 
-const schema = z.object({
-  name: z.string().min(1, "Název je povinný"),
-  description: z.string().optional(),
-  capacity: getOptionalPositiveNumber("Kapacita musí být kladná"),
-  area: getOptionalPositiveNumber("Plocha musí být kladná"),
-  images: z.array(z.object(optionalMediaSchema)).default([]),
-  hasAccommodation: z.boolean().default(false),
-  accommodationCapacity: getOptionalPositiveNumber(
-    "Kapacita ubytování musí být kladná",
-  ),
-  price: priceWithoutTravelFeeSchema,
-  accommodationRooms: z
-    .array(
-      z.object({
-        id: z.string(),
-        name: z.string().min(1, "Název je povinný"),
-        capacity: getPositiveNumber("Kapacita musí být kladná"),
-        countOfRoomsOfThisType: getPositiveNumber(
-          "Počet pokojů tohoto typu musí být kladný",
-        ),
-        amenityIds: z.array(relationshipItemSchema).default([]),
-      }),
-    )
-    .default([]),
-  spaceRuleIds: z.array(relationshipItemSchema).default([]),
-});
+const schema = z
+  .object({
+    name: z.string().min(1, "Název je povinný"),
+    description: z.string().optional(),
+    capacity: getOptionalPositiveNumber("Kapacita musí být kladná"),
+    area: getOptionalPositiveNumber("Plocha musí být kladná"),
+    images: z.object(
+      {
+        coverImage: z.object(requiredMediaSchema, "Titulní obrázek je povinný"),
+        gallery: z
+          .array(
+            z.object(requiredMediaSchema, "Přidejte alespoň čtyři obrázky"),
+            "Přidejte alespoň čtyři obrázky",
+          )
+          .max(20, "Galerie může obsahovat maximálně 20 obrázků")
+          .optional(),
+      },
+      "Obrázky jsou povinné",
+    ),
+    hasAccommodation: z.boolean().default(false),
+    accommodationCapacity: getOptionalPositiveNumber(
+      "Kapacita ubytování musí být kladná",
+    ),
+    price: priceWithoutTravelFeeSchema,
+    accommodationRooms: z
+      .array(
+        z.object({
+          id: z.string(),
+          name: z.string().min(1, "Název je povinný"),
+          capacity: getPositiveNumber("Kapacita musí být kladná"),
+          countOfRoomsOfThisType: getPositiveNumber(
+            "Počet pokojů tohoto typu musí být kladný",
+          ),
+          amenityIds: z.array(relationshipItemSchema).default([]),
+        }),
+      )
+      .default([]),
+    spaceRuleIds: z.array(relationshipItemSchema).default([]),
+  })
+  .superRefine((data, ctx) => {
+    if (data.hasAccommodation) {
+      if (!data.accommodationCapacity) {
+        ctx.addIssue({
+          code: "custom",
+          message:
+            "Kapacita ubytování je povinná, pokud prostor nabízí ubytování",
+          path: ["accommodationCapacity"],
+        });
+      }
+    }
+  });
 
 type FormInputs = z.infer<typeof schema>;
 
@@ -164,8 +193,8 @@ export function SpaceForm(props: SpaceFormProps) {
       label: "Prostor",
       sections: [
         S.basics,
-        S.images,
         S.price,
+        S.images,
         S.seasonalPrices,
         S.capacity,
         ...(spaceType !== "room" ? [S.accommodation] : []),
@@ -191,7 +220,10 @@ export function SpaceForm(props: SpaceFormProps) {
       props.mode === "edit"
         ? props.defaultValues
         : {
-            images: [],
+            images: {
+              coverImage: {},
+              gallery: [],
+            },
             hasAccommodation: false,
             accommodationRooms: [],
             spaceRuleIds: [],
@@ -258,6 +290,7 @@ export function SpaceForm(props: SpaceFormProps) {
       ? `Vytvořit ${TYPE_LABEL[spaceType].toLowerCase()}`
       : `Uložit změny`;
 
+  console.log(errors);
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="flex gap-6 mt-8">
       <div className="flex w-full flex-col gap-4">
@@ -298,32 +331,7 @@ export function SpaceForm(props: SpaceFormProps) {
           />
         </FormSection>
 
-        {/* ── 2. Obrázky ────────────────────────────────────────────────────── */}
-        <FormSection
-          id={S.images.id}
-          icon={S.images.icon}
-          title={S.images.title}
-          subtitle={S.images.subTitle}
-          surfaceColor="bg-space-surface"
-          color="text-space"
-        >
-          <Controller
-            control={control}
-            name="images"
-            render={({ field }) => (
-              <GalleryInput
-                label="Galerie"
-                value={field.value}
-                onChange={field.onChange}
-                onUpload={uploadFileToCloud}
-                maxImages={20}
-                error={errors.images?.message}
-              />
-            )}
-          />
-        </FormSection>
-
-        {/* ── 3. Základní cena ──────────────────────────────────────────────── */}
+        {/* ── 2. Základní cena ──────────────────────────────────────────────── */}
         <FormSection
           id={S.price.id}
           icon={S.price.icon}
@@ -331,7 +339,7 @@ export function SpaceForm(props: SpaceFormProps) {
           subtitle={S.price.subTitle}
           surfaceColor="bg-space-surface"
           color="text-space"
-          error={!!errors.price?.base}
+          error={!!errors.price?.base || !!errors.price?.pricingUnit}
         >
           <Controller
             control={control}
@@ -346,6 +354,51 @@ export function SpaceForm(props: SpaceFormProps) {
                 onUnitChange={field.onChange}
                 amountError={errors.price?.base?.message}
                 unitError={errors.price?.pricingUnit?.message}
+                options={["per_day", "per_hour"]}
+              />
+            )}
+          />
+        </FormSection>
+
+        {/* ── 3. Obrázky ────────────────────────────────────────────────────── */}
+        <FormSection
+          id={S.images.id}
+          icon={S.images.icon}
+          title={S.images.title}
+          subtitle={S.images.subTitle}
+          color="text-listing"
+          surfaceColor="bg-listing-surface"
+          error={!!errors.images}
+        >
+          <Controller
+            control={control}
+            name="images.coverImage"
+            render={({ field }) => (
+              <ImageInput
+                containerRef={field.ref}
+                label="Titulní obrázek"
+                value={field.value}
+                onChange={(filename) => field.onChange(filename ?? "")}
+                onUpload={uploadFileToCloud}
+                error={errors.images?.coverImage?.filename?.message}
+                isRequired
+              />
+            )}
+          />
+
+          <Controller
+            control={control}
+            name="images.gallery"
+            render={({ field }) => (
+              <GalleryInput
+                containerRef={field.ref}
+                label="Galerie"
+                value={field.value}
+                onChange={field.onChange}
+                onUpload={uploadFileToCloud}
+                maxImages={20}
+                isRequired
+                error={errors.images?.gallery?.message}
               />
             )}
           />
@@ -409,6 +462,7 @@ export function SpaceForm(props: SpaceFormProps) {
             subtitle={S.accommodation.subTitle}
             surfaceColor="bg-space-surface"
             color="text-space"
+            error={!!errors.accommodationCapacity?.message}
           >
             <Controller
               control={control}

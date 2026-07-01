@@ -69,9 +69,22 @@ export const spacesFields: Field[] = [
   },
   {
     name: 'images',
-    type: 'array',
-    fields: getMediaFields(),
+    type: 'group',
+    required: true,
+    fields: [
+      {
+        name: 'coverImage',
+        type: 'group',
+        fields: getMediaFields(true),
+      },
+      {
+        name: 'gallery',
+        type: 'array',
+        fields: getMediaFields(),
+      },
+    ],
   },
+
   {
     name: 'hasAccommodation',
     type: 'checkbox',

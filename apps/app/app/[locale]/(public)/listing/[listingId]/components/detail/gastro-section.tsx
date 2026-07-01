@@ -16,8 +16,8 @@ export default function GastroSection({ detail, listing }: Props) {
   const resolve = (id: string | { id: string }) =>
     typeof id === "string" ? id : id.id;
 
-  const cuisines = (listing.options?.cuisines ?? []).flatMap((id) => {
-    const found = filters?.cuisines.find((e) => e.id === resolve(id));
+  const cuisines = (detail.options.cuisines ?? []).flatMap((entry) => {
+    const found = filters?.cuisines.find((e) => e.id === resolve(entry.cuisine));
     return found ? [found.name] : [];
   });
   const dishTypes = (listing.filters?.dishTypes ?? []).flatMap((id) => {
@@ -28,8 +28,22 @@ export default function GastroSection({ detail, listing }: Props) {
     const found = filters?.dietaryOptions.find((e) => e.id === resolve(id));
     return found ? [found.name] : [];
   });
-  const serviceStyles = (listing.options?.foodPreparationStyles ?? []).flatMap((id) => {
-    const found = filters?.foodPreparationStyles.find((e) => e.id === resolve(id));
+  const serviceStyles = (detail.options.foodPreparationStyles ?? []).flatMap(
+    (entry) => {
+      const found = filters?.foodPreparationStyles.find(
+        (e) => e.id === resolve(entry.foodPreparationStyle),
+      );
+      return found ? [found.name] : [];
+    },
+  );
+  const services = (detail.options.services ?? []).flatMap((entry) => {
+    const found = filters?.services.find((e) => e.id === resolve(entry.service));
+    return found ? [found.name] : [];
+  });
+  const personnel = (detail.options.personnel ?? []).flatMap((entry) => {
+    const found = filters?.personnel.find(
+      (e) => e.id === resolve(entry.personnel),
+    );
     return found ? [found.name] : [];
   });
   const necessities = (listing.filters?.necessities ?? []).flatMap((id) => {
@@ -38,7 +52,7 @@ export default function GastroSection({ detail, listing }: Props) {
   });
 
   const flags = [
-    detail.hasAlcoholLicense && "Alkoholová licence",
+    detail.alcohol.servesAlcohol && "Alkoholová licence",
     detail.kidsMenu && "Dětské menu",
   ].filter((f): f is string => !!f);
 
@@ -71,6 +85,18 @@ export default function GastroSection({ detail, listing }: Props) {
       {serviceStyles.length > 0 && (
         <SectionWrapper title="Forma servisu">
           <ChipList items={serviceStyles} />
+        </SectionWrapper>
+      )}
+
+      {services.length > 0 && (
+        <SectionWrapper title="Služby">
+          <ChipList items={services} />
+        </SectionWrapper>
+      )}
+
+      {personnel.length > 0 && (
+        <SectionWrapper title="Personál">
+          <ChipList items={personnel} />
         </SectionWrapper>
       )}
 

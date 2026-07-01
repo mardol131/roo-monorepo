@@ -16,6 +16,7 @@ const fixedSectionLabels: Record<FixedSectionKey, string> = {
   location: "Lokalita",
   basics: "Základní informace",
   detail: "Detailní informace",
+  spaces: "Prostory",
   employees: "Náš tým",
   references: "Reference",
   faq: "Časté otázky",

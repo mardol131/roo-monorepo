@@ -5,13 +5,10 @@ import { MapPin } from "lucide-react";
 import { InfoRow } from "../listing-ui";
 import SectionWrapper from "../section-wrapper";
 import { useCity } from "@/app/react-query/cities/hooks";
-import Link from "next/link";
-import Text from "@/app/components/ui/atoms/text";
+import ListingMap from "./listing-map";
 
 function ExactLocation({ listing }: { listing: Listing }) {
   const loc = listing.location;
-  const [lon, lat] = loc.point;
-  const mapUrl = `https://maps.google.com/?q=${lat},${lon}`;
 
   const cityRecord = useCity(getIdFromRelationshipField(loc.city), {
     enabled: typeof loc.city === "string",
@@ -26,22 +23,13 @@ function ExactLocation({ listing }: { listing: Listing }) {
 
   return (
     <SectionWrapper title="Kde nás najdete">
-      <div className="flex flex-col gap-2">
+      <div className="flex flex-col gap-4">
         <InfoRow
           icon={<MapPin size={16} />}
           label="Adresa a město"
           value={`${loc.address}, ${city()}`}
         />
-        <Link
-          href={mapUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-sm text-primary underline-offset-2 hover:underline ml-7"
-        >
-          <Text variant="label-sm" color="primary">
-            Zobrazit na mapě
-          </Text>
-        </Link>
+        <ListingMap listing={listing} />
       </div>
     </SectionWrapper>
   );

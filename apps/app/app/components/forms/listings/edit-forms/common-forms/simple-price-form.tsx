@@ -19,7 +19,12 @@ type Props = {
   priceUnitOptions?: PricingUnits[];
 };
 
-export function SimplePriceForm({ form, isActive, texts, priceUnitOptions }: Props) {
+export function SimplePriceForm({
+  form,
+  isActive,
+  texts,
+  priceUnitOptions,
+}: Props) {
   return (
     <div className={!isActive ? "hidden" : "flex flex-col gap-4"}>
       <FormSection
@@ -42,7 +47,7 @@ export function SimplePriceForm({ form, isActive, texts, priceUnitOptions }: Pro
           error={form.formState.errors?.minimumPricePerEvent?.message}
           isRequired
         />
-      
+
         <Controller
           control={form.control}
           name="price.pricingUnit"
@@ -61,7 +66,7 @@ export function SimplePriceForm({ form, isActive, texts, priceUnitOptions }: Pro
         />
       </FormSection>
 
-      <FormSection
+      {/* <FormSection
         id={texts.seasonalPrices.id}
         icon={texts.seasonalPrices.icon}
         title={texts.seasonalPrices.title}
@@ -74,7 +79,7 @@ export function SimplePriceForm({ form, isActive, texts, priceUnitOptions }: Pro
           register={form.register}
           errors={(form.formState.errors?.price?.seasonalPrices as any) ?? []}
         />
-      </FormSection>
+      </FormSection> */}
     </div>
   );
 }

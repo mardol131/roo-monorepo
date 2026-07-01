@@ -6,7 +6,11 @@ interface Props {
 
 export default function DescriptionSection({ description }: Props) {
   return (
-    <Text variant="body" color="secondary" className="leading-relaxed">
+    <Text
+      variant="body"
+      color="secondary"
+      className="leading-relaxed whitespace-pre-line"
+    >
       {description}
     </Text>
   );

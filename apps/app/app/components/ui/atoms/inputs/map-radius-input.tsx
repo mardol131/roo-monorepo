@@ -24,7 +24,7 @@ type Props = {
 const STEPS = 64;
 const KM_PER_DEG_LAT = 111;
 
-function buildCircleGeoJSON(lat: number, lon: number, radiusKm: number) {
+export function buildCircleGeoJSON(lat: number, lon: number, radiusKm: number) {
   const degLat = radiusKm / KM_PER_DEG_LAT;
   const degLon = radiusKm / (KM_PER_DEG_LAT * Math.cos((lat * Math.PI) / 180));
   const coords: [number, number][] = [];

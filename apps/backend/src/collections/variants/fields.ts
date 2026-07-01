@@ -1,119 +1,8 @@
 import { getRecordStatuses, PRICING_UNITS_ARRAY } from '@roo/common'
 import { Field } from 'payload'
-import { getMediaFields, getSeasonalPricesArrayField } from '../common/common-fields'
+import { getMediaFields } from '../common/common-fields'
 
-export const venueVariantDetails: Field[] = [
-  {
-    name: 'includedSpaces',
-    type: 'relationship',
-    relationTo: 'spaces',
-    hasMany: true,
-  },
-  {
-    name: 'accommodation',
-    type: 'group',
-    required: true,
-    fields: [
-      {
-        name: 'included',
-        type: 'checkbox',
-      },
-      {
-        name: 'capacity',
-        type: 'number',
-        validate: (value: unknown, { siblingData }: { siblingData: Record<string, unknown> }) => {
-          if (siblingData?.included && (value === undefined || value === null)) {
-            return 'Zadejte kapacitu ubytování'
-          }
-          return true
-        },
-      },
-    ],
-  },
-  {
-    name: 'breakfast',
-    type: 'group',
-    required: true,
-    fields: [
-      {
-        name: 'included',
-        type: 'checkbox',
-      },
-      {
-        name: 'price',
-        type: 'number',
-        validate: (value: unknown, { siblingData }: { siblingData: Record<string, unknown> }) => {
-          if (siblingData?.included && (value === undefined || value === null)) {
-            return 'Zadejte cenu snídaně'
-          }
-          return true
-        },
-      },
-      {
-        name: 'loweredPrice',
-        type: 'number',
-      },
-    ],
-  },
-]
-
-export const gastroVariantDetails: Field[] = [
-  {
-    name: 'kidsMenu',
-    type: 'checkbox',
-  },
-  {
-    name: 'alcoholIncluded',
-    type: 'checkbox',
-  },
-  {
-    name: 'minimumOrderAmount',
-    type: 'number',
-  },
-]
-
-export const entertainmentVariantDetails: Field[] = [
-  {
-    name: 'audience',
-    type: 'select',
-    hasMany: true,
-    options: ['adults', 'kids', 'seniors'],
-  },
-  {
-    name: 'performance',
-    type: 'group',
-    required: true,
-    fields: [
-      {
-        name: 'entertainmentIsPerformance',
-        type: 'checkbox',
-        defaultValue: false,
-      },
-      {
-        name: 'numberOfSets',
-        type: 'number',
-        validate: (value: unknown, { siblingData }: { siblingData: Record<string, unknown> }) => {
-          if (siblingData?.entertainmentIsPerformance && (value === undefined || value === null)) {
-            return 'Zadejte počet setů'
-          }
-          return true
-        },
-      },
-      {
-        name: 'pauseBetweenSetsInMinutes',
-        type: 'number',
-        validate: (value: unknown, { siblingData }: { siblingData: Record<string, unknown> }) => {
-          if (siblingData?.entertainmentIsPerformance && (value === undefined || value === null)) {
-            return 'Zadejte délku pauzy mezi sety v minutách'
-          }
-          return true
-        },
-      },
-    ],
-  },
-]
-
-export const variantsCommonFields: Field[] = [
+export const variantFields: Field[] = [
   {
     name: 'listing',
     type: 'relationship',
@@ -127,6 +16,22 @@ export const variantsCommonFields: Field[] = [
     options: getRecordStatuses(['active', 'archived', 'disabled', 'inactive']),
     defaultValue: 'active',
     required: true,
+  },
+  {
+    name: 'name',
+    type: 'text',
+    required: true,
+  },
+  {
+    name: 'shortDescription',
+    type: 'text',
+    maxLength: 150,
+    required: true,
+  },
+  {
+    name: 'description',
+    type: 'textarea',
+    maxLength: 1000,
   },
   {
     name: 'capacity',
@@ -144,23 +49,6 @@ export const variantsCommonFields: Field[] = [
     ],
   },
   {
-    name: 'name',
-    type: 'text',
-    required: true,
-  },
-  {
-    name: 'shortDescription',
-    type: 'text',
-    maxLength: 50,
-    required: true,
-  },
-  {
-    name: 'description',
-    type: 'textarea',
-    maxLength: 1000,
-  },
-
-  {
     name: 'price',
     type: 'group',
     required: true,
@@ -171,13 +59,14 @@ export const variantsCommonFields: Field[] = [
         min: 0,
         required: true,
       },
+      // Cena balíčku nezávisí na čase — délka je popis služby, ne cenová
+      // proměnná. Hodinové/denní sazby patří do custom poptávky.
       {
         name: 'pricingUnit',
         type: 'select',
-        options: PRICING_UNITS_ARRAY,
+        options: PRICING_UNITS_ARRAY.filter((u) => u === 'lump_sum' || u === 'per_person'),
         required: true,
       },
-      getSeasonalPricesArrayField({ required: false }),
     ],
   },
   {
@@ -200,36 +89,26 @@ export const variantsCommonFields: Field[] = [
       },
     ],
   },
+  // Jednorázová služba (dodavatel přijede v daný čas) vs. služba s trváním
+  // (od–do). Řídí, jaký výběr času se zobrazí v poptávce.
   {
-    name: 'duration',
-    type: 'group',
-    fields: [
-      {
-        name: 'hasExactDuration',
-        type: 'checkbox',
-        defaultValue: false,
-      },
-      {
-        name: 'exactDurationMinutes',
-        type: 'number',
-        min: 1,
-        admin: {
-          condition: (_: unknown, siblingData: Record<string, unknown>) =>
-            !!siblingData?.hasExactDuration,
-        },
-        validate: (value: unknown, { siblingData }: { siblingData: Record<string, unknown> }) => {
-          if (siblingData?.hasExactDuration && (value === undefined || value === null)) {
-            return 'Zadejte přesnou délku v minutách'
-          }
-          return true
-        },
-      },
-      {
-        name: 'maxDurationMinutes',
-        type: 'number',
-        min: 1,
-      },
-    ],
+    name: 'isOneTime',
+    type: 'checkbox',
+    defaultValue: false,
+  },
+  {
+    name: 'durationMinutes',
+    type: 'number',
+    min: 1,
+    admin: {
+      condition: (_: unknown, siblingData: Record<string, unknown>) => !siblingData?.isOneTime,
+    },
+    validate: (value: unknown, { siblingData }: { siblingData: Record<string, unknown> }) => {
+      if (!siblingData?.isOneTime && (value === undefined || value === null)) {
+        return 'Zadejte orientační délku v minutách, nebo označte službu jako jednorázovou'
+      }
+      return true
+    },
   },
   {
     name: 'images',
@@ -240,37 +119,12 @@ export const variantsCommonFields: Field[] = [
         name: 'coverImage',
         type: 'group',
         required: true,
-        fields: getMediaFields(),
+        fields: getMediaFields(true),
       },
       {
         name: 'gallery',
         type: 'array',
         fields: getMediaFields(),
-      },
-    ],
-  },
-]
-
-export const variantFields: Field[] = [
-  ...variantsCommonFields,
-
-  {
-    name: 'details',
-    type: 'blocks',
-    required: true,
-    maxRows: 1,
-    blocks: [
-      {
-        slug: 'venue',
-        fields: venueVariantDetails,
-      },
-      {
-        slug: 'gastro',
-        fields: gastroVariantDetails,
-      },
-      {
-        slug: 'entertainment',
-        fields: entertainmentVariantDetails,
       },
     ],
   },

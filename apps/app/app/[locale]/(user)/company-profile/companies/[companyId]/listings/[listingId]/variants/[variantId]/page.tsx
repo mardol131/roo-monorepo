@@ -7,20 +7,17 @@ import InfoSection from "@/app/[locale]/(user)/components/info-section";
 import { ItemListCard } from "@/app/[locale]/(user)/components/item-list-card";
 import Loader from "@/app/[locale]/(user)/components/loader";
 import ListingStatusTag from "@/app/[locale]/(user)/components/tags/listing-status-tag";
-import { VariantEntertainmentDetails } from "@/app/[locale]/(user)/components/variant-entertainment-details";
-import { VariantGastroDetails } from "@/app/[locale]/(user)/company-profile/companies/[companyId]/listings/[listingId]/variants/[variantId]/components/variant-gastro-details";
-import { VariantVenueDetails } from "@/app/[locale]/(user)/company-profile/companies/[companyId]/listings/[listingId]/variants/[variantId]/components/variant-venue-details";
-import Text from "@/app/components/ui/atoms/text";
 import { confirmActionModalEvents } from "@/app/components/ui/molecules/modals/confirm-action-modal";
 import { useRouter } from "@/app/i18n/navigation";
 import { useUpdateVariant, useVariant } from "@/app/react-query/variants/hooks";
-import { format } from "date-fns";
 import { Package, Trash2 } from "lucide-react";
 import { useParams } from "next/navigation";
 import { ControlSection } from "../../../../../../../components/control-section";
-import { useSpacesByListing } from "@/app/react-query/spaces/hooks";
 import { CompletionWidget } from "@/app/[locale]/(user)/components/completion-widget";
-import { getFullVariantCompletion } from "@/app/functions/utils/variants";
+import {
+  formatVariantCapacity,
+  getFullVariantCompletion,
+} from "@/app/functions/utils/variants";
 
 export default function Page() {
   const { companyId, listingId, variantId } = useParams<{
@@ -29,7 +26,6 @@ export default function Page() {
     variantId: string;
   }>();
   const { data: variant, isPending } = useVariant(variantId);
-  const { data: spaces } = useSpacesByListing(listingId);
   const { mutate: updateVariant, isPending: isUpdating } = useUpdateVariant();
   const router = useRouter();
 
@@ -63,13 +59,11 @@ export default function Page() {
     );
   };
 
-  const capacityText = variant.capacity.min
-    ? `${variant.capacity.min}–${variant.capacity.max} osob`
-    : `max. ${variant.capacity.max} osob`;
+  const capacityText = formatVariantCapacity(variant.capacity);
 
   const infoItems = [
     { icon: "Banknote", text: `${variant.price.base} Kč` },
-    { icon: "Users", text: capacityText },
+    ...(capacityText ? [{ icon: "Users", text: capacityText }] : []),
   ];
 
   const basicInfoItems = [
@@ -231,55 +225,6 @@ export default function Page() {
             )}
           </div>
         ) : undefined}
-
-        {variant.price.seasonalPrices?.length ? (
-          <DashboardSection
-            title="Sezónní ceny"
-            icon="Banknote"
-            iconBg="bg-amber-100"
-            iconColor="text-amber-500"
-          >
-            <div className="flex flex-col">
-              {variant.price.seasonalPrices.map((sp) => (
-                <div
-                  key={sp.id}
-                  className="py-2.5 flex items-center justify-between border-b border-zinc-100 last:border-0"
-                >
-                  <div className="flex flex-col">
-                    {sp.title && (
-                      <Text variant="label-lg" color="textDark">
-                        {sp.title}
-                      </Text>
-                    )}
-                    <Text variant="label" color="textLight">
-                      {format(new Date(sp.from), "dd.MM.yyyy")} –{" "}
-                      {format(new Date(sp.to), "dd.MM.yyyy")}
-                    </Text>
-                  </div>
-                  <Text variant="label-lg" color="textDark">
-                    {sp.amount} Kč
-                  </Text>
-                </div>
-              ))}
-            </div>
-          </DashboardSection>
-        ) : null}
-
-        {variant.details.map((block, i) => {
-          if (block.blockType === "venue")
-            return (
-              <VariantVenueDetails
-                key={i}
-                block={block}
-                spaces={spaces?.docs}
-              />
-            );
-          if (block.blockType === "gastro")
-            return <VariantGastroDetails key={i} block={block} />;
-          if (block.blockType === "entertainment")
-            return <VariantEntertainmentDetails key={i} block={block} />;
-          return null;
-        })}
       </div>
     </main>
   );
